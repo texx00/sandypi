@@ -1,0 +1,5 @@
+.vscode
+env
+instance
+**/__pycache__
+UIserver.egg-info
