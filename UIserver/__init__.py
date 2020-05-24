@@ -1,6 +1,6 @@
 from flask import Flask, redirect, url_for
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
 
 import UIserver.preferences.playlists
 
