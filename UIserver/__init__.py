@@ -1,13 +1,19 @@
 from flask import Flask, redirect, url_for
+from flask_socketio import SocketIO
 
 app = Flask(__name__, template_folder='templates')
+app.config['SECRET_KEY'] = 'secret!' # TODO put a key here
+socketio = SocketIO(app)
 
 import UIserver.preferences.playlists
+import UIserver.bot_interface.socketio_callbacks
 
 @app.route('/')
 def home():
     return redirect(url_for('/playlists'))
 
+if __name__ == '__main__':
+    socketio.run(app)
 
 
 """
