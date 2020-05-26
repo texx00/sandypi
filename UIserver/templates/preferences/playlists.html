@@ -3,6 +3,9 @@
 {%block title%}Playlists{% endblock %}
 {%block head%}{%endblock%}
 {%block body%}
-Hello world!
-<p style="font-family:roboto">This is a paragraph.</p>
+<h1>Select file to upload</h1>
+<form method=post enctype=multipart/form-data>
+    <input type=file name=file>
+    <input type=submit value=Upload>
+</form>
 {%endblock%}

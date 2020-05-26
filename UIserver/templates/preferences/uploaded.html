@@ -1,0 +1,8 @@
+{%extends "base.html"%}
+{%block title%}{%if success%}File uploaded{%else%}Upload error{%endif%}{%endblock%}
+{%block head%}
+<meta http-equiv = "refresh" content = "3; url = ./playlists" />
+{%endblock%}
+{%block body%}
+<div><h1>{%if success%}Your file has been uploaded successfully{%else%}Upload error. Please try again{%endif%}</h1></div>
+{%endblock%}

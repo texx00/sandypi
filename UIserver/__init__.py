@@ -3,6 +3,7 @@ from flask_socketio import SocketIO
 
 app = Flask(__name__, template_folder='templates')
 app.config['SECRET_KEY'] = 'secret!' # TODO put a key here
+app.config['UPLOAD_FOLDER'] = "./Drawings"
 socketio = SocketIO(app)
 
 import UIserver.preferences.playlists
