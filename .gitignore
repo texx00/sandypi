@@ -3,5 +3,4 @@ env
 instance
 **/__pycache__
 UIserver.egg-info
-Drawings/*
 *.db
