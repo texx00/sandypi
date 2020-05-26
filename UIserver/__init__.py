@@ -1,11 +1,18 @@
 from flask import Flask, redirect, url_for
 from flask_socketio import SocketIO
+from flask_sqlalchemy import SQLAlchemy
+import os
 
 app = Flask(__name__, template_folder='templates')
 app.config['SECRET_KEY'] = 'secret!' # TODO put a key here
 app.config['UPLOAD_FOLDER'] = "./Drawings"
 socketio = SocketIO(app)
 
+file_path = os.path.abspath(os.getcwd())+"\database.db"
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+file_path
+db = SQLAlchemy(app)
+
+import UIserver.database
 import UIserver.preferences.playlists
 import UIserver.bot_interface.socketio_callbacks
 

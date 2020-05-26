@@ -1,9 +1,9 @@
-from UIserver import app
+from UIserver import app, db
+from UIserver.database import UploadedFiles
 from flask import render_template, request
 from werkzeug.utils import secure_filename
 
 import os
-
 
 ALLOWED_EXTENSIONS = ["gcode", "nc"]
 
@@ -17,7 +17,10 @@ def playlists():
             file = request.files['file']
             if file and file.filename!= '' and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+                new_file = UploadedFiles(filename = filename)
+                db.session.add(new_file)
+                db.session.commit()
+                file.save(os.path.join(app.config["UPLOAD_FOLDER"], str(new_file.id)+".gcode"))
                 return render_template("preferences/uploaded.html", success=True)
             else: 
                 return render_template("preferences/uploaded.html", success=False)
