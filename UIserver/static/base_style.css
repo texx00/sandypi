@@ -1,5 +1,14 @@
+:root{
+    /* color palette: https://www.color-hex.com/color-palette/23053 */
+    --color-medium: #29b474;
+    --color-light: #35ea97;
+    --color-darkest: #333333;
+    --color-vlight: #aaaaaa;
+    --color-white: #ffffff;
+}
+
 body {
-    background-color: #222;
-    color:#bbb;
+    background-color: var(--color-darkest);
+    color: var(--color-light);
     font-family: 'roboto', sans-serif;
 }
