@@ -1,11 +1,39 @@
 {% extends "base.html"%}
 
 {%block title%}Playlists{% endblock %}
-{%block head%}{%endblock%}
+{%block head%}
+<link rel="stylesheet" href="static/playlists.css">
+{%endblock%}
 {%block body%}
+<!--
 <h1>Select file to upload</h1>
 <form method=post enctype=multipart/form-data>
     <input type=file name=file>
     <input type=submit value=Upload>
 </form>
+TODO: move the upload on a single button instead of having a full form
+-->
+
+<div>
+    <div id="drawings">
+        <h1 style="display:inline-block">Your drawings</h1>
+        <form style="display: inline-block; float:right; margin-top: 1.4em;">
+            <button class="button">+ Upload new file</button>
+        </form>
+    </div>
+    <div class="grid">
+
+    </div>
+</div>
+<div>
+    <div id="playlists">
+        <h1 style="display:inline-block">Your playlists</h1>
+        <form style="display: inline-block; float:right; margin-top: 1.4em;">
+            <button class="button">+ Create new playlist</button>
+        </form>
+    </div>
+    <div class="grid">
+
+    </div>
+</div>
 {%endblock%}

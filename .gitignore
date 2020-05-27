@@ -4,3 +4,4 @@ instance
 **/__pycache__
 UIserver.egg-info
 *.db
+/sketches

@@ -1,0 +1,9 @@
+@import "base_style.css"; 
+
+#drawings, #playlists{
+    border-bottom: 1px solid var(--color-light);
+}
+
+.button{
+    font-size: 1em;
+}

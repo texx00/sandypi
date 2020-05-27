@@ -8,6 +8,27 @@
     {% block head %}{%endblock%}
 </head>
 <body>
-    {% block body %}{%endblock%}
+
+    <nav>
+        <div class=wi>
+            <div class=logo>
+                <div style="display: inline-block;vertical-align: center;">SandyPi</div>
+                <form method=post action="/settings" style="display: inline-block; vertical-align: center; float: right">
+                    <button type="submit" class="dark_button" >Settings</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class=wi>
+        {% block body %}{%endblock%}
+    </div>
+
+    <footer>
+        <div class=wi>Here goes the footer</div>
+    </footer>
+
+
+    
 </body>
 </html>

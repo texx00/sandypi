@@ -13,7 +13,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+file_path
 db = SQLAlchemy(app)
 
 import UIserver.database
-import UIserver.preferences.playlists
+import UIserver.views.playlists
 import UIserver.bot_interface.socketio_callbacks
 
 @app.route('/')
