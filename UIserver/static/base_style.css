@@ -5,6 +5,7 @@
     --color-darkest: #333333;
     --color-vlight: #aaaaaa;
     --color-white: #ffffff;
+    --color-vlight-alpha: #aaaaaa77;
 }
 
 html{
@@ -68,4 +69,15 @@ button{
 .dark_button{
     background-color: var(--color-darkest);
     color: var(--color-light);
+}
+
+#floater{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    background-color: var(--color-vlight-alpha);
+    color: var(--color-light);
+    display: none;
+    text-align: center;
 }

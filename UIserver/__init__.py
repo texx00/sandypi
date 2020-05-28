@@ -10,6 +10,7 @@ socketio = SocketIO(app)
 
 file_path = os.path.abspath(os.getcwd())+"\database.db"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+file_path
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 import UIserver.database
@@ -18,7 +19,7 @@ import UIserver.bot_interface.socketio_callbacks
 
 @app.route('/')
 def home():
-    return redirect(url_for('/playlists'))
+    return redirect(url_for('playlists'))
 
 if __name__ == '__main__':
     socketio.run(app)

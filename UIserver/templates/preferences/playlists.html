@@ -3,7 +3,21 @@
 {%block title%}Playlists{% endblock %}
 {%block head%}
 <link rel="stylesheet" href="static/playlists.css">
+<script src="./static/dropzone.js"></script>
+<script src="./static/playlists.js"></script>
 {%endblock%}
+
+{%block floater%}
+    <div id=floater_inner>
+        <form action="/playlists"
+            class="dropzone"
+            id="drawings_dropzone">
+            <div class="dz-message" data-dz-message><span class="message_span">Drag and drop the .gcode/.nc file here <br>or click to open the file explorer</span></div>
+        </form>
+        <button id="undo_upload" on_click="hide_dropzone()">Undo</button>
+    </div>
+{%endblock%}
+
 {%block body%}
 <!--
 <h1>Select file to upload</h1>
@@ -17,20 +31,15 @@ TODO: move the upload on a single button instead of having a full form
 <div>
     <div id="drawings">
         <h1 style="display:inline-block">Your drawings</h1>
-        <form style="display: inline-block; float:right; margin-top: 1.4em;">
-            <button class="button">+ Upload new file</button>
-        </form>
+        <button style="display: inline-block; float:right; margin-top: 1.4em;" class="button" onclick="show_dropzone()">+ Upload drawing</button>
     </div>
     <div class="grid">
-
     </div>
 </div>
 <div>
     <div id="playlists">
         <h1 style="display:inline-block">Your playlists</h1>
-        <form style="display: inline-block; float:right; margin-top: 1.4em;">
-            <button class="button">+ Create new playlist</button>
-        </form>
+        <button style="display: inline-block; float:right; margin-top: 1.4em;" class="button" onclick="">+ Create new playlist</button>
     </div>
     <div class="grid">
 

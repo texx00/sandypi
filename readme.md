@@ -31,3 +31,7 @@ Here is a list of features (already available or for future enhancements):
 
 In a far far away future:
 * [ ] Create a social network to share designs and update your personal playlists
+
+Todos:
+* [ ] Create logo
+* [ ] Create favicon
