@@ -9,11 +9,21 @@
 
 {%block floater%}
     <div id=floater_inner>
+        <div id="upload_dropzone">
+            <div class="dz-message" data-dz-message>
+                <span class="message_span">Drag and drop the .gcode/.nc file here <br>or click to open the file explorer</span>
+                <div id="upload_progress">
+                    <div id="upload_progress_value">0%</div>
+                    <span id="upload_progress_bar"></span>
+                </div>
+            </div>
+        </div>
+        <!--
         <form action="/playlists"
             class="dropzone"
             id="drawings_dropzone">
             <div class="dz-message" data-dz-message><span class="message_span">Drag and drop the .gcode/.nc file here <br>or click to open the file explorer</span></div>
-        </form>
+        </form>-->
         <button id="undo_upload" on_click="hide_dropzone()">Undo</button>
     </div>
 {%endblock%}
@@ -31,7 +41,7 @@ TODO: move the upload on a single button instead of having a full form
 <div>
     <div id="drawings">
         <h1 style="display:inline-block">Your drawings</h1>
-        <button style="display: inline-block; float:right; margin-top: 1.4em;" class="button" onclick="show_dropzone()">+ Upload drawing</button>
+        <button style="float:right; margin-top: 1.4em;" class="button" onclick="show_dropzone()">+ Upload drawing</button>
     </div>
     <div class="grid">
     </div>
@@ -39,7 +49,7 @@ TODO: move the upload on a single button instead of having a full form
 <div>
     <div id="playlists">
         <h1 style="display:inline-block">Your playlists</h1>
-        <button style="display: inline-block; float:right; margin-top: 1.4em;" class="button" onclick="">+ Create new playlist</button>
+        <button style="float:right; margin-top: 1.4em;" class="button" onclick="">+ Create new playlist</button>
     </div>
     <div class="grid">
 

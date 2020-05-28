@@ -2,8 +2,11 @@ from flask import Flask, redirect, url_for
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 import os
+import logging
 
 app = Flask(__name__, template_folder='templates')
+app.logger.setLevel(logging.INFO)
+
 app.config['SECRET_KEY'] = 'secret!' # TODO put a key here
 app.config['UPLOAD_FOLDER'] = "./Drawings"
 socketio = SocketIO(app)

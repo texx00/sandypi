@@ -4,14 +4,19 @@ from flask import render_template, request
 from werkzeug.utils import secure_filename
 
 import os
+import logging
 
 ALLOWED_EXTENSIONS = ["gcode", "nc"]
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route('/playlists', methods=['GET','POST'])
+@app.route('/playlists')
 def playlists():
+    return render_template("preferences/playlists.html")
+
+@app.route('/upload', methods=['GET','POST'])
+def upload():
     if request.method == "POST":
         if 'file' in request.files:
             file = request.files['file']
@@ -21,8 +26,10 @@ def playlists():
                 db.session.add(new_file)
                 db.session.commit()
                 file.save(os.path.join(app.config["UPLOAD_FOLDER"], str(new_file.id)+".gcode"))
-                return render_template("preferences/uploaded.html", success=True)
+                app.logger.info("File added")
+                #TODO response success
+                return "1"
             else: 
-                return render_template("preferences/uploaded.html", success=False)
-            
-    return render_template("preferences/playlists.html")
+                #TODO response error
+                return "0"
+    return "0"

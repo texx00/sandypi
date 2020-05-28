@@ -16,7 +16,7 @@
 
 /* Dropzone defaults */
 
-.dropzone{
+#upload_dropzone{
     width:100%;
     background-color: var(--color-vlight);
     border: 4px dashed var(--color-light);
@@ -54,4 +54,37 @@
 #undo_upload{
     margin-top:1em;
     font-size: 1.5em;
+}
+
+.dz-preview{
+    display:none;
+}
+
+#upload_progress{
+    display:none;
+    height:25px;
+    width: 50%;
+    margin: 60px 0;
+    border: 2px solid var(--color-light);
+    border-radius: 5px;
+    position: absolute;
+    bottom:0px;
+    margin-top: 20px;
+    left:25%;
+}
+#upload_progress span{
+    display: inline-block;
+    height: 25px;
+    width: 0%;
+    background: var(--color-light);
+    border-radius: 5px;
+    position: absolute;
+    left:0;
+}
+#upload_progress div{
+    display: inline-block;
+    font-size: small;
+    position:absolute;
+    top:20%;
+    color: var(--color-white);
 }
