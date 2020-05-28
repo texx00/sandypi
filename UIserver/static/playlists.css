@@ -2,6 +2,10 @@
 
 #drawings, #playlists{
     border-bottom: 1px solid var(--color-light);
+    margin-bottom:10px;
+}
+#playlists{
+    margin-bottom:5em;
 }
 
 .button{
@@ -12,6 +16,18 @@
     padding:25%;
     padding-top:200px;
     padding-bottom:0;
+}
+.grid_container{
+    display: grid;
+    grid-template-columns: auto auto auto auto;
+    grid-gap:20px;
+}
+.grid_element{
+    width:100%;
+    display: block;
+}
+.grid_element img{
+    width:100%;
 }
 
 /* Dropzone defaults */

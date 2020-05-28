@@ -18,32 +18,23 @@
                 </div>
             </div>
         </div>
-        <!--
-        <form action="/playlists"
-            class="dropzone"
-            id="drawings_dropzone">
-            <div class="dz-message" data-dz-message><span class="message_span">Drag and drop the .gcode/.nc file here <br>or click to open the file explorer</span></div>
-        </form>-->
         <button id="undo_upload" on_click="hide_dropzone()">Undo</button>
     </div>
 {%endblock%}
 
 {%block body%}
-<!--
-<h1>Select file to upload</h1>
-<form method=post enctype=multipart/form-data>
-    <input type=file name=file>
-    <input type=submit value=Upload>
-</form>
-TODO: move the upload on a single button instead of having a full form
--->
-
 <div>
     <div id="drawings">
         <h1 style="display:inline-block">Your drawings</h1>
         <button style="float:right; margin-top: 1.4em;" class="button" onclick="show_dropzone()">+ Upload drawing</button>
     </div>
-    <div class="grid">
+    <div class="grid_container">
+        {% for item in drawings %}
+            <div class="grid_element">
+                <img src="{{ url_for('static', filename='Drawings/'+item.id|string+'/'+item.id|string +'.jpg')}}">
+                <span>{{item.filename}}</span>
+            </div>
+        {% endfor %}
     </div>
 </div>
 <div>
@@ -51,7 +42,7 @@ TODO: move the upload on a single button instead of having a full form
         <h1 style="display:inline-block">Your playlists</h1>
         <button style="float:right; margin-top: 1.4em;" class="button" onclick="">+ Create new playlist</button>
     </div>
-    <div class="grid">
+    <div class="grid_container">
 
     </div>
 </div>

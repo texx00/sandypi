@@ -8,7 +8,7 @@ app = Flask(__name__, template_folder='templates')
 app.logger.setLevel(logging.INFO)
 
 app.config['SECRET_KEY'] = 'secret!' # TODO put a key here
-app.config['UPLOAD_FOLDER'] = "./Drawings"
+app.config['UPLOAD_FOLDER'] = "./UIserver/static/Drawings"
 socketio = SocketIO(app)
 
 file_path = os.path.abspath(os.getcwd())+"\database.db"

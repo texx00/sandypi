@@ -1,8 +1,11 @@
 from UIserver import db
+from datetime import datetime
 
 class UploadedFiles(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(80), unique=False, nullable=False)
+    up_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow) # to update: datetime.datetime.utcnow()
+    edit_date = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
         return '<User %r>' % self.filename

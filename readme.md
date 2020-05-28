@@ -35,3 +35,9 @@ In a far far away future:
 Todos:
 * [ ] Create logo
 * [ ] Create favicon
+* [ ] Create a setup script
+* [ ] Run the server not on a production server
+* [ ] Upload of multiple files at once
+* [ ] Create preview of the gcode as an image when the file is loaded
+* [ ] Possibility to modify the settings of the single file and save them in the gcode as comments?
+* [ ] Create a playlist for "cleanup" drawings with some defaults
