@@ -1,8 +1,18 @@
-from UIserver import socketio
-
-from flask_socketio import emit
+from UIserver import socketio, app
+from UIserver.bot_interface import bot_commands as bot
 
 @socketio.on('message')
 def handle_message(message):
-    print('received message: ' + str(message))
-    emit('response', "Prova")
+    app.logger.info("Received message from js")
+    res = message['data'].split(":")
+    if res[0]=="start":
+        bot.start_drawing(res[1])
+
+@socketio.on('connect')
+def on_connect():
+    #app.logger.info("Connected")
+    pass
+
+@socketio.on('server_command')
+def on_server_command(command):
+    app.logger.info("Command received from bot")
