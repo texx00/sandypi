@@ -78,4 +78,7 @@ def drawings_page(page):
 # Single drawing page
 @app.route('/drawing/<code>')
 def drawing(code):
-    return "Hello " + str(code)
+    item = db.session.query(UploadedFiles).filter(UploadedFiles.id==code).one()
+    app.logger.info(item)
+    filename ="Pinco"
+    return render_template("management/single_drawing.html", item = item)

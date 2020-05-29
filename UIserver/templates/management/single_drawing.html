@@ -1,0 +1,22 @@
+{% extends "base.html"%}
+
+{%block title%}{{item.filename}}{% endblock %}
+{%block head%}
+<link rel="stylesheet" href="{{url_for('static', filename='management.css')}}">
+<link rel="stylesheet" href="{{url_for('static', filename='single_drawing.css')}}">
+<script src="{{url_for('static', filename='management.js')}}"></script>
+{%endblock%}
+
+{%block body%}
+<div id="container">
+    <h1>{{item.filename}}</h1>
+    <div>
+        <img src="{{ url_for('static', filename='Drawings/'+item.id|string+'/'+item.id|string +'.jpg')}}" id="drawing_preview">
+    </div>
+    <!--TODO add commands to modify the drawing-->
+    <div class="buttons">
+        <button onclick="drawnow('{{item.id}}')">Draw it now</button>
+        <button onclick="delete_drawing('{{item.id}}')">Delete this drawing</button>
+    </div>
+</div>
+{%endblock%}

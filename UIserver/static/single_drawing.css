@@ -1,0 +1,15 @@
+#drawing_preview{
+    width:60%;
+}
+#container{
+    text-align: center;
+}
+
+.buttons{
+    text-align: center;
+    margin-top:20px;
+}
+.buttons button{
+    display: inline-block;
+    font-size: medium;
+}

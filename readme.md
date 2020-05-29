@@ -28,6 +28,7 @@ Here is a list of features (already available or for future enhancements):
 * [ ] Guests that can control the table
 * [ ] Raspberry as hotspot to which connect with a qrcode
 * [ ] Lights/led control
+* [ ] Make it nice
 
 In a far far away future:
 * [ ] Create a social network to share designs and update your personal playlists

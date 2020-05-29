@@ -46,6 +46,8 @@ nav {
 .logo{
     font-size: 3em;
     overflow: hidden;
+}
+.logo span{
     cursor: pointer;
 }
 
@@ -72,6 +74,13 @@ button{
     font-size: 0.5em;
     border:none;
     margin: auto;
+    cursor: pointer;
+    transition:0.15s;
+}
+button:hover{
+    background-color: var(--color-vlight);
+    transition: 0.15s;
+    color: var(--color-darkest)
 }
 
 .dark_button{
