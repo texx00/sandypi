@@ -6,6 +6,7 @@ class UploadedFiles(db.Model):
     filename = db.Column(db.String(80), unique=False, nullable=False)
     up_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow) # to update: datetime.datetime.utcnow()
     edit_date = db.Column(db.DateTime, default=datetime.utcnow)
+    #last_drawn_date = db.Column(db.DateTime)
 
     def __repr__(self):
         return '<User %r>' % self.filename

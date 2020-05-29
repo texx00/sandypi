@@ -59,7 +59,7 @@ def drawings_page(page):
     DRAWINGS_PER_PAGE = 20
     page = int(page)
     d_num = db.session.query(UploadedFiles).count()
-    pages_num = int(d_num/DRAWINGS_PER_PAGE)+1
+    pages_num = int((d_num-1)/DRAWINGS_PER_PAGE)+1
     if page > pages_num:
         page = pages_num
     if page < 1:

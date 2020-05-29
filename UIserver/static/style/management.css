@@ -24,10 +24,25 @@
 }
 .grid_element{
     width:100%;
+    position:relative;
     display: block;
 }
 .grid_element img{
     width:100%;
+    display:block;
+}
+
+.grid_element span{
+    background-color: var(--color-vlight);
+    text-align: center;
+    width:100%;
+    display: block;
+    position: absolute;
+    bottom:0px;
+    padding-top:3px;
+    padding-bottom:3px;
+    font-weight: bold;
+    color: var(--color-darkest);
 }
 
 .redirect_form{
