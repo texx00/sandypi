@@ -2,9 +2,9 @@
 
 {%block title%}Playlists{% endblock %}
 {%block head%}
-<link rel="stylesheet" href="static/playlists.css">
+<link rel="stylesheet" href="static/management.css">
 <script src="./static/dropzone.js"></script>
-<script src="./static/playlists.js"></script>
+<script src="./static/management.js"></script>
 {%endblock%}
 
 {%block floater%}
@@ -30,11 +30,16 @@
     </div>
     <div class="grid_container">
         {% for item in drawings %}
-            <div class="grid_element">
+    <div class="grid_element" onclick="redirect_drawing({{item.id}})">
                 <img src="{{ url_for('static', filename='Drawings/'+item.id|string+'/'+item.id|string +'.jpg')}}">
                 <span>{{item.filename}}</span>
             </div>
         {% endfor %}
+    </div>
+    <div>
+        <form action="/drawings" method="get" class="redirect_form">
+            <button type="submit" class="redirect_button">More drawings</button>
+        </form>
     </div>
 </div>
 <div>

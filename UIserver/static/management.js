@@ -28,10 +28,14 @@ function hide_dropzone(){
 
 function file_loaded_success(){
     console.log("Success");
-    hide_dropzone()
+    hide_dropzone();
 }
 
 function file_loaded_error(){
     console.log("Error");
-    hide_dropzone()
+    hide_dropzone();
+}
+
+function redirect_drawing(code){
+    window.location.href = "/drawings/"+code;
 }

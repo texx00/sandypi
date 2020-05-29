@@ -17,7 +17,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 import UIserver.database
-import UIserver.views.playlists
+import UIserver.views.drawings_management
 import UIserver.bot_interface.socketio_callbacks
 
 @app.route('/')

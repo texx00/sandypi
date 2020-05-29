@@ -15,7 +15,7 @@ def allowed_file(filename):
 @app.route('/playlists')
 def playlists():
     result = db.session.query(UploadedFiles).order_by(UploadedFiles.edit_date.desc()).limit(4)
-    return render_template("preferences/playlists.html", drawings=result)
+    return render_template("management/preview.html", drawings=result)
 
 # Upload route for the dropzone to load new drawings
 @app.route('/upload', methods=['GET','POST'])
@@ -32,10 +32,20 @@ def upload():
                 folder = app.config["UPLOAD_FOLDER"] +"/" + str(new_file.id) +"/"
                 os.mkdir(folder)
                 file.save(os.path.join(folder, str(new_file.id)+".gcode"))
-                # create a copy of a placeholder figure. TODO create the image from the gcode
+                # create a copy of a placeholder figure. 
+                # TODO create the image from the gcode
                 shutil.copy2(app.config["UPLOAD_FOLDER"]+"/placeholder.jpg", os.path.join(folder, str(new_file.id)+".jpg"))
 
                 app.logger.info("File added")
                 # TODO give a feedback to the user about the result of the operation
                 return "1"
     return "0"
+
+
+@app.route('/drawings')
+def drawings():
+    return "drawings"
+
+@app.route('/drawings/<code>')
+def drawing(code):
+    return "Hello " + str(code)

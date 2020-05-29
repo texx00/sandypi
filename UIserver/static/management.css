@@ -30,6 +30,14 @@
     width:100%;
 }
 
+.redirect_form{
+    text-align: center;
+    margin-top:15px;
+}
+.redirect_button{
+    font-size: medium;
+}
+
 /* Dropzone defaults */
 
 #upload_dropzone{
