@@ -29,6 +29,8 @@ Here is a list of features (already available or for future enhancements):
 * [ ] Raspberry as hotspot to which connect with a qrcode
 * [ ] Lights/led control
 * [ ] Make it nice
+* [ ] Create groups of drawings to be drawn one after the other to create complex designs
+* [ ] Create a tool to merge different drawings into one file
 
 In a far far away future:
 * [ ] Create a social network to share designs and update your personal playlists

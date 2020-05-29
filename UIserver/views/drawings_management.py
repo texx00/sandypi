@@ -2,6 +2,8 @@ from UIserver import app, db
 from UIserver.database import UploadedFiles
 from flask import render_template, request, url_for
 from werkzeug.utils import secure_filename
+from UIserver.views.utils.gcode_converter import gcode_to_image
+import traceback
 
 import os
 import logging
@@ -32,9 +34,15 @@ def upload():
                 folder = app.config["UPLOAD_FOLDER"] +"/" + str(new_file.id) +"/"
                 os.mkdir(folder)
                 file.save(os.path.join(folder, str(new_file.id)+".gcode"))
-                # create a copy of a placeholder figure. 
-                # TODO create the image from the gcode
-                shutil.copy2(app.config["UPLOAD_FOLDER"]+"/placeholder.jpg", os.path.join(folder, str(new_file.id)+".jpg"))
+                # create the preview image
+                try:
+                    with open(os.path.join(folder, str(new_file.id)+".gcode")) as file:
+                        image = gcode_to_image(file)
+                        image.save(os.path.join(folder, str(new_file.id)+".jpg"))
+                except:
+                    app.logger.error("Error during image creation")
+                    app.logger.error(traceback.print_exc())
+                    shutil.copy2(app.config["UPLOAD_FOLDER"]+"/placeholder.jpg", os.path.join(folder, str(new_file.id)+".jpg"))
 
                 app.logger.info("File added")
                 # TODO give a feedback to the user about the result of the operation
@@ -71,7 +79,6 @@ def drawings_page(page):
         'drawings': d_num
     }
     app.logger.info(rows)
-
     return render_template("management/drawings.html", drawings=rows, pages = pages)
 
 
@@ -79,6 +86,4 @@ def drawings_page(page):
 @app.route('/drawing/<code>')
 def drawing(code):
     item = db.session.query(UploadedFiles).filter(UploadedFiles.id==code).one()
-    app.logger.info(item)
-    filename ="Pinco"
     return render_template("management/single_drawing.html", item = item)
