@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
     <title>{% block title %}{%endblock%}</title>
+    <!--TODO insert the font on a local path to make the app independent from internet-->
     <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet'>
-    <link rel="stylesheet" href="{{url_for('static', filename='base_style.css')}}">
-    <script src="{{url_for('static', filename='base.js')}}"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='style/base_style.css')}}">
+    <script src="{{url_for('static', filename='js/base.js')}}"></script>
 
     {% block head %}{%endblock%}
 </head>
