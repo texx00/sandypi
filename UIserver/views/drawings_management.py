@@ -44,8 +44,38 @@ def upload():
 
 @app.route('/drawings')
 def drawings():
-    return "drawings"
+    return drawings_page(1)
 
-@app.route('/drawings/<code>')
+@app.route('/drawings/<page>')
+def drawings_page(page):
+    DRAWINGS_PER_PAGE = 20
+    page = int(page)
+    d_num = db.session.query(UploadedFiles).count()
+    pages_num = int(d_num/DRAWINGS_PER_PAGE)+1
+    if page > pages_num:
+        page = pages_num
+    if page < 1:
+        page = 1
+    
+    rows = db.session.query(UploadedFiles).order_by(UploadedFiles.edit_date.desc()).limit(str(DRAWINGS_PER_PAGE)).offset(str(DRAWINGS_PER_PAGE*(page-1)))
+    if page == pages_num:
+        limit = d_num - DRAWINGS_PER_PAGE*(pages_num-1)
+    else: limit = DRAWINGS_PER_PAGE
+
+    pages = {
+        "this": page,
+        "next": page+1,
+        "prev": page-1,
+        "total": pages_num,
+        "limit": limit,
+        'drawings': d_num
+    }
+    app.logger.info(rows)
+
+    return render_template("management/drawings.html", drawings=rows, pages = pages)
+
+
+# Single drawing page
+@app.route('/drawing/<code>')
 def drawing(code):
     return "Hello " + str(code)

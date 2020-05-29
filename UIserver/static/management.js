@@ -3,7 +3,7 @@ var floater;
 
 function show_dropzone(){
     if(!dropzone){
-        dropzone = new Dropzone("div#upload_dropzone", {url: "upload", acceptedFiles: ".gcode, .nc"});
+        dropzone = new Dropzone("div#upload_dropzone", {url: location.protocol + '//' + location.host + "/upload", acceptedFiles: ".gcode, .nc"});
         dropzone.on("success", file_loaded_success);
         dropzone.on("error", file_loaded_error);
         dropzone.on("totaluploadprogress", function (progress) {
@@ -24,6 +24,7 @@ function hide_dropzone(){
     floater.style.display = 'none';
     dropzone.removeAllFiles(true);
     document.getElementById("upload_progress").style.display="none";
+    location.reload()
 }
 
 function file_loaded_success(){
@@ -37,5 +38,5 @@ function file_loaded_error(){
 }
 
 function redirect_drawing(code){
-    window.location.href = "/drawings/"+code;
+    window.location.href = "/drawing/"+code;
 }

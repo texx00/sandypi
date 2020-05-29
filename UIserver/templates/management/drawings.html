@@ -1,6 +1,6 @@
 {% extends "base.html"%}
 
-{%block title%}Recent files{% endblock %}
+{%block title%}Drawings{% endblock %}
 {%block head%}
 <link rel="stylesheet" href="{{url_for('static', filename='management.css')}}">
 <script src="{{url_for('static', filename='Dropzone.js')}}"></script>
@@ -24,6 +24,7 @@
 
 {%block body%}
 <div>
+    <!--TODO add a drop down menu to filter by date, name, etc...-->
     <div id="drawings">
         <h1 style="display:inline-block">Your drawings</h1>
         <button style="float:right; margin-top: 1.4em;" class="button" onclick="show_dropzone()">+ Upload drawing</button>
@@ -36,19 +37,21 @@
             </div>
         {% endfor %}
     </div>
-    <div>
-        <form action="/drawings" method="get" class="redirect_form">
-            <button type="submit" class="redirect_button">More drawings</button>
+    <div class="pages">
+        {%if not pages['prev'] == 0%}
+        <form action="/drawings/{{pages['prev']}}" method="get" class="redirect_form pages_component">
+            <button type="submit" class="redirect_button">Previous page</button>
         </form>
+        {%endif%}
+        {%if pages['next'] <= pages['total']%}
+        <form action="/drawings/{{pages['next']}}" method="get" class="redirect_form pages_component">
+            <button type="submit" class="redirect_button">Next page</button>
+        </form>
+        {%endif%}
     </div>
-</div>
-<div>
-    <div id="playlists">
-        <h1 style="display:inline-block">Your playlists</h1>
-        <button style="float:right; margin-top: 1.4em;" class="button" onclick="">+ Create new playlist</button>
+    <div class="pages">
+        <div id="page_num" class="pages_component">Page {{pages['this']}}/{{pages['total']}} - {{pages['limit']}} of {{pages['drawings']}} total drawings</div>
     </div>
-    <div class="grid_container">
-
-    </div>
+    <div class="footer_spacer"></div>
 </div>
 {%endblock%}

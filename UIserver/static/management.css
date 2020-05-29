@@ -38,6 +38,15 @@
     font-size: medium;
 }
 
+.pages{
+    text-align: center;
+    margin-top:15px;
+}
+.pages_component{
+    display: inline;
+    margin:15px;
+}
+
 /* Dropzone defaults */
 
 #upload_dropzone{
