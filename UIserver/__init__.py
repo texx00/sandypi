@@ -22,7 +22,7 @@ import UIserver.bot_interface.socketio_callbacks
 
 @app.route('/')
 def home():
-    return redirect(url_for('playlists'))
+    return redirect(url_for('preview'))
 
 if __name__ == '__main__':
     socketio.run(app)

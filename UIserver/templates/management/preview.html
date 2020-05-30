@@ -29,12 +29,7 @@
         <button style="float:right; margin-top: 1.4em;" class="button" onclick="show_dropzone()">+ Upload drawing</button>
     </div>
     <div class="grid_container">
-        {% for item in drawings %}
-    <div class="grid_element" onclick="redirect_drawing('{{item.id}}')">
-                <img src="{{ url_for('static', filename='Drawings/'+item.id|string+'/'+item.id|string +'.jpg')}}">
-                <span>{{item.filename}}</span>
-            </div>
-        {% endfor %}
+        {%block grid_element%}{%endblock%}
     </div>
     <div>
         <form action="/drawings" method="get" class="redirect_form">

@@ -14,10 +14,10 @@ ALLOWED_EXTENSIONS = ["gcode", "nc"]
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route('/playlists')
+@app.route('/preview')
 def playlists():
     result = db.session.query(UploadedFiles).order_by(UploadedFiles.edit_date.desc()).limit(4)
-    return render_template("management/preview.html", drawings=result)
+    return render_template("management/grid_element.html", drawings = result, parent_template = "management/preview.html")
 
 # Upload route for the dropzone to load new drawings
 @app.route('/upload', methods=['GET','POST'])
@@ -78,9 +78,8 @@ def drawings_page(page):
         "limit": limit,
         'drawings': d_num
     }
-    app.logger.info(rows)
-    return render_template("management/drawings.html", drawings=rows, pages = pages)
-
+    #app.logger.info(rows)
+    return render_template("management/grid_element.html", drawings=rows, pages = pages, parent_template  = "management/drawings.html")
 
 # Single drawing page
 @app.route('/drawing/<code>')
