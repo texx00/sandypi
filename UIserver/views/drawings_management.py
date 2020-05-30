@@ -1,6 +1,6 @@
 from UIserver import app, db
 from UIserver.database import UploadedFiles
-from flask import render_template, request, url_for
+from flask import render_template, request, url_for, redirect
 from werkzeug.utils import secure_filename
 from UIserver.views.utils.gcode_converter import gcode_to_image
 import traceback
@@ -86,3 +86,16 @@ def drawings_page(page):
 def drawing(code):
     item = db.session.query(UploadedFiles).filter(UploadedFiles.id==code).one()
     return render_template("management/single_drawing.html", item = item)
+
+# Delete drawing
+@app.route('/delete/<code>')
+def delete(code):
+    item = db.session.query(UploadedFiles).filter_by(id=code).first()
+    try:
+        db.session.delete(item)
+        db.session.commit()
+        os.rmdir(app.config["UPLOAD_FOLDER"] +"/" + str(code) +"/")
+        app.logger.info("Drawing code {} deleted".format(code))
+    except:
+        app.logger.error("'Delete drawing code {}' error".format(code))
+    return redirect(url_for('preview'))

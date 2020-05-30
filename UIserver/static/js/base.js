@@ -5,7 +5,10 @@ function home(){
 function close_popup(event){
     if (event.target != event.currentTarget)
         return;
-    console.log("Close")
+    close_popup_noevent();
+}
+
+function close_popup_noevent(){
     $("#popup").css("display", "none");
 }
 
