@@ -1,5 +1,7 @@
 from threading import Thread, Lock
 from queue import Queue
+import os
+from pathlib import Path
 
 import time
 
@@ -13,12 +15,12 @@ class Feeder():
         self.serial = FakeSerial()  # TODO substitute this with a real serial if available (if there is something connected)
 
     # starts to send gcode to the machine
-    def start_code(self, code, start_new=False):
-        if(not start_new and self.is_running()):
+    def start_code(self, code, force_stop=False):
+        if(not force_stop and self.is_running()):
             return False    # if a file is already being sent it will not start a new one
         else:
             if self.is_running():
-                self._th.stop()
+                self.stop()
             with self.mutex:
                 self._th = Thread(target = self._thf, args=(code,), daemon=True)
                 self._isrunning = True
@@ -94,13 +96,14 @@ class Feeder():
 
     # thread function
     def _thf(self, code):
-        print("Sending code: {}\n".format(code))
         while True:
+            print("Starting new drawing with code {}".format(code))
             with self.mutex:
                 code = self._running_code
-            with open("../UIserver/static/Drawings/{0}/{0}.gcode".format(code), "r") as file:
+            filename = os.path.join(Path(__file__).parent.parent.absolute(), "UIserver/static/Drawings/{0}/{0}.gcode".format(code))
+            with open(filename, "r") as file:
                 for line in file:
-                    if self.is_running():
+                    if not self.is_running():
                         break
                     if self.is_paused():
                         continue
@@ -112,7 +115,7 @@ class Feeder():
             with self.mutex:
                 if self.q.qsize()>0:
                     code = self.q.queue.pop()
-                    print("Starting new drawing with code {}".format(code))
+                else: break
                     
 
         print("Exiting thread")
@@ -121,6 +124,7 @@ class Feeder():
 class FakeSerial():
     def send(self, obj):
         print(obj)
+        #time.sleep(0.01)
 
 # tests
 if __name__ == "__main__":
