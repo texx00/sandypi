@@ -15,7 +15,7 @@ function show_dropzone(){
         })
     }
 
-    floater = document.getElementById("floater");
+    floater = document.getElementById("popup");
     floater.style.display = 'block';
     floater.setAttribute("onclick", "hide_dropzone()");
 }

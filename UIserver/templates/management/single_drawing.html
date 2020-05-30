@@ -22,3 +22,13 @@
     </div>
 </div>
 {%endblock%}
+
+{%block popup%}
+<div class="dialog" onclick="dummy()">
+    <div class="dialog_text">Are you sure?</div>
+    <div class="dialog_buttons">
+        <button onclick="undo()" class="dialog_button dark_button">Undo</button>
+        <button onclick="confirm_delete('{{item.id}}')" class="dialog_button dark_button">Confirm</button>
+    </div>
+</div>
+{%endblock%}

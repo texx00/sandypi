@@ -15,7 +15,7 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/preview')
-def playlists():
+def preview():
     result = db.session.query(UploadedFiles).order_by(UploadedFiles.edit_date.desc()).limit(4)
     return render_template("management/grid_element.html", drawings = result, parent_template = "management/preview.html")
 

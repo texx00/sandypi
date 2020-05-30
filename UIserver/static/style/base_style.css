@@ -71,7 +71,7 @@ button{
     color: var(--color-darkest);
     border-radius: 0.2em;
     padding: 0.5em;
-    font-size: 0.5em;
+    font-size: large;
     border:none;
     margin: auto;
     cursor: pointer;
@@ -88,7 +88,7 @@ button:hover{
     color: var(--color-light);
 }
 
-#floater{
+#popup{
     position: absolute;
     width: 100%;
     height: 100%;
@@ -97,4 +97,38 @@ button:hover{
     color: var(--color-light);
     display: none;
     text-align: center;
+}
+
+.popup_container{
+    font-size: x-large;
+    position: absolute;
+    top:200px;
+    left:25%;
+    width:50%;
+    min-height:60%;
+    /*padding:25%;
+    padding-top:200px;
+    padding-bottom:0;*/
+}
+
+/* Dialog windows setup */
+.dialog{
+    background-color: var(--color-medium);
+    color: var(--color-darkest);
+    border-radius: 5px;
+    padding-top:40px;
+    padding-bottom:40px;
+    position: absolute;
+    width:70%;
+    left:15%;
+}
+.dialog_text{
+    margin-bottom:15px;
+}
+.dialog_button{
+    display: inline-block;
+    width: 40%;
+}
+.dialog_buttons{
+    margin-top:10px;
 }

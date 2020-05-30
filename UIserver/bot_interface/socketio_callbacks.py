@@ -7,6 +7,8 @@ def handle_message(message):
     res = message['data'].split(":")
     if res[0]=="start":
         bot.start_drawing(res[1])
+    if res[0]=="queue":
+        bot.queue_drawing(res[1])
 
 @socketio.on('connect')
 def on_connect():
