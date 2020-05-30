@@ -1,27 +1,9 @@
 import socketio_interface
 import socketio
-import atexit
-from flask_socketio import emit
 
-def init():
-    sio.connect('http://127.0.0.1:5000')
-    atexit.register(at_exit)
-    print("Connected")
+# Start the socketio communication with the server
+socketio_interface.init()
 
-def at_exit():
-    sio.disconnect()
-
-def send_command(command):
-    sio.emit("server_command", command)
-
-sio = socketio.Client()
-init()
-
-send_command("test")
-print("sent")
-
-@sio.on('bot_command')
-def parse(response):
-    print("Response: " +  response)
-
-sio.wait()
+# Wait for any event
+while True:
+    pass
