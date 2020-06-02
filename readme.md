@@ -53,7 +53,7 @@ Now you can install SandyPi:
 ## Running the server
 
 To run the server use:
-`(env)$> python3 start.py`
+`(env)$> sudo python3 start.py`
 
 # Project status
 
