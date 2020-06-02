@@ -11,6 +11,13 @@ class UploadedFiles(db.Model):
     def __repr__(self):
         return '<User %r>' % self.filename
 
+# this method should be used only during the installation or the update of the server and only by the setup.py script
+def DBUpdate():
+    print("Dropping database")
+    db.drop_all()       # in a future version, instead of deleting the tables everytime it will update the structure of the tables with new columns or what it is necessary
+    print("Creating database")
+    db.create_all()
+
 # The tables are created from a Model
 # If this file is run as the main file it will create the necessary tables
 # For development purposes, when significant changes are done to the db structure it is possible to drop all the tables and create them again like this:
