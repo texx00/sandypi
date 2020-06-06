@@ -26,6 +26,7 @@ def upload():
         if 'file' in request.files:
             file = request.files['file']
             if file and file.filename!= '' and allowed_file(file.filename):
+                # TODO move this into a thread because on the pi0w it is too slow and some drawings are not loaded in time
                 filename = secure_filename(file.filename)
                 new_file = UploadedFiles(filename = filename)
                 db.session.add(new_file)

@@ -20,6 +20,7 @@ def gcode_to_image(file, final_width=800, final_height=800, bg_color=(0,0,0), li
                 x=float(p[1:-1])
             if p[0]=="Y":
                 y=float(p[1:-1])
+            # TODO add a check on the coordinates: if x or y is missing should use the last one
         if x<xmin:
             xmin = x
         if x>xmax:
