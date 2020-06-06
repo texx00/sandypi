@@ -14,8 +14,14 @@
 <body>
     <!-- popup container: this is shown over the entire page-->
     <div id="popup" onclick="close_popup(event)">
-        <div class="popup_container" onclick="close_popup(event)">
-            {%block popup%}{%endblock%}
+        <div id="popup_container" onclick="close_popup(event)">
+            <div id="popup_div" class="dialog" onclick="dummy()">
+                <div id="dialog_text" class="dialog_text">Are you sure?</div>
+                <div class="dialog_buttons">
+                    <button id="dialog_undo" onclick="undo()" class="dialog_button dark_button">Undo</button>
+                    <button id="dialog_confirm" onclick="" class="dialog_button dark_button">Confirm</button>
+                </div>
+            </div>
         </div>
     </div>
 

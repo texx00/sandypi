@@ -11,8 +11,8 @@ class FeederEvents(FeederEventHandler):
         sio.emit("drawing_ended")
 
     def on_drawing_started(self):
-        print("S> Sending drawing started")
-        sio.emit("drawing_started")
+        print("S> Sending drawing started. Code: {}".format(sio.feeder.get_drawing_code()))
+        sio.emit("drawing_started", sio.feeder.get_drawing_code())
 
 
 class SocketInterface():
@@ -42,4 +42,5 @@ def start_gcode(code):
 
 @sio.on('bot_queue')
 def queue_gcode(code):
+    print("Queued")
     sio.feeder.queue_code(code)

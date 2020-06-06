@@ -1,5 +1,4 @@
 from UIserver import socketio, app
-from UIserver.bot_interface import bot_commands as bot
 
 def show_message_on_UI(message):
     socketio.emit("message_container", message)
@@ -17,9 +16,9 @@ def handle_message(message):
     app.logger.info("Received message from js")
     res = message['data'].split(":")
     if res[0]=="start":
-        bot.start_drawing(res[1])
+        app.feederbot.start_drawing(res[1])
     if res[0]=="queue":
-        bot.queue_drawing(res[1])
+        app.feederbot.queue_drawing(res[1])
 
 # NCFeeder callbacks
 
@@ -27,11 +26,13 @@ def handle_message(message):
 def on_drawing_ended():
     app.logger.info("B> Drawing ended")
     show_message_on_UI("Drawing ended")
+    app.feederbot.set_is_drawing(False)
 
 @socketio.on('drawing_started')
-def on_drawing_ended():
+def on_drawing_started(code):
     app.logger.info("B> Drawing started")
     show_message_on_UI("Drawing started")
+    app.feederbot.set_code(code)
 
 @socketio.on('server_command')
 def on_server_command(command):

@@ -16,18 +16,9 @@
     </div>
     <!--TODO add commands to modify the drawing-->
     <div class="buttons">
-        <button onclick="drawnow('{{item.id}}')">Draw it now</button>
-        <button onclick="delete_drawing('{{item.id}}')">Delete this drawing</button>
-    </div>
-</div>
-{%endblock%}
-
-{%block popup%}
-<div class="dialog" onclick="dummy()">
-    <div class="dialog_text">Are you sure?</div>
-    <div class="dialog_buttons">
-        <button onclick="undo()" class="dialog_button dark_button">Undo</button>
-        <button onclick="confirm_delete('{{item.id}}')" class="dialog_button dark_button">Confirm</button>
+        <button id="start_button" onclick="drawnow('{{item.id}}', '{{isdrawing}}')">Draw it now</button>
+        <button id="queue_button" onclick="queue('{{item.id}}')" {% if not isdrawing %}style="display: none"{%endif%}>Add to queue</button>
+        <button id="delete_button" onclick="delete_drawing('{{item.id}}')">Delete this drawing</button>
     </div>
 </div>
 {%endblock%}

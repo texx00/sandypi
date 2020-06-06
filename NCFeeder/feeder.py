@@ -47,7 +47,7 @@ class Feeder():
     # add a code to the queue
     def queue_code(self, code):
         if self.q.empty() and not self.is_running():
-            self.start_code(gcode)
+            self.start_code(code)
             return
         self.q.put(code)
 
@@ -62,9 +62,9 @@ class Feeder():
             return self._ispaused
 
     # return the code of the drawing on the go
-    def get_drawing_code():
+    def get_drawing_code(self):
         with self.mutex:
-            return self._present_code
+            return self._running_code
     
     # return the content of the queue as a string
     def queue_str(self):
@@ -153,8 +153,8 @@ class Feeder():
 # Fake serial class to be used when nothing is connected and for development purposes
 class FakeSerial():
     def send(self, obj):
-        print(obj)
-        #time.sleep(0.01)
+        #print(obj)
+        time.sleep(0.02)
         pass
 
 # tests

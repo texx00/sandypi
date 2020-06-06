@@ -86,7 +86,8 @@ def drawings_page(page):
 @app.route('/drawing/<code>')
 def drawing(code):
     item = db.session.query(UploadedFiles).filter(UploadedFiles.id==code).one()
-    return render_template("management/single_drawing.html", item = item)
+    app.logger.info("Is drawing: {}".format(app.feederbot.is_drawing()))
+    return render_template("management/single_drawing.html", item = item, isdrawing=app.feederbot.is_drawing())
 
 # Delete drawing
 @app.route('/delete/<code>')
