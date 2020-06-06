@@ -28,6 +28,60 @@ body {
     position: relative;
 }
 
+button{
+    background-color: var(--color-medium);
+    color: var(--color-darkest);
+    border-radius: 0.2em;
+    padding: 0.5em;
+    font-size: large;
+    border:none;
+    margin: auto;
+    cursor: pointer;
+    transition:0.15s;
+}
+
+button:hover{
+    background-color: var(--color-vlight);
+    transition: 0.15s;
+    color: var(--color-darkest)
+}
+
+.dark_button{
+    background-color: var(--color-darkest);
+    color: var(--color-light);
+}
+
+.wi{
+    width: 900px;
+    margin: 0 auto;
+}
+
+/* --- MESSAGES --- */
+
+#message_container{
+    position: fixed;
+    top:0px;
+    height:30px;
+    background-color: var(--color-light);
+    border-bottom: 1px solid var(--color-darkest);
+    color: var(--color-darkest);
+    width:100%;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0.3s linear, opacity 0.3s linear;
+}
+
+#message_container_text{
+    width:100%;
+    text-align: center;
+    padding-top:5px;
+}
+
+#message_container_close{
+    float: right;
+}
+
+/* --- NAVBAR ---*/
 nav {
     background-color: var(--color-medium);
     color: var(--color-white);
@@ -38,11 +92,6 @@ nav {
     width:100%;
 }
 
-.wi{
-    width: 900px;
-    margin: 0 auto;
-}
-
 .logo{
     font-size: 3em;
     overflow: hidden;
@@ -51,6 +100,7 @@ nav {
     cursor: pointer;
 }
 
+/* --- FOOTER --- */
 footer{
     background-color: var(--color-medium);
     color: var(--color-white);
@@ -66,28 +116,7 @@ footer{
     height:5.5em;
 }
 
-button{
-    background-color: var(--color-medium);
-    color: var(--color-darkest);
-    border-radius: 0.2em;
-    padding: 0.5em;
-    font-size: large;
-    border:none;
-    margin: auto;
-    cursor: pointer;
-    transition:0.15s;
-}
-button:hover{
-    background-color: var(--color-vlight);
-    transition: 0.15s;
-    color: var(--color-darkest)
-}
-
-.dark_button{
-    background-color: var(--color-darkest);
-    color: var(--color-light);
-}
-
+/* --- POPUP --- */
 #popup{
     position: absolute;
     width: 100%;

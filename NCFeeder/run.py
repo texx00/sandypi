@@ -1,11 +1,8 @@
-import socketio_interface
+from NCFeeder.socketio_interface import SocketInterface
 import socketio
 from feeder import Feeder
 
-fed = Feeder()
-
-# Start the socketio communication with the server
-socketio_interface.init(fed)
+sioif = SocketInterface()
 
 # Wait for any event
 while True:

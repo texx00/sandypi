@@ -6,14 +6,23 @@
     <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet'>
     <link rel="stylesheet" href="{{url_for('static', filename='style/base_style.css')}}">
     <script src="{{url_for('static', filename='js/lib/jquery-3.5.1.js')}}"></script>
+    <script src="{{url_for('static', filename='js/lib/socket.io.js')}}"></script>
     <script src="{{url_for('static', filename='js/base.js')}}"></script>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     {% block head %}{%endblock%}
 </head>
 <body>
+    <!-- popup container: this is shown over the entire page-->
     <div id="popup" onclick="close_popup(event)">
         <div class="popup_container" onclick="close_popup(event)">
             {%block popup%}{%endblock%}
+        </div>
+    </div>
+
+    <div id="message_container">
+        <div class="wi">
+            <div id="message_container_text">
+            </div>
         </div>
     </div>
 

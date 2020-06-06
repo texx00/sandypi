@@ -3,17 +3,30 @@ from queue import Queue
 import os
 from pathlib import Path
 from NCFeeder.gcode_rescalers import *
-
 import time
 
+
+class FeederEventHandler():
+    def on_drawing_ended(self):
+        pass
+
+    def on_drawing_started(self):
+        pass
+
+
 class Feeder():
-    def __init__(self):
+    def __init__(self, handler = None):
         self.q = Queue()
         self._isrunning = False
         self._th = None
         self.mutex = Lock()
-
+        if handler is None:
+            self.handler = FeederEventHandler()
+        else: self.handler = handler
         self.serial = FakeSerial()  # TODO substitute this with a real serial if available (if there is something connected)
+
+    def set_event_handler(self, handler):
+        self.handler = handler
 
     # starts to send gcode to the machine
     def start_code(self, code, force_stop=False):
@@ -29,6 +42,7 @@ class Feeder():
                 self._isdone = False
                 self._running_code = code
                 self._th.start()
+            self.handler.on_drawing_started()
 
     # add a code to the queue
     def queue_code(self, code):
@@ -126,19 +140,22 @@ class Feeder():
 
                         with self.mutex:
                             self.serial.send(line)
+            self.handler.on_drawing_ended()
             with self.mutex:
                 if self.q.qsize()>0:
                     code = self.q.queue.pop()
                 else: break
                     
-
         print("Exiting thread")
+
+
 
 # Fake serial class to be used when nothing is connected and for development purposes
 class FakeSerial():
     def send(self, obj):
         print(obj)
         #time.sleep(0.01)
+        pass
 
 # tests
 if __name__ == "__main__":
