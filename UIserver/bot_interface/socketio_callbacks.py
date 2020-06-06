@@ -1,4 +1,6 @@
-from UIserver import socketio, app
+from UIserver import socketio, app, db
+from flask import render_template
+from UIserver.database import UploadedFiles
 
 def show_message_on_UI(message):
     socketio.emit("message_container", message)
@@ -19,6 +21,12 @@ def handle_message(message):
         app.feederbot.start_drawing(res[1])
     if res[0]=="queue":
         app.feederbot.queue_drawing(res[1])
+
+@socketio.on("request_nav_drawing_status")
+def nav_drawing_request():
+    if app.feederbot.is_drawing():
+        item = db.session.query(UploadedFiles).filter(UploadedFiles.id==app.feederbot.get_code()).one()
+        socketio.emit("current_drawing_preview", render_template("drawing_status.html", item=item))
 
 # NCFeeder callbacks
 

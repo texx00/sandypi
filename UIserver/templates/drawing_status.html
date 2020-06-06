@@ -1,0 +1,5 @@
+<div onclick="show_queue()">
+    <img id="nav_status_preview_img" src="{{ url_for('static', filename='Drawings/'+item.id|string+'/'+item.id|string +'.jpg')}}">
+    <span id="nav_status_preview_name">Now drawing: <b>{{item.filename}}</b></span>
+    <!-- TODO add a progress bar -->
+</div>

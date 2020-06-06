@@ -154,7 +154,7 @@ class Feeder():
 class FakeSerial():
     def send(self, obj):
         #print(obj)
-        time.sleep(0.02)
+        time.sleep(2)
         pass
 
 # tests

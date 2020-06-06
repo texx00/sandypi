@@ -101,3 +101,8 @@ def delete(code):
     except:
         app.logger.error("'Delete drawing code {}' error".format(code))
     return redirect(url_for('preview'))
+
+# Show queue
+@app.route('/queue')
+def show_queue():
+    return render_template("management/queue.html")

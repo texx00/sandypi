@@ -2,7 +2,6 @@ var socket = io.connect(location.host);
 
 // socket setup
 $( document ).ready(function() {
-    console.log( "ready!" );
     socket.on('message_container', function(message){
         console.log("M> "+message)
         $("#message_container_text").html(message);
@@ -10,11 +9,22 @@ $( document ).ready(function() {
         $("#message_container").css("opacity", "1");
         setTimeout(close_message, 3000)
     });
+
+    socket.on('current_drawing_preview', function(content){
+        console.log("Updating actual code preview")
+        $("#nav_bot_status").html(content)
+    })
+
+    socket.emit("request_nav_drawing_status")
 });
 
 // --- Navbar functions ---
 function home(){
     window.location=location.protocol + '//' + location.host
+}
+
+function show_queue(){
+    window.location=location.protocol + '//' + location.host + "/queue"
 }
 
 // --- Message functions ---

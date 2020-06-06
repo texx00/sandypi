@@ -86,18 +86,54 @@ nav {
     background-color: var(--color-medium);
     color: var(--color-white);
     margin: auto;
-    padding-top:1em;
+    padding-top:5px;
     padding-bottom: 1em;
     margin-bottom: 1em;
     width:100%;
 }
 
-.logo{
+#logo{
+    display: inline-block;
     font-size: 3em;
     overflow: hidden;
+    margin-top:5px;
 }
-.logo span{
+#logo span{
     cursor: pointer;
+}
+
+#nav_right_container{
+    vertical-align: middle;
+    float: right;
+    padding-top:10px;
+}
+#nav_right_container form{
+    display: inline-block;
+    padding-bottom:10px;
+}
+#nav_bot_status{
+    vertical-align: middle;
+    margin-right:40px;
+    display: inline-block;
+}
+#nav_bot_status div{
+    border-radius: 5px;
+    padding:8px;
+    background-color: var(--color-vlight);
+    text-align: center;
+}
+#nav_status_preview_img{
+    vertical-align: middle;
+    width:40px;
+}
+#nav_status_preview_name{
+    font-size: medium;
+    height: 100%;
+    margin-left:10px;
+    margin-right:10px;
+}
+#nav_status_preview_name b{
+    font-weight: 600;
 }
 
 /* --- FOOTER --- */
