@@ -1,5 +1,4 @@
 from threading import Thread, Lock
-from queue import Queue
 import os
 from pathlib import Path
 from NCFeeder.gcode_rescalers import *
@@ -16,7 +15,6 @@ class FeederEventHandler():
 
 class Feeder():
     def __init__(self, handler = None):
-        self.q = Queue()
         self._isrunning = False
         self._th = None
         self.mutex = Lock()
@@ -44,13 +42,6 @@ class Feeder():
                 self._th.start()
             self.handler.on_drawing_started()
 
-    # add a code to the queue
-    def queue_code(self, code):
-        if self.q.empty() and not self.is_running():
-            self.start_code(code)
-            return
-        self.q.put(code)
-
     # ask if the feeder is already sending a file
     def is_running(self):
         with self.mutex:
@@ -65,32 +56,6 @@ class Feeder():
     def get_drawing_code(self):
         with self.mutex:
             return self._running_code
-    
-    # return the content of the queue as a string
-    def queue_str(self):
-        return str(self.q.queue)
-
-    # clear the queue
-    def clear_queue(self):
-        with self.mutex:
-            self.q.queue.clear()
-
-    def queue_length(self):
-        with self.mutex:
-            return self.q.qsize()
-
-    # start the next drawing of the queue
-    # by default will start it only if not already printing something
-    # with "force_stop = True" will stop the actual drawing and start the next
-    def start_next(self, force_stop=False):
-        if(self.is_running()):
-            if(force_stop):
-                self.stop()
-            else: return False
-        if self.queue_length() > 0:
-            self.start_code(self.q.queue.pop())
-            return True
-        return False
     
     # stops the drawing
     def stop(self):
@@ -141,10 +106,6 @@ class Feeder():
                         with self.mutex:
                             self.serial.send(line)
             self.handler.on_drawing_ended()
-            with self.mutex:
-                if self.q.qsize()>0:
-                    code = self.q.queue.pop()
-                else: break
                     
         print("Exiting thread")
 
@@ -153,8 +114,8 @@ class Feeder():
 # Fake serial class to be used when nothing is connected and for development purposes
 class FakeSerial():
     def send(self, obj):
-        #print(obj)
-        time.sleep(2)
+        print(obj)
+        #time.sleep(2)
         pass
 
 # tests
@@ -162,18 +123,3 @@ if __name__ == "__main__":
     fed = Feeder()
 
     fed.start_code(10)
-
-    fed.start_code(11)
-    fed.queue_code(12)
-    fed.queue_code(13)
-    print(fed.queue_str())
-
-    time.sleep(2)
-    
-    if(fed.start_next()):
-        print("Starting drawing without stopping")
-    
-    if(fed.start_next(force_stop=True)):
-        print("Stopping feeder and starting next drawing")
-
-    fed._th.join()

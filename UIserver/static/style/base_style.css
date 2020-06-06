@@ -115,6 +115,7 @@ nav {
     vertical-align: middle;
     margin-right:40px;
     display: inline-block;
+    cursor: pointer;
 }
 #nav_bot_status div{
     border-radius: 5px;

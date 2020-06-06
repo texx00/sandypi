@@ -35,12 +35,14 @@ def on_drawing_ended():
     app.logger.info("B> Drawing ended")
     show_message_on_UI("Drawing ended")
     app.feederbot.set_is_drawing(False)
+    app.feederbot.start_next()
 
 @socketio.on('drawing_started')
 def on_drawing_started(code):
     app.logger.info("B> Drawing started")
     show_message_on_UI("Drawing started")
     app.feederbot.set_code(code)
+    nav_drawing_request()
 
 @socketio.on('server_command')
 def on_server_command(command):
