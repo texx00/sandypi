@@ -27,6 +27,9 @@ def nav_drawing_request():
     if app.feederbot.is_drawing():
         item = db.session.query(UploadedFiles).filter(UploadedFiles.id==app.feederbot.get_code()).one()
         socketio.emit("current_drawing_preview", render_template("drawing_status.html", item=item))
+    else: 
+        socketio.emit("current_drawing_preview", "")
+    
 
 # NCFeeder callbacks
 
@@ -34,6 +37,7 @@ def nav_drawing_request():
 def on_drawing_ended():
     app.logger.info("B> Drawing ended")
     show_message_on_UI("Drawing ended")
+    nav_drawing_request()
     app.feederbot.set_is_drawing(False)
     app.feederbot.start_next()
 

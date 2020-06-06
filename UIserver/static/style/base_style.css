@@ -116,6 +116,9 @@ nav {
     margin-right:40px;
     display: inline-block;
     cursor: pointer;
+    visibility: visible;
+    opacity: 1;
+    transition: visibility 0.3s linear, opacity 0.3s linear;
 }
 #nav_bot_status div{
     border-radius: 5px;

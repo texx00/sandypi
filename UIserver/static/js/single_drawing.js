@@ -16,6 +16,7 @@ function drawnow(code, is_drawing){
 function queue(code){
     console.log("Sending queue command");
     socket.emit('message', {data: 'queue:'+code});
+    show_message("Drawing added to the queue")
 }
 
 function undo(){

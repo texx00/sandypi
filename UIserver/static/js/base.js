@@ -3,20 +3,35 @@ var socket = io.connect(location.host);
 // socket setup
 $( document ).ready(function() {
     socket.on('message_container', function(message){
-        console.log("M> "+message)
-        $("#message_container_text").html(message);
-        $("#message_container").css("visibility", "visible");
-        $("#message_container").css("opacity", "1");
-        setTimeout(close_message, 3000)
+        show_message(message)
     });
 
     socket.on('current_drawing_preview', function(content){
         console.log("Updating actual code preview")
-        $("#nav_bot_status").html(content)
+        if(content==""){
+            $("#nav_bot_status").css("visibility", "hidden");
+            $("#nav_bot_status").css("opacity", "0");
+            $("#nav_bot_status").off("click");
+        }else{
+            $("#nav_bot_status").html(content);
+            $("#nav_bot_status").css("visibility", "visible");
+            $("#nav_bot_status").css("opacity", "1");
+            $("#nav_bot_status").click(function (){
+                show_queue();
+            });
+        }
     })
 
     socket.emit("request_nav_drawing_status")
 });
+
+function show_message(message){
+    console.log("M> "+message)
+    $("#message_container_text").html(message);
+    $("#message_container").css("visibility", "visible");
+    $("#message_container").css("opacity", "1");
+    setTimeout(close_message, 3000)
+}
 
 // --- Navbar functions ---
 function home(){
