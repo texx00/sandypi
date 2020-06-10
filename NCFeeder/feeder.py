@@ -1,7 +1,7 @@
 from threading import Thread, Lock
 import os
 from pathlib import Path
-from NCFeeder.gcode_rescalers import *
+from gcode_rescalers import *
 import time
 
 
@@ -12,10 +12,12 @@ class FeederEventHandler():
     def on_drawing_started(self):
         pass
 
-
 class Feeder():
     def __init__(self, handler = None):
         self._isrunning = False
+        self._ispaused = False
+        self.total_commands_number = None
+        self.command_number = 0
         self._th = None
         self.mutex = Lock()
         if handler is None:
@@ -37,8 +39,8 @@ class Feeder():
                 self._th = Thread(target = self._thf, args=(code,), daemon=True)
                 self._isrunning = True
                 self._ispaused = False
-                self._isdone = False
                 self._running_code = code
+                self.command_number = 0
                 self._th.start()
             self.handler.on_drawing_started()
 
@@ -84,31 +86,37 @@ class Feeder():
             
             # TODO retrieve saved information for the gcode filter
             dims = {"table_x":100, "table_y":100, "drawing_max_x":100, "drawing_max_y":100, "drawing_min_x":0, "drawing_min_y":0}
+            # TODO calculate an estimate about the remaining time for the current drawing (for the moment can output the number of rows over the total number of lines in the file)
+            self.total_commands_number = 10**6  # TODO change this placeholder
+
             filter = Fit(dims)
             
             with open(filename, "r") as file:
                 file_line = 1
-                for line in file:
+                for k, line in enumerate(file):
                     if not self.is_running():
                         break
-                    if self.is_paused():
-                        continue
+                    while self.is_paused():
+                        time.sleep(1)
                     if not line[0]==";":
                         # TODO parse line to scale/add padding to the drawing according to the drawing settings (in order to keep the original .gcode file)
                         line = filter.parse_line(line)
                         line = "N{} ".format(file_line) + line
-                        file_line += 1
 
                         # TODO should create a function/class to manage the connection with the controller
                         # for example: marlin is buffering the commands so it is necessary to put a check wheter the queue is full and should wait before sending the next move
                         # should also lost lines when requested by the controller (better to move the line number inside the class)
 
                         with self.mutex:
+                            self.command_number = k
                             self.serial.send(line)
             self.handler.on_drawing_ended()
                     
         print("Exiting thread")
-
+    
+    def get_status(self):
+        with self.mutex:
+            return {"is_running":self._isrunning, "progress":[self.command_number, self.total_commands_number], "is_paused":self._ispaused}
 
 
 # Fake serial class to be used when nothing is connected and for development purposes

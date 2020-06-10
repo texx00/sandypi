@@ -1,4 +1,4 @@
-from NCFeeder.socketio_interface import SocketInterface
+from socketio_interface import SocketInterface
 import socketio
 from feeder import Feeder
 

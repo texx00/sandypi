@@ -1,4 +1,4 @@
-from UIserver import app, db
+from UIserver import app, socketio, db
 from UIserver.database import UploadedFiles
 from flask import render_template, request, url_for, redirect
 from werkzeug.utils import secure_filename
@@ -86,8 +86,8 @@ def drawings_page(page):
 @app.route('/drawing/<code>')
 def drawing(code):
     item = db.session.query(UploadedFiles).filter(UploadedFiles.id==code).one()
-    app.logger.info("Is drawing: {}".format(app.feederbot.is_drawing()))
-    return render_template("management/single_drawing.html", item = item, isdrawing=app.feederbot.is_drawing())
+    app.logger.info("Is drawing: {}".format(app.qmanager.is_drawing()))
+    return render_template("management/single_drawing.html", item = item, isdrawing=app.qmanager.is_drawing())
 
 # Delete drawing
 @app.route('/delete/<code>')
@@ -105,4 +105,5 @@ def delete(code):
 # Show queue
 @app.route('/queue')
 def show_queue():
+    socketio.emit("bot_status")
     return render_template("management/queue.html")

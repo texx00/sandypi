@@ -1,6 +1,6 @@
 from queue import Queue
 
-class FeederBot():
+class QueueManager():
     def __init__(self, app, socketio):
         self._isdrawing = False
         self._code = None

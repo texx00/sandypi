@@ -1,16 +1,19 @@
 import socketio
 import atexit
 from flask_socketio import emit
-from NCFeeder.feeder import Feeder, FeederEventHandler
+from feeder import Feeder, FeederEventHandler
+import pickle
 
 sio = socketio.Client()
 
 class FeederEvents(FeederEventHandler):
     def on_drawing_ended(self):
+        # Send a message to the server that the drawing is ended.
         print("S> Sending drawing ended")
         sio.emit("drawing_ended")
 
     def on_drawing_started(self):
+        # Send a message to the server that a drawing has been started.
         print("S> Sending drawing started. Code: {}".format(sio.feeder.get_drawing_code()))
         sio.emit("drawing_started", sio.feeder.get_drawing_code())
 
@@ -34,13 +37,14 @@ class SocketInterface():
     def disconnect():
         sio.disconnect()
 
-# Events
+# Socket events from the server
 
+# Starts a new drawing (even if there was a drawing on the way already)
 @sio.on('bot_start')
 def start_gcode(code):
     sio.feeder.start_code(code, force_stop = True)
 
-@sio.on('bot_queue')
-def queue_gcode(code):
-    print("Queued")
-    sio.feeder.queue_code(code)
+# Send the current status of the current drawing to the server
+@sio.on('bot_status')
+def send_status():
+    sio.emit("feeder_status", pickle.dumps(sio.feeder.get_status()))

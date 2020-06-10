@@ -3,7 +3,7 @@ from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 import os
 import logging
-from UIserver.bot_interface.feeder_bot import FeederBot
+from UIserver.bot_interface.queue_manager import QueueManager
 
 app = Flask(__name__, template_folder='templates')
 app.logger.setLevel(logging.INFO)
@@ -17,7 +17,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+file_path
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-app.feederbot = FeederBot(app, socketio)
+app.qmanager = QueueManager(app, socketio)
 
 import UIserver.database
 import UIserver.views.drawings_management
