@@ -32,9 +32,19 @@ function delete_drawing(code){
 }
 
 function confirm_delete(code){
-    window.location=location.protocol + '//' + location.host + "/delete/" + code
+    window.location=location.protocol + '//' + location.host + "/delete/drawing/" + code
 }
 
-function substitute_buttons(is_drawing){
-    
+//TODO I don't like the styling limitation of the select option. May change to a different thing in the future
+function add_to_playlist(drawing_code){
+    $("#dialog_text").html("Select the playlist<br>"+$("#playlists_select").html());
+    $("#dialog_confirm").off("click");
+    $("#dialog_confirm").click(function(){
+        pl_code = $("#playlists_dropdown").val();
+        console.log("Pl_code: "+pl_code)
+        socket.emit("add_to_playlist", drawing_code=drawing_code, playlist_code=pl_code);
+        console.log("Added to playlist "+pl_code);
+        close_popup_noevent();
+    });
+    $("#popup").css("display", "inline-block");
 }

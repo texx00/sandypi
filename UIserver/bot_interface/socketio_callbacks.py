@@ -1,7 +1,9 @@
 from UIserver import socketio, app, db
 from flask import render_template
-from UIserver.database import UploadedFiles
+from UIserver.database import UploadedFiles, Playlists
 import pickle
+import datetime
+import json
 
 def show_message_on_UI(message):
     socketio.emit("message_container", message)
@@ -12,7 +14,7 @@ def on_connect():
     pass
 
 
-# frontend callbacks
+# ---- Frontend callbacks ----
 
 @socketio.on('message')
 def handle_message(message):
@@ -31,8 +33,27 @@ def nav_drawing_request():
     else: 
         socketio.emit("current_drawing_preview", "")
     
+# playlist sockets
+# save the changes to the playlist
+@socketio.on("playlist_save")
+def playlist_save(pls):
+    pls = pls['data']   # data is a dict itself with the data to save
+    item = db.session.query(Playlists).filter(Playlists.id==int(pls['id']))
+    for i in item:  # should be just one
+        i.name = pls['name']
+        i.edit_date = datetime.datetime.utcnow()
+    db.session.commit()
+    app.logger.info("Saved")
 
-# NCFeeder callbacks
+@socketio.on("add_to_playlist")
+def add_to_playlist(drawing_code, playlist_code):
+    item = db.session.query(Playlists).filter(Playlists.id==playlist_code).one()
+    item.drawings = item.drawings +"{},".format(drawing_code)
+    item.edit_date = datetime.datetime.utcnow()
+    db.session.commit()
+    # TODO add the information about the playlists also in the single drawing?
+
+# ---- NCFeeder callbacks ----
 
 @socketio.on('drawing_ended')
 def on_drawing_ended():

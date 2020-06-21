@@ -2,10 +2,14 @@
 
 #drawings, #playlists{
     border-bottom: 1px solid var(--color-light);
-    margin-bottom:10px;
+    margin-bottom:30px;
+    position: relative;
 }
 #playlists{
-    margin-bottom:5em;
+    margin-bottom: 100px;
+}
+#spacer{
+    height:50px;
 }
 
 .button{
@@ -38,6 +42,13 @@
     padding-bottom:3px;
     font-weight: bold;
     color: var(--color-darkest);
+}
+
+.playlist_grid_element span{
+    background-color: var(--color-medium);
+    margin-top: 10px;
+    padding-top:20px;
+    padding-bottom:20px;
 }
 
 .redirect_form{

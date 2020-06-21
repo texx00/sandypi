@@ -7,3 +7,12 @@
 </div>
 {% endfor %}
 {%endblock%}
+
+
+{%block playlist_grid_element%}
+{%for item in playlists%}
+<div class="grid_element playlist_grid_element" onclick="redirect_playlist('{{item.id}}')">
+    <span>{{item.name}}</span>
+</div>
+{%endfor%}
+{%endblock%}

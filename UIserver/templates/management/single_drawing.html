@@ -10,6 +10,13 @@
 
 {%block body%}
 <div id="container">
+    <div id="playlists_select" class="data">
+        <select id="playlists_dropdown">
+            {%for i in playlists%}
+            <option value="{{i.id}}">{{i.name}}</option>
+            {%endfor%}
+        </select>
+    </div>
     <h1>{{item.filename}}</h1>
     <div>
         <img src="{{ url_for('static', filename='Drawings/'+item.id|string+'/'+item.id|string +'.jpg')}}" id="drawing_preview">
@@ -19,6 +26,7 @@
         <button id="start_button" onclick="drawnow('{{item.id}}', '{{isdrawing}}')">Draw it now</button>
         <button id="queue_button" onclick="queue('{{item.id}}')" {% if not isdrawing %}style="display: none"{%endif%}>Add to queue</button>
         <button id="delete_button" onclick="delete_drawing('{{item.id}}')">Delete this drawing</button>
+        <button id="add_to_playlist" onclick="add_to_playlist('{{item.id}}')">Add to a playlist</button>
     </div>
 </div>
 {%endblock%}

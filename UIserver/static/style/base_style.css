@@ -51,9 +51,25 @@ button:hover{
     color: var(--color-light);
 }
 
+select{
+    font-size: medium;
+    margin: 30px;
+    background-color: var(--color-light);
+    border: solid 2px var(--color-darkest);
+}
+
+select option{
+    font-size: medium;
+    background-color: var(--color-light);
+}
+
 .wi{
     width: 900px;
     margin: 0 auto;
+}
+
+.data{
+    display: none;
 }
 
 /* --- MESSAGES --- */

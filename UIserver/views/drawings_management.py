@@ -1,5 +1,5 @@
 from UIserver import app, socketio, db
-from UIserver.database import UploadedFiles
+from UIserver.database import UploadedFiles, Playlists
 from flask import render_template, request, url_for, redirect
 from werkzeug.utils import secure_filename
 from UIserver.views.utils.gcode_converter import gcode_to_image
@@ -17,7 +17,8 @@ def allowed_file(filename):
 @app.route('/preview')
 def preview():
     result = db.session.query(UploadedFiles).order_by(UploadedFiles.edit_date.desc()).limit(4)
-    return render_template("management/grid_element.html", drawings = result, parent_template = "management/preview.html")
+    pl_result = db.session.query(Playlists).order_by(Playlists.edit_date.desc())
+    return render_template("management/grid_element.html", drawings = result, parent_template = "management/preview.html", playlists = pl_result)
 
 # Upload route for the dropzone to load new drawings
 @app.route('/upload', methods=['GET','POST'])
@@ -33,7 +34,10 @@ def upload():
                 db.session.commit()
                 # create a folder for each drawing. The folder will contain the .gcode file, the preview and additionally some settings for the drawing
                 folder = app.config["UPLOAD_FOLDER"] +"/" + str(new_file.id) +"/"
-                os.mkdir(folder)
+                try:
+                    os.mkdir(folder)
+                except:
+                    app.logger.error("The folder for '{}' already exists".format(new_file.id))
                 file.save(os.path.join(folder, str(new_file.id)+".gcode"))
                 # create the preview image
                 try:
@@ -50,6 +54,7 @@ def upload():
                 return "1"
     return "0"
 
+# ---- DRAWINGS ----
 
 @app.route('/drawings')
 def drawings():
@@ -87,11 +92,12 @@ def drawings_page(page):
 def drawing(code):
     item = db.session.query(UploadedFiles).filter(UploadedFiles.id==code).one()
     app.logger.info("Is drawing: {}".format(app.qmanager.is_drawing()))
-    return render_template("management/single_drawing.html", item = item, isdrawing=app.qmanager.is_drawing())
+    playlists = db.session.query(Playlists)
+    return render_template("management/single_drawing.html", item = item, isdrawing=app.qmanager.is_drawing(), playlists=playlists)
 
 # Delete drawing
-@app.route('/delete/<code>')
-def delete(code):
+@app.route('/delete/drawing/<code>')
+def delete_drawing(code):
     item = db.session.query(UploadedFiles).filter_by(id=code).first()
     try:
         db.session.delete(item)
@@ -101,6 +107,39 @@ def delete(code):
     except:
         app.logger.error("'Delete drawing code {}' error".format(code))
     return redirect(url_for('preview'))
+
+
+# ---- PLAYLISTS ----
+
+@app.route('/playlist/<code>')
+def playlist(code):
+    item = db.session.query(Playlists).filter_by(id=code).first()
+    if not item.drawings=="":
+        drawings = item.drawings.split(",")[0:-1]
+    else: drawings = []
+    return render_template("management/playlist.html", item=item, drawings=drawings)
+
+@app.route('/create_playlist')
+def create_playlist():
+    item = Playlists()
+    db.session.add(item)
+    db.session.commit()
+    return redirect(url_for("playlist", code=str(item.id)))
+
+
+# Delete playlist
+@app.route('/delete/playlist/<code>')
+def delete_playlist(code):
+    item = db.session.query(Playlists).filter_by(id=code).first()
+    try:
+        db.session.delete(item)
+        db.session.commit()
+        app.logger.info("Playlist code {} deleted".format(code))
+    except:
+        app.logger.error("'Delete playlist code {}' error".format(code))
+    return redirect(url_for('preview'))
+
+# ---- QUEUE ----
 
 # Show queue
 @app.route('/queue')

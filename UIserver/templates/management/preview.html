@@ -38,10 +38,11 @@
 <div>
     <div id="playlists">
         <h1 style="display:inline-block">Your playlists</h1>
-        <button style="float:right; margin-top: 1.4em;" class="button" onclick="">+ Create new playlist</button>
+        <button style="float:right; margin-top: 1.4em;" class="button" onclick="create_new_playlist()">+ Create new playlist</button>
     </div>
     <div class="grid_container">
-
+        {%block playlist_grid_element%}{%endblock%}
     </div>
+    <div id="spacer"></div>
 </div>
 {%endblock%}

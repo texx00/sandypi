@@ -1,5 +1,4 @@
 var dropzone;
-var floater;
 
 function show_dropzone(){
     if(!dropzone){
@@ -17,23 +16,24 @@ function show_dropzone(){
         dropzone.on("success", file_loaded_success);
         dropzone.on("error", file_loaded_error);
         dropzone.on("totaluploadprogress", function (progress) {
-            document.getElementById("upload_progress_bar").style.width=progress + '%';
-            document.getElementById("upload_progress_value").text = progress + '%';
+            $("#upload_progress_bar").css("width", progress + '%');
+            $("#upload_progress_value").html(progress + '%');
           });
         dropzone.on("addedfile", function(file){
-            document.getElementById("upload_progress").style.display="block";
+            $("#upload_progress").css("display", "block");
         })
     }
 
-    floater = document.getElementById("popup");
-    floater.style.display = 'block';
-    floater.setAttribute("onclick", "hide_dropzone()");
+    $("#popup").css("display", 'block');
+    $("#popup").click(function (){
+        hide_dropzone();
+    });
 }
 
 function hide_dropzone(){
-    floater.style.display = 'none';
+    $("#popup").css("display", "none");
     dropzone.removeAllFiles(true);
-    document.getElementById("upload_progress").style.display="none";
+    $("#upload_progress").css("display", "none");
     location.reload()
 }
 
@@ -49,4 +49,12 @@ function file_loaded_error(){
 
 function redirect_drawing(code){
     window.location.href = "/drawing/"+code;
+}
+
+function redirect_playlist(code){
+    window.location.href = "/playlist/"+code;
+}
+
+function create_new_playlist(){
+    window.location.href ="/create_playlist"
 }
