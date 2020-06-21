@@ -10,3 +10,4 @@ src
 dist
 
 UIserver/static/js/bower_components
+UIserver/static/js/node_modules

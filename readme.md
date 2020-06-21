@@ -17,7 +17,7 @@ The final aim of the project is to create something like a social network to sha
 
 ## Windows
 
-Install python 3.7 or above together with pip and git.
+Install python 3.7 or above together with pip, npm and git and restart your computer to make the commands available system wide.
 
 Open cmd and install virtual env as:
 `$> python -m pip install virtualenv`
@@ -45,10 +45,10 @@ Now you can install SandyPi:
 
 ## Raspbian OS
 
-Make sure on your system git, pip and virtualenv are already available:
+Make sure on your system git, npm, pip and virtualenv are already available:
 
 ```
-$> sudo apg-get install git python3-pip
+$> sudo apg-get install git python3-pip npm
 $> sudo pip3 install virtualenv
 ```
 
