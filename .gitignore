@@ -8,3 +8,5 @@ sketches
 build
 src
 dist
+
+UIserver/static/js/bower_components

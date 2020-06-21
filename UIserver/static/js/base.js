@@ -1,4 +1,4 @@
-var socket = io.connect(location.host);
+var socket = io(location.host);
 
 // socket setup
 $( document ).ready(function() {

@@ -1,0 +1,22 @@
+{
+  "name": "sandypi_frontend",
+  "homepage": "https://github.com/texx00/sandypi",
+  "description": "",
+  "authors": ["Luca Tessaro"],
+  "main": "",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jQuery":"latest",
+    "sortablejs":"latest",
+    "dropzone":"latest",
+    "socket.io-client":"latest"
+  }
+}

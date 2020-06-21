@@ -5,8 +5,11 @@
     <!--TODO insert the font on a local path to make the app independent from internet-->
     <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet'>
     <link rel="stylesheet" href="{{url_for('static', filename='style/base_style.css')}}">
-    <script src="{{url_for('static', filename='js/lib/jquery-3.5.1.js')}}"></script>
-    <script src="{{url_for('static', filename='js/lib/socket.io.js')}}"></script>
+    
+    <script src="{{url_for('static', filename='js/bower_components/dropzone/dist/dropzone.js')}}"></script>
+    <script src="{{url_for('static', filename='js/bower_components/jQuery/dist/jquery.js')}}"></script>
+    <script src="{{url_for('static', filename='js/bower_components/sortablejs/Sortable.js')}}"></script>
+    <script src="{{url_for('static', filename='js/bower_components/socket.io-client/dist/socket.io.js')}}"></script>
     <script src="{{url_for('static', filename='js/base.js')}}"></script>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     {% block head %}{%endblock%}
