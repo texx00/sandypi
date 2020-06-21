@@ -7,19 +7,6 @@
 <script src="{{url_for('static', filename='js/management.js')}}"></script>
 {%endblock%}
 
-{%block popup%}
-    <div id="upload_dropzone">
-        <div class="dz-message" data-dz-message>
-            <span class="message_span">Drag and drop the .gcode/.nc file here <br>or click to open the file explorer</span>
-            <div id="upload_progress">
-                <div id="upload_progress_value">0%</div>
-                <span id="upload_progress_bar"></span>
-            </div>
-        </div>
-    </div>
-    <button id="undo_upload" on_click="hide_dropzone()">Undo</button>
-{%endblock%}
-
 {%block body%}
 <div>
     <div id="drawings">

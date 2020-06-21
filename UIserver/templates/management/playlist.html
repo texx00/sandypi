@@ -5,6 +5,10 @@
 {%block head%}
 <link rel="stylesheet" href="{{url_for('static', filename='style/management.css')}}">
 <link rel="stylesheet" href="{{url_for('static', filename='style/playlist.css')}}">
+<script src="{{url_for('static', filename='js/lib/dropzone.js')}}"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-sortablejs@latest/jquery-sortable.js"></script>
+
 <script src="{{url_for('static', filename='js/management.js')}}"></script>
 <script src="{{url_for('static', filename='js/playlist.js')}}"></script>
 {%endblock%}
@@ -12,14 +16,22 @@
 {%block body%}
 <div id="container">
     <div id="playlist_id" class="data">{{item.id}}</div>
-    <h1 id="playlist_name" contenteditable="true">{{item.name}}</h1>
-    <button onclick="save('{{item.id}}')">Save changes</button>
-    <button onclick="">+ Upload drawing</button><!-- TODO add the possibility to upload from within the playlist-->
-    <button onclick="delete_playlist('{{item.id}}')">Delete playlist</button>
-    <div id="grid_container">
-        {% for i in drawings%}
-        Prova
-        {%endfor%}
+    <div id="name_bar">
+        <h1>Playlist name: </h1><h1 id="playlist_name" contenteditable="true">{{item.name}}</h1>
+        <div id="playlist_right_container">
+            <button onclick="save('{{item.id}}')">Save changes</button>
+            <button onclick="show_dropzone('{{item.id}}')">+ Upload drawing</button>
+            <button onclick="delete_playlist('{{item.id}}')">Delete playlist</button>
+        </div>
+    </div>
+    <div>
+        <ul id="sortable_list">
+            {% for i in drawings%}
+            <li class="list_element">
+                <img class="playlist_drawing_preview" src = "{{ url_for('static', filename='Drawings/'+i|string+'/'+i|string +'.jpg')}}"/>
+            </li>
+            {%endfor%}
+        </ul>
     </div>
 </div>
 {%endblock%}

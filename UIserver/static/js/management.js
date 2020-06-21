@@ -1,6 +1,6 @@
 var dropzone;
 
-function show_dropzone(){
+function show_dropzone(playlist=0){
     if(!dropzone){
         $("#popup_container").html('\
     <div id="upload_dropzone">\
@@ -11,8 +11,9 @@ function show_dropzone(){
                 <span id="upload_progress_bar"></span>\
             </div>\
         </div>\
-    </div>');
-        dropzone = new Dropzone("#upload_dropzone", {url: location.protocol + '//' + location.host + "/upload", acceptedFiles: ".gcode, .nc"});
+    </div>\
+    <button id="undo_upload" on_click="hide_dropzone()">Undo</button>');
+        dropzone = new Dropzone("#upload_dropzone", {url: location.protocol + '//' + location.host + "/upload/" + playlist, acceptedFiles: ".gcode, .nc"});
         dropzone.on("success", file_loaded_success);
         dropzone.on("error", file_loaded_error);
         dropzone.on("totaluploadprogress", function (progress) {

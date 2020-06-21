@@ -2,6 +2,7 @@ must_save = false;
 
 $( document ).ready(function() {
     $('#playlist_name').on('keyup', function() {updateTitle();});
+    $('#sortable_list').sortable();
 });
 
 // Ask to save before leaving the page

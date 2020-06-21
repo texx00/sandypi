@@ -3,7 +3,9 @@ from UIserver.database import UploadedFiles, Playlists
 from flask import render_template, request, url_for, redirect
 from werkzeug.utils import secure_filename
 from UIserver.views.utils.gcode_converter import gcode_to_image
+from UIserver.bot_interface.socketio_callbacks import add_to_playlist
 import traceback
+import datetime
 
 import os
 import logging
@@ -21,8 +23,8 @@ def preview():
     return render_template("management/grid_element.html", drawings = result, parent_template = "management/preview.html", playlists = pl_result)
 
 # Upload route for the dropzone to load new drawings
-@app.route('/upload', methods=['GET','POST'])
-def upload():
+@app.route('/upload/<playlist>', methods=['GET','POST'])
+def upload(playlist):
     if request.method == "POST":
         if 'file' in request.files:
             file = request.files['file']
@@ -48,6 +50,10 @@ def upload():
                     app.logger.error("Error during image creation")
                     app.logger.error(traceback.print_exc())
                     shutil.copy2(app.config["UPLOAD_FOLDER"]+"/placeholder.jpg", os.path.join(folder, str(new_file.id)+".jpg"))
+
+                playlist = int(playlist)
+                if (playlist):
+                    add_to_playlist(new_file.id, playlist)
 
                 app.logger.info("File added")
                 # TODO give a feedback to the user about the result of the operation
@@ -113,11 +119,11 @@ def delete_drawing(code):
 
 @app.route('/playlist/<code>')
 def playlist(code):
-    item = db.session.query(Playlists).filter_by(id=code).first()
-    if not item.drawings=="":
-        drawings = item.drawings.split(",")[0:-1]
+    playlist = db.session.query(Playlists).filter_by(id=code).first()
+    if not playlist.drawings=="":
+        drawings = playlist.drawings.split(",")[0:-1]
     else: drawings = []
-    return render_template("management/playlist.html", item=item, drawings=drawings)
+    return render_template("management/playlist.html", item=playlist, drawings=drawings)
 
 @app.route('/create_playlist')
 def create_playlist():

@@ -3,7 +3,6 @@ from flask import render_template
 from UIserver.database import UploadedFiles, Playlists
 import pickle
 import datetime
-import json
 
 def show_message_on_UI(message):
     socketio.emit("message_container", message)
