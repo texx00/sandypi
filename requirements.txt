@@ -8,15 +8,15 @@ idna==2.9
 itsdangerous==1.1.0
 Jinja2==2.11.2
 MarkupSafe==1.1.1
+pid==3.0.3
 Pillow==7.1.2
-pip==20.1.1
+psutil==5.7.0
 python-dotenv==0.13.0
 python-engineio==3.13.0
 python-socketio==4.6.0
 requests==2.23.0
-setuptools==47.1.1
 six==1.15.0
 SQLAlchemy==1.3.17
--e git+https://github.com/texx00/sandypi.git@cc3f93f5cf426336f3563bf00cc09afbe472b1bc#egg=UIserver
+-e git+https://github.com/texx00/sandypi.git@7d8747c6f1ab2a01172be6e8ea7618b99efdb5f9#egg=UIserver
 urllib3==1.25.9
 Werkzeug==1.0.1

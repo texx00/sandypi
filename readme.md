@@ -85,6 +85,8 @@ To run the server use:
 
 The service can be stopped with `CTRL+C`
 
+At the moment the server do not starts automatically when the device turns on.
+
 ## Visual Studio Code debugging setup
 
 The project is developed with VS Code. It is possible to setup the debugger to run the flask server with some simple steps:
@@ -97,12 +99,21 @@ If you want to test the connection also from other devices it is necessary to ad
 `"--host=0.0.0.0"`
 Without this additional option the server will be available only on the running device at `127.0.0.1:5000`
 
+To see the NCFeeder terminal windows it is possible to add an environment variable: `"SHOW_FEEDER_TERMINAL" : "true"`
+If the variable is added to the 'launch.json' configuration file (in the 'env' section) it will run only for the selected configuration
+
+While coding the NCFeeder part, it is possible to set the `RUN_FEEDER_MANUALLY : "true"` environment variable. This variable stops the server to start automatically the NCFeeder process. The process can be started manually with: ```(env)> python NCFeeder/run.py```
+
+**IMPORTANT NOTE:** vscode debugger do not send the SIGKILL and for this reason the feeder process is not stopped automatically. To kill the subprocess it is necessary to use CTRL+C in the terminal window. When working on the NCFeeder it may be easier to let the server alive and refresh just the feeder script by setting the RUN_FEEDER_MANUALLY variable.
+
 ## Web interface
 
 Once the service is running it is possible to connect through a browser by typing the device ip address and connecting to the port 5000 like `192.168.1.15:5000`
 If you are running on the local device you can also use `127.0.0.1:5000`
 
 # Project status
+
+There is a lot to do and I do not have much time. Any help will be accepted.
 
 ## Features 
 
@@ -126,9 +137,9 @@ In a far far away future:
 Todos:
 * [ ] Create logo
 * [ ] Connection management with the table / table settings
-* [ ] Create a setup script and a bash script to automatize the installation (i.e. install pip, venv, create venv, start the setup)
 * [ ] Run the server not on a production server
 * [ ] Upload of multiple files at once
-* [ ] Create preview of the gcode as an image when the file is loaded
+* [ ] Show the realtime gcode simulation with time estimate (on a live page?)
 * [ ] Possibility to modify the settings of the single file and save them in the gcode as comments?
 * [ ] Create a playlist for "cleanup" drawings with some defaults
+* [ ] Start the server automatically at device boot (create a script to activate/deactivate this function)
