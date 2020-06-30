@@ -3,6 +3,7 @@ from flask import render_template
 from UIserver.database import UploadedFiles, Playlists
 import pickle
 import datetime
+import json
 
 def show_message_on_UI(message):
     socketio.emit("message_container", message)
@@ -52,7 +53,29 @@ def add_to_playlist(drawing_code, playlist_code):
     db.session.commit()
     # TODO add the information about the playlists also in the single drawing?
 
+# save the settings
+@socketio.on("save_settings")
+def save_settings(data, is_connect):
+    dataj = json.dumps(data)
+    with open(app.config['SAVED_SETTINGS'],"w") as f:
+        f.write(dataj)
+    show_message_on_UI("Settings saved")
+    if is_connect:
+        app.logger.info("Connecting device")
+        socketio.emit("connect_to_device")
+
+@socketio.on("send_gcode_command")
+def send_gcode_command(command):
+    socketio.emit("gcode_command", command)
+
 # ---- NCFeeder callbacks ----
+
+# receives the list of serial ports available and redirect them to the js frontend
+@socketio.on('serial_list')
+def on_serial_list(slist):
+    slist = pickle.loads(slist)
+    app.logger.info(slist)    
+    socketio.emit("serial_list_show", slist)
 
 @socketio.on('drawing_ended')
 def on_drawing_ended():
@@ -74,3 +97,7 @@ def on_feeder_status(status):
     feeder = pickle.loads(status)
     # TODO show the updated status in the UI
     app.logger.info("Status: " + str(feeder))
+
+@socketio.on("message_to_frontend")
+def message_to_frontend(message):
+    show_message_on_UI(message)

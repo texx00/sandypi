@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+
+{%block title%}Settings{% endblock %}
+{%block head%}
+<link rel="stylesheet" href="{{url_for('static', filename='style/settings.css')}}">
+<script src="{{url_for('static', filename='js/settings.js')}}"></script>
+{%endblock%}
+
+{%block body%}
+<div>
+    <h1>Settings</h1>
+    <div>
+        <h2>Device settings</h2>
+        <h3>Serial port settings</h3>
+        <div>
+            <span>Port number</span>
+            <select id="serial_ports">
+                <!--Filled at runtime with js with the data coming from the feeder-->
+            </select>
+            <span>Baudrate</span>
+            <div id="saved_port" class="data">{{serial["port"]}}</div>
+            <select id="serial_baud">
+                {%for item in serial["baudrates"]%}
+                <option {% if serial["baud"]==item %} selected="selected" {%endif%}value={{item}}>{{item}}</option>
+                {%endfor%}
+            </select>
+        </div>
+        <button onclick="save()">Save settings</button>
+        <button onclick="save(true)">Connect</button>
+    </div>
+    <div>
+        <!-- TODO move this to a dedicated preview page -->
+        <h2>Gcode command: </h2>
+        <input id="gcode_command"></input>
+        <button onclick="send_command()">Send command</button>
+    </div>
+    <!-- TODO better management of the settings. should save only the one changed and ask before leaving if at least one was changed (also, add a color change for the settings changed?)-->
+</div>
+{%endblock%}

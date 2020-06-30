@@ -23,12 +23,14 @@ class SocketInterface():
     def __init__(self):
         sio.connect('http://127.0.0.1:5000')
         atexit.register(self.at_exit)
-        print("Connected")
+        print("Socket connection established")
         events = FeederEvents()
         self.feeder = Feeder(events)
         sio.feeder = self.feeder
+        self.feeder.connect()
 
     def at_exit():
+        sio.feeder.close()
         sio.disconnect()
 
     def send_command(command):
@@ -36,6 +38,10 @@ class SocketInterface():
 
     def disconnect():
         sio.disconnect()
+
+
+def show_message_on_UI(message):
+    sio.emit("message_to_frontend", message)
 
 # Socket events from the server
 
@@ -48,3 +54,24 @@ def start_gcode(code):
 @sio.on('bot_status')
 def send_status():
     sio.emit("feeder_status", pickle.dumps(sio.feeder.get_status()))
+
+# Settings callbacks
+@sio.on('serial_port_list_request')
+def update_serial_port_list():
+    print("Sending list of serial ports")
+    sio.emit("serial_list", pickle.dumps(sio.feeder.serial.serial_port_list()))
+
+# Connect to device call
+@sio.on('connect_to_device')
+def connect_to_device():
+    sio.feeder.connect()
+    if sio.feeder.serial.is_connected():
+        show_message_on_UI("Connection to device successful")
+    else:
+        show_message_on_UI("Device not connected")
+
+@sio.on('gcode_command')
+def send_gcode_command(command):
+    print("Received command: " + command)
+    sio.feeder.send_gcode_command(command)
+    show_message_on_UI("Command executed")

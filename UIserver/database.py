@@ -25,7 +25,6 @@ class Playlists(db.Model):
     active = db.Column(db.Boolean, default=False)                               # If the software should use this playlist or not when checking for rules
 
 
-
 # this method should be used only during the installation or the update of the server and only by the setup.py script
 def DBUpdate():
     print("Dropping database")

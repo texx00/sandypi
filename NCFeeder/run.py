@@ -9,8 +9,7 @@ pidname = "feeder.pid2"
 
 try:
     with PidFile(pidname) as p: # check if the process is already running using pid files. If it is already running will restart it
-        print(p.pidname)
-                
+              
         sioif = SocketInterface()
 
         # Wait for any event

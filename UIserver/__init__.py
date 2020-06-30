@@ -19,6 +19,7 @@ app.logger.setLevel(logging.INFO)
 
 app.config['SECRET_KEY'] = 'secret!' # TODO put a key here
 app.config['UPLOAD_FOLDER'] = "./UIserver/static/Drawings"
+app.config['SAVED_SETTINGS'] = "./UIserver/saves/saved_settings.json"
 socketio = SocketIO(app)
 
 file_path = os.path.abspath(os.getcwd())+"\database.db"
@@ -29,7 +30,7 @@ db = SQLAlchemy(app)
 app.qmanager = QueueManager(app, socketio)
 
 import UIserver.database
-import UIserver.views.drawings_management
+import UIserver.views.drawings_management, UIserver.views.settings
 import UIserver.bot_interface.socketio_callbacks
 
 

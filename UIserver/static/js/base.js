@@ -23,8 +23,10 @@ $( document ).ready(function() {
     })
 
     socket.emit("request_nav_drawing_status")
+    document_ready()    // used by the other script to access the document ready callback without overwriting
 });
 
+// TODO show a list of messages instead of only the most recent one. The older of the list must expire after some seconds
 function show_message(message){
     console.log("M> "+message)
     $("#message_container_text").html(message);
