@@ -3,7 +3,7 @@ from flask import render_template
 from UIserver.database import UploadedFiles, Playlists
 import pickle
 import datetime
-import json
+from utils import settings_utils
 
 def show_message_on_UI(message):
     socketio.emit("message_container", message)
@@ -56,9 +56,7 @@ def add_to_playlist(drawing_code, playlist_code):
 # save the settings
 @socketio.on("save_settings")
 def save_settings(data, is_connect):
-    dataj = json.dumps(data)
-    with open(app.config['SAVED_SETTINGS'],"w") as f:
-        f.write(dataj)
+    settings_utils.save_settings(data)
     show_message_on_UI("Settings saved")
     if is_connect:
         app.logger.info("Connecting device")
@@ -101,3 +99,7 @@ def on_feeder_status(status):
 @socketio.on("message_to_frontend")
 def message_to_frontend(message):
     show_message_on_UI(message)
+
+@socketio.on("message_from_device")
+def message_from_device(message):
+    socketio.emit("frontend_message_from_device", message)

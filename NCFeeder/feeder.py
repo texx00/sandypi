@@ -10,13 +10,21 @@ import serial
 import atexit
 import traceback
 import json
+from utils import settings_utils
 
 class FeederEventHandler():
+    # called when the drawing is finished
     def on_drawing_ended(self):
         pass
 
+    # called when a new drawing is started
     def on_drawing_started(self):
         pass
+    
+    # called when the feeder receives a message that must be sent to the frontend
+    def on_message_received(self, line):
+        pass
+
 
 class Feeder():
     def __init__(self, handler = None):
@@ -36,22 +44,25 @@ class Feeder():
         self.serial.close()
 
     def connect(self):
+        print("Connecting to serial device...")
+        settings = settings_utils.load_settings()
         with self.mutex:
             if not self.serial is None:
                 self.serial.close()
-            settings = ""
             try:
-                path = "./UIserver/saves/saved_settings.json"
-                #path = os.path.abspath(os.path.join(path, os.pardir))
-                with open(path, 'r') as f:
-                    settings = json.load(f) 
-                self.serial = DeviceSerial(settings['serial']['port'], settings['serial']['baud'])
+                self.serial = DeviceSerial(settings['serial']['port'], settings['serial']['baud']) 
+                self._serial_read_thread = Thread(target = self._thsr, daemon=True)
+                self._serial_read_thread.start()
             except:
                 print("Error during device connection")
                 print(traceback.print_exc())
-                self.serial = DeviceSerial()               
-        #self.send_gcode_command("M914 X19 Y19")
-        #self.send_gcode_command("G28")
+                self.serial = DeviceSerial()
+
+        # reset line number when connecting
+        self.line_number = 0
+        self.send_gcode_command("M110 N1")  
+        # send the "on connection" script from the settings
+        self.send_script(settings['scripts']['connection'])
 
     def set_event_handler(self, handler):
         self.handler = handler
@@ -131,37 +142,68 @@ class Feeder():
                     #line = "N{} ".format(file_line) + line
                     time.sleep(0.1)
 
-                    # TODO should create a function/class to manage the connection with the controller
-                    # for example: marlin is buffering the commands so it is necessary to put a check wheter the queue is full and should wait before sending the next move
-                    # should also lost lines when requested by the controller (better to move the line number inside the class)
-
                     self.send_gcode_command(line)
         self.handler.on_drawing_ended()
                 
         print("Exiting thread")
-    
+
+    # thread that keep reading the serial port
+    def _thsr(self):
+        while True:
+            with self.mutex:
+                try:
+                    line = self.serial.readline()
+                except:
+                    print("Serial connection lost")
+            if not line is None:
+                line = line.decode("utf-8") 
+                self.parse_device_line(line)
+
+    # parse a line coming from the device
+    def parse_device_line(self, line):
+        print(line) # TODO parse the line properly to save information coming from the device or to send back missing lines/allow for new line to be sent when the buffer is not full anymore
+        self.handler.on_message_received(line)
+
     def get_status(self):
         with self.mutex:
             return {"is_running":self._isrunning, "progress":[self.command_number, self.total_commands_number], "is_paused":self._ispaused, "is_connected":self.serial.is_connected()}
 
     def send_gcode_command(self, command):
+        # some commands require to update the feeder status
+        # parse the command if necessary
+        if "M110" in command:
+            cs = command.split(" ")
+            for c in cs:
+                if c[0]=="N":
+                    self.line_number = int(c[1:]) -1
+
+        # send the command after parsing the content
         with self.mutex:
             self.line_number = self.line_number + 1
             line = "N{} {} ".format(self.line_number, command)
-            # calculate checksum
+            # calculate checksum according to the wiki
             cs = 0
-            for i in line :
+            for i in line:
                 cs = cs ^ ord(i)
             cs &= 0xff
             
             line +="*{}\n".format(cs)   # add checksum to the line
             self.serial.send(line)      # send line
 
+    # Send a multiline script
+    def send_script(self, script):
+        print("Sending script: ")
+        script = script.split("\n")
+        for s in script:
+            print("> " + s)
+            self.send_gcode_command(s)
+
 class DeviceSerial():
     def __init__(self, serialname = None, baudrate = None):
         self.serialname = serialname
         self.baudrate = baudrate
         self.is_fake = False
+        self.echo = ""
         try:
             self.serial = serial.Serial()
             self.serial.port = self.serialname
@@ -176,7 +218,8 @@ class DeviceSerial():
     def send(self, obj):
         if self.is_fake:
             print("Fake> " + str(obj))
-            time.sleep(0.1)
+            self.echo = obj
+            time.sleep(0.05)
         else:
             if self.serial.is_open:
                 try:
@@ -184,8 +227,6 @@ class DeviceSerial():
                 except:
                     self.close()
                     print("Error while sending a command")
-            while self.serial.inWaiting():
-                print(self.serial.readline())
     
     # TODO add a serial read thread
 
@@ -211,6 +252,18 @@ class DeviceSerial():
             print("Serial port closed")
         except:
             print("Error: serial already closed or not available")
+    
+    def readline(self):
+        if not self.is_fake:
+            if self.serial.is_open:
+                if self.serial.inWaiting():
+                    return self.serial.readline()
+        else:
+            if not self.echo == "":
+                echo = self.echo
+                self.echo = ""
+                return echo.encode()
+        return None
 
 
 # tests

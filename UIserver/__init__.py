@@ -19,7 +19,6 @@ app.logger.setLevel(logging.INFO)
 
 app.config['SECRET_KEY'] = 'secret!' # TODO put a key here
 app.config['UPLOAD_FOLDER'] = "./UIserver/static/Drawings"
-app.config['SAVED_SETTINGS'] = "./UIserver/saves/saved_settings.json"
 socketio = SocketIO(app)
 
 file_path = os.path.abspath(os.getcwd())+"\database.db"

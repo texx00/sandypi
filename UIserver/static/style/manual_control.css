@@ -1,0 +1,10 @@
+#message_from_device{
+    overflow: auto;
+    width: 400px;
+    height: 300px;
+    background-color: var(--color-vlight);
+    color: var(--color-darkest);
+    padding: 5px;
+    border-radius: 5px;
+    margin:5px;
+}

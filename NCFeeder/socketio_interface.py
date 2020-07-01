@@ -16,6 +16,10 @@ class FeederEvents(FeederEventHandler):
         # Send a message to the server that a drawing has been started.
         print("S> Sending drawing started. Code: {}".format(sio.feeder.get_drawing_code()))
         sio.emit("drawing_started", sio.feeder.get_drawing_code())
+    
+    def on_message_received(self, line):
+        # Send the line to the server
+        sio.emit("message_from_device", line)
 
 
 class SocketInterface():
@@ -68,7 +72,7 @@ def connect_to_device():
     if sio.feeder.serial.is_connected():
         show_message_on_UI("Connection to device successful")
     else:
-        show_message_on_UI("Device not connected")
+        show_message_on_UI("Device not connected. Opening a fake serial port.")
 
 @sio.on('gcode_command')
 def send_gcode_command(command):

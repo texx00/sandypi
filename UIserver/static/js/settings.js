@@ -1,24 +1,9 @@
-(function($, window) {
-    $.fn.replaceOptions = function(options) {
-      var self, $option;
-  
-      this.empty();
-      self = this;
-  
-      $.each(options, function(index, option) {
-        $option = $("<option></option>")
-          .attr("value", option.value)
-          .text(option.text);
-        self.append($option);
-      });
-    };
-  })(jQuery, window);
-
 function document_ready(){
     socket.on("serial_list_show", function(data){
         console.log("list_request");
         console.log(data);
         var options = [];
+        data.push("FAKE")
         var selector = $("#serial_ports")
         selector.html(" ")
         var selected_value = $("#saved_port").html()
@@ -34,12 +19,11 @@ function save(connect = false){
         serial : {
             port : $("#serial_ports").val(),
             baud : $("#serial_baud").val()
+        },
+        scripts : {
+            connection: $("#script_connection").val()
         }
     }
     socket.emit("save_settings", data, connect);
 };
 
-function send_command(){
-  socket.emit("send_gcode_command", $("#gcode_command").val());
-  $("#gcode_command").val("");
-}
