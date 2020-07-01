@@ -8,16 +8,20 @@
 
 {%block body%}
 <div>
-    <div>
-        <h1>Manual control</h1>
-        <h2>Gcode command: </h2>
-        <div id="message_from_device"></div>
-        <input id="gcode_command"></input>
-        <button onclick="send_command()">Send command</button>
-    </div>
-    <div>
-        <button onclick="send_command('M112')" title="Warning: this button will not stop the device during homing">EMERGENCY STOP</button>
-        <button onclick="send_command('G28')">Home</button>
+    <h1>Manual control</h1>
+    <div class="c2_grid_container">
+        <div class="grid_element">
+            <h3>Gcode command: </h3>
+            <div id="message_from_device"></div>
+            <div>
+                <input id="gcode_command"></input>
+                <button id="send_gcode_command" onclick="send_command()">Send command</button>
+            </div>
+        </div>
+        <div class="grid_element border_left right_block">
+            <button onclick="send_command('M112')" title="Warning: this button will not stop the device during homing">EMERGENCY STOP</button>
+            <button onclick="send_command('G28')">Home</button>
+        </div>
     </div>
 </div>
 <!-- TODO add button to move it manualy or launch specific gcodes/files (for example to make the referencing or run a cleaning script)-->

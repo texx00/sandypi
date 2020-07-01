@@ -21,7 +21,9 @@ function save(connect = false){
             baud : $("#serial_baud").val()
         },
         scripts : {
-            connection: $("#script_connection").val()
+            connection: $("#script_connection").val(),
+            before: $("#script_before").val(),
+            after: $("#script_after").val()
         }
     }
     socket.emit("save_settings", data, connect);

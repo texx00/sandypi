@@ -72,6 +72,36 @@ select option{
     display: none;
 }
 
+
+/* --- GRID --- */
+.c2_grid_container{    
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-gap:20px;
+    list-style-type: none;
+}
+.c3_grid_container{    
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto auto auto;
+    grid-gap:20px;
+    list-style-type: none;
+}
+.c4_grid_container{   
+    width: 100%; 
+    display: grid;
+    grid-template-columns: auto auto auto auto;
+    grid-gap:20px;
+    list-style-type: none;
+}
+
+.grid_element{
+    width: 100%;
+    position:relative;
+    display: block;
+}
+
 /* --- MESSAGES --- */
 
 #message_container{

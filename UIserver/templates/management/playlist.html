@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="{{url_for('static', filename='style/management.css')}}">
 <link rel="stylesheet" href="{{url_for('static', filename='style/playlist.css')}}">
 
-<script src="https://cdn.jsdelivr.net/npm/jquery-sortablejs@latest/jquery-sortable.js"></script>
+<script src="{{url_for('static', filename='js/node_modules/sortablejs/Sortable.js')}}"></script>
 
 <script src="{{url_for('static', filename='js/management.js')}}"></script>
 <script src="{{url_for('static', filename='js/playlist.js')}}"></script>
@@ -24,10 +24,11 @@
         </div>
     </div>
     <div>
-        <ul id="sortable_list">
+        <ul id="drawings_ul" class="c4_grid_container">
             {% for i in drawings%}
-            <li class="list_element">
+            <li class="grid_element" title="Drag me around to sort the list">
                 <img class="playlist_drawing_preview" src = "{{ url_for('static', filename='Drawings/'+i|string+'/'+i|string +'.jpg')}}"/>
+                <div class="data">{{i|string}}</div>
             </li>
             {%endfor%}
         </ul>

@@ -1,1 +1,1 @@
-{"serial": {"port": null, "baud": "115200"}, "scripts": {"connection": ""}}
+{"serial": {"port": null, "baud": "115200"}, "scripts": {"connection": "", "before": "", "after": ""}}

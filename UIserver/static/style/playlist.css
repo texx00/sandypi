@@ -18,17 +18,17 @@
     cursor: pointer;
     background-color: var(--color-medium);
     color: var(--color-darkest)
-
 }
 
-.grid_container{
-    display: grid;
-    grid-template-columns: auto auto auto auto;
-    grid-gap:20px;
+#drawings_ul{
+    padding: 0px;
 }
 
-.grid_element{
-    width:100%;
-    max-width: 200px;
-    display:block;
+#drawings_ul li{
+    cursor: pointer;
+}
+
+.playlist_drawing_preview{
+    width:90%;
+    max-width: 230px;
 }

@@ -26,8 +26,10 @@ function show_dropzone(playlist=0){
     }
 
     $("#popup").css("display", 'block');
-    $("#popup").click(function (){
-        hide_dropzone();
+    $("#popup").on("click", function (event){
+        if (event.currentTarget == "#popup" || event.currentTarget == "#popup_container"){
+            hide_dropzone();
+        }
     });
 }
 

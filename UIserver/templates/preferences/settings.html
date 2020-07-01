@@ -13,26 +13,51 @@
     <div>
         <h2>Device settings</h2>
         <h3>Serial port settings</h3>
-        <div>
-            <span>Port number</span>
-            <select id="serial_ports">
-                <!--Filled at runtime with js with the data coming from the feeder-->
-            </select>
-            <span>Baudrate</span>
-            <div id="saved_port" class="data">{{settings['serial']['port']}}</div>
-            <select id="serial_baud">
-                {%for item in serial["baudrates"]%}
-                <option {% if settings['serial']['baud']==item %} selected="selected" {%endif%}value={{item}}>{{item}}</option>
-                {%endfor%}
-            </select>
+        <div class="c3_grid_container settings_group">
+            <div class="grid_element">
+                <span>Port number</span>
+                <select id="serial_ports">
+                    <!--Filled at runtime with js with the data coming from the feeder-->
+                </select>
+            </div>
+            <div class="grid_element">
+                <span>Baudrate</span>
+                <div id="saved_port" class="data">{{settings['serial']['port']}}</div>
+                <select id="serial_baud">
+                    {%for item in serial["baudrates"]%}
+                    <option {% if settings['serial']['baud']==item %} selected="selected" {%endif%}value={{item}}>{{item}}</option>
+                    {%endfor%}
+                </select>
+            </div>
+            <div class="grid_element">
+                <button onclick="save(true)">Connect</button>
+            </div>
         </div>
-        <button onclick="save(true)">Connect</button>
+        <h3>Scripts</h3>
+        <div class="settings_group c3_grid_container">
+            <div class="grid_element">
+                <div>
+                    On connection:
+                </div>
+                <textarea id="script_connection">{{settings['scripts']['connection']}}</textarea>
+            </div>
+            <div class="grid_element">
+                <div>
+                    Before new drawing:
+                </div>
+                <textarea id="script_before">{{settings['scripts']['before']}}</textarea>
+            </div>
+            <div class="grid_element">
+                <div>
+                    After drawing:
+                </div>
+                <textarea id="script_after">{{settings['scripts']['after']}}</textarea>
+            </div>
+        </div>
     </div>
-    <div>
-        <h2>Scripts</h2>
-        <div>On connection: <textarea id="script_connection">{{settings['scripts']['connection']}}</textarea></div>
+    <div class="center_h add_space_before">
+        <button id="save_button" onclick="save()">Save settings</button>
     </div>
-    <button onclick="save()">Save settings</button>
     <!-- TODO better management of the settings. should save only the one changed and ask before leaving if at least one was changed (also, add a color change for the settings changed?)-->
 </div>
 {%endblock%}

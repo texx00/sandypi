@@ -1,5 +1,7 @@
 var socket = io(location.host);
 
+function document_ready(){};
+
 // socket setup
 $( document ).ready(function() {
     socket.on('message_container', function(message){
@@ -52,6 +54,7 @@ function close_message(){
 
 // --- Popup functions ---
 function close_popup(event){
+    
     if (event.target != event.currentTarget)
         return;
     close_popup_noevent();

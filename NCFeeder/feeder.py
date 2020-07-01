@@ -117,6 +117,9 @@ class Feeder():
 
     # thread function
     def _thf(self, code):
+        settings = settings_utils.load_settings()
+        self.send_script(settings['scripts']['before'])
+
         print("Starting new drawing with code {}".format(code))
         with self.mutex:
             code = self._running_code
@@ -143,9 +146,8 @@ class Feeder():
                     time.sleep(0.1)
 
                     self.send_gcode_command(line)
+        self.send_script(settings['scripts']['after'])
         self.handler.on_drawing_ended()
-                
-        print("Exiting thread")
 
     # thread that keep reading the serial port
     def _thsr(self):

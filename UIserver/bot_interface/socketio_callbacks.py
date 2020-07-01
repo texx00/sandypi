@@ -42,6 +42,7 @@ def playlist_save(pls):
     for i in item:  # should be just one
         i.name = pls['name']
         i.edit_date = datetime.datetime.utcnow()
+        i.drawings = str([int(i) for i in pls['drawings']]).strip("[]") +","
     db.session.commit()
     app.logger.info("Saved")
 
@@ -51,7 +52,6 @@ def add_to_playlist(drawing_code, playlist_code):
     item.drawings = item.drawings +"{},".format(drawing_code)
     item.edit_date = datetime.datetime.utcnow()
     db.session.commit()
-    # TODO add the information about the playlists also in the single drawing?
 
 # save the settings
 @socketio.on("save_settings")

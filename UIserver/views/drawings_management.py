@@ -121,7 +121,10 @@ def delete_drawing(code):
 def playlist(code):
     playlist = db.session.query(Playlists).filter_by(id=code).first()
     if not playlist.drawings=="":
-        drawings = playlist.drawings.split(",")[0:-1]
+        drawings = playlist.drawings.replace(" ", "")
+        drawings = drawings.split(",")
+        if drawings[-1] == "":
+            drawings = drawings[:-1]
     else: drawings = []
     return render_template("management/playlist.html", item=playlist, drawings=drawings)
 

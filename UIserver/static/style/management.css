@@ -16,16 +16,6 @@
     font-size: 1em;
 }
 
-.grid_container{
-    display: grid;
-    grid-template-columns: auto auto auto auto;
-    grid-gap:20px;
-}
-.grid_element{
-    width:100%;
-    position:relative;
-    display: block;
-}
 .grid_element img{
     width:100%;
     display:block;
@@ -49,6 +39,7 @@
     margin-top: 10px;
     padding-top:20px;
     padding-bottom:20px;
+    border-radius: 5px;
 }
 
 .redirect_form{

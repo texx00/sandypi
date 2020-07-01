@@ -1,9 +1,14 @@
-must_save = false;
-
-$( document ).ready(function() {
+var must_save = false;
+var sortable;
+function document_ready() {
     $('#playlist_name').on('keyup', function() {updateTitle();});
-    $('#sortable_list').sortable();
-});
+    // setting up the drawings to be sortable
+    Sortable.create($('#drawings_ul').get(0), 
+        {animation:150, 
+            onUpdate: function (evt) {
+            must_save = true;
+        },});
+};
 
 // Ask to save before leaving the page
 $(window).bind('beforeunload', function(){
@@ -25,7 +30,11 @@ function save(){
     save_data = {
         name : $("#playlist_name").html().replace(/(?:&nbsp;|<br>)/g,''),
         id : $("#playlist_id").html(),
+        drawings: []
     }
+    $("#drawings_ul").children('li').each(function( index ) {
+        save_data['drawings'].push($(this).children('div').html());
+      });
     socket.emit('playlist_save', {data: save_data});
 }
 
