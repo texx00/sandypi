@@ -28,8 +28,12 @@ def handle_message(message):
 @socketio.on("request_nav_drawing_status")
 def nav_drawing_request():
     if app.qmanager.is_drawing():
-        item = db.session.query(UploadedFiles).filter(UploadedFiles.id==app.qmanager.get_code()).one()
-        socketio.emit("current_drawing_preview", render_template("drawing_status.html", item=item))
+        try:
+            item = db.session.query(UploadedFiles).filter(UploadedFiles.id==app.qmanager.get_code()).one()
+            socketio.emit("current_drawing_preview", render_template("drawing_status.html", item=item))
+        except:
+            app.logger.error("Error during nav drawing status update")
+            socketio.emit("current_drawing_preview", "")
     else: 
         socketio.emit("current_drawing_preview", "")
     
@@ -46,6 +50,7 @@ def playlist_save(pls):
     db.session.commit()
     app.logger.info("Saved")
 
+# add a drawing to a playlist
 @socketio.on("add_to_playlist")
 def add_to_playlist(drawing_code, playlist_code):
     item = db.session.query(Playlists).filter(Playlists.id==playlist_code).one()
@@ -53,7 +58,15 @@ def add_to_playlist(drawing_code, playlist_code):
     item.edit_date = datetime.datetime.utcnow()
     db.session.commit()
 
-# save the settings
+# starts to draw a playlist
+@socketio.on("start_playlist")
+def start_playlist(code):
+    item = db.session.query(Playlists).filter(Playlists.id==code).one()
+    for i in item.drawings.replace(" ", "").split(","):
+        if i != "":
+            app.qmanager.queue_drawing(i)
+
+# settings callbacks
 @socketio.on("save_settings")
 def save_settings(data, is_connect):
     settings_utils.save_settings(data)

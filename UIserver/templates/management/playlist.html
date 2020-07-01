@@ -17,16 +17,18 @@
     <div id="playlist_id" class="data">{{item.id}}</div>
     <div id="name_bar">
         <h1>Playlist name: </h1><h1 id="playlist_name" contenteditable="true">{{item.name}}</h1>
-        <div id="playlist_right_container">
-            <button onclick="save('{{item.id}}')">Save changes</button>
-            <button onclick="show_dropzone('{{item.id}}')">+ Upload drawing</button>
-            <button onclick="delete_playlist('{{item.id}}')">Delete playlist</button>
-        </div>
+    </div>
+    <div class="c4_grid_container playlist_options">
+        <button class="grid_element" onclick="start_playlist('{{item.id}}')">Start playlist</button>
+        <button class="grid_element" onclick="save('{{item.id}}')">Save changes</button>
+        <button class="grid_element" onclick="show_dropzone('{{item.id}}')">+ Upload drawing</button>
+        <button class="grid_element" onclick="delete_playlist('{{item.id}}')">Delete playlist</button>
     </div>
     <div>
         <ul id="drawings_ul" class="c4_grid_container">
             {% for i in drawings%}
-            <li class="grid_element" title="Drag me around to sort the list">
+            <li id="sortable_li_{{i|string}}" class="grid_element playlist_drawing_container" title="Drag me around to sort the list">
+                <div class="remove_drawing" onclick="delete_drawing('{{i|string}}')" title="Remove this drawing from the list">X</div>
                 <img class="playlist_drawing_preview" src = "{{ url_for('static', filename='Drawings/'+i|string+'/'+i|string +'.jpg')}}"/>
                 <div class="data">{{i|string}}</div>
             </li>
