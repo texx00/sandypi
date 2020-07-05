@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 import os
 import sys
 import logging
-from subprocess import Popen, CREATE_NEW_CONSOLE, CREATE_NO_WINDOW
+from subprocess import Popen
 import psutil
 import threading
 import atexit
@@ -56,16 +56,19 @@ def start_feeder_process():
     except:
         pass
 
-    try:
-        # Check if the environment variable is set. If it is will show the ncfeeder terminal window, otherwise will keep it hidden
-        create_window = CREATE_NEW_CONSOLE if os.environ['SHOW_FEEDER_TERMINAL'] == 'true' else CREATE_NO_WINDOW
-    except:
-        create_window = CREATE_NO_WINDOW
     
+    # terminal window is available only on windows
     if platform.system() == "Windows":
+        from subprocess import CREATE_NEW_CONSOLE, CREATE_NO_WINDOW
+        
+        try:
+            # Check if the environment variable is set. If it is will show the ncfeeder terminal window, otherwise will keep it hidden
+            create_window = CREATE_NEW_CONSOLE if os.environ['SHOW_FEEDER_TERMINAL'] == 'true' else CREATE_NO_WINDOW
+        except:
+            create_window = CREATE_NO_WINDOW
         feeder_process = Popen("env/Scripts/activate.bat & python NCFeeder/run.py", env=os.environ.copy(), creationflags=create_window)
     else:
-        feeder_process = Popen("source env/bin/activate & python NCFeeder/run.py",  env=os.environ.copy(), creationflags=create_window)
+        feeder_process = Popen("source env/bin/activate & python NCFeeder/run.py",  env=os.environ.copy())
     app.feeder_pid = feeder_process.pid
 
 @atexit.register

@@ -26,6 +26,6 @@ serial==0.0.97
 setuptools==47.1.1
 six==1.15.0
 SQLAlchemy==1.3.17
--e git+https://github.com/texx00/sandypi.git@2d052c565c6e4a3e61bf169ed776b68f72ed49b9#egg=UIserver
+-e git+https://github.com/texx00/sandypi.git@964b1518ac77197e919a3095bdbde655e24249ff#egg=UIserver
 urllib3==1.25.9
 Werkzeug==1.0.1
