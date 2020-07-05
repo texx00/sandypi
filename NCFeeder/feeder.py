@@ -11,6 +11,8 @@ import atexit
 import traceback
 import json
 from utils import settings_utils
+from queue import Queue
+from collections import OrderedDict
 
 class FeederEventHandler():
     # called when the drawing is finished
@@ -25,9 +27,12 @@ class FeederEventHandler():
     def on_message_received(self, line):
         pass
 
+# List of commands that are buffered by the controller
+BUFFERED_COMMANDS = ("G0", "G00", "G1", "G01", "G2", "G02", "G3", "G03", "G28")
 
 class Feeder():
-    def __init__(self, handler = None):
+    def __init__(self, handler = None, **kargvs):
+        self._print_ack = kargvs.pop("print_ack", False)
         self._isrunning = False
         self._ispaused = False
         self.total_commands_number = None
@@ -39,6 +44,14 @@ class Feeder():
         else: self.handler = handler
         self.serial = None
         self.line_number = 0
+
+        # buffer control attrs
+        self.command_buffer = Queue()
+        self.command_buffer_mutex = Lock()
+        self.command_buffer_max_length = 5
+        self.command_buffer_history = LimitedSizeDict(size_limit = 20)    # keep saved the last n commands
+        self._timeout = BufferTimeout(40, self._on_timeout)
+        self._timeout.start()
     
     def close(self):
         self.serial.close()
@@ -58,11 +71,16 @@ class Feeder():
                 print(traceback.print_exc())
                 self.serial = DeviceSerial()
 
+        # wait for the device to be ready
+        self.wait_device_ready()
+
         # reset line number when connecting
-        self.line_number = 0
-        self.send_gcode_command("M110 N1")  
+        self.reset_line_number()
         # send the "on connection" script from the settings
         self.send_script(settings['scripts']['connection'])
+
+    def wait_device_ready(self):
+        time.sleep(15) # TODO make it better
 
     def set_event_handler(self, handler):
         self.handler = handler
@@ -143,7 +161,6 @@ class Feeder():
                     # TODO parse line to scale/add padding to the drawing according to the drawing settings (in order to keep the original .gcode file)
                     #line = filter.parse_line(line)
                     #line = "N{} ".format(file_line) + line
-                    time.sleep(0.1)
 
                     self.send_gcode_command(line)
         self.send_script(settings['scripts']['after'])
@@ -160,10 +177,46 @@ class Feeder():
             if not line is None:
                 line = line.decode("utf-8") 
                 self.parse_device_line(line)
+    
+    def _on_timeout(self):
+        #print("!Buffer timeout!")
+        if(self.command_buffer_mutex.locked()):
+            self.command_buffer.get()
+            self.command_buffer_mutex.release()
+        else:
+            self._timeout.update()
 
     # parse a line coming from the device
     def parse_device_line(self, line):
-        print(line) # TODO parse the line properly to save information coming from the device or to send back missing lines/allow for new line to be sent when the buffer is not full anymore
+        if ("start" in line):
+            self.wait_device_ready()
+            self.reset_line_number()
+
+        elif "ok" in line:  # when an "ack" is received free one place in the buffer
+            if self.command_buffer_mutex.locked():
+                self.command_buffer.get()
+                self.command_buffer_mutex.release()
+            else:
+                with self.command_buffer_mutex: 
+                    self.command_buffer.get()
+            if not self._print_ack:  # if should not print the "ack" exit the parser to avoid printing the line
+                return
+
+        elif "Resend: " in line:
+            line_number = int(line.replace("Resend: ", "").replace("\r\n", ""))
+            for n, c in self.command_buffer_history.items():
+                n_line_number = int(n.strip("N"))
+                if n_line_number == line_number:
+                    with self.mutex:
+                        self.serial.send(c)
+                        no_line = False
+                        break
+
+        # TODO put something to fix the issue if the number cannot be found or if the command keep getting refused 
+
+        # TODO add "command not found" case
+        
+        print(line) 
         self.handler.on_message_received(line)
 
     def get_status(self):
@@ -171,6 +224,11 @@ class Feeder():
             return {"is_running":self._isrunning, "progress":[self.command_number, self.total_commands_number], "is_paused":self._ispaused, "is_connected":self.serial.is_connected()}
 
     def send_gcode_command(self, command):
+        # clean the command a little
+        command = command.replace("\n", "").replace("\r", "")
+        if command == " " or command == "":
+            return
+        
         # some commands require to update the feeder status
         # parse the command if necessary
         if "M110" in command:
@@ -179,7 +237,13 @@ class Feeder():
                 if c[0]=="N":
                     self.line_number = int(c[1:]) -1
 
+        # check if the command is in the "BUFFERED_COMMANDS" list and stops if the buffer is full
+        if any(code in command for code in BUFFERED_COMMANDS):
+            with self.command_buffer_mutex:     # wait until get some "ok" command to remove an element from the buffer
+                pass
+
         # send the command after parsing the content
+        # need to use the mutex here because it is changing also the line number
         with self.mutex:
             self.line_number = self.line_number + 1
             line = "N{} {} ".format(self.line_number, command)
@@ -192,13 +256,27 @@ class Feeder():
             line +="*{}\n".format(cs)   # add checksum to the line
             self.serial.send(line)      # send line
 
+            self._timeout.update()      # update the timeout because a new command has been sent
+
+            # store the line in the buffer
+            self.command_buffer.put(line)
+            self.command_buffer_history["N{}".format(self.line_number)] = line
+
+            if(self.command_buffer.qsize()>=self.command_buffer_max_length):
+                self.command_buffer_mutex.acquire()     # if the buffer is full acquire the lock so that cannot send new lines until the reception of an ack. Notice that this will stop only buffered commands. The other commands will be sent anyway
+
     # Send a multiline script
     def send_script(self, script):
         print("Sending script: ")
         script = script.split("\n")
         for s in script:
             print("> " + s)
-            self.send_gcode_command(s)
+            if s != "" and s != " ":
+                self.send_gcode_command(s)
+
+    def reset_line_number(self, line_number = 2):
+        print("Resetting line number")
+        self.send_gcode_command("M110 N{}".format(line_number))
 
 class DeviceSerial():
     def __init__(self, serialname = None, baudrate = None):
@@ -230,8 +308,6 @@ class DeviceSerial():
                     self.close()
                     print("Error while sending a command")
     
-    # TODO add a serial read thread
-
     def serial_port_list(self):
         if sys.platform.startswith('win'):
             plist = serial.tools.list_ports.comports()
@@ -262,14 +338,53 @@ class DeviceSerial():
                     return self.serial.readline()
         else:
             if not self.echo == "":
-                echo = self.echo
+                echo = "ok"         # sends "ok" as ack otherwise the feeder will stop sending buffered commands
                 self.echo = ""
                 return echo.encode()
         return None
 
+class LimitedSizeDict(OrderedDict):
+    def __init__(self, *args, **kwds):
+        self.size_limit = kwds.pop("size_limit", None)
+        OrderedDict.__init__(self, *args, **kwds)
+        self._check_size_limit()
 
-# tests
-if __name__ == "__main__":
-    fed = Feeder()
+    def __setitem__(self, key, value):
+        OrderedDict.__setitem__(self, key, value)
+        self._check_size_limit()
 
-    fed.start_code(10)
+    def _check_size_limit(self):
+        if self.size_limit is not None:
+            while len(self) > self.size_limit:
+                self.popitem(last=False)
+
+# this thread calls a function after a timeout but only if the "update" method is not called before that timeout expires
+class BufferTimeout(Thread):
+    def __init__(self, timeout_delta, function, group=None, target=None, name=None, args=(), kwargs=None):
+        super(BufferTimeout, self).__init__(group=group, target=target, name=name)
+        self.timeout_delta = timeout_delta
+        self.callback = function
+        self.mutex = Lock()
+        self.is_running = False
+        self.setDaemon(True)
+        self.update()
+
+    def update(self):
+        with self.mutex:
+            self.timeout_time = time.time() + self.timeout_delta
+
+    def stop(self):
+        self.is_running = False
+
+    def run(self):
+        self.is_running = True
+        while self.is_running:
+            with self.mutex:
+                timeout = self.timeout_time
+            current_time = time.time()
+            if current_time > timeout:
+                self.callback()
+                self.update()
+                with self.mutex:
+                    timeout = self.timeout_time
+            time.sleep(timeout - current_time)
