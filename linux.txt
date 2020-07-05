@@ -1,0 +1,3 @@
+-r requirements.txt
+flask_socketio
+flask_sqlalchemy
