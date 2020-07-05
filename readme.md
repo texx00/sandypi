@@ -78,6 +78,12 @@ Now you can install SandyPi:
 (env)$> sudo python3 setup.py install
 ```
 
+It may happen that the flask_socketio and flask_sqlalchemy are not installed correctly. Try to install them manually with:
+```
+(env)$> sudo pip3 install flask_socketio flask_sqlalchemy
+(env)$> sudo python3 setup.py install
+```
+
 ## Running the server
 
 To run the server use:
