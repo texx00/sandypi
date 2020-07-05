@@ -8,6 +8,7 @@ sketches
 build
 src
 dist
+*.save
 
 UIserver/static/js/bower_components
 UIserver/static/js/node_modules

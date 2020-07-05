@@ -56,6 +56,7 @@ def start_feeder_process():
     except:
         pass
 
+    filename = os.path.dirname(__file__) + "/../NCFeeder/run.py"
     
     # terminal window is available only on windows
     if platform.system() == "Windows":
@@ -66,25 +67,29 @@ def start_feeder_process():
             create_window = CREATE_NEW_CONSOLE if os.environ['SHOW_FEEDER_TERMINAL'] == 'true' else CREATE_NO_WINDOW
         except:
             create_window = CREATE_NO_WINDOW
-        feeder_process = Popen("env/Scripts/activate.bat & python NCFeeder/run.py", env=os.environ.copy(), creationflags=create_window)
+        feeder_process = Popen(["env/Scripts/activate.bat &", "python", filename], env=os.environ.copy(), creationflags=create_window)
     else:
-        feeder_process = Popen("source env/bin/activate & python NCFeeder/run.py",  env=os.environ.copy())
+        feeder_process = Popen(["python3", filename],  env=os.environ.copy())
     app.feeder_pid = feeder_process.pid
 
 @atexit.register
 def terminate_feeder_process():
-    # The feeder_process cannot be killed or terminated if saved into the app directly.
-    # Instead of saving the process object save the pid and kill it with that
-    process = psutil.Process(app.feeder_pid)
-    for proc in process.children(recursive=True):
-        proc.kill()
-    process.kill()
+    try:
+        # The feeder_process cannot be killed or terminated if saved into the app directly.
+        # Instead of saving the process object save the pid and kill it with that
+        process = psutil.Process(app.feeder_pid)
+        for proc in process.children(recursive=True):
+            proc.kill()
+        process.kill()
+    except:
+        pass
 
-# to get the call to atexit when using ctrl+c or the debugger need to use the signal handler
-def sighandler(signo, frame):
-    sys.exit(0)
+if platform.system() == "Windows":
+    # to get the call to atexit when using ctrl+c or the debugger need to use the signal handler
+    def sighandler(signo, frame):
+        sys.exit(0)
 
-signal.signal(signal.SIGINT, sighandler)
+    signal.signal(signal.SIGINT, sighandler)
 
 # Home routes
 @app.route('/')
