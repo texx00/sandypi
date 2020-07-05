@@ -74,7 +74,7 @@ $> source env/bin/activate
 
 Now you can install SandyPi:
 ```
-(env)$> sudo pip3 install -r "requirements.txt"
+(env)$> sudo pip3 install -r "linux.txt"
 (env)$> sudo python3 setup.py install
 ```
 
