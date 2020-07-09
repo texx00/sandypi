@@ -59,6 +59,31 @@
     margin:15px;
 }
 
+.drawing_grid_element{
+    cursor: pointer;
+    max-width: 300px;
+}
+#drawing_preview{
+    width:60%;
+}
+
+.remove_drawing{
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 30px;
+    height: 30px;
+    background-color: var(--color-darkest);
+    color: var(--color-medium);
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0.1s linear, opacity 0.1s linear;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 0px 0px 0px 5px;
+}
+
 /* Dropzone defaults */
 
 #upload_dropzone{

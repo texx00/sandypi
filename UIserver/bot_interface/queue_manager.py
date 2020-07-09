@@ -33,11 +33,26 @@ class QueueManager():
     # return the content of the queue as a string
     def queue_str(self):
         return str(self.q.queue)
+    
+    def get_queue(self):
+        return self.q.queue
 
     # clear the queue
     def clear_queue(self):
         self.q.queue.clear()
+    
+    # remove the first element with the given code
+    def remove(self, code):
+        tmp = Queue()
+        is_first = True
+        for c in self.q.queue:
+            if c == code and is_first:
+                is_first = False
+            else:
+                tmp.put(c)
+        self.q = tmp
 
+    # queue length
     def queue_length(self):
         return self.q.qsize()
     

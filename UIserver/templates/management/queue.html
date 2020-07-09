@@ -1,4 +1,28 @@
 {%extends "base.html"%}
+{%block head%}
+<link rel="stylesheet" href="{{url_for('static', filename='style/management.css')}}">
+<script src="{{url_for('static', filename='js/management.js')}}"></script>
+<script src="{{url_for('static', filename='js/queue.js')}}"></script>
+{%endblock%}
+{%block title%}
+Drawing queue
+{%endblock%}
 {%block body%}
-<div>queue</div>
+<div>
+    <h1>Queue</h1>
+    <div>
+        <h2>Now drawing: {{item.name}}</h2>
+        <img id="drawing_preview clickable" src="{{ url_for('static', filename='Drawings/'+item.id|string+'/'+item.id|string +'.jpg')}}" onclick="redirect_drawing('{{item.id}}')">
+    </div>
+    
+    {% if drawings.size != 0 %}
+    <div>
+        <h2>Coming next:</h2>
+        <div class="c4_grid_container">
+            {%block grid_element%}
+            {%endblock%}
+        </div>
+    </div>
+    {%endif%}
+</div>
 {%endblock%}

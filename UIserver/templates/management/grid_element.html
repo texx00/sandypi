@@ -1,7 +1,7 @@
 {%extends parent_template%}
 {%block grid_element%}
 {% for item in drawings %}
-<div class="grid_element" onclick="redirect_drawing('{{item.id}}')">
+<div class="grid_element drawing_grid_element" onclick="redirect_drawing('{{item.id}}')">
     <img src="{{ url_for('static', filename='Drawings/'+item.id|string+'/'+item.id|string +'.jpg')}}">
     <span>{{item.filename}}</span>
 </div>

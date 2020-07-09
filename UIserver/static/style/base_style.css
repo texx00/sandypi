@@ -72,6 +72,9 @@ select option{
     display: none;
 }
 
+.clickable{
+    cursor: pointer;
+}
 
 /* --- GRID --- */
 .c2_grid_container{    

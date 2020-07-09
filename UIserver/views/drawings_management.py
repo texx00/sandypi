@@ -154,4 +154,18 @@ def delete_playlist(code):
 @app.route('/queue')
 def show_queue():
     socketio.emit("bot_status")
-    return render_template("management/queue.html")
+    code = app.qmanager.get_code()
+    if not code is None:
+        item = db.session.query(UploadedFiles).filter_by(id=code).first()
+        q = db.session.query(UploadedFiles)
+        ids = [int(x) for x in app.qmanager.get_queue()]
+        q = q.filter(UploadedFiles.id.in_(ids))
+        drawings = q.all()
+        drawings.reverse()
+        return render_template("management/grid_element.html", parent_template="management/queue.html", item = item, drawings = drawings)
+    else: return redirect("/")
+
+@app.route('/queue/remove/<code>')
+def remove_from_queue(code):
+    app.qmanager.remove(code)
+    return redirect("/queue")

@@ -56,7 +56,7 @@ def start_feeder_process():
     except:
         pass
 
-    filename = os.path.dirname(__file__) + "/../NCFeeder/run.py"
+    filename = os.path.dirname(__file__) + "\\..\\NCFeeder\\run.py"
     
     # terminal window is available only on windows
     if platform.system() == "Windows":
@@ -67,7 +67,7 @@ def start_feeder_process():
             create_window = CREATE_NEW_CONSOLE if os.environ['SHOW_FEEDER_TERMINAL'] == 'true' else CREATE_NO_WINDOW
         except:
             create_window = CREATE_NO_WINDOW
-        feeder_process = Popen(["env/Scripts/activate.bat &", "python", filename], env=os.environ.copy(), creationflags=create_window)
+        feeder_process = Popen("env/Scripts/activate.bat & python NCFeeder/run.py", env=os.environ.copy(), creationflags=create_window)
     else:
         feeder_process = Popen(["python3", filename],  env=os.environ.copy())
     app.feeder_pid = feeder_process.pid
