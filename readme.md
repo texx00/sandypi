@@ -116,6 +116,18 @@ To stop the server starting automatically use `$> python3 start.py -a=off`
 Once the service is running it is possible to connect through a browser by typing the device ip address and connecting to the port 5000 like `192.168.1.15:5000`
 If you are running on the local device you can also use `127.0.0.1:5000`
 
+## Installation troubleshooting
+
+It may happen that the serial port is not working correctly.
+In this case activate the environment, uninstall the "serial" and the "pyserial" modules and install again the "pyserial":
+```
+$> source env/bin/activate
+python3 -m pip uninstall serial pyserial
+python3 -m pip install pyserial
+```
+
+If you find any bug or problem please open an issue in the dedicated page.
+
 ## Visual Studio Code debugging setup
 
 The project is developed with VS Code. It is possible to setup the debugger to run the flask server with some simple steps:
