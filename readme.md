@@ -4,7 +4,7 @@ A python program to feed your automatic zen table with a fresh design everyday
 
 ## The idea
 
-Zen tables are beautiful but I don't like to see always the same design on the sand: I wanted to have a fresh design waiting me every morning at caffee time.
+Zen tables are beautiful but I don't like to see always the same design on the sand: I wanted to have a fresh design waiting me every morning at coffee time.
 
 The program can run on a raspberry pi connected to your zen table and change the design over night.
 You can control the drawings via the web interface from your device connected to the network (smartphone, tablet or computer independently thanks to the web interface).

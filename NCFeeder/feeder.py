@@ -142,7 +142,7 @@ class Feeder():
         print("Starting new drawing with code {}".format(code))
         with self.mutex:
             code = self._running_code
-        filename = os.path.join(Path(__file__).parent.parent.absolute(), "UIserver/static/Drawings/{0}/{0}.gcode".format(code))
+        filename = os.path.join(str(Path(__file__).parent.parent.absolute()), "UIserver/static/Drawings/{0}/{0}.gcode".format(code))
         
         # TODO retrieve saved information for the gcode filter
         dims = {"table_x":100, "table_y":100, "drawing_max_x":100, "drawing_max_y":100, "drawing_min_x":0, "drawing_min_y":0}
@@ -154,6 +154,7 @@ class Feeder():
         with open(filename, "r") as file:
             file_line = 1
             for k, line in enumerate(file):
+                line = line.upper()
                 if not self.is_running():
                     break
                 while self.is_paused():
