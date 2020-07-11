@@ -29,14 +29,13 @@ class SocketInterface():
 
     def __init__(self):
         sio.connect('http://127.0.0.1:5000')
-        atexit.register(self.at_exit)
         print("Socket connection established")
         events = FeederEvents()
         self.feeder = Feeder(events)
         sio.feeder = self.feeder
         self.feeder.connect()
 
-    def at_exit():
+    def at_exit(self):
         sio.feeder.close()
         sio.disconnect()
 
