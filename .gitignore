@@ -13,3 +13,6 @@ dist
 UIserver/static/js/bower_components
 UIserver/static/js/node_modules
 UIserver/saves/saved_settings.json
+
+start.bat
+start.sh

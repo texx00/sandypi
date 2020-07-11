@@ -84,13 +84,6 @@ def terminate_feeder_process():
     except:
         pass
 
-if platform.system() == "Windows":
-    # to get the call to atexit when using ctrl+c or the debugger need to use the signal handler
-    def sighandler(signo, frame):
-        sys.exit(0)
-
-    signal.signal(signal.SIGINT, sighandler)
-
 # Home routes
 @app.route('/')
 def home():
