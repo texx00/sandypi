@@ -94,7 +94,7 @@ It may happen that the flask_socketio and flask_sqlalchemy are not installed cor
 ## Running the server
 
 To run the server use:
-`$> python3 start.py`
+`$> python3 start.py` on Windows or `$> python3 start.py` on Raspberry
 
 The script will activate the environment automatically.
 

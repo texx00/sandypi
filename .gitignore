@@ -9,6 +9,8 @@ build
 src
 dist
 *.save
+*.pyc
+server.started
 
 UIserver/static/js/bower_components
 UIserver/static/js/node_modules
