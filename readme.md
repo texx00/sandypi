@@ -20,6 +20,12 @@ The project is really immature and barely usable at the moment, see it as a prev
 
 The project is opensource under MIT license and thus anyone can help (there is so much to do).
 
+# Some screenshots
+
+![Main page](docs/images/preview.png)
+![Playlist](docs/images/playlist.png)
+![Drawing](docs/images/drawing.png)
+
 # Installation
 
 ## Windows
