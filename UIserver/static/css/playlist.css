@@ -1,0 +1,56 @@
+#name_bar * {
+  display: inline-block;
+  margin-bottom: 50px; }
+
+#playlist_right_container {
+  margin-top: 20px;
+  float: right; }
+
+#playlist_name {
+  margin-left: 3px;
+  padding: 5px;
+  border-radius: 5px;
+  transition: 0.15s; }
+
+#playlist_name:hover, #playlist_name:focus {
+  cursor: pointer;
+  background-color: var(--color-medium);
+  color: var(--color-darkest); }
+
+#drawings_ul {
+  padding: 0px; }
+
+#drawings_ul li {
+  cursor: pointer; }
+
+.playlist_drawing_preview {
+  width: 90%;
+  max-width: 230px; }
+
+.remove_drawing {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  width: 30px;
+  height: 30px;
+  background-color: var(--color-darkest);
+  color: var(--color-medium);
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0.1s linear, opacity 0.1s linear;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 0px 0px 0px 5px; }
+
+.sortable_ghost {
+  opacity: 0.2; }
+
+.sortable_chosen div.remove_drawing {
+  display: none; }
+
+.playlist_options {
+  margin-bottom: 40px; }
+
+.playlist_options button {
+  width: 200px; }
