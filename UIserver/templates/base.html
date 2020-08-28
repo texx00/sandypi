@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     {% block head %}{%endblock%}
 </head>
-<body>
+<body class="bg-dark">
     <!-- popup container: this is shown over the entire page-->
     <div id="popup" onclick="close_popup(event)">
         <div id="popup_container" onclick="close_popup(event)">
@@ -37,35 +37,46 @@
         </div>
     </div>
 
-    <nav>
-        <div class=wi>
-            <div id=logo>
-                <div style="display: inline-block;vertical-align: center;" onclick="home()"><span>Sandypi</span></div>
-            </div>
-            <div id="nav_right_container">
-                <div id="nav_bot_status"></div><!-- will be filled by js if the bot is doing a drawing-->
-                <form method=post action="/manual_control">
-                    <button type="submit" class="dark_button" >Manual control</button>
-                </form>
-                <form method=post action="/settings">
-                    <button type="submit" class="dark_button" >Settings</button>
-                </form>
+    <header>
+        <div class="navbar navbar-primary bg-primary">
+            <div class="container d-flex justify-content-between">
+                <div class="navbar-brand d-flex text-dark">
+                    <div onclick="home()"><span class="h1">Sandypi</span></div>
+                </div>
+                <div class="d-flex align-item-center">
+                    <div id="nav_bot_status"></div><!-- will be filled by js if the bot is doing a drawing-->
+                    <div class="align-item-center">
+                        <button 
+                            type="submit" 
+                            class="dark_button"
+                            onclick="location.href = '/manual_control';">
+                                Manual control
+                        </button>
+                        <button 
+                            type="submit" 
+                            class="dark_button" 
+                            onclick="location.href = '/settings';">
+                                Settings
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
-    </nav>
+    </header>
 
-    <div class=wi>
-        {% block body %}{%endblock%}
-    </div>
+    <main role="main" class="text-primary">
+        <div class="container">
+            {% block body %}{%endblock%}
+        </div>
+    </main>
 
-    <div class="footer_spacer"></div>
-    <footer>
-        <div class=wi>
-            <div style="position: relative;">
-                <div style="display: inline-block;">
+    <footer class="text-muted bg-primary p-2">
+        <div class="container">
+            <div class="text-dark">
+                <span>
                     Copyright &#169; 2020
-                </div>
-                <div style="display: inline-block; position: absolute; right: 0px;">
+                </span>
+                <div class="float-right">
                     For more detail visit the project homepage on <a href="https://github.com/texx00/sandypi" target="_blank">GitHub</a>
                 </div>
             </div>
