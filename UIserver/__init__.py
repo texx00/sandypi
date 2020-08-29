@@ -27,6 +27,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+file_path
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+# TODO add css and js minifiers and compile only on changes
 sass.compile(dirname=(os.path.abspath(os.getcwd())+"/UIServer/static/scss", os.path.abspath(os.getcwd())+"/UIServer/static/css"))
 
 app.qmanager = QueueManager(app, socketio)

@@ -3,30 +3,29 @@
 {%block title%}{{item.filename}}{% endblock %}
 {%block head%}
 <link rel="stylesheet" href="{{url_for('static', filename='css/management.css')}}">
-<link rel="stylesheet" href="{{url_for('static', filename='css/single_drawing.css')}}">
 <script src="{{url_for('static', filename='js/management.js')}}"></script>
 <script src="{{url_for('static', filename='js/single_drawing.js')}}"></script>
 {%endblock%}
 
 {%block body%}
-<div id="container">
-    <div id="playlists_select" class="data">
-        <select id="playlists_dropdown">
-            {%for i in playlists%}
-            <option value="{{i.id}}">{{i.name}}</option>
-            {%endfor%}
-        </select>
-    </div>
-    <h1>{{item.filename}}</h1>
-    <div>
-        <img src="{{ url_for('static', filename='Drawings/'+item.id|string+'/'+item.id|string +'.jpg')}}" id="drawing_preview">
-    </div>
-    <!--TODO add commands to modify the drawing-->
-    <div class="buttons">
-        <button id="start_button" onclick="drawnow('{{item.id}}', '{{isdrawing}}')">Draw it now</button>
-        <button id="queue_button" onclick="queue('{{item.id}}')" {% if not isdrawing %}style="display: none"{%endif%}>Add to queue</button>
-        <button id="delete_button" onclick="delete_drawing('{{item.id}}')">Delete this drawing</button>
-        <button id="add_to_playlist" onclick="add_to_playlist('{{item.id}}')">Add to a playlist</button>
-    </div>
+<div id="playlists_select" class="data">
+    <select id="playlists_dropdown">
+        {%for i in playlists%}
+        <option value="{{i.id}}">{{i.name}}</option>
+        {%endfor%}
+    </select>
 </div>
+<!-- TODO add possibility to change drawing name (similar to the playlist way)-->
+<h1 class="section-header text-center">{{item.filename}}</h1>
+<!--TODO add commands to modify the drawing-->
+<div class="text-center mt-1 mb-3">
+    <button class="d-inline-block" onclick="drawnow('{{item.id}}', '{{isdrawing}}')">Draw it now</button>
+    <button class= "{% if not isdrawing %} d-none {%else%} d-inline-block {%endif%}" onclick="queue('{{item.id}}')">Add to queue</button>
+    <button class="d-inline-block" onclick="delete_drawing('{{item.id}}')">Delete this drawing</button>
+    <button class="d-inline-block" onclick="add_to_playlist('{{item.id}}')">Add to a playlist</button>
+</div>
+<div class="text-center mb-5 row justify-content-md-center">
+    <img class="mb-5 col-md-auto" src="{{ url_for('static', filename='Drawings/'+item.id|string+'/'+item.id|string +'.jpg')}}">
+</div>
+
 {%endblock%}

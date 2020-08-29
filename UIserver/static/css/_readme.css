@@ -1,0 +1,9 @@
+/** 
+
+This project uses Sass.
+Css files are generated automatically from the scss files in the UIServer/static/scss folder
+Do not modify the css files directly otherwise the changes will be lost during the scss build process.
+Scss files are similar to css files with some powerful additions like variables and functions (see https://sass-lang.com/guide)
+In addition to using scss files, the project uses Bootstrap 4. Check this link for more: https://getbootstrap.com/
+
+**/

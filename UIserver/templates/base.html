@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     {% block head %}{%endblock%}
 </head>
-<body class="bg-dark">
+<body class="bg-dark d-flex flex-column min-vh-100">
     <!-- popup container: this is shown over the entire page-->
     <div id="popup" onclick="close_popup(event)">
         <div id="popup_container" onclick="close_popup(event)">
@@ -40,7 +40,7 @@
     <header>
         <div class="navbar navbar-primary bg-primary">
             <div class="container d-flex justify-content-between">
-                <div class="navbar-brand d-flex text-dark">
+                <div class="navbar-brand d-flex text-dark clickable rounded hover-light p-2 hover-zoom">
                     <div onclick="home()"><span class="h1">Sandypi</span></div>
                 </div>
                 <div class="d-flex align-item-center">
@@ -48,13 +48,13 @@
                     <div class="align-item-center">
                         <button 
                             type="submit" 
-                            class="dark_button"
+                            class="btn-dark"
                             onclick="location.href = '/manual_control';">
                                 Manual control
                         </button>
                         <button 
                             type="submit" 
-                            class="dark_button" 
+                            class="btn-dark" 
                             onclick="location.href = '/settings';">
                                 Settings
                         </button>
@@ -64,7 +64,7 @@
         </div>
     </header>
 
-    <main role="main" class="text-primary">
+    <main role="main" class="text-primary flex-grow-1">
         <div class="container">
             {% block body %}{%endblock%}
         </div>

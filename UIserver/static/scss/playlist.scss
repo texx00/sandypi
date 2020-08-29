@@ -1,39 +1,12 @@
-#name_bar *{
-    display:inline-block;
-    margin-bottom:50px;
-}
+@import "_colors";
 
-#playlist_right_container{
-    margin-top: 20px;
-    float: right;
-}
-
-#playlist_name{
-    margin-left:3px;
-    padding: 5px;
-    border-radius: 5px;
-    transition:0.15s;
-}
 #playlist_name:hover, #playlist_name:focus{
     cursor: pointer;
-    background-color: var(--color-medium);
-    color: var(--color-darkest)
+    background-color: $primary;
+    color: $dark;
 }
 
-#drawings_ul{
-    padding: 0px;
-}
-
-#drawings_ul li{
-    cursor: pointer;
-}
-
-.playlist_drawing_preview{
-    width:90%;
-    max-width: 230px;
-}
-
-.remove_drawing{
+.btn-cross{
     position: absolute;
     top: 0px;
     right: 0px;
@@ -53,14 +26,6 @@
 .sortable_ghost {
     opacity: 0.2;
 }
-.sortable_chosen div.remove_drawing{
+.sortable_chosen div.btn-cross{
     display: none;
-}
-
-.playlist_options{
-    margin-bottom:40px;
-}
-
-.playlist_options button{
-    width: 200px;
 }

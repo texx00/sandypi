@@ -8,27 +8,26 @@
 
 {%block body%}
 <div>
-    <div id="drawings">
-        <h1 style="display:inline-block">Your drawings</h1>
-        <button style="float:right; margin-top: 1.4em;" class="button" onclick="show_dropzone()">+ Upload drawing</button>
+    <div class="section-header">
+        <h2 class="d-inline-block">Your drawings</h2>
+        <button class="float-right" onclick="show_dropzone()">+ Upload drawing</button>
     </div>
-    <div class="c4_grid_container">
+    <div class="row">
         {%block grid_element%}{%endblock%}
     </div>
-    <div>
-        <form action="/drawings" method="get" class="redirect_form">
-            <button type="submit" class="redirect_button">More drawings</button>
+    <div class="text-center">
+        <form action="/drawings" method="get">
+            <button type="submit">More drawings</button>
         </form>
     </div>
 </div>
 <div>
-    <div id="playlists">
-        <h1 style="display:inline-block">Your playlists</h1>
-        <button style="float:right; margin-top: 1.4em;" class="button" onclick="create_new_playlist()">+ Create new playlist</button>
+    <div class="section-header">
+        <h2 class="d-inline-block">Your playlists</h2>
+        <button class="float-right" class="button" onclick="create_new_playlist()">+ Create new playlist</button>
     </div>
-    <div class="c4_grid_container">
+    <div class="row mb-5">
         {%block playlist_grid_element%}{%endblock%}
     </div>
-    <div id="spacer"></div>
 </div>
 {%endblock%}

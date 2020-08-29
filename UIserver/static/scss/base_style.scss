@@ -1,12 +1,10 @@
+@import "_colors";
 
-/* color palette: https://www.color-hex.com/color-palette/23053 */
-$primary: #29b474;
-$light: #35ea97;
-$dark: #333333;
-$secondary: #aaaaaa;
-$white: #ffffff;
-$light_alpha: #aaaaaa77;
+@import "../js/node_modules/bootstrap/scss/bootstrap";
 
+.bg-light-alpha{
+    background-color: $light_alpha;
+}
 
 a, a:visited {
     text-decoration: none;
@@ -20,17 +18,23 @@ a:hover{
 button{
     @extend .btn;
     @extend .m-1;
+    background-color: $primary;
+    color: $dark;
 }
 
-button:hover{
-    background-color: $light;
-    transition: 0.15s;
-    color: $dark
-}
-
-.dark_button{
+.btn-dark{
+    @extend .btn-dark;
     background-color: $dark;
-    color: $light;
+    color: $primary;
+}
+
+.section-header{
+    @extend .border-bottom;
+    @extend .border-light;
+    @extend .align-item-center !optional;
+    @extend .mt-4;
+    @extend .mb-3;
+    @extend .pb-2;
 }
 
 .data{
@@ -41,35 +45,40 @@ button:hover{
     cursor: pointer;
 }
 
-/* --- GRID --- */
-.c2_grid_container{    
-    width: 100%;
-    display: grid;
-    grid-template-columns: auto auto;
-    grid-gap:20px;
-    list-style-type: none;
-}
-.c3_grid_container{    
-    width: 100%;
-    display: grid;
-    grid-template-columns: auto auto auto;
-    grid-gap:20px;
-    list-style-type: none;
-}
-.c4_grid_container{   
-    width: 100%; 
-    display: grid;
-    grid-template-columns: auto auto auto auto;
-    grid-gap:20px;
-    list-style-type: none;
+/* HOVERS */
+
+.hover-light:hover{
+    background-color: $light;
+    transition: 0.15s;
 }
 
-.grid_element{
-    width: 100%;
-    position:relative;
-    display: block;
+button:hover, .btn-dark:hover{
+    background-color: $light;
+    transition: 0.15s;
+    color: $white;
 }
 
+.hover-zoom{
+    &:hover{
+        transform: scale(1.05);
+    }
+    transition: all ease-in-out 0.15s;
+}
+
+/* Bootstrap overrides */
+.card{
+    @extend .card;
+    border: 0px;
+}
+
+/* special styles */
+.fade-top{
+    margin-bottom: -1px;
+    background-image: linear-gradient(transparent, $primary);
+}
+
+
+/* others */
 #nav_bot_status{
     vertical-align: middle;
     margin-right:40px;
@@ -147,4 +156,4 @@ button:hover{
 }
 
 
-@import "../js/node_modules/bootstrap/scss/bootstrap";
+@import "playlist";
