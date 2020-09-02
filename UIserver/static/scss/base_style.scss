@@ -2,6 +2,12 @@
 
 @import "../js/node_modules/bootstrap/scss/bootstrap";
 
+
+/** ----------------------------------------------------- **/
+/** ------------------  Custom styles  ------------------ **/
+/** ----------------------------------------------------- **/
+
+
 .bg-light-alpha{
     background-color: $light_alpha;
 }
@@ -156,4 +162,7 @@ button:hover, .btn-dark:hover{
 }
 
 
-@import "playlist";
+/** SECTION SPECIFIC STYLES **/
+
+
+@import "_playlist";

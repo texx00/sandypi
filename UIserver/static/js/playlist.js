@@ -12,7 +12,7 @@ function document_ready() {
             chosenClass: "sortable_chosen",             // dragged object style class
             filter: ".btn-cross",                  // filter the mouse event: on the elements with this class it will not activate the sortable class but will launch onclick events
             onStart: function (evt){                    // when starts to drag it removes the "delete element" button and disable it until the object is released
-                element = $("div.btn-cross")
+                element = $(".btn-cross")
                 element.css("opacity", "0");
                 element.css("visibility", "hidden");
                 show_delete = false;
@@ -21,19 +21,19 @@ function document_ready() {
                 show_delete = true;
             },
             onUpdate: function (evt) {                  // when the list is resorted set the flag to save before exit
-            must_save = true;
+                must_save = true;
         },});
     
     // hover callbacks for grid elements to show the "delete drawing" button
     // TODO fix the cross: after introducing bootstrap is not showing up anymore
-    $("li.show-cross").hover(function(){
+    $("div.show-cross").hover(function(){
             if(show_delete){
-                var element = $(this).children("div.div.btn-cross");
+                var element = $(this).children(".btn-cross");
                 element.css("opacity", "1");
                 element.css("visibility", "visible");
             }
         }, function(){
-            var element = $(this).children("div.div.btn-cross");
+            var element = $(this).children(".btn-cross");
             element.css("opacity", "0");
             element.css("visibility", "hidden");
     });
