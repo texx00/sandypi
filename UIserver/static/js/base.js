@@ -30,11 +30,11 @@ $( document ).ready(function() {
 
 // TODO show a list of messages instead of only the most recent one. The older of the list must expire after some seconds
 function show_message(message){
-    console.log("M> "+message)
-    $("#message_container_text").html(message);
-    $("#message_container").css("visibility", "visible");
-    $("#message_container").css("opacity", "1");
-    setTimeout(close_message, 3000)
+    console.log("M> "+message);
+    let toast = '<div class="toast" data-autohide="true", data-delay="3000"  role="status" aria-live="polite" aria-atomic="true"><div class="toast-body"><div class="row"><div class="col pr-0 align-self-center"><span>'+message+'</span></div><div class="col-sm-auto align-self-center"><button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close"><span aria-hidden="true">&times;</span></button></div></div></div>';
+    let element = $(toast);
+    $("#toasts_container").append(element);
+    element.toast("show")    
 }
 
 // --- Navbar functions ---

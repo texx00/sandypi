@@ -4,7 +4,6 @@
     <title>{% block title %}{%endblock%}</title>
     <!--TODO insert the font on a local path to make the app independent from internet-->
     <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet'>
-    <link rel="stylesheet" href="{{url_for('static', filename='js/node_modules/bootstrap/dist/css/bootstrap.min.css')}}" />
     <link rel="stylesheet" href="{{url_for('static', filename='css/base_style.css')}}">
     
     <script src="{{url_for('static', filename='js/node_modules/dropzone/dist/dropzone.js')}}"></script>
@@ -26,13 +25,6 @@
                     <button id="dialog_undo" onclick="undo()" class="dialog_button dark_button">Undo</button>
                     <button id="dialog_confirm" onclick="" class="dialog_button dark_button">Confirm</button>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="message_container">
-        <div class="wi">
-            <div id="message_container_text">
             </div>
         </div>
     </div>
@@ -65,7 +57,7 @@
     </header>
 
     <main role="main" class="text-primary flex-grow-1">
-        <div class="container pt-2">
+        <div class="container pt-2 zindex-background">
             {% block body %}{%endblock%}
         </div>
     </main>
@@ -82,6 +74,9 @@
             </div>
         </div>
     </footer>
-
+    <div class="position-fixed fixed-bottom w-100">
+        <div id="toasts_container" aria-live="polite" aria-atomic="true" class="position-relative float-right min-vh-20 p-4">
+        </div>
+    </div>
 </body>
 </html>
