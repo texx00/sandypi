@@ -31,7 +31,20 @@ $( document ).ready(function() {
 // shows a toast message to the user
 function show_toast(message){
     console.log("M> "+message);
-    let toast = '<div class="toast m-3" data-autohide="true", data-delay="3000"  role="status" aria-live="polite" aria-atomic="true"><div class="toast-body"><div class="row"><div class="col pr-0 align-self-center"><span>'+message+'</span></div><div class="col-sm-auto align-self-center"><button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close"><span aria-hidden="true">&times;</span></button></div></div></div>';
+    let toast = '\
+        <div class="toast m-3" data-autohide="true", data-delay="3000"  role="status" aria-live="polite" aria-atomic="true">\
+            <div class="toast-body">\
+                <div class="row">\
+                    <div class="col pr-0 align-self-center">\
+                        <span>'+message+'</span>\
+                    </div>\
+                <div class="col-sm-auto align-self-center">\
+                    <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">\
+                        <span aria-hidden="true">&times;</span>\
+                    </button>\
+                </div>\
+            </div>\
+        </div>';
     let element = $(toast);
     $("#toasts_container").append(element);
     element.toast("show")    
@@ -45,23 +58,3 @@ function home(){
 function show_queue(){
     window.location=location.protocol + '//' + location.host + "/queue"
 }
-
-// --- Message functions ---
-function close_message(){
-    $("#message_toast").css("visibility", "hidden");
-    $("#message_toast").css("opacity", "0");
-}
-
-// --- Popup functions ---
-function close_popup(event){
-    
-    if (event.target != event.currentTarget)
-        return;
-    close_popup_noevent();
-}
-
-function close_popup_noevent(){
-    $("#popup").css("display", "none");
-}
-
-function dummy(){}

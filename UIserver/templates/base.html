@@ -17,14 +17,9 @@
 </head>
 <body class="bg-dark d-flex flex-column min-vh-100">
     <!-- popup container: this is shown over the entire page-->
-    <div id="popup" onclick="close_popup(event)">
-        <div id="popup_container" onclick="close_popup(event)">
-            <div id="popup_div" class="dialog" onclick="dummy()">
-                <div id="dialog_text" class="dialog_text">Are you sure?</div>
-                <div class="dialog_buttons">
-                    <button id="dialog_undo" onclick="undo()" class="dialog_button dark_button">Undo</button>
-                    <button id="dialog_confirm" onclick="" class="dialog_button dark_button">Confirm</button>
-                </div>
+    <div class="modal fade bd-example-modal-lg" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div id="modal_container" class="modal-content">
             </div>
         </div>
     </div>

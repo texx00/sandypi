@@ -1,0 +1,28 @@
+/* Dropzone defaults */
+.no-clickable {
+  pointer-events: none; }
+
+.dz-preview {
+  display: none; }
+
+.animated-background {
+  border: 3px dashed #333333;
+  border-radius: 5px;
+  animation: pulse 1.5s infinite;
+  animation-direction: alternate; }
+
+.animated-background:hover, #upload_dropzone:hover > .animated-background {
+  animation: pulse-hover 0.7s infinite;
+  animation-direction: alternate; }
+
+@keyframes pulse {
+  0% {
+    background-color: #ffffff; }
+  100% {
+    background-color: #aaaaaa; } }
+
+@keyframes pulse-hover {
+  0% {
+    background-color: #ffffff; }
+  100% {
+    background-color: #35ea97; } }
