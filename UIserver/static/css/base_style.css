@@ -7232,6 +7232,11 @@ button:hover, .btn-dark:hover {
   margin-bottom: -1px;
   background-image: linear-gradient(transparent, #29b474); }
 
+.toast_container_position {
+  position: fixed;
+  right: 0px;
+  bottom: 0px; }
+
 /* others */
 #nav_bot_status {
   vertical-align: middle;

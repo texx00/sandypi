@@ -83,6 +83,12 @@ button:hover, .btn-dark:hover{
     background-image: linear-gradient(transparent, $primary);
 }
 
+.toast_container_position{
+    position: fixed;
+    right: 0px;
+    bottom: 0px;
+}
+
 /* others */
 #nav_bot_status{
     vertical-align: middle;

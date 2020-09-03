@@ -5,8 +5,8 @@ import pickle
 import datetime
 from utils import settings_utils
 
-def show_message_on_UI(message):
-    socketio.emit("message_container", message)
+def show_toast_on_UI(message):
+    socketio.emit("message_toast", message)
 
 @socketio.on('connect')
 def on_connect():
@@ -70,7 +70,7 @@ def start_playlist(code):
 @socketio.on("save_settings")
 def save_settings(data, is_connect):
     settings_utils.save_settings(data)
-    show_message_on_UI("Settings saved")
+    show_toast_on_UI("Settings saved")
     if is_connect:
         app.logger.info("Connecting device")
         socketio.emit("connect_to_device")
@@ -91,7 +91,7 @@ def on_serial_list(slist):
 @socketio.on('drawing_ended')
 def on_drawing_ended():
     app.logger.info("B> Drawing ended")
-    show_message_on_UI("Drawing ended")
+    show_toast_on_UI("Drawing ended")
     nav_drawing_request()
     app.qmanager.set_is_drawing(False)
     app.qmanager.start_next()
@@ -99,7 +99,7 @@ def on_drawing_ended():
 @socketio.on('drawing_started')
 def on_drawing_started(code):
     app.logger.info("B> Drawing started")
-    show_message_on_UI("Drawing started")
+    show_toast_on_UI("Drawing started")
     app.qmanager.set_code(code)
     nav_drawing_request()
 
@@ -111,7 +111,7 @@ def on_feeder_status(status):
 
 @socketio.on("message_to_frontend")
 def message_to_frontend(message):
-    show_message_on_UI(message)
+    show_toast_on_UI(message)
 
 @socketio.on("message_from_device")
 def message_from_device(message):

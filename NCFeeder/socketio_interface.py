@@ -6,7 +6,7 @@ import pickle
 
 sio = socketio.Client()
 
-def show_message_on_UI(message):
+def show_toast_on_UI(message):
     sio.emit("message_to_frontend", message)
 
 class FeederEvents(FeederEventHandler):
@@ -69,12 +69,12 @@ class SocketInterface():
     def connect_to_device():
         sio.feeder.connect()
         if sio.feeder.serial.is_connected():
-            show_message_on_UI("Connection to device successful")
+            show_toast_on_UI("Connection to device successful")
         else:
-            show_message_on_UI("Device not connected. Opening a fake serial port.")
+            show_toast_on_UI("Device not connected. Opening a fake serial port.")
 
     @sio.on('gcode_command')
     def send_gcode_command(command):
         print("Received command: " + command)
         sio.feeder.send_gcode_command(command)
-        show_message_on_UI("Command executed")
+        show_toast_on_UI("Command executed")
