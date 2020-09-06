@@ -1,0 +1,179 @@
+@import "_colors";
+
+@import "../js/node_modules/bootstrap/scss/bootstrap";
+
+
+/** ----------------------------------------------------- **/
+/** ------------------  Custom styles  ------------------ **/
+/** ----------------------------------------------------- **/
+
+
+.bg-light-alpha{
+    background-color: $light_alpha;
+}
+
+a, a:visited {
+    text-decoration: none;
+    font-weight: 700;
+    color: $dark;
+}
+a:hover{
+    text-decoration: underline;
+}
+
+button{
+    @extend .btn;
+    @extend .m-1;
+    background-color: $primary;
+    color: $dark;
+}
+
+.btn-dark{
+    @extend .btn-dark;
+    background-color: $dark;
+    color: $primary;
+}
+
+.section-header{
+    @extend .border-bottom;
+    @extend .border-light;
+    @extend .align-item-center !optional;
+    @extend .mt-4;
+    @extend .mb-3;
+    @extend .pb-2;
+}
+
+.center{
+    @extend .d-flex;
+    @extend .text-center;
+    @extend .justify-content-center;
+}
+
+.data{
+    display: none;
+}
+
+.clickable{
+    cursor: pointer;
+}
+
+/* HOVERS */
+
+.hover-light:hover{
+    background-color: $light;
+    transition: 0.15s;
+}
+
+button:hover, .btn-dark:hover{
+    background-color: $light;
+    transition: 0.15s;
+    color: $white;
+}
+
+.hover-zoom{
+    &:hover{
+        transform: scale(1.05);
+    }
+    transition: all ease-in-out 0.15s;
+}
+
+/* Bootstrap overrides */
+.card{
+    @extend .card;
+    border: 0px;
+}
+
+/* special styles */
+.fade-top{
+    margin-bottom: -1px;
+    background-image: linear-gradient(transparent, $primary);
+}
+
+.toast_container_position{
+    position: fixed;
+    right: 0px;
+    bottom: 0px;
+}
+
+/* others */
+#nav_bot_status{
+    vertical-align: middle;
+    margin-right:40px;
+    display: inline-block;
+    cursor: pointer;
+    visibility: visible;
+    opacity: 1;
+    transition: visibility 0.3s linear, opacity 0.3s linear;
+}
+#nav_bot_status div{
+    border-radius: 5px;
+    padding:8px;
+    background-color: $light;
+    text-align: center;
+}
+#nav_status_preview_img{
+    vertical-align: middle;
+    width:40px;
+}
+#nav_status_preview_name{
+    font-size: medium;
+    height: 100%;
+    margin-left:10px;
+    margin-right:10px;
+}
+#nav_status_preview_name b{
+    font-weight: 600;
+}
+
+/* --- POPUP --- */
+#popup{
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    background-color: $light_alpha;
+    color: $light;
+    display: none;
+    text-align: center;
+}
+
+#popup_container{
+    font-size: x-large;
+    position: absolute;
+    top:200px;
+    left:25%;
+    width:50%;
+    min-height:60%;
+}
+#popup_div{
+    padding-left:10px;
+    padding-right:10px;
+    background-color: $primary;
+}
+
+/* Dialog windows setup */
+.dialog{
+    color: $dark;
+    border-radius: 5px;
+    padding-top:40px;
+    padding-bottom:40px;
+    position: absolute;
+    width:70%;
+    left:15%;
+}
+.dialog_text{
+    margin-bottom:15px;
+}
+.dialog_button{
+    display: inline-block;
+    width: 40%;
+}
+.dialog_buttons{
+    margin-top:10px;
+}
+
+
+/** SECTION SPECIFIC STYLES **/
+
+
+@import "_playlist";

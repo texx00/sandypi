@@ -1,7 +1,7 @@
 {%extends "base.html"%}
 {%block head%}
-<link rel="stylesheet" href="{{url_for('static', filename='style/management.css')}}">
-<script src="{{url_for('static', filename='js/management.js')}}"></script>
+<link rel="stylesheet" href="{{url_for('static', filename='css/file_upload.css')}}">
+<script src="{{url_for('static', filename='js/file_upload.js')}}"></script>
 <script src="{{url_for('static', filename='js/queue.js')}}"></script>
 {%endblock%}
 {%block title%}
@@ -9,6 +9,7 @@ Drawing queue
 {%endblock%}
 {%block body%}
 <div>
+    <!-- TODO move this page to the manual control page -->
     <h1>Queue</h1>
     <div>
         <h2>Now drawing: {{item.name}}</h2>

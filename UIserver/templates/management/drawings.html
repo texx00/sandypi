@@ -2,8 +2,8 @@
 
 {%block title%}Drawings{% endblock %}
 {%block head%}
-<link rel="stylesheet" href="{{url_for('static', filename='style/management.css')}}">
-<script src="{{url_for('static', filename='js/management.js')}}"></script>
+<link rel="stylesheet" href="{{url_for('static', filename='css/file_upload.css')}}">
+<script src="{{url_for('static', filename='js/file_upload.js')}}"></script>
 {%endblock%}
 
 {%block popup%}
@@ -22,27 +22,28 @@
 {%block body%}
 <div>
     <!--TODO add a drop down menu to filter by date, name, etc...-->
-    <div id="drawings">
-        <h1 style="display:inline-block">Your drawings</h1>
-        <button style="float:right; margin-top: 1.4em;" class="button" onclick="show_dropzone()">+ Upload drawing</button>
+    <!--TODO load file as scrolling instead of having multiple pages -->
+    <div class="section-header">
+        <h1 class="d-inline-block">Your drawings</h1>
+        <button class="float-right" class="button" onclick="show_dropzone()">+ Upload drawing</button>
     </div>
-    <div class="c4_grid_container">
+    <div class="row">
         {%block grid_element%}{%endblock%}
     </div>
-    <div class="pages">
+    <div class="text-center m-3">
         {%if not pages['prev'] == 0%}
-        <form action="/drawings/{{pages['prev']}}" method="get" class="redirect_form pages_component">
-            <button type="submit" class="redirect_button">Previous page</button>
+        <form action="/drawings/{{pages['prev']}}" method="get" class="d-inline-block">
+            <button type="submit">Previous page</button>
         </form>
         {%endif%}
         {%if pages['next'] <= pages['total']%}
-        <form action="/drawings/{{pages['next']}}" method="get" class="redirect_form pages_component">
-            <button type="submit" class="redirect_button">Next page</button>
+        <form action="/drawings/{{pages['next']}}" method="get" class="d-inline-block">
+            <button type="submit">Next page</button>
         </form>
         {%endif%}
     </div>
-    <div class="pages">
-        <div id="page_num" class="pages_component">Page {{pages['this']}}/{{pages['total']}} - {{pages['limit']}} of {{pages['drawings']}} total drawings</div>
+    <div class="text-center m-3 mb-5">
+        <div id="page_num" class="d-inline-block">Page {{pages['this']}}/{{pages['total']}} - {{pages['limit']}} of {{pages['drawings']}} total drawings</div>
     </div>
 </div>
 {%endblock%}

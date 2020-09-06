@@ -3,55 +3,54 @@
 
 {%block title%}Settings{% endblock %}
 {%block head%}
-<link rel="stylesheet" href="{{url_for('static', filename='style/settings.css')}}">
+<link rel="stylesheet" href="{{url_for('static', filename='css/settings.css')}}">
 <script src="{{url_for('static', filename='js/settings.js')}}"></script>
 {%endblock%}
 
 {%block body%}
 <div>
-    <h1>Settings</h1>
-    <div>
-        <h2>Device settings</h2>
-        <h3>Serial port settings</h3>
-        <div class="c3_grid_container settings_group">
-            <div class="grid_element">
-                <span>Port number</span>
-                <select id="serial_ports">
-                    <!--Filled at runtime with js with the data coming from the feeder-->
-                </select>
-            </div>
-            <div class="grid_element">
-                <span>Baudrate</span>
-                <div id="saved_port" class="data">{{settings['serial']['port']}}</div>
-                <select id="serial_baud">
-                    {%for item in serial["baudrates"]%}
-                    <option {% if settings['serial']['baud']==item %} selected="selected" {%endif%}value={{item}}>{{item}}</option>
-                    {%endfor%}
-                </select>
-            </div>
-            <div class="grid_element">
-                <button onclick="save(true)">Connect</button>
-            </div>
+    <h1 class="section-header">Settings</h1>
+    <h2 class="p-relative d-block section-header">Device settings</h2>
+    <h3 class="p-relative d-block">Serial port settings</h3>
+    <div class="row">
+        <div class="col">
+            <span>Port number</span>
+            <select id="serial_ports">
+                <!--Filled at runtime with js with the data coming from the feeder-->
+            </select>
         </div>
+        <div class="col">
+            <span>Baudrate</span>
+            <div id="saved_port" class="data">{{settings['serial']['port']}}</div>
+            <select id="serial_baud">
+                {%for item in serial["baudrates"]%}
+                <option {% if settings['serial']['baud']==item %} selected="selected" {%endif%}value={{item}}>{{item}}</option>
+                {%endfor%}
+            </select>
+        </div>
+        <div class="col">
+            <button onclick="save(true)">Connect</button>
+        </div>
+    </div>
         <h3>Scripts</h3>
-        <div class="settings_group c3_grid_container">
-            <div class="grid_element">
+        <div class="row">
+            <div class="col">
                 <div>
                     On connection:
                 </div>
-                <textarea id="script_connection">{{settings['scripts']['connection']}}</textarea>
+                <textarea class="w-100 m-1" id="script_connection">{{settings['scripts']['connection']}}</textarea>
             </div>
-            <div class="grid_element">
+            <div class="col">
                 <div>
                     Before new drawing:
                 </div>
-                <textarea id="script_before">{{settings['scripts']['before']}}</textarea>
+                <textarea class="w-100 m-1" id="script_before">{{settings['scripts']['before']}}</textarea>
             </div>
-            <div class="grid_element">
+            <div class="col">
                 <div>
                     After drawing:
                 </div>
-                <textarea id="script_after">{{settings['scripts']['after']}}</textarea>
+                <textarea class="w-100 m-1" id="script_after">{{settings['scripts']['after']}}</textarea>
             </div>
         </div>
     </div>

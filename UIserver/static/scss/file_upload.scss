@@ -1,0 +1,41 @@
+@import '_colors';
+/* Dropzone defaults */
+
+.no-clickable{
+    pointer-events: none;
+}
+
+.dz-preview{
+    display:none;
+}
+
+.animated-background{
+    border: 3px dashed $dark;
+    border-radius: 5px;
+    animation: pulse 1.5s infinite;
+    animation-direction: alternate;
+}
+
+.animated-background:hover, #upload_dropzone:hover > .animated-background{
+    animation: pulse-hover 0.7s infinite;
+    animation-direction: alternate;
+}
+
+@keyframes pulse {
+    0% {
+        background-color: $white;
+    }
+    100% {
+        background-color: $secondary;
+    }
+}
+
+@keyframes pulse-hover {
+    0% {
+        background-color: $white;
+    }
+    100% {
+        background-color: $light;
+    }
+}
+

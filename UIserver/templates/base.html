@@ -4,71 +4,75 @@
     <title>{% block title %}{%endblock%}</title>
     <!--TODO insert the font on a local path to make the app independent from internet-->
     <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet'>
-    <link rel="stylesheet" href="{{url_for('static', filename='style/base_style.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/base_style.css')}}">
     
-    <script src="{{url_for('static', filename='js/node_modules/dropzone/dist/dropzone.js')}}"></script>
-    <script src="{{url_for('static', filename='js/node_modules/jQuery/dist/jquery.js')}}"></script>
-    <script src="{{url_for('static', filename='js/node_modules/sortablejs/Sortable.js')}}"></script>
+    <script src="{{url_for('static', filename='js/node_modules/dropzone/dist/min/dropzone.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/node_modules/jQuery/dist/jquery.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/node_modules/sortablejs/Sortable.min.js')}}"></script>
     <script src="{{url_for('static', filename='js/node_modules/socket.io-client/dist/socket.io.js')}}"></script>
+    
     <script src="{{url_for('static', filename='js/base.js')}}"></script>
+    <script src="{{url_for('static', filename='js/node_modules/bootstrap/dist/js/bootstrap.min.js')}}"></script>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     {% block head %}{%endblock%}
 </head>
-<body>
+<body class="bg-dark d-flex flex-column min-vh-100">
     <!-- popup container: this is shown over the entire page-->
-    <div id="popup" onclick="close_popup(event)">
-        <div id="popup_container" onclick="close_popup(event)">
-            <div id="popup_div" class="dialog" onclick="dummy()">
-                <div id="dialog_text" class="dialog_text">Are you sure?</div>
-                <div class="dialog_buttons">
-                    <button id="dialog_undo" onclick="undo()" class="dialog_button dark_button">Undo</button>
-                    <button id="dialog_confirm" onclick="" class="dialog_button dark_button">Confirm</button>
+    <div class="modal fade bd-example-modal-lg" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div id="modal_container" class="modal-content">
+            </div>
+        </div>
+    </div>
+
+    <header>
+        <div class="navbar navbar-primary bg-primary">
+            <div class="container d-flex justify-content-between">
+                <div class="navbar-brand d-flex text-dark clickable rounded hover-light p-2 hover-zoom">
+                    <div onclick="home()"><span class="h1">Sandypi</span></div>
+                </div>
+                <div class="d-flex align-item-center">
+                    <div id="nav_bot_status"></div><!-- will be filled by js if the bot is doing a drawing-->
+                    <div class="align-item-center">
+                        <button 
+                            type="submit" 
+                            class="btn-dark"
+                            onclick="location.href = '/manual_control';">
+                                Manual control
+                        </button>
+                        <button 
+                            type="submit" 
+                            class="btn-dark" 
+                            onclick="location.href = '/settings';">
+                                Settings
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </header>
 
-    <div id="message_container">
-        <div class="wi">
-            <div id="message_container_text">
-            </div>
+    <main role="main" class="text-primary flex-grow-1">
+        <div class="container pt-2 zindex-background">
+            {% block body %}{%endblock%}
         </div>
-    </div>
+    </main>
 
-    <nav>
-        <div class=wi>
-            <div id=logo>
-                <div style="display: inline-block;vertical-align: center;" onclick="home()"><span>Sandypi</span></div>
-            </div>
-            <div id="nav_right_container">
-                <div id="nav_bot_status"></div><!-- will be filled by js if the bot is doing a drawing-->
-                <form method=post action="/manual_control">
-                    <button type="submit" class="dark_button" >Manual control</button>
-                </form>
-                <form method=post action="/settings">
-                    <button type="submit" class="dark_button" >Settings</button>
-                </form>
-            </div>
-        </div>
-    </nav>
-
-    <div class=wi>
-        {% block body %}{%endblock%}
-    </div>
-
-    <div class="footer_spacer"></div>
-    <footer>
-        <div class=wi>
-            <div style="position: relative;">
-                <div style="display: inline-block;">
+    <footer class="text-muted bg-primary p-2">
+        <div class="container">
+            <div class="text-dark">
+                <span>
                     Copyright &#169; 2020
-                </div>
-                <div style="display: inline-block; position: absolute; right: 0px;">
+                </span>
+                <div class="float-right">
                     For more detail visit the project homepage on <a href="https://github.com/texx00/sandypi" target="_blank">GitHub</a>
                 </div>
             </div>
         </div>
     </footer>
-
+    <div class="toast_container_position">
+        <div id="toasts_container" aria-live="polite" aria-atomic="true" class="position-relative float-right min-vh-20">
+        </div>
+    </div>
 </body>
 </html>
