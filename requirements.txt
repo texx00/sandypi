@@ -3,13 +3,17 @@ chardet==3.0.4
 click==7.1.2
 ecdsa==0.15
 Flask==1.1.2
+Flask-Minify==0.27
 Flask-SocketIO==4.3.0
 Flask-SQLAlchemy==2.4.2
 future==0.18.2
+htmlmin==0.1.12
 idna==2.9
 iso8601==0.1.12
 itsdangerous==1.1.0
 Jinja2==2.11.2
+jsmin==2.2.2
+lesscpy==0.14.0
 libsass==0.20.1
 MarkupSafe==1.1.1
 pid==3.0.3
@@ -29,7 +33,8 @@ serial==0.0.97
 setuptools==47.1.1
 six==1.15.0
 SQLAlchemy==1.3.17
--e git+https://github.com/texx00/sandypi.git@b311cf81b5b5221a12cc6c29225ca0cb6bcb7968#egg=UIserver
+-e git+https://github.com/texx00/sandypi.git@f24652ce98cf2b274d8144bcfcbc435e9cb212c8#egg=UIserver
 urllib3==1.25.9
 webassets==2.0
 Werkzeug==1.0.1
+xxhash==2.0.0
