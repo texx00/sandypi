@@ -4890,7 +4890,7 @@ button.bg-dark:focus {
 .d-table-cell {
   display: table-cell !important; }
 
-.d-flex {
+.d-flex, .center {
   display: flex !important; }
 
 .d-inline-flex {
@@ -5072,7 +5072,7 @@ button.bg-dark:focus {
 .justify-content-end {
   justify-content: flex-end !important; }
 
-.justify-content-center {
+.justify-content-center, .center {
   justify-content: center !important; }
 
 .justify-content-between {
@@ -6974,7 +6974,7 @@ button.bg-dark:focus {
 .text-right {
   text-align: right !important; }
 
-.text-center {
+.text-center, .center {
   text-align: center !important; }
 
 @media (min-width: 576px) {

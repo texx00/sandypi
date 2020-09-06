@@ -10,7 +10,7 @@ function document_ready() {
         {   animation:150,                              // animation when something is dragged
             ghostClass: "sortable_ghost",               // ghost object style class
             chosenClass: "sortable_chosen",             // dragged object style class
-            filter: ".btn-cross",                  // filter the mouse event: on the elements with this class it will not activate the sortable class but will launch onclick events
+            filter: ".btn-cross",                       // filter the mouse event: on the elements with this class it will not activate the sortable class but will launch onclick events
             onStart: function (evt){                    // when starts to drag it removes the "delete element" button and disable it until the object is released
                 element = $(".btn-cross")
                 element.css("opacity", "0");
@@ -25,7 +25,6 @@ function document_ready() {
         },});
     
     // hover callbacks for grid elements to show the "delete drawing" button
-    // TODO fix the cross: after introducing bootstrap is not showing up anymore
     $("div.show-cross").hover(function(){
             if(show_delete){
                 var element = $(this).children(".btn-cross");
@@ -69,10 +68,18 @@ function save(){
 
 function delete_playlist(code){
     console.log("Delete file");
-    $("#dialog_text").html("Are you sure you want to delete this playlist?");
-    $("#dialog_confirm").off("click");
-    $("#dialog_confirm").click(function(){confirm_delete(code)});
-    $("#popup").css("display", "inline-block");
+    $("#modal_container").html('\
+        <div class="center p-5">\
+            Are you sure you want to delete this playlist?\
+        </div>\
+        <div class="modal-footer">\
+            <div class="text-center w-100 m-0">\
+                <button type="button" class="btn btn-primary m-0" data-dismiss="modal">No</button>\
+                <button type="button" class="btn btn-primary m-0" onclick=confirm_delete('+code+')>Yes</button>\
+            </div>\
+        </div>\
+    ');
+    $('.modal').modal('show');
 }
 
 function confirm_delete(code){

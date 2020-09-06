@@ -43,6 +43,12 @@ button{
     @extend .pb-2;
 }
 
+.center{
+    @extend .d-flex;
+    @extend .text-center;
+    @extend .justify-content-center;
+}
+
 .data{
     display: none;
 }

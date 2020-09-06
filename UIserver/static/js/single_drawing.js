@@ -1,9 +1,18 @@
 function drawnow(code, is_drawing){
     if(is_drawing == 'True'){
-        $("#dialog_text").html("Are you sure? </br>A drawing is already on the go");
-        $("#dialog_confirm").off("click");
-        $("#dialog_confirm").click(function(){drawnow(code, "False");});
-        $("#popup").css("display", "inline-block");
+        $("#modal_container").html('\
+            <div class="center p-5">\
+                Do you really want to start this drawing now? </br>\
+                Another drawing is already on the go\
+            </div>\
+            <div class="modal-footer">\
+                <div class="text-center w-100 m-0">\
+                    <button type="button" class="btn btn-primary m-0" data-dismiss="modal">No</button>\
+                    <button type="button" class="btn btn-primary m-0" onclick="drawnow('+code+', \"False\")">Yes</button>\
+                </div>\
+            </div>\
+        ');
+        $('.modal').modal('show');
     }else{
         console.log("Sending start command");
         socket.emit('message', {data: 'start:'+code});
@@ -23,28 +32,46 @@ function undo(){
     close_popup_noevent();
 }
 
-function delete_drawing(code){
-    console.log("Delete file");
-    $("#dialog_text").html("Are you sure you want to delete this drawing?");
-    $("#dialog_confirm").off("click");
-    $("#dialog_confirm").click(function(){confirm_delete(code)});
-    $("#popup").css("display", "inline-block");
+function delete_drawing_modal(code){
+    $("#modal_container").html('\
+        <div class="center p-5">\
+            Are you sure you want to delete this drawing?\
+        </div>\
+        <div class="modal-footer">\
+            <div class="text-center w-100 m-0">\
+                <button type="button" class="btn btn-primary m-0" data-dismiss="modal">No</button>\
+                <button type="button" class="btn btn-primary m-0" onclick="delete_drawing('+code+')">Yes</button>\
+            </div>\
+        </div>\
+    ');
+    $('.modal').modal('show');
 }
 
-function confirm_delete(code){
+function delete_drawing(code){
     window.location=location.protocol + '//' + location.host + "/delete/drawing/" + code
 }
 
-//TODO I don't like the styling limitation of the select option. May change to a different thing in the future
 function add_to_playlist(drawing_code){
-    $("#dialog_text").html("Select the playlist<br>"+$("#playlists_select").html());
-    $("#dialog_confirm").off("click");
-    $("#dialog_confirm").click(function(){
-        pl_code = $("#playlists_dropdown").val();
-        console.log("Pl_code: "+pl_code)
-        socket.emit("add_to_playlist", drawing_code=drawing_code, playlist_code=pl_code);
-        console.log("Added to playlist "+pl_code);
-        close_popup_noevent();
-    });
-    $("#popup").css("display", "inline-block");
+    pl_code = $("#playlists_dropdown").val();
+    socket.emit("add_to_playlist", drawing_code=drawing_code, playlist_code=pl_code);
+    $('.modal').modal('hide');
+    show_toast("Drawing added");
+}
+
+function add_to_playlist_modal(drawing_code){
+    $("#modal_container").html('\
+        <div class="center p-5">\
+            <div class="w-75">\
+                <div class="row mb-2"><span class="w-100 text-center">Select the playlist<span></div>\
+                <div class="row w-100 m-0">'+$("#playlists_select").html()+'</div>\
+            </div>\
+        </div>\
+        <div class="modal-footer">\
+            <div class="text-center w-100 m-0">\
+                <button type="button" class="btn btn-primary m-0" data-dismiss="modal">Undo</button>\
+                <button type="button" class="btn btn-primary m-0" onclick="add_to_playlist('+drawing_code+')">Add</button>\
+            </div>\
+        </div>\
+    ');
+    $('.modal').modal('show');
 }
