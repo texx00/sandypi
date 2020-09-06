@@ -61,9 +61,10 @@ function save(){
         drawings: []
     }
     $("#drawings_ul").children('li').each(function( index ) {
-            save_data['drawings'].push($(this).children('div.data').html());
+            save_data['drawings'].push($(this).find('div.data').html());
         });
     socket.emit('playlist_save', {data: save_data});
+    show_toast("Playlist saved");
 }
 
 function delete_playlist(code){

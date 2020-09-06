@@ -14,6 +14,7 @@ import platform
 from time import sleep
 from UIserver.bot_interface.queue_manager import QueueManager
 import sass
+from flask_minify import minify
 
 app = Flask(__name__, template_folder='templates')
 app.logger.setLevel(logging.INFO)
@@ -27,8 +28,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+file_path
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# TODO add css and js minifiers and compile only on changes
-sass.compile(dirname=(os.path.abspath(os.getcwd())+"/UIServer/static/scss", os.path.abspath(os.getcwd())+"/UIServer/static/css"))
+# scss compiler (already minified)
+sass.compile(dirname=(os.path.abspath(os.getcwd())+"/UIServer/static/scss", os.path.abspath(os.getcwd())+"/UIServer/static/css"), output_style='compressed')
+# js and html minifier (on request)
+minify(app=app, html=True, js=False)
 
 app.qmanager = QueueManager(app, socketio)
 
