@@ -26,7 +26,14 @@ class Playlists(db.Model):
     active = db.Column(db.Boolean, default=False)                               # If the software should use this playlist or not when checking for rules
 
 
-# this method should be used only during the installation or the update of the server and only by the setup.py script
-# is using flask-migrate to update the db structure
+# The app is using Flask-migrate
+# When a modification is applied to the db structure (new table, table structure modification like column name change, new column etc.)
+# must use the "flask db migrate" command (with the active environment and after setting the environmental FLASK_APP=UIserver variable)
+# The command will create a new version for the db and will apply the changes automatically when the latest version of the repo is loaded
+# with "flask db upgrade" (this command is called automatically during "python setup.py install/develop")
+# When testing may get multiple revisions for the same commit. Can merge multiple revisions with "flask db merge <revisions>"
+
+
+# --- This method should be used only during the installation or the update of the server and only by the setup.py script ---
 def DBUpdate():
     os.system("flask db upgrade")
