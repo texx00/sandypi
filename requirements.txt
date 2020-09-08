@@ -1,8 +1,10 @@
+alembic==1.4.2
 certifi==2020.4.5.1
 chardet==3.0.4
 click==7.1.2
 ecdsa==0.15
 Flask==1.1.2
+Flask-Migrate==2.5.3
 Flask-Minify==0.27
 Flask-SocketIO==4.3.0
 Flask-SQLAlchemy==2.4.2
@@ -15,16 +17,19 @@ Jinja2==2.11.2
 jsmin==2.2.2
 lesscpy==0.14.0
 libsass==0.20.1
+Mako==1.1.3
 MarkupSafe==1.1.1
 pid==3.0.3
 Pillow==7.1.2
-pip==20.2.2
+pip==20.2.3
 ply==3.11
 psutil==5.7.0
 pyaes==1.6.1
 pyScss==1.3.7
 pyserial==3.4
+python-dateutil==2.8.1
 python-dotenv==0.13.0
+python-editor==1.0.4
 python-engineio==3.13.0
 python-socketio==4.6.0
 PyYAML==5.3.1
@@ -33,7 +38,7 @@ serial==0.0.97
 setuptools==47.1.1
 six==1.15.0
 SQLAlchemy==1.3.17
--e git+https://github.com/texx00/sandypi.git@f24652ce98cf2b274d8144bcfcbc435e9cb212c8#egg=UIserver
+-e git+https://github.com/texx00/sandypi.git@30de1e8afbea2f40066e79bf48784f0011f274a9#egg=UIserver
 urllib3==1.25.9
 webassets==2.0
 Werkzeug==1.0.1
