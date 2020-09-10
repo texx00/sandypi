@@ -120,25 +120,11 @@ python3 -m pip install pyserial
 
 If you find any bug or problem please open an issue in the dedicated page.
 
-## Visual Studio Code debugging setup
+# Development and testing
 
-The project is developed with VS Code. It is possible to setup the debugger to run the flask server with some simple steps:
-* create a launch.json file
-* add a configuration
-* select the Flask launch type
-* insert "UIServer" as the application name
-
-If you want to test the connection also from other devices it is necessary to add the following line in the "args" section of the launch.json configuration:
-`"--host=0.0.0.0"`
-Without this additional option the server will be available only on the running device at `127.0.0.1:5000`
-
-To see the NCFeeder terminal windows it is possible to add an environment variable: `"SHOW_FEEDER_TERMINAL" : "true"`
-If the variable is added to the 'launch.json' configuration file (in the 'env' section) it will run only for the selected configuration
-
-While coding the NCFeeder part, it is possible to set the `RUN_FEEDER_MANUALLY : "true"` environment variable. This variable stops the server to start automatically the NCFeeder process. The process can be started manually with: ```(env)> python NCFeeder/run.py```
-
-**IMPORTANT NOTE:** vscode debugger do not send the SIGKILL and for this reason the feeder process is not stopped automatically. To kill the subprocess it is necessary to use CTRL+C in the terminal window. When working on the NCFeeder it may be easier to let the server alive and refresh just the feeder script by setting the RUN_FEEDER_MANUALLY variable.
-
+Any help in the app development is accepted.
+Also testing the software counts! If you find any bug or you have any idea just check if an issue is already open for that topic or open it yourself.
+For the coding, debugging and so on check the [wiki](https://github.com/texx00/sandypi/wiki)
 
 # Current status
 
