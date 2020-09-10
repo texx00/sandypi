@@ -1,13 +1,13 @@
-echo 'Installing python dependencies'
+echo '----- Installing python dependencies -----'
 python3 -m pip install -r requirements.txt
 
-echo '\n\nInstalling js dependencies'
+echo '\n\n----- Installing js dependencies -----'
 sudo npm install -g yarn
 sudo yarn --cwd ./UIserver/static/js
 
-echo '\n\nUpgrading database'
+echo '\n\n----- Upgrading database -----'
 export FLASK_APP=UIserver
 flask db upgrade
 
-echo '\n\nInstalling app'
+echo '\n\n----- Installing app -----'
 sudo python3 setup.py install

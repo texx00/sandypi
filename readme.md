@@ -43,7 +43,7 @@ Open the sandypi folder, create a new virtual environment and activate it:
 
 ```
 $> cd sandypi
-$> virtualenv env
+$> python -m venv env
 $> \env\Scripts\activate.bat
 
 (env)$> 
@@ -51,10 +51,8 @@ $> \env\Scripts\activate.bat
 
 Now you can install SandyPi:
 ```
-(env)$> python -m pip install -r "requirements.txt"
-(env)$> python setup.py install
+(env)$> install.bat
 ```
-
 
 ## Raspbian OS
 
@@ -87,7 +85,7 @@ $> source env/bin/activate
 
 Now you can install SandyPi:
 ```
-(env)$> sudo sh install.sh
+(env)$> sh install.sh
 ```
 
 ## Running the server
