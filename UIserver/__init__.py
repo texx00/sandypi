@@ -1,6 +1,7 @@
 from flask import Flask, redirect, url_for
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 import os
 import sys
 import logging
@@ -27,9 +28,10 @@ file_path = os.path.abspath(os.getcwd())+"\database.db"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+file_path
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 # scss compiler (already minified)
-sass.compile(dirname=(os.path.abspath(os.getcwd())+"/UIServer/static/scss", os.path.abspath(os.getcwd())+"/UIServer/static/css"), output_style='compressed')
+sass.compile(dirname=(os.path.abspath(os.getcwd())+"/UIserver/static/scss", os.path.abspath(os.getcwd())+"/UIserver/static/css"), output_style='compressed')
 # js and html minifier (on request)
 minify(app=app, html=True, js=False)
 
@@ -44,8 +46,11 @@ import UIserver.bot_interface.socketio_callbacks
 
 # Wait until the server is ready
 def wait_server_ready():
-    while urllib.request.urlopen("http://localhost:5000").getcode() != 200:
-        pass
+    try:
+        while urllib.request.urlopen("http://localhost:5000").getcode() != 200:
+            pass
+    except Exception as e:
+        print("__init.py__ error: "+str(e))
     start_feeder_process()
 
 # run the waiting function in a thread

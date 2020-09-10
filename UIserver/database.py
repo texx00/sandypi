@@ -1,5 +1,6 @@
 from UIserver import db
 from datetime import datetime
+import os
 
 # Gcode files table
 # Stores information about the single drawing
@@ -25,21 +26,9 @@ class Playlists(db.Model):
     active = db.Column(db.Boolean, default=False)                               # If the software should use this playlist or not when checking for rules
 
 
-# this method should be used only during the installation or the update of the server and only by the setup.py script
-def DBUpdate():
-    print("Dropping database")
-    db.drop_all()       # in a future version, instead of deleting the tables everytime it will update the structure of the tables with new columns or what it is necessary
-    print("Creating database")
-    db.create_all()
-
-# The tables are created from a Model
-# If this file is run as the main file it will create the necessary tables
-# For development purposes, when significant changes are done to the db structure it is possible to drop all the tables and create them again like this:
-# enter the python command line
-#  > from UIserver import db
-#  > db.drop_all()  -> will delete all the tables with their content
-#  > db.create_all()  -> recreate all the tables with all the modifications
-
-# this script should be run during the installation to create the database (just the first time)
-if __name__ == "__main__":
-    DBUpdate()
+# The app is using Flask-migrate
+# When a modification is applied to the db structure (new table, table structure modification like column name change, new column etc.)
+# must use the "flask db migrate" command (with the active environment and after setting the environmental FLASK_APP=UIserver variable)
+# The command will create a new version for the db and will apply the changes automatically when the latest version of the repo is loaded
+# with "flask db upgrade" (this command is called automatically during "python setup.py install/develop")
+# When testing may get multiple revisions for the same commit. Can merge multiple revisions with "flask db merge <revisions>"
