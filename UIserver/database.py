@@ -32,8 +32,3 @@ class Playlists(db.Model):
 # The command will create a new version for the db and will apply the changes automatically when the latest version of the repo is loaded
 # with "flask db upgrade" (this command is called automatically during "python setup.py install/develop")
 # When testing may get multiple revisions for the same commit. Can merge multiple revisions with "flask db merge <revisions>"
-
-
-# --- This method should be used only during the installation or the update of the server and only by the setup.py script ---
-def DBUpdate():
-    os.system("flask db upgrade")

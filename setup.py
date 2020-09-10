@@ -7,13 +7,6 @@ import platform
 import os
 
 
-# Loads the necessary js libraries with bower
-def update_yarn_dependencies():
-    #os.system("cd UIServer/static/js")             # change dir to static/js
-    os.system("echo 'Installing js dependencies")
-    os.system("npm install -g yarn")                # install bower
-    os.system("yarn --cwd ./UIserver/static/js")    # install dependencies using yarn
-
 class PostDevelopCommand(develop):
     def run(self):
         develop.run(self)
