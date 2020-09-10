@@ -31,7 +31,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 # scss compiler (already minified)
-sass.compile(dirname=(os.path.abspath(os.getcwd())+"/UIServer/static/scss", os.path.abspath(os.getcwd())+"/UIServer/static/css"), output_style='compressed')
+sass.compile(dirname=(os.path.abspath(os.getcwd())+"/UIserver/static/scss", os.path.abspath(os.getcwd())+"/UIserver/static/css"), output_style='compressed')
 # js and html minifier (on request)
 minify(app=app, html=True, js=False)
 

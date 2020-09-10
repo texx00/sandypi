@@ -87,28 +87,22 @@ $> source env/bin/activate
 
 Now you can install SandyPi:
 ```
-(env)$> sudo python3 -m pip install -r requirements.txt
-(env)$> sudo python3 setup.py install
-```
-
-It may happen that the flask_socketio and flask_sqlalchemy are not installed correctly. Try to install them manually with:
-```
-(env)$> sudo pip3 install flask_socketio flask_sqlalchemy
-(env)$> sudo python3 setup.py install
+(env)$> sudo sh install.sh
 ```
 
 ## Running the server
 
 To run the server use:
-`$> python3 start.py` on Windows or `$> python3 start.py` on Raspberry
+`$> python start.py`
+When running on linux use `python3` instead of `python`.
 
 The script will activate the environment automatically.
 
 The service can be stopped with `CTRL+C`
 
-It is possible to set the server to start automatically when the device turns on with `$> python3 start.py -a=on`
+It is possible to set the server to start automatically when the device turns on with `$> python start.py -a=on`
 
-To stop the server starting automatically use `$> python3 start.py -a=off`
+To stop the server starting automatically use `$> python start.py -a=off`
 
 
 ## Web interface
