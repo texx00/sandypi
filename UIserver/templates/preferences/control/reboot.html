@@ -1,0 +1,44 @@
+{%extends "base.html"%}
+
+{%block head%}
+<style>
+    .special-hide{
+        display: none !important;
+    }
+</style>
+<script>
+
+    function document_ready(){
+        function check_server_available(){
+            console.log("Checking server on")
+            $.ajax(
+                {
+                    type: "get",
+                    url: '/',
+                    cache: false,
+                    statusCode: {
+                                    404: function (){
+                                        setTimeout(function() { check_server_available; }, 1000);
+                                        console.log("Server not running")
+                                    },
+                                    200: function (){
+                                        window.location.href = '/';
+                                    }
+                                },
+                    async: true
+            });
+        };
+        
+        setTimeout( check_server_available, 10000);
+    }
+</script>
+{%endblock%}
+
+{%block title%}System reboot{%endblock%}
+{%block body%}
+<div class="row w-100 h-100 d-flex">
+    <div class="col-sm-12 h-100 w-100 center">
+        <div class="d-flex align-self-center"><h1>Rebooting... If the page does not reload automatically click <a href="/" class="text-light">here</a>.</h1></div>
+    </div>
+</div>
+{%endblock%}

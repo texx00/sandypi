@@ -41,6 +41,13 @@ import UIserver.database
 import UIserver.views.drawings_management, UIserver.views.settings
 import UIserver.bot_interface.socketio_callbacks
 
+# Inject globals context before creating templates
+@app.context_processor
+def inject_global_context():
+    return dict(
+        is_windows=platform.system() == "Windows",
+        is_linux=platform.system() != "Windows"
+    )
 
 # This section starts the feeder or restarts it if already running when the server is restarted
 

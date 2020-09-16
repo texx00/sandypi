@@ -47,7 +47,6 @@ $(window).bind('beforeunload', function(){
 });
 
 function updateTitle(){
-    console.log("Prova")
     must_save = true
     text = $("#playlist_name").html().replace(/(?:&nbsp;|<br>)/g,'');
     $(document).prop('title', text);
