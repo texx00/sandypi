@@ -18,3 +18,5 @@ UIserver/saves/saved_settings.json
 
 start.bat
 start.sh
+
+.env

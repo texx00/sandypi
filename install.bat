@@ -6,7 +6,6 @@ call npm install -g yarn
 call yarn --cwd ./UIserver/static/js
 
 echo '----- Upgrading database -----'
-SET FLASK_APP=UIserver
 flask db upgrade
 
 echo '----- Installing app -----'

@@ -13,8 +13,6 @@ def generate_start_file(folder):
             "{}\n".format(folder[0:2]),                 # change drive
             "cd {}\n".format(folder),                   # go to the correct folder
             "call .\\env\\Scripts\\activate.bat\n",     # activate the environment
-            "SET FLASK_APP=UIserver\n",                 # set environmental variables
-            "SET FLASK_ENV=development\n", 
             "echo Server starting\n",                     # echo that the server is starting
             "flask run --host=0.0.0.0\n"]               # start the server
 
@@ -26,8 +24,6 @@ def generate_start_file(folder):
             "#!/usr/bin/env bash\n",                      
             "cd {}\n".format(folder),                   # go to the correct folder
             "source env/bin/activate\n",                # activate the environment
-            "export FLASK_APP=UIserver\n",              # set environmental variables
-            "export FLASK_ENV=development\n", 
             "chmod 777 .\n",                            # changing permission to the files otherwise cannot use the db
             "touch 'server.started'\n",                 # create a file to say that the server has been started
             "flask run --host=0.0.0.0\n"]               # start the server
