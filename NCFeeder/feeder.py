@@ -12,8 +12,8 @@ import atexit
 import traceback
 import json
 from utils import settings_utils
-from queue import Queue
-from collections import OrderedDict
+from collections import OrderedDict, deque
+from copy import deepcopy
 
 class FeederEventHandler():
     # called when the drawing is finished
@@ -47,11 +47,11 @@ class Feeder():
         self.line_number = 0
 
         # buffer control attrs
-        self.command_buffer = Queue()
+        self.command_buffer = deque()
         self.command_buffer_mutex = Lock()
-        self.command_buffer_max_length = 5
-        self.command_buffer_history = LimitedSizeDict(size_limit = 20)    # keep saved the last n commands
-        self._timeout = BufferTimeout(40, self._on_timeout)
+        self.command_buffer_max_length = 20
+        self.command_buffer_history = LimitedSizeDict(size_limit = self.command_buffer_max_length+20)    # keep saved the last n commands
+        self._timeout = BufferTimeout(20, self._on_timeout)
         self._timeout.start()
     
     def close(self):
@@ -179,46 +179,73 @@ class Feeder():
             if not line is None:
                 line = line.decode("utf-8") 
                 self.parse_device_line(line)
+
+    def _update_timeout(self):
+        self._timeout_last_line = self.line_number
+        self._timeout.update()
+    # TODO could ask the board the position to update the buffer status on timeout
     
     def _on_timeout(self):
         #print("!Buffer timeout!")
-        if(self.command_buffer_mutex.locked()):
-            self.command_buffer.get()
-            self.command_buffer_mutex.release()
+        if(self.command_buffer_mutex.locked and self.line_number == self._timeout_last_line):
+            self._ack_received()    # force an ack 
         else:
-            self._timeout.update()
+            self._update_timeout()
+
+    def _ack_received(self, safe_line_number=None):
+        if safe_line_number is None:
+            if self.command_buffer_mutex.locked():
+                self.command_buffer.popleft()
+                self.command_buffer_mutex.release()
+            else: 
+                with self.command_buffer_mutex:
+                    if len(self.command_buffer) != 0:
+                        self.command_buffer.popleft()
+        else:
+            if not self.command_buffer_mutex.locked():
+                self.command_buffer_mutex.acquire()
+            while True:
+                # Remove the numbers lower than the specified safe_line_number (used in the resend line command: lines older than the one required can be deleted safely)
+                line_number = self.command_buffer.popleft()
+                if line_number >= safe_line_number:
+                    self.command_buffer.appendleft(line_number)
+                    break
+            self.command_buffer_mutex.release()
 
     # parse a line coming from the device
     def parse_device_line(self, line):
+        print_line = True
         if ("start" in line):
             self.wait_device_ready()
             self.reset_line_number()
 
         elif "ok" in line:  # when an "ack" is received free one place in the buffer
-            if self.command_buffer_mutex.locked():
-                self.command_buffer.get()
-                self.command_buffer_mutex.release()
-            else:
-                with self.command_buffer_mutex: 
-                    self.command_buffer.get()
-            if not self._print_ack:  # if should not print the "ack" exit the parser to avoid printing the line
-                return
+            self._ack_received()
+            if not self._print_ack:
+                print_line = False
 
         elif "Resend: " in line:
+            line_found = False
             line_number = int(line.replace("Resend: ", "").replace("\r\n", ""))
-            for n, c in self.command_buffer_history.items():
+            items = deepcopy(self.command_buffer_history)
+            for n, c in items.items():
                 n_line_number = int(n.strip("N"))
-                if n_line_number == line_number:
+                if n_line_number >= line_number:
+                    line_found = True
+                    # All the lines after the required one must be resent. Cannot break the loop now
                     with self.mutex:
                         self.serial.send(c)
-                        no_line = False
-                        break
+            self._ack_received(safe_line_number=line_number-1)
+            if not line_found: 
+                print("No line was found for the number required. Restart numeration.")
+                self.send_gcode_command("M110 N1")
+                print_line = False
 
-        # TODO put something to fix the issue if the number cannot be found or if the command keep getting refused 
-
-        # TODO add "command not found" case
+        elif "echo:Unknown command:" in line:
+            print("Error: command not found. Can also be a communication error")
         
-        print(line) 
+        if print_line:
+            print(line) 
         self.handler.on_message_received(line)
 
     def get_status(self):
@@ -227,7 +254,7 @@ class Feeder():
 
     def send_gcode_command(self, command):
         # clean the command a little
-        command = command.replace("\n", "").replace("\r", "")
+        command = command.replace("\n", "").replace("\r", "").upper()
         if command == " " or command == "":
             return
         
@@ -238,6 +265,7 @@ class Feeder():
             for c in cs:
                 if c[0]=="N":
                     self.line_number = int(c[1:]) -1
+                    self.command_buffer.clear()
 
         # check if the command is in the "BUFFERED_COMMANDS" list and stops if the buffer is full
         if any(code in command for code in BUFFERED_COMMANDS):
@@ -249,6 +277,7 @@ class Feeder():
         with self.mutex:
             self.line_number = self.line_number + 1
             line = "N{} {} ".format(self.line_number, command)
+
             # calculate checksum according to the wiki
             cs = 0
             for i in line:
@@ -256,15 +285,16 @@ class Feeder():
             cs &= 0xff
             
             line +="*{}\n".format(cs)   # add checksum to the line
-            self.serial.send(line)      # send line
-
-            self._timeout.update()      # update the timeout because a new command has been sent
 
             # store the line in the buffer
-            self.command_buffer.put(line)
+            self.command_buffer.append(self.line_number)
             self.command_buffer_history["N{}".format(self.line_number)] = line
 
-            if(self.command_buffer.qsize()>=self.command_buffer_max_length):
+            self.serial.send(line)  # send line
+
+            self._update_timeout()      # update the timeout because a new command has been sent
+
+            if(len(self.command_buffer)>=self.command_buffer_max_length):
                 self.command_buffer_mutex.acquire()     # if the buffer is full acquire the lock so that cannot send new lines until the reception of an ack. Notice that this will stop only buffered commands. The other commands will be sent anyway
 
     # Send a multiline script
