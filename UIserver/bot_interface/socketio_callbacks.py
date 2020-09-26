@@ -10,6 +10,7 @@ def show_toast_on_UI(message):
 
 @socketio.on('connect')
 def on_connect():
+    nav_drawing_request()
     #app.logger.info("Connected")
     pass
 
