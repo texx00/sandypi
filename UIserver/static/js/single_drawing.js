@@ -8,7 +8,7 @@ function drawnow(code, is_drawing){
             <div class="modal-footer">\
                 <div class="text-center w-100 m-0">\
                     <button type="button" class="btn btn-primary m-0" data-dismiss="modal">No</button>\
-                    <button type="button" class="btn btn-primary m-0" onclick="drawnow('+code+', \"False\")">Yes</button>\
+                    <button type="button" class="btn btn-primary m-0" onclick="drawnow('+code+', \'False\')">Yes</button>\
                 </div>\
             </div>\
         ');

@@ -19,7 +19,7 @@
 <h1 class="section-header text-center">{{item.filename}}</h1>
 <!--TODO add commands to modify the drawing-->
 <div class="text-center mt-1 mb-3">
-    <button class="d-inline-block" onclick="drawnow('{{item.id}}', '{{isdrawing}}')">Draw it now</button>
+    <button class="d-inline-block" onclick='drawnow("{{item.id}}", "{{isdrawing}}")'>Draw it now</button>
     <button class= "{% if not isdrawing %} d-none {%else%} d-inline-block {%endif%}" onclick="queue('{{item.id}}')">Add to queue</button>
     <button class="d-inline-block" onclick="delete_drawing_modal('{{item.id}}')">Delete this drawing</button>
     <button class="d-inline-block" onclick="add_to_playlist_modal('{{item.id}}')">Add to a playlist</button>
