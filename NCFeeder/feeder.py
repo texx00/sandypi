@@ -34,12 +34,13 @@ BUFFERED_COMMANDS = ("G0", "G00", "G1", "G01", "G2", "G02", "G3", "G03", "G28")
 class Feeder():
     def __init__(self, handler = None, **kargvs):
         self._print_ack = kargvs.pop("print_ack", False)
+        self._print_ack = True
         self._isrunning = False
         self._ispaused = False
         self.total_commands_number = None
         self.command_number = 0
         self._th = None
-        self.mutex = Lock()
+        self.serial_mutex = Lock()
         if handler is None:
             self.handler = FeederEventHandler()
         else: self.handler = handler
@@ -48,9 +49,11 @@ class Feeder():
 
         # buffer control attrs
         self.command_buffer = deque()
-        self.command_buffer_mutex = Lock()
-        self.command_buffer_max_length = 20
-        self.command_buffer_history = LimitedSizeDict(size_limit = self.command_buffer_max_length+20)    # keep saved the last n commands
+        self.command_buffer_mutex = Lock()  # mutex used to modify the command buffer
+        self.command_send_mutex = Lock()    # mutex used to pause the thread when the buffer is full
+        self.command_buffer_max_length = 4
+        self.command_buffer_history = LimitedSizeDict(size_limit = self.command_buffer_max_length+10)    # keep saved the last n commands
+        self.position_request_difference = 10          # every n lines requires the current position with M114
         self._timeout = BufferTimeout(20, self._on_timeout)
         self._timeout.start()
     
@@ -60,7 +63,7 @@ class Feeder():
     def connect(self):
         print("Connecting to serial device...")
         settings = settings_utils.load_settings()
-        with self.mutex:
+        with self.serial_mutex:
             if not self.serial is None:
                 self.serial.close()
             try:
@@ -81,7 +84,7 @@ class Feeder():
         self.send_script(settings['scripts']['connection'])
 
     def wait_device_ready(self):
-        time.sleep(15) # TODO make it better
+        time.sleep(5) # TODO make it better
 
     def set_event_handler(self, handler):
         self.handler = handler
@@ -93,45 +96,47 @@ class Feeder():
         else:
             if self.is_running():
                 self.stop()
-            with self.mutex:
+            with self.serial_mutex:
                 self._th = Thread(target = self._thf, args=(code,), daemon=True)
                 self._isrunning = True
                 self._ispaused = False
                 self._running_code = code
                 self.command_number = 0
+                with self.command_buffer_mutex:
+                    self.command_buffer.clear()
                 self._th.start()
             self.handler.on_drawing_started()
 
     # ask if the feeder is already sending a file
     def is_running(self):
-        with self.mutex:
+        with self.serial_mutex:
             return self._isrunning
 
     # ask if the feeder is paused
     def is_paused(self):
-        with self.mutex:
+        with self.serial_mutex:
             return self._ispaused
 
     # return the code of the drawing on the go
     def get_drawing_code(self):
-        with self.mutex:
+        with self.serial_mutex:
             return self._running_code
     
     # stops the drawing
     def stop(self):
         if(self.is_running()):
-            with self.mutex:
+            with self.serial_mutex:
                 self._isrunning = False
     
     # pause the drawing
     # can resume with "resume()"
     def pause(self):
-        with self.mutex:
+        with self.serial_mutex:
             self._ispaused = True
     
     # resume the drawing (only if used with "pause()" and not "stop()")
     def resume(self):
-        with self.mutex:
+        with self.serial_mutex:
             self._ispaused = False
 
     # thread function
@@ -140,7 +145,7 @@ class Feeder():
         self.send_script(settings['scripts']['before'])
 
         print("Starting new drawing with code {}".format(code))
-        with self.mutex:
+        with self.serial_mutex:
             code = self._running_code
         filename = os.path.join(str(Path(__file__).parent.parent.absolute()), "UIserver/static/Drawings/{0}/{0}.gcode".format(code))
         
@@ -171,46 +176,50 @@ class Feeder():
     # thread that keep reading the serial port
     def _thsr(self):
         while True:
-            with self.mutex:
+            tic = time.time()
+            with self.serial_mutex:
                 try:
                     line = self.serial.readline()
                 except:
                     print("Serial connection lost")
+            #print("Serial read time: {}".format(time.time()-tic))
             if not line is None:
                 line = line.decode("utf-8") 
                 self.parse_device_line(line)
+            time.sleep(0.01)
 
     def _update_timeout(self):
         self._timeout_last_line = self.line_number
         self._timeout.update()
-    # TODO could ask the board the position to update the buffer status on timeout
     
     def _on_timeout(self):
-        #print("!Buffer timeout!")
-        if(self.command_buffer_mutex.locked and self.line_number == self._timeout_last_line):
-            self._ack_received()    # force an ack 
+        if (self.command_buffer_mutex.locked and self.line_number == self._timeout_last_line):
+            print("!Buffer timeout. Try to clean the buffer!")
+            # to clean the buffer try to send an M114 message. In this way will trigger the buffer cleaning mechanism
+            line = self._generate_line("M114")  # may need to send it twice? could also send an older line to trigger the error?
+            with self.serial_mutex:
+                self.serial.send(line)
         else:
             self._update_timeout()
 
     def _ack_received(self, safe_line_number=None):
         if safe_line_number is None:
-            if self.command_buffer_mutex.locked():
-                self.command_buffer.popleft()
-                self.command_buffer_mutex.release()
-            else: 
-                with self.command_buffer_mutex:
-                    if len(self.command_buffer) != 0:
-                        self.command_buffer.popleft()
+            with self.command_buffer_mutex:
+                if len(self.command_buffer) != 0:
+                    self.command_buffer.popleft()
+                    if self.command_send_mutex.locked():
+                        self.command_send_mutex.release()
         else:
-            if not self.command_buffer_mutex.locked():
-                self.command_buffer_mutex.acquire()
             while True:
                 # Remove the numbers lower than the specified safe_line_number (used in the resend line command: lines older than the one required can be deleted safely)
-                line_number = self.command_buffer.popleft()
-                if line_number >= safe_line_number:
-                    self.command_buffer.appendleft(line_number)
-                    break
-            self.command_buffer_mutex.release()
+                with self.command_buffer_mutex:
+                    if len(self.command_buffer) != 0:
+                        line_number = self.command_buffer.popleft()
+                        if line_number > safe_line_number:
+                            self.command_buffer.appendleft(line_number)
+                            break
+                if self.command_send_mutex.locked():
+                    self.command_send_mutex.release()
 
     # parse a line coming from the device
     def parse_device_line(self, line):
@@ -232,8 +241,12 @@ class Feeder():
                 n_line_number = int(n.strip("N"))
                 if n_line_number >= line_number:
                     line_found = True
+                    # checks if the requested line is an M114. In that case do not need to print the error/resend command because its a wanted behaviour
+                    #if line_number == n_line_number and "M114" in c:
+                    #    print_line = False
+
                     # All the lines after the required one must be resent. Cannot break the loop now
-                    with self.mutex:
+                    with self.serial_mutex:
                         self.serial.send(c)
             self._ack_received(safe_line_number=line_number-1)
             if not line_found: 
@@ -249,8 +262,27 @@ class Feeder():
         self.handler.on_message_received(line)
 
     def get_status(self):
-        with self.mutex:
+        with self.serial_mutex:
             return {"is_running":self._isrunning, "progress":[self.command_number, self.total_commands_number], "is_paused":self._ispaused, "is_connected":self.serial.is_connected()}
+
+    def _generate_line(self, command):
+        self.line_number += 1
+        line = "N{} {} ".format(self.line_number, command)
+
+        # calculate checksum according to the wiki
+        cs = 0
+        for i in line:
+            cs = cs ^ ord(i)
+        cs &= 0xff
+        
+        line +="*{}\n".format(cs)   # add checksum to the line
+
+        # store the line in the buffer
+        with self.command_buffer_mutex:
+            self.command_buffer.append(self.line_number)
+            self.command_buffer_history["N{}".format(self.line_number)] = line
+
+        return line
 
     def send_gcode_command(self, command):
         # clean the command a little
@@ -269,33 +301,29 @@ class Feeder():
 
         # check if the command is in the "BUFFERED_COMMANDS" list and stops if the buffer is full
         if any(code in command for code in BUFFERED_COMMANDS):
-            with self.command_buffer_mutex:     # wait until get some "ok" command to remove an element from the buffer
+            with self.command_send_mutex:     # wait until get some "ok" command to remove an element from the buffer
                 pass
 
         # send the command after parsing the content
         # need to use the mutex here because it is changing also the line number
-        with self.mutex:
-            self.line_number = self.line_number + 1
-            line = "N{} {} ".format(self.line_number, command)
+        with self.serial_mutex:
+            # check if needs to send a "M114" command (actual position request) but not in the first lines
+            if (self.line_number % self.position_request_difference) == 0 and self.line_number > 5:
+                #self._generate_line("M114")  # does not send the line to trigger the "resend" event and clean the buffer from messages that are already done
+                pass
 
-            # calculate checksum according to the wiki
-            cs = 0
-            for i in line:
-                cs = cs ^ ord(i)
-            cs &= 0xff
-            
-            line +="*{}\n".format(cs)   # add checksum to the line
+            line = self._generate_line(command)
 
-            # store the line in the buffer
-            self.command_buffer.append(self.line_number)
-            self.command_buffer_history["N{}".format(self.line_number)] = line
+            self.serial.send(line)      # send line
 
-            self.serial.send(line)  # send line
+            # TODO the problem with small geometries may be with the serial port being to slow. Should check it
 
             self._update_timeout()      # update the timeout because a new command has been sent
 
-            if(len(self.command_buffer)>=self.command_buffer_max_length):
-                self.command_buffer_mutex.acquire()     # if the buffer is full acquire the lock so that cannot send new lines until the reception of an ack. Notice that this will stop only buffered commands. The other commands will be sent anyway
+            with self.command_buffer_mutex:
+                if(len(self.command_buffer)>=self.command_buffer_max_length):
+                    self.command_send_mutex.acquire()     # if the buffer is full acquire the lock so that cannot send new lines until the reception of an ack. Notice that this will stop only buffered commands. The other commands will be sent anyway
+        
 
     # Send a multiline script
     def send_script(self, script):
@@ -396,13 +424,13 @@ class BufferTimeout(Thread):
         super(BufferTimeout, self).__init__(group=group, target=target, name=name)
         self.timeout_delta = timeout_delta
         self.callback = function
-        self.mutex = Lock()
+        self.serial_mutex = Lock()
         self.is_running = False
         self.setDaemon(True)
         self.update()
 
     def update(self):
-        with self.mutex:
+        with self.serial_mutex:
             self.timeout_time = time.time() + self.timeout_delta
 
     def stop(self):
@@ -411,12 +439,12 @@ class BufferTimeout(Thread):
     def run(self):
         self.is_running = True
         while self.is_running:
-            with self.mutex:
+            with self.serial_mutex:
                 timeout = self.timeout_time
             current_time = time.time()
             if current_time > timeout:
                 self.callback()
                 self.update()
-                with self.mutex:
+                with self.serial_mutex:
                     timeout = self.timeout_time
             time.sleep(timeout - current_time)
