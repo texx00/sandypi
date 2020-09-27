@@ -51,7 +51,7 @@ class Feeder():
         self.command_buffer = deque()
         self.command_buffer_mutex = Lock()  # mutex used to modify the command buffer
         self.command_send_mutex = Lock()    # mutex used to pause the thread when the buffer is full
-        self.command_buffer_max_length = 4
+        self.command_buffer_max_length = 10
         self.command_buffer_history = LimitedSizeDict(size_limit = self.command_buffer_max_length+10)    # keep saved the last n commands
         self.position_request_difference = 10          # every n lines requires the current position with M114
         self._timeout = BufferTimeout(20, self._on_timeout)
@@ -180,13 +180,12 @@ class Feeder():
             with self.serial_mutex:
                 try:
                     line = self.serial.readline()
-                except:
+                except Exception as e:
+                    print(e)
                     print("Serial connection lost")
             #print("Serial read time: {}".format(time.time()-tic))
             if not line is None:
-                line = line.decode("utf-8") 
                 self.parse_device_line(line)
-            time.sleep(0.01)
 
     def _update_timeout(self):
         self._timeout_last_line = self.line_number
@@ -202,7 +201,7 @@ class Feeder():
         else:
             self._update_timeout()
 
-    def _ack_received(self, safe_line_number=None):
+    def _ack_received(self, safe_line_number=None, append_left_extra=False):
         if safe_line_number is None:
             with self.command_buffer_mutex:
                 if len(self.command_buffer) != 0:
@@ -210,16 +209,18 @@ class Feeder():
                     if self.command_send_mutex.locked():
                         self.command_send_mutex.release()
         else:
-            while True:
-                # Remove the numbers lower than the specified safe_line_number (used in the resend line command: lines older than the one required can be deleted safely)
-                with self.command_buffer_mutex:
+            with self.command_buffer_mutex:   
+                while True:
+                    # Remove the numbers lower than the specified safe_line_number (used in the resend line command: lines older than the one required can be deleted safely)
                     if len(self.command_buffer) != 0:
                         line_number = self.command_buffer.popleft()
                         if line_number > safe_line_number:
                             self.command_buffer.appendleft(line_number)
                             break
-                if self.command_send_mutex.locked():
-                    self.command_send_mutex.release()
+                if append_left_extra:
+                    self.command_buffer.appendleft(safe_line_number-1)
+            if self.command_send_mutex.locked():
+                self.command_send_mutex.release()
 
     # parse a line coming from the device
     def parse_device_line(self, line):
@@ -248,7 +249,9 @@ class Feeder():
                     # All the lines after the required one must be resent. Cannot break the loop now
                     with self.serial_mutex:
                         self.serial.send(c)
-            self._ack_received(safe_line_number=line_number-1)
+                    break
+            self._ack_received(safe_line_number=line_number-1, append_left_extra=True)
+            # the resend command is sending an ack. should add an entry to the buffer to keep the right lenght (because the line has been sent 2 times)
             if not line_found: 
                 print("No line was found for the number required. Restart numeration.")
                 self.send_gcode_command("M110 N1")
@@ -343,6 +346,7 @@ class DeviceSerial():
         self.serialname = serialname
         self.baudrate = baudrate
         self.is_fake = False
+        self._buffer = bytearray()
         self.echo = ""
         try:
             self.serial = serial.Serial()
@@ -394,8 +398,14 @@ class DeviceSerial():
     def readline(self):
         if not self.is_fake:
             if self.serial.is_open:
-                if self.serial.inWaiting():
-                    return self.serial.readline()
+                while self.serial.inWaiting():
+                    # return self.serial.readline()
+                    byte = self.serial.read()
+                    self._buffer.append(int.from_bytes(byte, byteorder="little"))
+                    if byte == b'\n': # 10 => '\n', 13 => '\r'
+                        line = self._buffer.decode(encoding='UTF-8')
+                        self._buffer.clear()
+                        return line
         else:
             if not self.echo == "":
                 echo = "ok"         # sends "ok" as ack otherwise the feeder will stop sending buffered commands
