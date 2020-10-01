@@ -24,8 +24,12 @@ class FeederEventHandler():
     def on_drawing_started(self):
         pass
     
-    # called when the feeder receives a message that must be sent to the frontend
+    # called when the feeder receives a message from the hw that must be sent to the frontend
     def on_message_received(self, line):
+        pass
+
+    # called when a new line is sent through serial (real or fake)
+    def on_new_line(self, line):
         pass
 
 # List of commands that are buffered by the controller
@@ -266,6 +270,8 @@ class Feeder():
 
             if(self.command_buffer.qsize()>=self.command_buffer_max_length):
                 self.command_buffer_mutex.acquire()     # if the buffer is full acquire the lock so that cannot send new lines until the reception of an ack. Notice that this will stop only buffered commands. The other commands will be sent anyway
+            
+            self.handler.on_new_line(line)  # uses the handler callback for the new line
 
     # Send a multiline script
     def send_script(self, script):

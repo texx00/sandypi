@@ -72,6 +72,7 @@ def start_playlist(code):
 def save_settings(data, is_connect):
     settings_utils.save_settings(data)
     show_toast_on_UI("Settings saved")
+    
     if is_connect:
         app.logger.info("Connecting device")
         socketio.emit("connect_to_device")
@@ -117,3 +118,7 @@ def message_to_frontend(message):
 @socketio.on("message_from_device")
 def message_from_device(message):
     socketio.emit("frontend_message_from_device", message)
+
+@socketio.on("path_command")
+def path_command(line):
+    socketio.emit("frontend_path_command", line)

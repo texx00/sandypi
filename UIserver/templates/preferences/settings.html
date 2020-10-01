@@ -3,7 +3,6 @@
 
 {%block title%}Settings{% endblock %}
 {%block head%}
-<link rel="stylesheet" href="{{url_for('static', filename='css/settings.css')}}">
 <script src="{{url_for('static', filename='js/settings.js')}}"></script>
 {%endblock%}
 
@@ -12,7 +11,7 @@
     <h1 class="section-header">Settings</h1>
     <h2 class="p-relative d-block section-header">Device settings</h2>
     <h3 class="p-relative d-block">Serial port settings</h3>
-    <div class="row">
+    <div class="row mb-4">
         <div class="col">
             <span>Port number</span>
             <select id="serial_ports">
@@ -27,13 +26,28 @@
                 <option {% if settings['serial']['baud']==item %} selected="selected" {%endif%}value={{item}}>{{item}}</option>
                 {%endfor%}
             </select>
+            </div>
+            <div class="col">
+                <button onclick="save(true)">Connect</button>
+            </div>
         </div>
-        <div class="col">
-            <button onclick="save(true)">Connect</button>
+        <h3>Dimensions</h3><!-- TODO should add type (rectangular or round/gcode or thr)-->
+        <div class="row mb-4">
+            <div class="col">
+                <div>
+                    <p class="d-block">Width</p>
+                    <input id="device_width" value="{{settings.dimensions.width}}"></input>
+                </div>
+            </div>
+            <div class="col">
+                <div>
+                    <p class="d-block">Height</p>
+                    <input id="device_height" value="{{settings.dimensions.height}}"></input>
+                </div>
+            </div>
         </div>
-    </div>
         <h3>Scripts</h3>
-        <div class="row">
+        <div class="row mb-4">
             <div class="col">
                 <div>
                     On connection:
@@ -57,6 +71,6 @@
     <div class="center_h add_space_before">
         <button id="save_button" onclick="save()">Save settings</button>
     </div>
-    <!-- TODO better management of the settings. should save only the one changed and ask before leaving if at least one was changed (also, add a color change for the settings changed?)-->
+    <!-- TODO better management and layout for the settings. should save only the one changed and ask before leaving if at least one was changed (also, add a color change for the settings changed?)-->
 </div>
 {%endblock%}
