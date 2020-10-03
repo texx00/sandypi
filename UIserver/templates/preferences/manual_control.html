@@ -22,8 +22,8 @@
             <div>
                 <canvas id="path_canvas" class="w-100 border-primary border-1"></canvas>
             </div>
-            <div id="device_width" class="data">{{settings.dimensions.width}}</div>
-            <div id="device_height" class="data">{{settings.dimensions.height}}</div>
+            <div id="device_width" class="data">{{settings.device.width}}</div>
+            <div id="device_height" class="data">{{settings.device.height}}</div>
         </div>
     </div>
     <div class="row">
@@ -32,6 +32,9 @@
             <button class="2-25" onclick="send_command('G28')">Home</button>
 
         </div>
+    </div>
+    <div class="p-5">
+
     </div>
 </div>
 <!-- TODO add button to move it manualy or launch specific gcodes/files (for example to make the referencing or run a cleaning script)-->

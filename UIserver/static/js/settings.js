@@ -20,7 +20,7 @@ function save(connect = false){
             port : $("#serial_ports").val(),
             baud : $("#serial_baud").val()
         },
-        dimensions : {
+        device : {
             width: $("#device_width").val(),
             height : $("#device_height").val()
         },

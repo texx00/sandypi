@@ -36,13 +36,13 @@
             <div class="col">
                 <div>
                     <p class="d-block">Width</p>
-                    <input id="device_width" value="{{settings.dimensions.width}}"></input>
+                    <input id="device_width" value="{{settings.device.width}}"></input>
                 </div>
             </div>
             <div class="col">
                 <div>
                     <p class="d-block">Height</p>
-                    <input id="device_height" value="{{settings.dimensions.height}}"></input>
+                    <input id="device_height" value="{{settings.device.height}}"></input>
                 </div>
             </div>
         </div>
@@ -68,7 +68,7 @@
             </div>
         </div>
     </div>
-    <div class="center_h add_space_before">
+    <div class="center_h add_space_before mb-5">
         <button id="save_button" onclick="save()">Save settings</button>
     </div>
     <!-- TODO better management and layout for the settings. should save only the one changed and ask before leaving if at least one was changed (also, add a color change for the settings changed?)-->

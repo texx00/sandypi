@@ -114,11 +114,32 @@ It may happen that the serial port is not working correctly.
 In this case activate the environment, uninstall the "serial" and the "pyserial" modules and install again the "pyserial":
 ```
 $> source env/bin/activate
-python3 -m pip uninstall serial pyserial
-python3 -m pip install pyserial
+(env) $> python3 -m pip uninstall serial pyserial
+(env) $> python3 -m pip install pyserial
 ```
 
 If you find any bug or problem please open an issue in the dedicated page.
+
+# Updates
+
+To update to the last available version of the software in linux you can run the following commands:
+
+```
+$> source env/bin/activate
+(env) $> git pull
+(env) $> sh install.sh
+```
+
+If you are working on Windows you should use instead:
+
+```
+$> source env/bin/activate
+(env) $> git pull
+(env) $> install.bat
+```
+
+Some browser may cache the scripts. If you get any error try to clean the cache of your browser related to the sandipy site.
+
 
 # Development and testing
 
