@@ -41,6 +41,7 @@ class Feeder():
         self.command_number = 0
         self._th = None
         self.serial_mutex = Lock()
+        self.status_mutex = Lock()
         if handler is None:
             self.handler = FeederEventHandler()
         else: self.handler = handler
@@ -51,7 +52,7 @@ class Feeder():
         self.command_buffer = deque()
         self.command_buffer_mutex = Lock()  # mutex used to modify the command buffer
         self.command_send_mutex = Lock()    # mutex used to pause the thread when the buffer is full
-        self.command_buffer_max_length = 10
+        self.command_buffer_max_length = 8
         self.command_buffer_history = LimitedSizeDict(size_limit = self.command_buffer_max_length+10)    # keep saved the last n commands
         self.position_request_difference = 10          # every n lines requires the current position with M114
         self._timeout = BufferTimeout(20, self._on_timeout)
@@ -84,7 +85,7 @@ class Feeder():
         self.send_script(settings['scripts']['connection'])
 
     def wait_device_ready(self):
-        time.sleep(5) # TODO make it better
+        time.sleep(1) # TODO make it better
 
     def set_event_handler(self, handler):
         self.handler = handler
@@ -96,6 +97,7 @@ class Feeder():
         else:
             if self.is_running():
                 self.stop()
+                time.sleep(5)       # wait a little for the thread to stop
             with self.serial_mutex:
                 self._th = Thread(target = self._thf, args=(code,), daemon=True)
                 self._isrunning = True
@@ -109,34 +111,34 @@ class Feeder():
 
     # ask if the feeder is already sending a file
     def is_running(self):
-        with self.serial_mutex:
+        with self.status_mutex:
             return self._isrunning
 
     # ask if the feeder is paused
     def is_paused(self):
-        with self.serial_mutex:
+        with self.status_mutex:
             return self._ispaused
 
     # return the code of the drawing on the go
     def get_drawing_code(self):
-        with self.serial_mutex:
+        with self.status_mutex:
             return self._running_code
     
     # stops the drawing
     def stop(self):
         if(self.is_running()):
-            with self.serial_mutex:
+            with self.status_mutex:
                 self._isrunning = False
     
     # pause the drawing
     # can resume with "resume()"
     def pause(self):
-        with self.serial_mutex:
+        with self.status_mutex:
             self._ispaused = True
     
     # resume the drawing (only if used with "pause()" and not "stop()")
     def resume(self):
-        with self.serial_mutex:
+        with self.status_mutex:
             self._ispaused = False
 
     # thread function
@@ -176,14 +178,12 @@ class Feeder():
     # thread that keep reading the serial port
     def _thsr(self):
         while True:
-            tic = time.time()
             with self.serial_mutex:
                 try:
                     line = self.serial.readline()
                 except Exception as e:
                     print(e)
                     print("Serial connection lost")
-            #print("Serial read time: {}".format(time.time()-tic))
             if not line is None:
                 self.parse_device_line(line)
 
@@ -206,20 +206,19 @@ class Feeder():
             with self.command_buffer_mutex:
                 if len(self.command_buffer) != 0:
                     self.command_buffer.popleft()
-                    if self.command_send_mutex.locked():
-                        self.command_send_mutex.release()
         else:
             with self.command_buffer_mutex:   
                 while True:
                     # Remove the numbers lower than the specified safe_line_number (used in the resend line command: lines older than the one required can be deleted safely)
                     if len(self.command_buffer) != 0:
                         line_number = self.command_buffer.popleft()
-                        if line_number > safe_line_number:
+                        if line_number >= safe_line_number:
                             self.command_buffer.appendleft(line_number)
                             break
                 if append_left_extra:
                     self.command_buffer.appendleft(safe_line_number-1)
-            if self.command_send_mutex.locked():
+        with self.command_buffer_mutex:
+            if self.command_send_mutex.locked() and len(self.command_buffer) < self.command_buffer_max_length:
                 self.command_send_mutex.release()
 
     # parse a line coming from the device
@@ -319,7 +318,7 @@ class Feeder():
 
             self.serial.send(line)      # send line
 
-            # TODO the problem with small geometries may be with the serial port being to slow. Should check it
+            # TODO the problem with small geometries may be with the serial port being to slow. For long (straight) segments the problem is not evident
 
             self._update_timeout()      # update the timeout because a new command has been sent
 
@@ -398,14 +397,9 @@ class DeviceSerial():
     def readline(self):
         if not self.is_fake:
             if self.serial.is_open:
-                while self.serial.inWaiting():
-                    # return self.serial.readline()
-                    byte = self.serial.read()
-                    self._buffer.append(int.from_bytes(byte, byteorder="little"))
-                    if byte == b'\n': # 10 => '\n', 13 => '\r'
-                        line = self._buffer.decode(encoding='UTF-8')
-                        self._buffer.clear()
-                        return line
+                while c := self.serial.inWaiting():
+                    line = self.serial.readline()
+                    return line.decode(encoding='UTF-8')
         else:
             if not self.echo == "":
                 echo = "ok"         # sends "ok" as ack otherwise the feeder will stop sending buffered commands
@@ -434,27 +428,28 @@ class BufferTimeout(Thread):
         super(BufferTimeout, self).__init__(group=group, target=target, name=name)
         self.timeout_delta = timeout_delta
         self.callback = function
-        self.serial_mutex = Lock()
+        self.mutex = Lock()
         self.is_running = False
         self.setDaemon(True)
         self.update()
 
     def update(self):
-        with self.serial_mutex:
+        with self.mutex:
             self.timeout_time = time.time() + self.timeout_delta
 
     def stop(self):
-        self.is_running = False
+        with self.mutex:
+            self.is_running = False
 
     def run(self):
         self.is_running = True
         while self.is_running:
-            with self.serial_mutex:
+            with self.mutex:
                 timeout = self.timeout_time
             current_time = time.time()
             if current_time > timeout:
                 self.callback()
                 self.update()
-                with self.serial_mutex:
+                with self.mutex:
                     timeout = self.timeout_time
             time.sleep(timeout - current_time)
