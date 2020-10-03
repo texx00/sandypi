@@ -12,16 +12,25 @@
     <div class="row">
         <div class="col pt-2">
             <h3>Gcode command: </h3>
-            <div id="message_from_device" class="bg-secondary border-radius-5"></div>
+            <div id="message_from_device" class="bg-secondary border-radius-5 p-2 text-dark"></div>
             <div>
-                <input id="gcode_command"></input><!-- TODO add input history control with arrows -->
+                <input id="gcode_command"></input>
                 <button id="send_gcode_command" onclick="send_command()">Send command</button>
             </div>
         </div>
+        <div class="col pt-2">
+            <div>
+                <canvas id="path_canvas" class="w-100 border-primary border-1"></canvas>
+            </div>
+            <div id="device_width" class="data">{{settings.dimensions.width}}</div>
+            <div id="device_height" class="data">{{settings.dimensions.height}}</div>
+        </div>
+    </div>
+    <div class="row">
         <div class="col max-width-460-md">
-            <button class="d-block w-100" onclick="send_command('M112')" title="Warning: this button will not stop the device during homing">EMERGENCY STOP</button>
-            <button class="d-block w-100" onclick="send_command('G28')">Home</button>
-            <!-- TODO add "turn off raspberry" here or in the settings? -->
+            <button class="w-25 mr-3" onclick="send_command('M112')" title="Warning: this button will not stop the device during homing">EMERGENCY STOP</button>
+            <button class="2-25" onclick="send_command('G28')">Home</button>
+
         </div>
     </div>
 </div>

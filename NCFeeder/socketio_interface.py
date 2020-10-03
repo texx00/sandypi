@@ -24,6 +24,9 @@ class FeederEvents(FeederEventHandler):
         # Send the line to the server
         sio.emit("message_from_device", line)
 
+    def on_new_line(self, line):
+        # Send the line to the server
+        sio.emit("path_command", line)
 
 class SocketInterface():
 

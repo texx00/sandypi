@@ -16,6 +16,7 @@ from time import sleep
 from UIserver.bot_interface.queue_manager import QueueManager
 import sass
 from flask_minify import minify
+from utils import settings_utils
 
 app = Flask(__name__, template_folder='templates')
 app.logger.setLevel(logging.INFO)
@@ -46,7 +47,8 @@ import UIserver.bot_interface.socketio_callbacks
 def inject_global_context():
     return dict(
         is_windows=platform.system() == "Windows",
-        is_linux=platform.system() != "Windows"
+        is_linux=platform.system() != "Windows",
+        settings=settings_utils.load_settings(),
     )
 
 # This section starts the feeder or restarts it if already running when the server is restarted

@@ -6,7 +6,7 @@ from time import sleep
 import traceback
 import atexit
 
-pidname = "feeder.pid2"
+pidname = "feeder.pid"
 
 try:
     with PidFile(pidname) as p: # check if the process is already running using pid files. If it is already running will restart it
