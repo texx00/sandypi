@@ -32,9 +32,56 @@ $( document ).ready(function() {
         }
     });
 
+    check_software_updates();
+
     socket.emit("request_nav_drawing_status");
     document_ready()    // used by the other script to access the document ready callback without overwriting
 });
+
+
+// cookies functions
+function setCookie(name,value,days) {
+    var expires = "";
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+}
+
+function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+
+function eraseCookie(name) {   
+    setCookie(name, "", -1); 
+}
+
+function check_software_updates(){
+    socket.on("software_updates_response", (response) =>{
+        show_toast(response, 10000);
+    });
+    function send_check(){
+        setCookie("check_update", "", 7);  // the coockie expires after 7 days
+        socket.emit("software_updates_check");
+    }
+    // TODO add a cookie disclaimer?
+    let cookie = document.cookie
+    if (!document.cookie.split(';').some((item) => item.trim().startsWith('check_update='))) {
+        console.log('The cookie "check_update" doesn\'t exists (ES6)')
+        send_check()
+    }else{
+        console.log("The cookie exists")
+    }
+}
 
 // shows a toast message to the user
 function show_toast(message, duration=3000){

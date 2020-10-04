@@ -3,7 +3,7 @@ from flask import render_template
 from UIserver.database import UploadedFiles, Playlists
 import pickle
 import datetime
-from utils import settings_utils
+from utils import settings_utils, software_updates
 
 def show_toast_on_UI(message):
     socketio.emit("message_toast", message)
@@ -25,6 +25,17 @@ def handle_message(message):
         app.qmanager.start_drawing(res[1])
     if res[0]=="queue":
         app.qmanager.queue_drawing(res[1])
+
+# 
+@socketio.on('software_updates_check')
+def handle_software_updates_check():
+    if result := software_updates.compare_local_remote_tags():
+        if result["behind_remote"]:
+            toast = """A new update is available ({0}).<br>
+            Your version is {1}.<br>
+            Check <a href="https://github.com/texx00/sandypi">sandipy</a> github page to update to the latest version.
+            """.format(result["remote_latest"], result["local"])
+            socketio.emit("software_updates_response", toast)
 
 @socketio.on("request_nav_drawing_status")
 def nav_drawing_request():

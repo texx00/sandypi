@@ -409,7 +409,7 @@ class DeviceSerial():
             if not self.echo == "":
                 echo = "ok"         # sends "ok" as ack otherwise the feeder will stop sending buffered commands
                 self.echo = ""
-                return echo.encode()
+                return echo
         return None
 
 class LimitedSizeDict(OrderedDict):

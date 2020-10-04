@@ -122,6 +122,10 @@ If you find any bug or problem please open an issue in the dedicated page.
 
 # Updates
 
+The software will prompt weekly if a new tag version has been added.
+The tagged version should be stable.
+Mid-tags commits may not be stable (for this reason the software will not notify these updates).
+
 To update to the last available version of the software in linux you can run the following commands:
 
 ```
@@ -175,3 +179,6 @@ Todos:
 * [ ] Possibility to modify the settings of the single file and save them in the gcode as comments?
 * [ ] Create a playlist for "cleanup" drawings with some defaults
 * [ ] A lot more stuff... Just ask to know what you can help with
+
+## Versions
+Check the latest version infos [here](docs/versions.md)

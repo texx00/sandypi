@@ -4,8 +4,11 @@ from packaging import version
 # Checks if there is a newer version/tag in the remote repo
 # return a dict with remote and local tags plus a "behind" boolean if the remote version is higher
 # return false if cannot compare tags because of a missing network connection
-def compare_local_remote_tags():
+def compare_local_remote_tags(verbose=False):
     result = {}
+    if not verbose:
+        def print(val):
+            pass
 
     # Requesting remote tags
     try:
@@ -45,6 +48,6 @@ def get_commit_shash():
     return result.decode(encoding="UTF-8").replace('"', '')    
 
 if __name__ == "__main__":
-    print(compare_local_remote_tags())
+    print(compare_local_remote_tags(verbose=True))
 
     print("\n---------------\nShort hash: {}".format(get_commit_shash()))
