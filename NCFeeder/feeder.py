@@ -375,6 +375,8 @@ class DeviceSerial():
         else:
             if self.serial.is_open:
                 try:
+                    while self.readline():
+                        pass
                     self.serial.write(str(obj).encode())
                 except:
                     self.close()
