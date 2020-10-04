@@ -138,8 +138,6 @@ $> source env/bin/activate
 (env) $> install.bat
 ```
 
-Some browser may cache the scripts. If you get any error try to clean the cache of your browser related to the sandipy site.
-
 
 # Development and testing
 

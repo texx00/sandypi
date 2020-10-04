@@ -16,7 +16,7 @@ from time import sleep
 from UIserver.bot_interface.queue_manager import QueueManager
 import sass
 from flask_minify import minify
-from utils import settings_utils
+from utils import settings_utils, software_updates
 
 app = Flask(__name__, template_folder='templates')
 app.logger.setLevel(logging.INFO)
@@ -42,14 +42,33 @@ import UIserver.database
 import UIserver.views.drawings_management, UIserver.views.settings
 import UIserver.bot_interface.socketio_callbacks
 
+# Context pre-processor variables
+# Global template values to be injected before templates creation
+global_context_dict = dict(
+    # System check
+    is_windows = platform.system() == "Windows",
+    is_linux = platform.system() != "Windows",
+    # Loads settings
+    settings = settings_utils.load_settings()
+)
+# Get lates commit short hash to use as a version to refresh cached files
+sw_version = software_updates.get_commit_shash()
+
 # Inject globals context before creating templates
 @app.context_processor
 def inject_global_context():
-    return dict(
-        is_windows=platform.system() == "Windows",
-        is_linux=platform.system() != "Windows",
-        settings=settings_utils.load_settings(),
-    )
+    global_context_dict["settings"] = settings_utils.load_settings()  # loads the latest settings
+    return global_context_dict
+
+@app.context_processor
+def override_url_for():
+    return dict(url_for=versioned_url_for)
+
+# Adds a version number to the static url to update the cached files when a new version of the software is loaded
+def versioned_url_for(endpoint, **values):
+    if endpoint == 'static':
+        values["version"] = sw_version
+    return url_for(endpoint, **values)
 
 # This section starts the feeder or restarts it if already running when the server is restarted
 

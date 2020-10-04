@@ -37,10 +37,10 @@ $( document ).ready(function() {
 });
 
 // shows a toast message to the user
-function show_toast(message){
+function show_toast(message, duration=3000){
     console.log("M> "+message);
     let toast = '\
-        <div class="toast m-3" data-autohide="true", data-delay="3000"  role="status" aria-live="polite" aria-atomic="true">\
+        <div class="toast m-3" data-autohide="true", data-delay="'+duration+'"  role="status" aria-live="polite" aria-atomic="true">\
             <div class="toast-body">\
                 <div class="row">\
                     <div class="col pr-0 align-self-center">\
