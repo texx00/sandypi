@@ -353,9 +353,13 @@ class DeviceSerial():
         self._buffer = bytearray()
         self.echo = ""
         try:
-            self.serial = serial.Serial()
+            args = dict(
+                baudrate = self.baudrate,
+                timeout = 0,
+                write_timeout = 0
+            )
+            self.serial = serial.Serial(**args)
             self.serial.port = self.serialname
-            self.serial.baudrate = self.baudrate
             self.serial.open()
             print("Serial device connected")
         except:
