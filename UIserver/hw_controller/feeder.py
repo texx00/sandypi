@@ -1,19 +1,15 @@
 from threading import Thread, Lock
 import os
-import sys
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
-import glob
 from pathlib import Path
-from UIserver.hw_controller.gcode_rescalers import *
 import time
-import serial.tools.list_ports
-import serial
-import atexit
 import traceback
 import json
-from utils import settings_utils
-from collections import OrderedDict, deque
+from UIserver.utils import settings_utils
+from collections import deque
 from copy import deepcopy
+from UIserver.utils import limited_size_dict, buffered_timeout
+from UIserver.hw_controller.device_serial import DeviceSerial
+from UIserver.hw_controller.gcode_rescalers import *
 
 
 """
@@ -66,12 +62,12 @@ class Feeder():
 
         # buffer control attrs
         self.command_buffer = deque()
-        self.command_buffer_mutex = Lock()  # mutex used to modify the command buffer
-        self.command_send_mutex = Lock()    # mutex used to pause the thread when the buffer is full
+        self.command_buffer_mutex = Lock()              # mutex used to modify the command buffer
+        self.command_send_mutex = Lock()                # mutex used to pause the thread when the buffer is full
         self.command_buffer_max_length = 8
-        self.command_buffer_history = LimitedSizeDict(size_limit = self.command_buffer_max_length+10)    # keep saved the last n commands
-        self.position_request_difference = 10          # every n lines requires the current position with M114
-        self._timeout = BufferTimeout(20, self._on_timeout)
+        self.command_buffer_history = limited_size_dict.LimitedSizeDict(size_limit = self.command_buffer_max_length+10)    # keep saved the last n commands
+        self.position_request_difference = 10           # every n lines requires the current position with M114
+        self._timeout = buffered_timeout.BufferTimeout(20, self._on_timeout)
         self._timeout.start()
     
     def close(self):
@@ -190,8 +186,8 @@ class Feeder():
 
                     self.send_gcode_command(line)
         self.send_script(settings['scripts']['after'])
-        self.handler.on_drawing_ended(code)
         self.stop()
+        self.handler.on_drawing_ended(code)
 
     # thread that keep reading the serial port
     def _thsr(self):
@@ -365,123 +361,3 @@ class Feeder():
     
     def is_connected(self):
         return self.serial.is_connected()
-
-class DeviceSerial():
-    def __init__(self, serialname = None, baudrate = None):
-        self.serialname = serialname
-        self.baudrate = baudrate
-        self.is_fake = False
-        self._buffer = bytearray()
-        self.echo = ""
-        try:
-            args = dict(
-                baudrate = self.baudrate,
-                timeout = 0,
-                write_timeout = 0
-            )
-            self.serial = serial.Serial(**args)
-            self.serial.port = self.serialname
-            self.serial.open()
-            print("Serial device connected")
-        except:
-            #print(traceback.print_exc())
-            self.is_fake = True
-            print("Serial not available. Will use the fake serial")
-
-    def send(self, obj):
-        if self.is_fake:
-            print("Fake> " + str(obj))
-            self.echo = obj
-            time.sleep(0.05)
-        else:
-            if self.serial.is_open:
-                try:
-                    while self.readline():
-                        pass
-                    self.serial.write(str(obj).encode())
-                except:
-                    self.close()
-                    print("Error while sending a command")
-    
-    def serial_port_list(self):
-        if sys.platform.startswith('win'):
-            plist = serial.tools.list_ports.comports()
-            ports = [port.device for port in plist]
-        elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
-            # this excludes your current terminal "/dev/tty"
-            ports = glob.glob('/dev/tty[A-Za-z]*')
-        else:
-            raise EnvironmentError('Unsupported platform')
-        return ports
-
-    def is_connected(self):
-        if(self.is_fake):
-            return False
-        return self.serial.is_open
-    
-    def close(self):
-        try:
-            self.serial.close()
-            print("Serial port closed")
-        except:
-            print("Error: serial already closed or not available")
-    
-    def readline(self):
-        if not self.is_fake:
-            if self.serial.is_open:
-                while self.serial.inWaiting():
-                    line = self.serial.readline()
-                    return line.decode(encoding='UTF-8')
-        else:
-            if not self.echo == "":
-                echo = "ok"         # sends "ok" as ack otherwise the feeder will stop sending buffered commands
-                self.echo = ""
-                return echo
-        return None
-
-class LimitedSizeDict(OrderedDict):
-    def __init__(self, *args, **kwds):
-        self.size_limit = kwds.pop("size_limit", None)
-        OrderedDict.__init__(self, *args, **kwds)
-        self._check_size_limit()
-
-    def __setitem__(self, key, value):
-        OrderedDict.__setitem__(self, key, value)
-        self._check_size_limit()
-
-    def _check_size_limit(self):
-        if self.size_limit is not None:
-            while len(self) > self.size_limit:
-                self.popitem(last=False)
-
-# this thread calls a function after a timeout but only if the "update" method is not called before that timeout expires
-class BufferTimeout(Thread):
-    def __init__(self, timeout_delta, function, group=None, target=None, name=None, args=(), kwargs=None):
-        super(BufferTimeout, self).__init__(group=group, target=target, name=name)
-        self.timeout_delta = timeout_delta
-        self.callback = function
-        self.mutex = Lock()
-        self.is_running = False
-        self.setDaemon(True)
-        self.update()
-
-    def update(self):
-        with self.mutex:
-            self.timeout_time = time.time() + self.timeout_delta
-
-    def stop(self):
-        with self.mutex:
-            self.is_running = False
-
-    def run(self):
-        self.is_running = True
-        while self.is_running:
-            with self.mutex:
-                timeout = self.timeout_time
-            current_time = time.time()
-            if current_time > timeout:
-                self.callback()
-                self.update()
-                with self.mutex:
-                    timeout = self.timeout_time
-            time.sleep(timeout - current_time)

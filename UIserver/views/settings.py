@@ -3,7 +3,7 @@ from flask import render_template
 import os.path
 import shutil
 import json
-from utils import settings_utils
+from UIserver.utils import settings_utils
 import os
 from time import sleep
 from threading import Thread

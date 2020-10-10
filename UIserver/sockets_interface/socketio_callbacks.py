@@ -3,7 +3,7 @@ from flask import render_template
 from UIserver.database import UploadedFiles, Playlists
 import pickle
 import datetime
-from utils import settings_utils, software_updates
+from UIserver.utils import settings_utils, software_updates
 
 
 @socketio.on('message')

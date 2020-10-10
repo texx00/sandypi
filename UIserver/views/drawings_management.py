@@ -2,7 +2,7 @@ from UIserver import app, socketio, db
 from UIserver.database import UploadedFiles, Playlists
 from flask import render_template, request, url_for, redirect
 from werkzeug.utils import secure_filename
-from utils.gcode_converter import gcode_to_image
+from UIserver.utils.gcode_converter import gcode_to_image
 from UIserver.sockets_interface.socketio_callbacks import add_to_playlist
 import traceback
 import datetime

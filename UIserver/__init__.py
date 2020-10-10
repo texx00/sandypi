@@ -18,7 +18,7 @@ from UIserver.hw_controller.feeder import Feeder
 from UIserver.hw_controller.feeder_event_manager import FeederEventManager
 import sass
 from flask_minify import minify
-from utils import settings_utils, software_updates
+from UIserver.utils import settings_utils, software_updates
 
 app = Flask(__name__, template_folder='templates')
 
