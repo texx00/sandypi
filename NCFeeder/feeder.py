@@ -402,7 +402,7 @@ class DeviceSerial():
     def readline(self):
         if not self.is_fake:
             if self.serial.is_open:
-                while c := self.serial.inWaiting():
+                while self.serial.inWaiting():
                     line = self.serial.readline()
                     return line.decode(encoding='UTF-8')
         else:

@@ -29,7 +29,8 @@ def handle_message(message):
 # 
 @socketio.on('software_updates_check')
 def handle_software_updates_check():
-    if result := software_updates.compare_local_remote_tags():
+    result = software_updates.compare_local_remote_tags()
+    if result:
         if result["behind_remote"]:
             toast = """A new update is available ({0}).<br>
             Your version is {1}.<br>
