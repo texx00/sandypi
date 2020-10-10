@@ -5,9 +5,6 @@ import pickle
 import datetime
 from utils import settings_utils, software_updates
 
-def show_toast_on_UI(message):
-    socketio.emit("message_toast", message)
-
 @socketio.on('connect')
 def on_connect():
     nav_drawing_request()
@@ -83,54 +80,17 @@ def start_playlist(code):
 @socketio.on("save_settings")
 def save_settings(data, is_connect):
     settings_utils.save_settings(data)
-    show_toast_on_UI("Settings saved")
+    app.semits.show_toast_on_UI("Settings saved")
     
     if is_connect:
         app.logger.info("Connecting device")
-        socketio.emit("connect_to_device")
+        
+        app.feeder.connect()
+        if app.feeder.is_connected():
+            app.semits.show_toast_on_UI("Connection to device successful")
+        else:
+            app.semits.show_toast_on_UI("Device not connected. Opening a fake serial port.")
 
 @socketio.on("send_gcode_command")
 def send_gcode_command(command):
-    socketio.emit("gcode_command", command)
-
-# ---- NCFeeder callbacks ----
-
-# receives the list of serial ports available and redirect them to the js frontend
-@socketio.on('serial_list')
-def on_serial_list(slist):
-    slist = pickle.loads(slist)
-    app.logger.info(slist)    
-    socketio.emit("serial_list_show", slist)
-
-@socketio.on('drawing_ended')
-def on_drawing_ended():
-    app.logger.info("B> Drawing ended")
-    show_toast_on_UI("Drawing ended")
-    nav_drawing_request()
-    app.qmanager.set_is_drawing(False)
-    app.qmanager.start_next()
-
-@socketio.on('drawing_started')
-def on_drawing_started(code):
-    app.logger.info("B> Drawing started")
-    show_toast_on_UI("Drawing started")
-    app.qmanager.set_code(code)
-    nav_drawing_request()
-
-@socketio.on("feeder_status")
-def on_feeder_status(status):
-    feeder = pickle.loads(status)
-    # TODO show the updated status in the UI
-    app.logger.info("Status: " + str(feeder))
-
-@socketio.on("message_to_frontend")
-def message_to_frontend(message):
-    show_toast_on_UI(message)
-
-@socketio.on("message_from_device")
-def message_from_device(message):
-    socketio.emit("frontend_message_from_device", message)
-
-@socketio.on("path_command")
-def path_command(line):
-    socketio.emit("frontend_path_command", line)
+    app.feeder.send_gcode_command(command)

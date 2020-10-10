@@ -3,7 +3,7 @@ from UIserver.database import UploadedFiles, Playlists
 from flask import render_template, request, url_for, redirect
 from werkzeug.utils import secure_filename
 from utils.gcode_converter import gcode_to_image
-from UIserver.bot_interface.socketio_callbacks import add_to_playlist
+from UIserver.sockets_interface.socketio_callbacks import add_to_playlist
 import traceback
 import datetime
 
@@ -153,7 +153,8 @@ def delete_playlist(code):
 # Show queue
 @app.route('/queue')
 def show_queue():
-    socketio.emit("bot_status")
+    status = app.feeder.get_status()    # TODO pass status to the template
+    print(status)
     code = app.qmanager.get_code()
     if not code is None:
         item = db.session.query(UploadedFiles).filter_by(id=code).first()

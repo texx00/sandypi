@@ -28,7 +28,7 @@ function prepare_command_window(){
         }
       });
 
-    socket.on("frontend_message_from_device", function(data){
+    socket.on("command_line_show", function(data){
         add_command_line(data);
     });
 }
@@ -102,8 +102,9 @@ function prepare_canvas(){
 
     clear_canvas();
 
-    socket.on('frontend_path_command', function(line){
+    socket.on("preview_new_position", function(line){
         console.log("Received line: " + line);
+        add_command_line(line);
         if(line.includes("G28")){
             clear_canvas();
             // TODO add some sort of animation/fading

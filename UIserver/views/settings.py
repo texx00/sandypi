@@ -22,7 +22,7 @@ def settings_page():
     serial["baudrates"] = ["2400", "4800", "9600", "19200", "38400", "57600", "115200", "230400", "460800", "921600"]
     serial["baud"] = settings['serial']['baud']  # TODO load the last saved
     serial["port"] = settings['serial']['port']  # TODO load the last saved
-    socketio.emit("serial_port_list_request")
+    serial["available_ports"] = app.feeder.serial_port_list()
     return render_template("preferences/settings.html", serial = serial, settings = settings)
 
 # Reboot the device

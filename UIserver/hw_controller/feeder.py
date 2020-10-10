@@ -4,7 +4,7 @@ import sys
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 import glob
 from pathlib import Path
-from gcode_rescalers import *
+from UIserver.hw_controller.gcode_rescalers import *
 import time
 import serial.tools.list_ports
 import serial
@@ -15,13 +15,24 @@ from utils import settings_utils
 from collections import OrderedDict, deque
 from copy import deepcopy
 
+
+"""
+
+This class duty is to send commands to the hw. It can be a single command or an entire drawing.
+
+
+"""
+
+# TODO use different logger
+
+
 class FeederEventHandler():
     # called when the drawing is finished
-    def on_drawing_ended(self):
+    def on_drawing_ended(self, code):
         pass
 
     # called when a new drawing is started
-    def on_drawing_started(self):
+    def on_drawing_started(self, code):
         pass
     
     # called when the feeder receives a message from the hw that must be sent to the frontend
@@ -51,6 +62,7 @@ class Feeder():
         else: self.handler = handler
         self.serial = None
         self.line_number = 0
+        self._timeout_last_line = self.line_number
 
         # buffer control attrs
         self.command_buffer = deque()
@@ -90,6 +102,7 @@ class Feeder():
 
     def wait_device_ready(self):
         time.sleep(1) # TODO make it better
+        # without this function the device may be not ready to receive commands
 
     def set_event_handler(self, handler):
         self.handler = handler
@@ -111,7 +124,7 @@ class Feeder():
                 with self.command_buffer_mutex:
                     self.command_buffer.clear()
                 self._th.start()
-            self.handler.on_drawing_started()
+            self.handler.on_drawing_started(code)
 
     # ask if the feeder is already sending a file
     def is_running(self):
@@ -153,7 +166,7 @@ class Feeder():
         print("Starting new drawing with code {}".format(code))
         with self.serial_mutex:
             code = self._running_code
-        filename = os.path.join(str(Path(__file__).parent.parent.absolute()), "UIserver/static/Drawings/{0}/{0}.gcode".format(code))
+        filename = os.path.join(str(Path(__file__).parent.parent.absolute()), "static/Drawings/{0}/{0}.gcode".format(code))
         
         # TODO retrieve saved information for the gcode filter
         dims = {"table_x":100, "table_y":100, "drawing_max_x":100, "drawing_max_y":100, "drawing_min_x":0, "drawing_min_y":0}
@@ -177,7 +190,8 @@ class Feeder():
 
                     self.send_gcode_command(line)
         self.send_script(settings['scripts']['after'])
-        self.handler.on_drawing_ended()
+        self.handler.on_drawing_ended(code)
+        self.stop()
 
     # thread that keep reading the serial port
     def _thsr(self):
@@ -200,7 +214,7 @@ class Feeder():
             print("!Buffer timeout. Try to clean the buffer!")
             # to clean the buffer try to send an M114 message. In this way will trigger the buffer cleaning mechanism
             line = self._generate_line("M114")  # may need to send it twice? could also send an older line to trigger the error?
-            with self.serial_mutex:
+            with self.serial_mutex:                
                 self.serial.send(line)
         else:
             self._update_timeout()
@@ -269,7 +283,7 @@ class Feeder():
 
     def get_status(self):
         with self.serial_mutex:
-            return {"is_running":self._isrunning, "progress":[self.command_number, self.total_commands_number], "is_paused":self._ispaused, "is_connected":self.serial.is_connected()}
+            return {"is_running":self._isrunning, "progress":[self.command_number, self.total_commands_number], "is_paused":self._ispaused, "is_connected":self.is_connected()}
 
     def _generate_line(self, command):
         self.line_number += 1
@@ -345,6 +359,12 @@ class Feeder():
         print("Resetting line number")
         self.send_gcode_command("M110 N{}".format(line_number))
 
+    def serial_ports_list(self):
+        return self.serial.serial_port_list()
+    
+    def is_connected(self):
+        return self.serial.is_connected()
+
 class DeviceSerial():
     def __init__(self, serialname = None, baudrate = None):
         self.serialname = serialname
@@ -363,7 +383,7 @@ class DeviceSerial():
             self.serial.open()
             print("Serial device connected")
         except:
-            print(traceback.print_exc())
+            #print(traceback.print_exc())
             self.is_fake = True
             print("Serial not available. Will use the fake serial")
 

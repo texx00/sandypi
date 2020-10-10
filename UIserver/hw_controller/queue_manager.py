@@ -76,4 +76,4 @@ class QueueManager():
     # This method send a "start" command to the bot with the code of the drawing
     def start_drawing(self, code):
         self.app.logger.info("Sending gcode start command")
-        self.socketio.emit('bot_start', str(code))
+        self.app.feeder.start_code(code, force_stop = True)
