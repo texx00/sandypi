@@ -16,7 +16,6 @@ from time import sleep
 from UIserver.hw_controller.queue_manager import QueueManager
 from UIserver.hw_controller.feeder import Feeder
 from UIserver.hw_controller.feeder_event_manager import FeederEventManager
-from UIserver.sockets_interface.socketio_emits import SocketioEmits
 import sass
 from flask_minify import minify
 from utils import settings_utils, software_updates
@@ -31,13 +30,13 @@ logging.getLogger("werkzeug").setLevel('WARNING')
 app.config['SECRET_KEY'] = 'secret!' # TODO put a key here
 app.config['UPLOAD_FOLDER'] = "./UIserver/static/Drawings"
 socketio = SocketIO(app)
-app.semits = SocketioEmits(socketio)
 
 file_path = os.path.abspath(os.getcwd())+"\database.db"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+file_path
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+
 
 # scss compiler (already minified)
 sass.compile(dirname=(os.path.abspath(os.getcwd())+"/UIserver/static/scss", os.path.abspath(os.getcwd())+"/UIserver/static/css"), output_style='compressed')
@@ -48,6 +47,9 @@ minify(app=app, html=True, js=False)
 import UIserver.database
 import UIserver.views.drawings_management, UIserver.views.settings
 import UIserver.sockets_interface.socketio_callbacks
+from UIserver.sockets_interface.socketio_emits import SocketioEmits
+
+app.semits = SocketioEmits(app,socketio, db)
 
 # Device controller initialization
 

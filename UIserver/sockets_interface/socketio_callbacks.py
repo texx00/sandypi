@@ -5,14 +5,6 @@ import pickle
 import datetime
 from utils import settings_utils, software_updates
 
-@socketio.on('connect')
-def on_connect():
-    nav_drawing_request()
-    #app.logger.info("Connected")
-    pass
-
-
-# ---- Frontend callbacks ----
 
 @socketio.on('message')
 def handle_message(message):
@@ -37,15 +29,7 @@ def handle_software_updates_check():
 
 @socketio.on("request_nav_drawing_status")
 def nav_drawing_request():
-    if app.qmanager.is_drawing():
-        try:
-            item = db.session.query(UploadedFiles).filter(UploadedFiles.id==app.qmanager.get_code()).one()
-            socketio.emit("current_drawing_preview", render_template("drawing_status.html", item=item))
-        except:
-            app.logger.error("Error during nav drawing status update")
-            socketio.emit("current_drawing_preview", "")
-    else: 
-        socketio.emit("current_drawing_preview", "")
+    app.semits.send_nav_drawing_status()
     
 # playlist sockets
 # save the changes to the playlist
