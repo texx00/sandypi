@@ -153,8 +153,6 @@ def delete_playlist(code):
 # Show queue
 @app.route('/queue')
 def show_queue():
-    status = app.feeder.get_status()    # TODO pass status to the template
-    print(status)
     code = app.qmanager.get_code()
     if not code is None:
         item = db.session.query(UploadedFiles).filter_by(id=code).first()

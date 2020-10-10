@@ -2,30 +2,44 @@ from flask import Flask, redirect, url_for
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+
 import os
 import sys
-import logging
+import platform
+
 from subprocess import Popen
 import psutil
 import threading
 import atexit
 import signal
 import urllib.request
-import platform
+
 from time import sleep
+from dotenv import load_dotenv
+import logging
+
+import sass
+from flask_minify import minify
+
 from UIserver.hw_controller.queue_manager import QueueManager
 from UIserver.hw_controller.feeder import Feeder
 from UIserver.hw_controller.feeder_event_manager import FeederEventManager
-import sass
-from flask_minify import minify
 from UIserver.utils import settings_utils, software_updates
 
-app = Flask(__name__, template_folder='templates')
+
 
 # Logging setup
-app.logger.setLevel(logging.INFO)
-logging.getLogger("werkzeug").setLevel('WARNING')
+load_dotenv()
+level = os.getenv("FLASK_LEVEL")
+if not level is None:
+    level = int(level)
+else:
+    level = 0
+settings_utils.print_level(level, "app")
+logging.getLogger("werkzeug").setLevel(level)
 
+# app setup
+app = Flask(__name__, template_folder='templates')
 
 app.config['SECRET_KEY'] = 'secret!' # TODO put a key here
 app.config['UPLOAD_FOLDER'] = "./UIserver/static/Drawings"

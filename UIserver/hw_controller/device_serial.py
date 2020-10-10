@@ -2,13 +2,15 @@ import serial.tools.list_ports
 import serial
 import time
 import sys
+import logging
 
 # This class connect to a serial device
 # If the serial device request is not available it will create a virtual serial device
 
 
 class DeviceSerial():
-    def __init__(self, serialname = None, baudrate = None):
+    def __init__(self, serialname = None, baudrate = None, logger_name = None):
+        self.logger = logging.getLogger(logger_name) if not logger_name is None else logging.getLogger()
         self.serialname = serialname
         self.baudrate = baudrate
         self.is_fake = False
@@ -23,15 +25,15 @@ class DeviceSerial():
             self.serial = serial.Serial(**args)
             self.serial.port = self.serialname
             self.serial.open()
-            print("Serial device connected")
+            self.logger.info("Serial device connected")
         except:
             #print(traceback.print_exc())
             self.is_fake = True
-            print("Serial not available. Will use the fake serial")
+            self.logger.error("Serial not available. Will use the fake serial")
 
     def send(self, obj):
         if self.is_fake:
-            print("Fake> " + str(obj))
+            #print("Fake> " + str(obj))
             self.echo = obj
             time.sleep(0.05)
         else:
@@ -42,7 +44,7 @@ class DeviceSerial():
                     self.serial.write(str(obj).encode())
                 except:
                     self.close()
-                    print("Error while sending a command")
+                    self.logger.error("Error while sending a command")
     
     def serial_port_list(self):
         if sys.platform.startswith('win'):
@@ -63,9 +65,9 @@ class DeviceSerial():
     def close(self):
         try:
             self.serial.close()
-            print("Serial port closed")
+            self.logger.info("Serial port closed")
         except:
-            print("Error: serial already closed or not available")
+            self.logger.error("Error: serial already closed or not available")
     
     def readline(self):
         if not self.is_fake:

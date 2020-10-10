@@ -4,12 +4,16 @@ from pathlib import Path
 import time
 import traceback
 import json
-from UIserver.utils import settings_utils
 from collections import deque
 from copy import deepcopy
-from UIserver.utils import limited_size_dict, buffered_timeout
+
+import logging
+from dotenv import load_dotenv
+
+from UIserver.utils import limited_size_dict, buffered_timeout, settings_utils
 from UIserver.hw_controller.device_serial import DeviceSerial
 from UIserver.hw_controller.gcode_rescalers import *
+
 
 
 """
@@ -39,13 +43,29 @@ class FeederEventHandler():
     def on_new_line(self, line):
         pass
 
+
+
 # List of commands that are buffered by the controller
 BUFFERED_COMMANDS = ("G0", "G00", "G1", "G01", "G2", "G02", "G3", "G03", "G28")
 
+
 class Feeder():
     def __init__(self, handler = None, **kargvs):
-        self._print_ack = kargvs.pop("print_ack", False)
-        self._print_ack = True
+        # logger setup
+        self.logger = logging.getLogger(__name__)
+        logging.addLevelName(settings_utils.LINE_SENT, "LINE_SENT")
+        logging.addLevelName(settings_utils.LINE_RECEIVED, "LINE_RECEIVED")
+        # load logging level from environment variables
+        load_dotenv()
+        level = os.getenv("FEEDER_LEVEL")
+        if not level is None:
+            level = int(level)
+        else:
+            level = 0
+        self.logger.setLevel(level)
+
+        settings_utils.print_level(level, __name__.split(".")[-1])
+
         self._isrunning = False
         self._ispaused = False
         self.total_commands_number = None
@@ -74,19 +94,19 @@ class Feeder():
         self.serial.close()
 
     def connect(self):
-        print("Connecting to serial device...")
+        self.logger.info("Connecting to serial device...")
         settings = settings_utils.load_settings()
         with self.serial_mutex:
             if not self.serial is None:
                 self.serial.close()
             try:
-                self.serial = DeviceSerial(settings['serial']['port'], settings['serial']['baud']) 
+                self.serial = DeviceSerial(settings['serial']['port'], settings['serial']['baud'], logger_name = __name__) 
                 self._serial_read_thread = Thread(target = self._thsr, daemon=True)
                 self._serial_read_thread.start()
             except:
-                print("Error during device connection")
-                print(traceback.print_exc())
-                self.serial = DeviceSerial()
+                self.logger.info("Error during device connection")
+                self.logger.info(traceback.print_exc())
+                self.serial = DeviceSerial(logger_name = __name__)
 
         # wait for the device to be ready
         self.wait_device_ready()
@@ -159,7 +179,7 @@ class Feeder():
         settings = settings_utils.load_settings()
         self.send_script(settings['scripts']['before'])
 
-        print("Starting new drawing with code {}".format(code))
+        self.logger.info("Starting new drawing with code {}".format(code))
         with self.serial_mutex:
             code = self._running_code
         filename = os.path.join(str(Path(__file__).parent.parent.absolute()), "static/Drawings/{0}/{0}.gcode".format(code))
@@ -196,8 +216,8 @@ class Feeder():
                 try:
                     line = self.serial.readline()
                 except Exception as e:
-                    print(e)
-                    print("Serial connection lost")
+                    self.logger.error(e)
+                    self.logger.error("Serial connection lost")
             if not line is None:
                 self.parse_device_line(line)
 
@@ -207,7 +227,7 @@ class Feeder():
     
     def _on_timeout(self):
         if (self.command_buffer_mutex.locked and self.line_number == self._timeout_last_line):
-            print("!Buffer timeout. Try to clean the buffer!")
+            # self.logger.warning("!Buffer timeout. Trying to clean the buffer!")
             # to clean the buffer try to send an M114 message. In this way will trigger the buffer cleaning mechanism
             line = self._generate_line("M114")  # may need to send it twice? could also send an older line to trigger the error?
             with self.serial_mutex:                
@@ -237,15 +257,12 @@ class Feeder():
 
     # parse a line coming from the device
     def parse_device_line(self, line):
-        print_line = True
         if ("start" in line):
             self.wait_device_ready()
             self.reset_line_number()
 
         elif "ok" in line:  # when an "ack" is received free one place in the buffer
             self._ack_received()
-            if not self._print_ack:
-                print_line = False
 
         elif "Resend: " in line:
             line_found = False
@@ -266,15 +283,13 @@ class Feeder():
             self._ack_received(safe_line_number=line_number-1, append_left_extra=True)
             # the resend command is sending an ack. should add an entry to the buffer to keep the right lenght (because the line has been sent 2 times)
             if not line_found: 
-                print("No line was found for the number required. Restart numeration.")
+                self.logger.error("No line was found for the number required. Restart numeration.")
                 self.send_gcode_command("M110 N1")
-                print_line = False
 
         elif "echo:Unknown command:" in line:
-            print("Error: command not found. Can also be a communication error")
+            self.logger.error("Error: command not found. Can also be a communication error")
         
-        if print_line:
-            print(line) 
+        self.logger.log(settings_utils.LINE_RECEIVED, line)
         self.handler.on_message_received(line)
 
     def get_status(self):
@@ -317,7 +332,7 @@ class Feeder():
 
         # check if the command is in the "BUFFERED_COMMANDS" list and stops if the buffer is full
         if any(code in command for code in BUFFERED_COMMANDS):
-            with self.command_send_mutex:     # wait until get some "ok" command to remove an element from the buffer
+            with self.command_send_mutex:       # wait until get some "ok" command to remove an element from the buffer
                 pass
 
         # send the command after parsing the content
@@ -325,34 +340,34 @@ class Feeder():
         with self.serial_mutex:
             # check if needs to send a "M114" command (actual position request) but not in the first lines
             if (self.line_number % self.position_request_difference) == 0 and self.line_number > 5:
-                #self._generate_line("M114")  # does not send the line to trigger the "resend" event and clean the buffer from messages that are already done
+                #self._generate_line("M114")    # does not send the line to trigger the "resend" event and clean the buffer from messages that are already done
                 pass
 
             line = self._generate_line(command)
 
-            self.serial.send(line)      # send line
+            self.serial.send(line)              # send line
+            self.logger.log(settings_utils.LINE_SENT, line.replace("\n", "")) 
 
             # TODO the problem with small geometries may be with the serial port being to slow. For long (straight) segments the problem is not evident
 
-            self._update_timeout()      # update the timeout because a new command has been sent
+            self._update_timeout()              # update the timeout because a new command has been sent
 
             with self.command_buffer_mutex:
                 if(len(self.command_buffer)>=self.command_buffer_max_length):
                     self.command_send_mutex.acquire()     # if the buffer is full acquire the lock so that cannot send new lines until the reception of an ack. Notice that this will stop only buffered commands. The other commands will be sent anyway
     
-            self.handler.on_new_line(line)  # uses the handler callback for the new line
+            self.handler.on_new_line(line)      # uses the handler callback for the new line
 
     # Send a multiline script
     def send_script(self, script):
-        print("Sending script: ")
+        self.logger.info("Sending script")
         script = script.split("\n")
         for s in script:
-            print("> " + s)
             if s != "" and s != " ":
                 self.send_gcode_command(s)
 
     def reset_line_number(self, line_number = 2):
-        print("Resetting line number")
+        self.logger.info("Resetting line number")
         self.send_gcode_command("M110 N{}".format(line_number))
 
     def serial_ports_list(self):

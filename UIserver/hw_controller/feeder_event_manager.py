@@ -6,7 +6,6 @@ class FeederEventManager(FeederEventHandler):
         self.app = app
 
     def on_drawing_ended(self, code):
-        print("S> Sending drawing ended")
         self.app.logger.info("B> Drawing ended")
         self.app.semits.show_toast_on_UI("Drawing ended")
         self.app.semits.send_nav_drawing_status()
