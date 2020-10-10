@@ -16,7 +16,7 @@
             <span>Port number</span>
             <select id="serial_ports">
                 {%for item in serial["available_ports"] %}
-                <option>{{item}}</option>   <!-- TODO fix this -->
+                <option {% if settings['serial']['port']==item %} selected="selected" {%endif%}value="{{item}}">{{item}}</option>
                 {%endfor%}
             </select>
         </div>

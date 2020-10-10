@@ -360,7 +360,8 @@ class Feeder():
         self.send_gcode_command("M110 N{}".format(line_number))
 
     def serial_ports_list(self):
-        return self.serial.serial_port_list()
+        result = self.serial.serial_port_list()
+        return [] if result is None else result
     
     def is_connected(self):
         return self.serial.is_connected()

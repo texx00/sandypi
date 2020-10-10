@@ -20,9 +20,10 @@ def settings_page():
     settings = settings_utils.load_settings()
     serial = {}
     serial["baudrates"] = ["2400", "4800", "9600", "19200", "38400", "57600", "115200", "230400", "460800", "921600"]
-    serial["baud"] = settings['serial']['baud']  # TODO load the last saved
-    serial["port"] = settings['serial']['port']  # TODO load the last saved
-    serial["available_ports"] = app.feeder.serial_port_list()
+    serial["baud"] = settings['serial']['baud']  # load the last saved
+    serial["port"] = settings['serial']['port']  # load the last saved
+    serial["available_ports"] = app.feeder.serial_ports_list()
+    serial["available_ports"].append("FAKE")
     return render_template("preferences/settings.html", serial = serial, settings = settings)
 
 # Reboot the device
