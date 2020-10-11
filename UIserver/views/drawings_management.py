@@ -1,9 +1,9 @@
 from UIserver import app, socketio, db
-from UIserver.database import UploadedFiles, Playlists
+from UIserver.database.models import UploadedFiles, Playlists
 from flask import render_template, request, url_for, redirect
 from werkzeug.utils import secure_filename
 from UIserver.utils.gcode_converter import gcode_to_image
-from UIserver.sockets_interface.socketio_callbacks import add_to_playlist
+from UIserver.database.playlist import Playlist
 import traceback
 import datetime
 
@@ -53,7 +53,9 @@ def upload(playlist):
 
                 playlist = int(playlist)
                 if (playlist):
-                    add_to_playlist(new_file.id, playlist)
+                    pl = Playlist(playlist)
+                    pl.add_single_element(new_file.id)
+                    pl.save()
 
                 app.logger.info("File added")
                 # TODO give a feedback to the user about the result of the operation
@@ -120,8 +122,8 @@ def delete_drawing(code):
 @app.route('/playlist/<code>')
 def playlist(code):
     playlist = db.session.query(Playlists).filter_by(id=code).first()
-    if not playlist.drawings=="":
-        drawings = playlist.drawings.replace(" ", "")
+    if not playlist.elements=="":
+        drawings = playlist.elements.replace(" ", "").replace("[", "").replace("]","").replace("'", "") # TODO fix this mess
         drawings = drawings.split(",")
         if drawings[-1] == "":
             drawings = drawings[:-1]
@@ -130,10 +132,8 @@ def playlist(code):
 
 @app.route('/create_playlist')
 def create_playlist():
-    item = Playlists()
-    db.session.add(item)
-    db.session.commit()
-    return redirect(url_for("playlist", code=str(item.id)))
+    pl = Playlist()
+    return redirect(url_for("playlist", code=str(pl.id)))
 
 
 # Delete playlist

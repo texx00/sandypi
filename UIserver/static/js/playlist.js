@@ -57,10 +57,10 @@ function save(){
     save_data = {
         name : $("#playlist_name").html().replace(/(?:&nbsp;|<br>)/g,''),
         id : $("#playlist_id").html(),
-        drawings: []
+        elements: []
     }
     $("#drawings_ul").children('li').each(function( index ) {
-            save_data['drawings'].push($(this).find('div.data').html());
+            save_data['elements'].push($(this).find('div.data').html());
         });
     socket.emit('playlist_save', {data: save_data});
     show_toast("Playlist saved");

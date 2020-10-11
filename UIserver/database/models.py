@@ -21,8 +21,7 @@ class Playlists(db.Model):
     name = db.Column(db.String(80), unique=False, nullable=False, default="New playlist")
     creation_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow) # Creation timestamp
     edit_date = db.Column(db.DateTime, default=datetime.utcnow)                 # Last time the playlist was edited (to update: datetime.datetime.utcnow())
-    drawings = db.Column(db.String(1000), default="")                           # List of drawings in the playlist
-    options = db.Column(db.String(1000))                                        # Options of the playlist (like the ordering method, period etc)
+    elements = db.Column(db.String(1000), default="")                           # List of elements in the playlist
     active = db.Column(db.Boolean, default=False)                               # If the software should use this playlist or not when checking for rules
 
 
