@@ -68,7 +68,7 @@ class QueueManager():
             if not force_stop:
                 return False
         if self.queue_length() > 0:
-            self.start_drawing(self.q.queue.pop())
+            self.start_drawing(self.q.queue.popleft())
             self.app.logger.info("Starting next code")
             return True
         return False

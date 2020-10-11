@@ -102,6 +102,7 @@ class Feeder():
             try:
                 self.serial = DeviceSerial(settings['serial']['port'], settings['serial']['baud'], logger_name = __name__) 
                 self._serial_read_thread = Thread(target = self._thsr, daemon=True)
+                self._serial_read_thread.name = "serial_read"
                 self._serial_read_thread.start()
             except:
                 self.logger.info("Error during device connection")
@@ -133,6 +134,7 @@ class Feeder():
                 time.sleep(5)       # wait a little for the thread to stop
             with self.serial_mutex:
                 self._th = Thread(target = self._thf, args=(code,), daemon=True)
+                self._th.name = "drawing_feeder"
                 self._isrunning = True
                 self._ispaused = False
                 self._running_code = code

@@ -6,6 +6,7 @@ import time
 class BufferTimeout(Thread):
     def __init__(self, timeout_delta, function, group=None, target=None, name=None, args=(), kwargs=None):
         super(BufferTimeout, self).__init__(group=group, target=target, name=name)
+        self.name = "buffered_timeout"
         self.timeout_delta = timeout_delta
         self.callback = function
         self.mutex = Lock()
