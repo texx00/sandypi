@@ -3,6 +3,7 @@ import serial
 import time
 import sys
 import logging
+from UIserver.hw_controller.emulator import Emulator
 
 # This class connect to a serial device
 # If the serial device request is not available it will create a virtual serial device
@@ -16,6 +17,8 @@ class DeviceSerial():
         self.is_fake = False
         self._buffer = bytearray()
         self.echo = ""
+        self._emulator = Emulator()
+
         try:
             args = dict(
                 baudrate = self.baudrate,
@@ -33,9 +36,7 @@ class DeviceSerial():
 
     def send(self, obj):
         if self.is_fake:
-            #print("Fake> " + str(obj))
-            self.echo = obj
-            time.sleep(0.05)
+            self._emulator.send(obj)
         else:
             if self.serial.is_open:
                 try:
@@ -76,8 +77,5 @@ class DeviceSerial():
                     line = self.serial.readline()
                     return line.decode(encoding='UTF-8')
         else:
-            if not self.echo == "":
-                echo = "ok"         # sends "ok" as ack otherwise the feeder will stop sending buffered commands
-                self.echo = ""
-                return echo
+            return self._emulator.readline()
         return None

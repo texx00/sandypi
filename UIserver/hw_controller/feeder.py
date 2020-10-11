@@ -6,6 +6,7 @@ import traceback
 import json
 from collections import deque
 from copy import deepcopy
+import re
 
 import logging
 from dotenv import load_dotenv
@@ -79,6 +80,10 @@ class Feeder():
         self.serial = None
         self.line_number = 0
         self._timeout_last_line = self.line_number
+        self.feedrate = 0
+
+        # commands parser
+        self.feed_regex = re.compile("[F]([0-9.]+)($|\s)")
 
         # buffer control attrs
         self.command_buffer = deque()
@@ -114,6 +119,7 @@ class Feeder():
 
         # reset line number when connecting
         self.reset_line_number()
+        self.request_feedrate()
         # send the "on connection" script from the settings
         self.send_script(settings['scripts']['connection'])
 
@@ -213,6 +219,7 @@ class Feeder():
 
     # thread that keep reading the serial port
     def _thsr(self):
+        line = None
         while True:
             with self.serial_mutex:
                 try:
@@ -288,6 +295,10 @@ class Feeder():
                 self.logger.error("No line was found for the number required. Restart numeration.")
                 self.send_gcode_command("M110 N1")
 
+        # TODO check feedrate response for M220 and set feedrate
+        #elif "_______" in line: # must see the real output from marlin
+        #    self.feedrate = .... # must see the real output from marlin
+
         elif "echo:Unknown command:" in line:
             self.logger.error("Error: command not found. Can also be a communication error")
         
@@ -334,6 +345,9 @@ class Feeder():
 
         # check if the command is in the "BUFFERED_COMMANDS" list and stops if the buffer is full
         if any(code in command for code in BUFFERED_COMMANDS):
+            if "F" in command:
+                feed = self.feed_regex.findall(command)
+                self.feedrate = feed[0][0]
             with self.command_send_mutex:       # wait until get some "ok" command to remove an element from the buffer
                 pass
 
@@ -355,7 +369,7 @@ class Feeder():
             self._update_timeout()              # update the timeout because a new command has been sent
 
             with self.command_buffer_mutex:
-                if(len(self.command_buffer)>=self.command_buffer_max_length):
+                if(len(self.command_buffer)>=self.command_buffer_max_length and not self.command_send_mutex.locked()):
                     self.command_send_mutex.acquire()     # if the buffer is full acquire the lock so that cannot send new lines until the reception of an ack. Notice that this will stop only buffered commands. The other commands will be sent anyway
     
             self.handler.on_new_line(line)      # uses the handler callback for the new line
@@ -371,6 +385,9 @@ class Feeder():
     def reset_line_number(self, line_number = 2):
         self.logger.info("Resetting line number")
         self.send_gcode_command("M110 N{}".format(line_number))
+    
+    def request_feedrate(self):
+        self.send_gcode_command("M220")
 
     def serial_ports_list(self):
         result = self.serial.serial_port_list()
