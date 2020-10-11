@@ -1,8 +1,8 @@
-"""empty message
+"""Initial migration
 
-Revision ID: 66d9df74c26a
+Revision ID: bf3bbfa3c751
 Revises: 
-Create Date: 2020-09-08 20:49:14.617499
+Create Date: 2020-10-11 16:22:00.268343
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '66d9df74c26a'
+revision = 'bf3bbfa3c751'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -23,9 +23,7 @@ def upgrade():
     sa.Column('name', sa.String(length=80), nullable=False),
     sa.Column('creation_date', sa.DateTime(), nullable=False),
     sa.Column('edit_date', sa.DateTime(), nullable=True),
-    sa.Column('drawings', sa.String(length=1000), nullable=True),
-    sa.Column('options', sa.String(length=1000), nullable=True),
-    sa.Column('active', sa.Boolean(), nullable=True),
+    sa.Column('elements', sa.String(length=1000), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('uploaded_files',
