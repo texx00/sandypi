@@ -122,7 +122,7 @@ def delete_drawing(code):
 @app.route('/playlist/<code>')
 def playlist(code):
     playlist = db.session.query(Playlists).filter_by(id=code).first()
-    if not playlist.elements=="":
+    if not playlist is None and not playlist.elements=="":
         drawings = playlist.elements.replace(" ", "").replace("[", "").replace("]","").replace("'", "") # TODO fix this mess
         drawings = drawings.split(",")
         if drawings[-1] == "":
