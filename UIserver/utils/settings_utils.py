@@ -19,7 +19,9 @@ def save_settings(settings):
 
 def load_settings():
     settings = ""
-    with open(settings_path) as f:
+    if not os.path.isfile(settings_path):        # for python tests
+        tmp_settings_path = defaults_path
+    with open(tmp_settings_path) as f:
         settings = json.load(f) 
     return settings
     
