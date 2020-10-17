@@ -33,6 +33,7 @@ class GenericPlaylistElement():
     
     def save(self, element_table):
         options = self.get_dict()
+        options.pop("element_type")
         options = json.dumps(options)
         element_table(element_type=self.element_type, element_options = options)
 
@@ -77,6 +78,7 @@ class DrawingElement(GenericPlaylistElement):
     
     def save(self, element_table):
         options = self.get_dict()
+        options.pop("element_type")
         options.pop("drawing_id")
         options = json.dumps(options)
         db.session.add(element_table(element_type=self.element_type, drawing_id = self.drawing_id, element_options = options))
