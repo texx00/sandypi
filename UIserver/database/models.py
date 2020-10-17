@@ -1,4 +1,5 @@
 from UIserver import db
+from UIserver.database.declarative import create_playlist_table
 from datetime import datetime
 import os
 
@@ -33,7 +34,7 @@ class Playlists(db.Model):
         self.elements += ", " + str(element)
     
     def add_elements(self, elements):
-        self.elements = elements
+        self.elements += elements
     
     def clear_elements(self):
         self.elements = ""
@@ -43,6 +44,7 @@ class Playlists(db.Model):
         item = Playlists()
         db.session.add(item)
         db.session.commit()
+        create_playlist_table(item.id)
         return item
     
     @classmethod
