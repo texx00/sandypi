@@ -1,0 +1,39 @@
+from sqlalchemy.ext.declarative import declarative_base
+from UIserver import db
+
+# creates base class with common methods
+class PlaylistElements(object):
+    @classmethod
+    def get_playlist_elements(cls):
+        if cls == PlaylistElements:
+            raise NotImplementedError("Must use a table class to query the elements")
+        return cls.query.all()
+
+    @classmethod
+    def clear_elements(cls):
+        if cls == PlaylistElements:
+            raise NotImplementedError("Must use a table class to clean the table")
+        return cls.query.delete()
+
+# creates sqlalchemy base class with the addition of the custom class
+Base = declarative_base(cls = PlaylistElements)
+Base.query = db.session.query_property()
+
+
+def get_playlist_table_class(id):
+    if id is None: raise ValueError("A playlist id must be specified")
+    table_name = "_playlist_{}".format(id)
+
+    class PTable(Base):
+        __tablename__ = table_name 
+        __table_args__ = {'extend_existing': True}                      # necessary to modify a table
+        id = db.Column(db.Integer, primary_key=True)
+        element_type = db.Column(db.String(10), default="")
+        drawing_id = db.Column(db.Integer, default = None)              # drawing id added explicitely for possible queries
+        element_options = db.Column(db.String(1000), default="")        # element options
+
+    return PTable
+
+def create_playlist_table(id):
+    p_class = get_playlist_table_class(id)
+    p_class.__table__.create(db.get_engine())

@@ -4,6 +4,7 @@ from flask import render_template, request, url_for, redirect
 from werkzeug.utils import secure_filename
 from UIserver.utils.gcode_converter import gcode_to_image
 from UIserver.database.models import Playlists
+from UIserver.database.playlist_elements import DrawingElement
 import traceback
 import datetime
 
@@ -54,7 +55,7 @@ def upload(playlist):
                 playlist = int(playlist)
                 if (playlist):
                     pl = Playlists.get_playlist(playlist)
-                    pl.add_single_element(new_file.id)
+                    pl.add_element(DrawingElement(new_file.id))
                     pl.save()
 
                 app.logger.info("File added")
@@ -122,11 +123,13 @@ def delete_drawing(code):
 @app.route('/playlist/<code>')
 def playlist(code):
     playlist = db.session.query(Playlists).filter_by(id=code).first()
-    if not playlist is None and not playlist.elements=="":
-        drawings = playlist.elements.replace(" ", "").replace("[", "").replace("]","").replace("'", "") # TODO fix this mess
-        drawings = drawings.split(",")
-        if drawings[-1] == "":
-            drawings = drawings[:-1]
+    drawings = []
+    if not playlist is None:
+        elements = playlist.get_elements()
+        if len(elements) > 0:
+            for i in elements:
+                if isinstance(i, DrawingElement):
+                    drawing.append(i.drawing_id)
     else: drawings = []
     return render_template("management/playlist.html", item=playlist, drawings=drawings)
 

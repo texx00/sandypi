@@ -1,5 +1,6 @@
 from UIserver import db
-from UIserver.database.declarative import create_playlist_table
+from UIserver.database.playlist_elements_tables import create_playlist_table, get_playlist_table_class
+from UIserver.database.playlist_elements import GenericPlaylistElement
 from datetime import datetime
 import os
 
@@ -22,22 +23,35 @@ class Playlists(db.Model):
     name = db.Column(db.String(80), unique=False, nullable=False, default="New playlist")
     creation_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow) # Creation timestamp
     edit_date = db.Column(db.DateTime, default=datetime.utcnow)                 # Last time the playlist was edited (to update: datetime.datetime.utcnow())
-    elements = db.Column(db.String(1000), default="")                           # List of elements in the playlist
     active = db.Column(db.Boolean, default=False)                               # If the software should use this playlist or not when checking for rules
-
-         
+           
     def save(self):
         self.edit_date = datetime.utcnow()
         db.session.commit()
 
-    def add_single_element(self, element):
-        self.elements += ", " + str(element)
-    
-    def add_elements(self, elements):
-        self.elements += elements
+    def add_element(self, elements):
+        if not isinstance(elements, list):
+            elements = [elements]
+        for i in elements:
+            if not isinstance(i, GenericPlaylistElement):
+                i = GenericPlaylistElement.create_element_from_json(i)
+            i.save(self._ec())
     
     def clear_elements(self):
-        self.elements = ""
+        return self._ec().clear_elements()
+
+    def get_elements(self):
+        els = self._ec().get_playlist_elements()
+        res = []
+        for e in els:
+            res.append(GenericPlaylistElement.create_element_from_db(e))
+        return res
+
+    # returns the database table class for the elements of that playlist
+    def _ec(self):
+        if not hasattr(self, "_tc"):
+            self._tc = get_playlist_table_class(self.id)
+        return self._tc
             
     @classmethod
     def create_playlist(cls):
@@ -52,6 +66,7 @@ class Playlists(db.Model):
         if id is None:
             raise ValueError("An id is necessary to select a playlist")
         return db.session.query(Playlists).filter(Playlists.id==id).one()
+
     
 
 # The app is using Flask-migrate

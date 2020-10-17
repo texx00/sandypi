@@ -26,8 +26,6 @@ from UIserver.hw_controller.feeder import Feeder
 from UIserver.hw_controller.feeder_event_manager import FeederEventManager
 from UIserver.utils import settings_utils, software_updates
 
-
-
 # Logging setup
 load_dotenv()
 level = os.getenv("FLASK_LEVEL")
