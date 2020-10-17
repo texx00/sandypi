@@ -4,7 +4,7 @@ from UIserver.database.models import UploadedFiles, Playlists
 import pickle
 import datetime
 from UIserver.utils import settings_utils, software_updates
-from UIserver.database.playlist import Playlist
+from UIserver.database.models import Playlists
 
 
 @socketio.on('message')
@@ -37,7 +37,7 @@ def nav_drawing_request():
 @socketio.on("playlist_save")
 def playlist_save(playlist):
     playlist = playlist['data']
-    pl = Playlist(playlist['id'])
+    pl = Playlists.get_playlist(playlist['id'])
     pl.name = playlist['name']
     pl.clear_elements()
     pl.add_elements(playlist['elements'])
@@ -46,7 +46,7 @@ def playlist_save(playlist):
 # add a drawing to a playlist
 @socketio.on("add_to_playlist")
 def add_to_playlist(element, playlist_code):
-    pl = Playlist(playlist_code)
+    pl = Playlists.get_playlist(playlist_code)
     pl.add_single_element(element)
     pl.save()
 

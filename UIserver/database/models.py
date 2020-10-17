@@ -24,6 +24,33 @@ class Playlists(db.Model):
     elements = db.Column(db.String(1000), default="")                           # List of elements in the playlist
     active = db.Column(db.Boolean, default=False)                               # If the software should use this playlist or not when checking for rules
 
+         
+    def save(self):
+        self.edit_date = datetime.utcnow()
+        db.session.commit()
+
+    def add_single_element(self, element):
+        self.elements += ", " + str(element)
+    
+    def add_elements(self, elements):
+        self.elements = elements
+    
+    def clear_elements(self):
+        self.elements = ""
+            
+    @classmethod
+    def create_playlist(cls):
+        item = Playlists()
+        db.session.add(item)
+        db.session.commit()
+        return item
+    
+    @classmethod
+    def get_playlist(cls, id):
+        if id is None:
+            raise ValueError("An id is necessary to select a playlist")
+        return db.session.query(Playlists).filter(Playlists.id==id).one()
+    
 
 # The app is using Flask-migrate
 # When a modification is applied to the db structure (new table, table structure modification like column name change, new column etc.)

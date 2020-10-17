@@ -3,7 +3,7 @@ from UIserver.database.models import UploadedFiles, Playlists
 from flask import render_template, request, url_for, redirect
 from werkzeug.utils import secure_filename
 from UIserver.utils.gcode_converter import gcode_to_image
-from UIserver.database.playlist import Playlist
+from UIserver.database.models import Playlists
 import traceback
 import datetime
 
@@ -53,7 +53,7 @@ def upload(playlist):
 
                 playlist = int(playlist)
                 if (playlist):
-                    pl = Playlist(playlist)
+                    pl = Playlists.get_playlist(playlist)
                     pl.add_single_element(new_file.id)
                     pl.save()
 
@@ -132,7 +132,7 @@ def playlist(code):
 
 @app.route('/create_playlist')
 def create_playlist():
-    pl = Playlist()
+    pl = Playlists.create_playlist()
     return redirect(url_for("playlist", code=str(pl.id)))
 
 
