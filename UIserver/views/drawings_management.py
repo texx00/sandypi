@@ -129,7 +129,7 @@ def playlist(code):
         if len(elements) > 0:
             for i in elements:
                 if isinstance(i, DrawingElement):
-                    drawing.append(i.drawing_id)
+                    drawings.append(i.drawing_id)
     else: drawings = []
     return render_template("management/playlist.html", item=playlist, drawings=drawings)
 

@@ -17,7 +17,7 @@ class GenericPlaylistElement():
             setattr(self, v, kwargs[v])
     
     def get_dict(self):
-        return {key:value for key, value in self.__dict__.items() if not key.startswith('_') and not callable(key)}
+        return GenericPlaylistElement.clean_dict(self.__dict__)
 
     def __str__(self):
         return json.dumps(self.get_dict())
@@ -37,13 +37,19 @@ class GenericPlaylistElement():
         options = json.dumps(options)
         element_table(element_type=self.element_type, element_options = options)
 
+    @classmethod
+    def clean_dict(cls, val):
+        return {key:value for key, value in val.items() if not key.startswith('_') and not callable(key)}
 
     @classmethod
     def create_element_from_dict(cls, dict_val):
-        el_type = dict_val.pop("element_type")      # remove element type. Should be already be choosen when using the class
-        for elementClass in GenericPlaylistElement._child_types:
+        if 'element_type' in dict_val:
+            el_type = dict_val.pop("element_type")      # remove element type. Should be already be choosen when using the class
+        else:
+            raise ValueError("the dictionary must contain an 'element_type'")
+        for elementClass in _child_types:
             if elementClass.element_type == el_type:
-                return elementClass.create_element_from_dict(dict_val)
+                return elementClass(**dict_val)
         raise ValueError("'element_type' doesn't match any known element type")
 
     @classmethod
@@ -56,8 +62,8 @@ class GenericPlaylistElement():
         if not isinstance(item, PlaylistElements):
             raise ValueError("Need a db item from a playlist elements table")
         
-        res = item.__dict__
-        tmp = res.pop["element_options"]
+        res = GenericPlaylistElement.clean_dict(item.__dict__)
+        tmp = res.pop("element_options")
         res = {**res, **json.loads(tmp)}
         return cls.create_element_from_dict(res)
 
@@ -67,8 +73,10 @@ class GenericPlaylistElement():
     Identifies a drawing in the playlist
 """
 class DrawingElement(GenericPlaylistElement):
+    element_type = "drawing"
+
     def __init__(self, drawing_id=None, **kwargs):
-        super().__init__("drawing", **kwargs)         # define the element type
+        super(DrawingElement, self).__init__(element_type=DrawingElement.element_type, **kwargs)         # define the element type
         try:
             drawing_id = int(drawing_id)
             self.drawing_id = drawing_id
@@ -89,8 +97,10 @@ class DrawingElement(GenericPlaylistElement):
     Identifies a timing element (delay between drawings, next drawing at specific time of the day, repetitions, etc)
 """
 class TimeElement(GenericPlaylistElement):
+    element_type = "timing"
+
     def __init__(self, delay=None, expiry_date=None):
-        super().__init__("timing")
+        super(TimeElement, self).__init__(element_type=TimeElement.element_type)
         non_none = sum(i is not None for i in [delay, expiry_date])
         if non_none != 1:
             if non_none == 0:
@@ -105,22 +115,27 @@ class TimeElement(GenericPlaylistElement):
     Identifies a command element (sends a specific command/list of commands to the board)
 """
 class CommandElement(GenericPlaylistElement):
+    element_type = "command"
+
     def __init__(self, command):
-        super().__init__("command")
+        super().__init__(element_type=CommandElement.element_type)
 
 """
     Identifies a particular behaviour for the ball between drawings (like: move to the closest border, start from the center)
 """
 class PositioningElement(GenericPlaylistElement):
+    element_type = "positioning"
     def __init__(self):
-        super().__init__("positioning")
+        super().__init__(element_type=PositioningElement.element_type)
 
 """
     Identifies a "clear all" pattern
 """
 class ClearElement(GenericPlaylistElement):
+    element_type = "clear"
+
     def __init__(self):
-        super().__init__("clear")
+        super().__init__(element_type=ClearElement.element_type)
 
 
 _child_types = [DrawingElement, TimeElement, CommandElement, PositioningElement, ClearElement]

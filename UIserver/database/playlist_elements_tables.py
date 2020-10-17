@@ -26,6 +26,10 @@ def get_playlist_table_class(id):
     table_name = "_playlist_{}".format(id)
 
     class PTable(Base):
+        """
+        These tables are not updated automatically with flask migrate.
+        If a schema change is applied to this tables must use a custom migrate script for the upgrade to a new database version
+        """
         __tablename__ = table_name 
         __table_args__ = {'extend_existing': True}                      # necessary to modify a table
         id = db.Column(db.Integer, primary_key=True)
@@ -36,5 +40,9 @@ def get_playlist_table_class(id):
     return PTable
 
 def create_playlist_table(id):
+    """
+    Create a table associated to a single playlist.
+    The number of tables will be the same as the number of playlists.
+    """
     p_class = get_playlist_table_class(id)
     p_class.__table__.create(db.get_engine())

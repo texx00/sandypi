@@ -24,7 +24,7 @@ from flask_minify import minify
 from UIserver.hw_controller.queue_manager import QueueManager
 from UIserver.hw_controller.feeder import Feeder
 from UIserver.hw_controller.feeder_event_manager import FeederEventManager
-from UIserver.utils import settings_utils, software_updates
+from UIserver.utils import settings_utils, software_updates, migrations
 
 # Logging setup
 load_dotenv()
@@ -43,11 +43,13 @@ app.config['SECRET_KEY'] = 'secret!' # TODO put a key here
 app.config['UPLOAD_FOLDER'] = "./UIserver/static/Drawings"
 socketio = SocketIO(app)
 
+# database
+
 file_path = os.path.join(os.path.abspath(os.getcwd()), "database.db")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+file_path
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+migrate = Migrate(app, db, include_object=migrations.include_object)
 
 
 # scss compiler (already minified)
