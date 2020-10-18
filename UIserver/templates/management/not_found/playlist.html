@@ -1,0 +1,19 @@
+{% extends "base.html"%}
+{%block title%}Playlist not found{% endblock %}}
+
+
+{%block head%}
+<script src="{{url_for('static', filename='js/not_found.js')}}"></script>
+{%endblock%}
+
+{%block body%}
+<div class="row w-100 h-100 d-flex">
+    <div class="col-sm-12 h-100 w-100 center">
+        <div class="d-flex align-self-center">
+            <div>
+                <div class="d-block"><h1>Playlist not found</h1></div>
+            </div>
+        </div>
+    </div>
+</div>
+{%endblock%}

@@ -130,10 +130,11 @@ def playlist(code):
             for i in elements:
                 if isinstance(i, DrawingElement):
                     drawings.append(i.drawing_id)
-    else: drawings = []
+    else: 
+        return render_template("management/not_found/playlist.html")
     return render_template("management/playlist.html", item=playlist, drawings=drawings)
 
-@app.route('/create_playlist')
+@app.route('/create/playlist')
 def create_playlist():
     pl = Playlists.create_playlist()
     return redirect(url_for("playlist", code=str(pl.id)))

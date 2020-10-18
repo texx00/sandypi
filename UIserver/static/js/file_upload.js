@@ -53,5 +53,5 @@ function redirect_playlist(code){
 }
 
 function create_new_playlist(){
-    window.location.href ="/create_playlist"
+    window.location.href ="/create/playlist"
 }
