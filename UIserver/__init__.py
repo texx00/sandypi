@@ -87,6 +87,7 @@ sw_version = software_updates.get_commit_shash()
 @app.context_processor
 def inject_global_context():
     global_context_dict["settings"] = settings_utils.load_settings()  # loads the latest settings
+    global_context_dict["jsdevorprod"] = "development" if os.environ['FLASK_ENV'] == 'development' else "production.min"
     return global_context_dict
 
 @app.context_processor

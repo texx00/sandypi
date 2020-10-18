@@ -86,11 +86,6 @@ function confirm_delete(code){
     window.location=location.protocol + '//' + location.host + "/delete/playlist/" + code
 }
 
-function delete_drawing(code){
-    $("#sortable_li_"+code).remove();
-    must_save = true;
-}
-
 function start_playlist(code){
     socket.emit("start_playlist", code);
 }

@@ -1,8 +1,10 @@
 from UIserver import db
 from UIserver.database.playlist_elements_tables import create_playlist_table, get_playlist_table_class
 from UIserver.database.playlist_elements import GenericPlaylistElement
+
 from datetime import datetime
 import os
+import json
 
 # Gcode files table
 # Stores information about the single drawing
@@ -46,6 +48,10 @@ class Playlists(db.Model):
         for e in els:
             res.append(GenericPlaylistElement.create_element_from_db(e))
         return res
+    
+    def get_elements_json(self):
+        els = self.get_elements()
+        return json.dumps([e.get_dict() for e in els])
 
     # returns the database table class for the elements of that playlist
     def _ec(self):
@@ -66,6 +72,7 @@ class Playlists(db.Model):
         if id is None:
             raise ValueError("An id is necessary to select a playlist")
         return db.session.query(Playlists).filter(Playlists.id==id).one()
+
 
     
 

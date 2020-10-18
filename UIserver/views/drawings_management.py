@@ -123,16 +123,12 @@ def delete_drawing(code):
 @app.route('/playlist/<code>')
 def playlist(code):
     playlist = db.session.query(Playlists).filter_by(id=code).first()
-    drawings = []
+    elements = ""
     if not playlist is None:
-        elements = playlist.get_elements()
-        if len(elements) > 0:
-            for i in elements:
-                if isinstance(i, DrawingElement):
-                    drawings.append(i.drawing_id)
+        elements = playlist.get_elements_json()
     else: 
         return render_template("management/not_found/playlist.html")
-    return render_template("management/playlist.html", item=playlist, drawings=drawings)
+    return render_template("management/playlist.html", item=playlist, elements=elements)
 
 @app.route('/create/playlist')
 def create_playlist():
