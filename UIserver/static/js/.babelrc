@@ -1,0 +1,9 @@
+{
+    "plugins": [
+      ["add-header-comment", {
+        "header": [
+          "This file is compiled to plain js by using the babel module.\nPlease, have a look at UIserver/static/js/jsx/readme.md for more info before any modification."
+        ]
+      }]
+    ]
+  }
