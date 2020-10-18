@@ -19,6 +19,7 @@ def save_settings(settings):
 
 def load_settings():
     settings = ""
+    tmp_settings_path = settings_path
     if not os.path.isfile(settings_path):        # for python tests
         tmp_settings_path = defaults_path
     with open(tmp_settings_path) as f:

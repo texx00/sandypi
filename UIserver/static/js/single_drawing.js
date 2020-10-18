@@ -53,7 +53,7 @@ function delete_drawing(code){
 
 function add_to_playlist(drawing_code){
     pl_code = $("#playlists_dropdown").val();
-    socket.emit("add_to_playlist", drawing_code=drawing_code, playlist_code=pl_code);
+    socket.emit("playlist_add_element", drawing_code=drawing_code, playlist_code=pl_code);
     $('.modal').modal('hide');
     show_toast("Drawing added");
 }

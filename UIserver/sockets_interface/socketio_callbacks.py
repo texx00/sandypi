@@ -45,8 +45,8 @@ def playlist_save(playlist):
     pl.save()
 
 # add a drawing to a playlist
-@socketio.on("add_to_playlist")
-def add_to_playlist(element, playlist_code):
+@socketio.on("playlist_add_element")
+def playlist_add_element(element, playlist_code):
     pl = Playlists.get_playlist(playlist_code)
     pl.add_element(DrawingElement(element))
     pl.save()
