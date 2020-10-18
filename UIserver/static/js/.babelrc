@@ -1,4 +1,5 @@
 {
+    "presets": ["react"],
     "plugins": [
       ["add-header-comment", {
         "header": [
