@@ -44,7 +44,6 @@ app.config['UPLOAD_FOLDER'] = "./UIserver/static/Drawings"
 socketio = SocketIO(app)
 
 # database
-
 file_path = os.path.join(os.path.abspath(os.getcwd()), "database.db")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+file_path
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -53,7 +52,8 @@ migrate = Migrate(app, db, include_object=migrations.include_object)
 
 
 # scss compiler (already minified)
-sass.compile(dirname=(os.path.abspath(os.getcwd())+"/UIserver/static/scss", os.path.abspath(os.getcwd())+"/UIserver/static/css"), output_style='compressed')
+if os.path.isdir('./UIserver/static/js/node_modules/bootstrap'):     # check if the bootstrap folder is available (it will not be available in the github workflow for testing)
+    sass.compile(dirname=(os.path.abspath(os.getcwd())+"/UIserver/static/scss", os.path.abspath(os.getcwd())+"/UIserver/static/css"), output_style='compressed')
 # js and html minifier (on request)
 minify(app=app, html=True, js=False)
 
