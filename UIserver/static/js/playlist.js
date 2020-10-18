@@ -6,36 +6,6 @@ var show_delete = true;
 function document_ready() {
     $('#playlist_name').on('keyup', function() {updateTitle();});
     // setting up the drawings to be sortable
-    Sortable.create($('#drawings_ul').get(0), 
-        {   animation:150,                              // animation when something is dragged
-            ghostClass: "sortable_ghost",               // ghost object style class
-            chosenClass: "sortable_chosen",             // dragged object style class
-            filter: ".btn-cross",                       // filter the mouse event: on the elements with this class it will not activate the sortable class but will launch onclick events
-            onStart: function (evt){                    // when starts to drag it removes the "delete element" button and disable it until the object is released
-                element = $(".btn-cross")
-                element.css("opacity", "0");
-                element.css("visibility", "hidden");
-                show_delete = false;
-            },
-            onEnd: function (evt){                      // when the element is released reactivate the "delete element" activation
-                show_delete = true;
-            },
-            onUpdate: function (evt) {                  // when the list is resorted set the flag to save before exit
-                must_save = true;
-        },});
-    
-    // hover callbacks for grid elements to show the "delete drawing" button
-    $("div.show-cross").hover(function(){
-            if(show_delete){
-                var element = $(this).children(".btn-cross");
-                element.css("opacity", "1");
-                element.css("visibility", "visible");
-            }
-        }, function(){
-            var element = $(this).children(".btn-cross");
-            element.css("opacity", "0");
-            element.css("visibility", "hidden");
-    });
 };
 
 // Ask to save before leaving the page

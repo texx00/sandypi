@@ -8,15 +8,39 @@ class ElementCard extends React.Component{
     constructor(props){
         super(props);
         this.state = {
-            active: true // TODO use a transition/animation on value change
+            active: true,
+            show_cross: false
+        }
+        this.element_ref = React.createRef();
+    }
+    
+    show_cross(val){
+        this.setState({show_cross: true});
+    }
+
+    hide_cross(val){
+        this.setState({show_cross: false});
+    }
+
+    onTransitionEnd(){
+        if (!this.state.active){
+            this.props.handleUnmount(this)
         }
     }
 
+
     render(){
-        return <li className={"col-lg-3 col-md-4 col-sm-6 col-xs-6 mb-3" + (this.state.active ? "" : " d-none")} title="Drag me around to sort the list">
-            <div className="card hover-zoom">
+        return <li className={"col-lg-3 col-md-4 col-sm-6 col-xs-6 mb-3" + (this.state.active ? "" : " disappear")} 
+            title="Drag me around to sort the list"
+            onTransitionEnd={this.onTransitionEnd.bind(this)}
+            ref={this.element_ref}>
+            <div className="card hover-zoom" 
+                onMouseEnter={this.show_cross.bind(this)} 
+                onMouseLeave={this.hide_cross.bind(this)}>
                 <div className="card-img-overlay show-cross">
-                    <div className="justify-content-md-center btn-cross" onClick={() => {this.setState({active: false})}} title="Remove this drawing from the list">X</div>
+                    <div className={"justify-content-md-center btn-cross" + (this.state.show_cross && this.props.show_cross ? " show" : "")}
+                        onClick={() => {this.setState({active: false})}} 
+                        title="Remove this drawing from the list">X</div>
                 </div>
                 <img className="card-img-top" src = {"../static/Drawings/" + this.props.element.drawing_id + "/" + this.props.element.drawing_id + ".jpg"}/>
             </div>
@@ -29,14 +53,47 @@ class SortableCards extends React.Component{
 
     constructor(props){
         super(props);
-        this.elements = this.props.elements.map((element, index) => {
-            return <ElementCard element={element} key={index}/>;
+        this.state = {
+            show_child_cross: true
+        }
+        elements = this.props.elements.map((element, index) => {
+            return <ElementCard 
+                element={element} 
+                key={index} 
+                show_cross={this.state.show_child_cross} 
+                handleUnmount={this.unmountComponent.bind(this)}/>;
         });
+        this.state = ({elements: elements});
+    }
+
+    componentDidMount(){
+        Sortable.create(($('#drawings_ul')[0]), 
+        {   animation:150,                              // animation when something is dragged
+            ghostClass: "sortable_ghost",               // ghost object style class
+            chosenClass: "sortable_chosen",             // dragged object style class
+            filter: ".btn-cross",                       // filter the mouse event: on the elements with this class it will not activate the sortable class but will launch onclick events
+            onStart:(evt) => {                          // when starts to drag it removes the "delete element" button and disable it until the object is released
+                this.setState({show_child_cross: false});
+            },
+            onEnd: (evt) => {                           // when the element is released reactivate the "delete element" activation
+                this.setState({show_child_cross: true});
+            },
+            onUpdate: (evt) => {                        // when the list is resorted set the flag to save before exit
+                must_save = true;
+        },});
+    }
+
+    unmountComponent(component){
+        elements = this.state.elements;
+        elements = elements.filter((el)=>{
+            return el.props.element.id!=component.props.element.id;
+        });
+        this.setState({elements: elements});
     }
 
     render(){
         return <ul id="drawings_ul" className="row list-unstyled">
-            {this.elements}
+            {this.state.elements}
         </ul>
     }
 }
@@ -98,10 +155,8 @@ class ElementsView extends React.Component{
     }
 }
 
-
 const elements_list = (
         <ElementsView/>
     );
-
 
 ReactDOM.render(elements_list, elements_container[0]);

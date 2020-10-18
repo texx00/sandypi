@@ -26,6 +26,11 @@
     cursor: pointer;
 }
 
+.show{
+    opacity: 1;
+    visibility: visible !important;
+}
+
 .sortable_ghost {
     opacity: 0.2;
 }

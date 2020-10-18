@@ -78,6 +78,11 @@ button:hover, .btn-dark:hover{
     transition: all ease-in-out 0.15s;
 }
 
+.disappear{
+    transform: scale(0);
+    transition: all ease-in-out 0.2s;
+}
+
 /* Bootstrap overrides */
 .card{
     @extend .card;
