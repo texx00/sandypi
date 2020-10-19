@@ -37,8 +37,7 @@ class ElementCard extends React.Component {
             "li",
             { className: "col-lg-3 col-md-4 col-sm-6 col-xs-6 mb-3" + (this.state.active ? "" : " disappear"),
                 title: "Drag me around to sort the list",
-                onTransitionEnd: this.onTransitionEnd.bind(this),
-                ref: this.element_ref },
+                onTransitionEnd: this.onTransitionEnd.bind(this) },
             React.createElement(
                 "div",
                 { className: "card hover-zoom",
@@ -75,6 +74,7 @@ class SortableCards extends React.Component {
                 element: element,
                 key: index,
                 show_cross: this.state.show_child_cross,
+                ref: element.ref,
                 handleUnmount: this.unmountComponent.bind(this) });
         });
         this.state = { elements: elements };
@@ -96,6 +96,7 @@ class SortableCards extends React.Component {
             onUpdate: evt => {
                 // when the list is resorted set the flag to save before exit
                 must_save = true;
+                this.props.onUpdate(evt.newIndex, evt.oldIndex);
             } });
     }
 
@@ -152,10 +153,17 @@ class Controls extends React.Component {
 class ElementsView extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
+        elements = elements.map(element => {
+            // elements is the global object containing data from the server
+            element.ref = React.createRef(); // adding ref to be able to get the element and send the new updated value to the server on save
+            return element;
+        });
+        this.state = { // saving elements in the state
             elements: elements
         };
-        this.list = React.createElement(SortableCards, { elements: this.state.elements });
+        this.list = React.createElement(SortableCards, {
+            elements: this.state.elements,
+            onUpdate: this.onListUpdate.bind(this) });
         this.controls = React.createElement(Controls, {
             onDeletePlaylist: this.onDeletePlaylist.bind(this),
             onSavePlaylist: this.onSavePlaylist.bind(this),
@@ -163,16 +171,45 @@ class ElementsView extends React.Component {
             onUploadDrawing: this.onUploadDrawing.bind(this) });
     }
 
+    onListUpdate(to, from) {
+        let els = this.state.elements;
+        let el = els[from];
+        els.splice(from, 1);
+        els.splice(to, 0, el);
+        this.setState({ elements: els });
+    }
+
     onDeletePlaylist() {
         delete_playlist(playlist_id);
     }
 
     onSavePlaylist() {
-        console.log("Save playlist");
-        elements = this.list;
-        console.log(this);
-        console.log(elements);
-        // todo implement callbacks from child elements to update sortable cards state which will be the json string to sent to the server
+        console.log("Saving playlist");
+        must_save = false;
+
+        elements = [...this.state.elements]; // create a copy of the elements to pack the data for the server
+        elements = elements.map((element, index) => {
+            if (element.ref && element.ref.current) {
+                let el = element.ref.current.props.element;
+                delete el['ref']; // remove reference element
+                el.id = index; // reorder the elements
+                return el;
+            }
+        });
+        elements = elements.filter(e => {
+            return e != undefined;
+        }); // remove undefined elements (elements that were removed from the array)
+
+        let data = { // not really nice but at the moment works. Should include also this element in the react part?
+            name: $("#playlist_name").html().replace(/(?:&nbsp;|<br>)/g, ''),
+            id: $("#playlist_id").html(),
+            elements: elements
+        };
+        console.log(data);
+        // create json string. Use a decycler to do it
+        data = JSON.stringify(data);
+        socket.emit("playlist_save", data);
+        show_toast("Playlist saved");
     }
 
     onStartPlaylist() {

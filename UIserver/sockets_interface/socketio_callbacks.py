@@ -1,11 +1,15 @@
-from UIserver import socketio, app, db
 from flask import render_template
-from UIserver.database.models import UploadedFiles, Playlists
+
 import pickle
+import json
 import datetime
+
+from UIserver import socketio, app, db
+
 from UIserver.utils import settings_utils, software_updates
 from UIserver.database.models import Playlists
 from UIserver.database.playlist_elements import DrawingElement
+from UIserver.database.models import UploadedFiles, Playlists
 
 
 @socketio.on('message')
@@ -37,7 +41,7 @@ def nav_drawing_request():
 # save the changes to the playlist
 @socketio.on("playlist_save")
 def playlist_save(playlist):
-    playlist = playlist['data']
+    playlist = json.loads(playlist)
     pl = Playlists.get_playlist(playlist['id'])
     pl.name = playlist['name']
     pl.clear_elements()

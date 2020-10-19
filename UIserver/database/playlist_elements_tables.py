@@ -13,7 +13,9 @@ class PlaylistElements(object):
     def clear_elements(cls):
         if cls == PlaylistElements:
             raise NotImplementedError("Must use a table class to clean the table")
-        return cls.query.delete()
+        res = db.session.query(cls).delete()
+        db.session.commit()
+        return res
 
 # creates sqlalchemy base class with the addition of the custom class
 Base = declarative_base(cls = PlaylistElements)

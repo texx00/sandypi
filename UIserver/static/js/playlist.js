@@ -22,20 +22,6 @@ function updateTitle(){
     $(document).prop('title', text);
 }
 
-function save(){
-    must_save=false
-    save_data = {
-        name : $("#playlist_name").html().replace(/(?:&nbsp;|<br>)/g,''),
-        id : $("#playlist_id").html(),
-        elements: []
-    }
-    $("#drawings_ul").children('li').each(function( index ) {
-            save_data['elements'].push($(this).find('div.data').html());
-        });
-    socket.emit('playlist_save', {data: save_data});
-    show_toast("Playlist saved");
-}
-
 function delete_playlist(code){
     console.log("Delete file");
     $("#modal_container").html('\

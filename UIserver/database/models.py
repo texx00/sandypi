@@ -36,7 +36,7 @@ class Playlists(db.Model):
             elements = [elements]
         for i in elements:
             if not isinstance(i, GenericPlaylistElement):
-                i = GenericPlaylistElement.create_element_from_json(i)
+                i = GenericPlaylistElement.create_element_from_dict(i)
             i.save(self._ec())
     
     def clear_elements(self):
