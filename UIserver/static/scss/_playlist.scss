@@ -37,3 +37,19 @@
 .sortable_chosen div.btn-cross{
     display: none;
 }
+
+.control-card {
+    background-color: black;
+    height:100%;
+    color: $light;
+    font-weight: 700;
+    font-size: 80px;
+    height: 100%;
+    width: 100%;
+    @extend .center;
+    transition: font-size pulse 2s infinite;
+}
+
+.control-card:hover{
+    font-size: 120px;
+}
