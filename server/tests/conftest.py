@@ -8,6 +8,7 @@ import flask_migrate
 
 import pytest
 
+from server import server
 from server import db
 
 # to run tests use "python -m pytest server/tests" in the main project folder
