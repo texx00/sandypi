@@ -1,0 +1,102 @@
+@import "_colors.scss";
+
+@import "~bootstrap/scss/bootstrap";
+
+
+/** ----------------------------------------------------- **/
+/** ---------------  Custom base styles  ---------------- **/
+/** ----------------------------------------------------- **/
+
+
+.bg-light-alpha{
+    background-color: $light_alpha;
+}
+
+a, a:visited {
+    text-decoration: none;
+    font-weight: 700;
+    color: $dark;
+    cursor: pointer;
+}
+a:hover{
+    text-decoration: underline;
+}
+
+button{
+    @extend .btn;
+    @extend .m-1;
+    background-color: $primary;
+    color: $dark;
+}
+
+.btn-dark{
+    @extend .btn-dark;
+    background-color: $dark;
+    color: $primary;
+}
+
+.section-header{
+    @extend .border-bottom;
+    @extend .border-light;
+    @extend .align-item-center !optional;
+    @extend .mt-4;
+    @extend .mb-3;
+    @extend .pb-2;
+}
+
+.center{
+    @extend .d-flex;
+    @extend .text-center;
+    @extend .justify-content-center;
+}
+
+.data{
+    display: none;
+}
+
+.clickable{
+    cursor: pointer;
+}
+
+/* HOVERS */
+
+.hover-light:hover{
+    background-color: $light;
+    transition: 0.15s;
+}
+
+button:hover, .btn-dark:hover{
+    background-color: $light;
+    transition: 0.15s;
+    color: $white;
+}
+
+.hover-zoom{
+    &:hover{
+        transform: scale(1.05);
+    }
+    transition: all ease-in-out 0.15s;
+}
+
+.disappear{
+    transform: scale(0);
+    transition: all ease-in-out 0.2s;
+}
+
+/* Bootstrap overrides */
+.card{
+    @extend .card;
+    border: 0px;
+}
+
+/* special styles */
+.fade-top{
+    margin-bottom: -1px;
+    background-image: linear-gradient(transparent, $primary);
+}
+
+.toast_container_position{
+    position: fixed;
+    right: 0px;
+    bottom: 0px;
+}
