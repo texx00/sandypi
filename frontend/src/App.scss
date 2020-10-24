@@ -61,12 +61,12 @@ button{
 /* HOVERS */
 
 .hover-light:hover{
-    background-color: $light;
+    background-color: $primary;
     transition: 0.15s;
 }
 
 button:hover, .btn-dark:hover{
-    background-color: $light;
+    background-color: $primary;
     transition: 0.15s;
     color: $white;
 }
@@ -83,10 +83,31 @@ button:hover, .btn-dark:hover{
     transition: all ease-in-out 0.2s;
 }
 
+.max-width{
+    max-width: 960px;
+}
+
+.logo{
+    font-weight: bold;
+    color: white;
+}
+
+
 /* Bootstrap overrides */
 .card{
     @extend .card;
+    background-color: transparent;
     border: 0px;
+}
+
+/* Carousel mutli overrides */
+button.react-multiple-carousel__arrow{
+    background-color: $light;
+    color: $dark;
+}
+
+button.react-multiple-carousel__arrow:hover{
+    background-color: $primary;
 }
 
 /* special styles */
@@ -99,4 +120,21 @@ button:hover, .btn-dark:hover{
     position: fixed;
     right: 0px;
     bottom: 0px;
+}
+
+.square{
+    width:100%;
+    padding-top:100% !important;
+    position: relative;
+    div{
+        position: absolute;
+        top:45%;
+        width:100%;
+        @extend .center;
+        @extend .text-light;
+    }
+}
+
+.bg-black{
+    background-color: $black;
 }
