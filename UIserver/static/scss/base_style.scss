@@ -131,53 +131,11 @@ button:hover, .btn-dark:hover{
     font-weight: 600;
 }
 
-/* --- POPUP --- */
-#popup{
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    z-index: 10;
-    background-color: $light_alpha;
-    color: $light;
-    display: none;
-    text-align: center;
-}
 
-#popup_container{
-    font-size: x-large;
-    position: absolute;
-    top:200px;
-    left:25%;
-    width:50%;
-    min-height:60%;
+/** **/
+.pb100{
+    padding-bottom: 100%;
 }
-#popup_div{
-    padding-left:10px;
-    padding-right:10px;
-    background-color: $primary;
-}
-
-/* Dialog windows setup */
-.dialog{
-    color: $dark;
-    border-radius: 5px;
-    padding-top:40px;
-    padding-bottom:40px;
-    position: absolute;
-    width:70%;
-    left:15%;
-}
-.dialog_text{
-    margin-bottom:15px;
-}
-.dialog_button{
-    display: inline-block;
-    width: 40%;
-}
-.dialog_buttons{
-    margin-top:10px;
-}
-
 
 /** SECTION SPECIFIC STYLES **/
 

@@ -11,6 +11,17 @@ class BasicElement extends React.Component{
         super(props);
     }
 
+    getModalOptions(){
+        return false;
+    }
+
+    showModal(){
+        let options = this.getModalOptions();
+        if (options){
+            console.log("Must show options");   //TODO
+        }
+    }
+
     render(){
         return <div className="bg-primary card-img-top"></div>;
     }
@@ -21,8 +32,33 @@ class DrawingElement extends BasicElement{
         super(props);
     }
 
+    getModalOptions(){
+        return false;
+    }
+
     render(){
         return <img className="card-img-top" src = {"../static/Drawings/" + this.props.element.drawing_id + "/" + this.props.element.drawing_id + ".jpg"}/>
+    }
+}
+
+// TODO add possibility to add a date instead of a delay
+class TimingElement extends BasicElement{
+    constructor(props){
+        super(props);
+    }
+
+    getModalOptions(){
+        return <div>
+            <div>
+                <span>Delay</span>
+            </div>
+            </div>
+    }
+
+    render(){
+        return <div>
+                Timing icon
+            </div>
     }
 }
 
@@ -70,6 +106,7 @@ class ElementCard extends React.Component{
         return <li className={"col-lg-3 col-md-4 col-sm-6 col-xs-6 mb-3" + (this.state.active ? "" : " disappear")} 
             title="Drag me around to sort the list"
             onTransitionEnd={this.onTransitionEnd.bind(this)}>
+            <div className="pb100 position-absolute"></div>
             <div className="card hover-zoom" 
                 onMouseEnter={this.show_cross.bind(this)} 
                 onMouseLeave={this.hide_cross.bind(this)}>
@@ -87,36 +124,122 @@ class ElementCard extends React.Component{
 class ModalContent extends React.Component{
     constructor(props){
         super(props);
+        this.last_edited = null;
     }
 
-    newElement(){
-        this.props.modalConfirm({prova:"prova"});// TODO insert element
+    toggleCollapsable(id){
+        $("#"+id).collapse("toggle");
+        this.last_edited = id;
+        console.log(id)
     }
 
+    componentDidMount(){
+        dropzone = new Dropzone("#upload_dropzone_elements", {url: location.protocol + '//' + location.host + "/upload/" + playlist_id, acceptedFiles: ".gcode, .nc"});
+        dropzone.on("success", file_loaded_success);
+        dropzone.on("error", file_loaded_error);
+        dropzone.on("totaluploadprogress", function (progress) {
+                console.log("progress " + progress);
+                $("#upload-progress-bar").css("width", progress+"%");
+                $("#upload-progress-bar").attr("aria-valuenow", progress+"%");
+            });
+            dropzone.on("addedfile", function(file){
+                console.log("start")
+                $("#upload-label").html("Please wait. <br/>Uploading file...");
+                // TODO fix progress bar (not showing progress correctly)
+                //$("#upload-progress-bar").parent().css("display", "block");
+            });
+    
+        //$("#upload-progress-bar").parent().css("display", "none");
+    }
+
+    /*
+
+                // TODO introduce the other elements types
+                        <button className="d-block btn btn-dark w-100" onClick={this.showAddDrawing.bind(this)}>+ Upload drawing</button> 
+                        <button className="d-block btn btn-dark w-100" onClick={this.showAddTiming.bind(this)}>+ Add timing element</button>
+                        <button className="d-block btn btn-dark w-100" onClick={this.showAddCommands.bind(this)}>+ Add commands</button>
+                        <button className="d-block btn btn-dark w-100" onClick={this.showAddPosition.bind(this)}>+ Add positioning element</button>
+                        <button className="d-block btn btn-dark w-100" onClick={this.showAddClearElement.bind(this)}>+ Add clear element</button>
+
+                        
+                </div>
+                */
+
+    //TODO fix this mess with the introduction of react for the entire app... Can manage better large blocks like this by creating better dedicated components (like for the file upload)
     render(){
         return <div>
-                <div className="center p-5">
-                    <button className="btn btn-dark" onClick={()=>{show_dropzone(playlist_id);}}>+ Upload drawing</button> 
-                    <button className="btn btn-dark">+ Add timing element</button>
-                    <button className="btn btn-dark">+ Add commands</button>
-                    <button className="btn btn-dark">+ Add positioning element</button>
-                    <button className="btn btn-dark">+ Add clear element</button>
+                <div className="modal-body">
+                    <div className="accordion" id="addElementAccordion">
+                        <div className="card">
+                            <div className="card-header" id="addDrawingH">
+                                <h5 className="mb-0 center">
+                                    <button className="" type="button" onClick={()=>{
+                                        this.toggleCollapsable("addDrawing");
+                                    }}>
+                                        + New Drawing
+                                    </button>
+                                </h5>
+                            </div>
+
+                            <div id="addDrawing" className="collapse" data-parent="#addElementAccordion">
+                                <div className="card-body">
+                                    <div id="upload_dropzone_elements" className="clickable">
+                                        <div className="animated-background m-2 p-5 mh-100 d-flex justify-content-center align-items-center no-clickable" data-dz-message>
+                                            <div className="d-block">
+                                                <span id="upload-label" className="text-center">Drag and drop the .gcode/.nc file here <br/> or click to open the file explorer</span>
+                                                <div className="progress mt-2 d-none">
+                                                    <div id="upload-progress-bar" className="progress-bar progress-bar-animated bg-primary" role="progressbar" aria-valuenow="25%" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="card">
+                            <div className="card-header" id="addTimingH">
+                                <h5 className="mb-0 center">
+                                    <button className="" type="button" onClick={()=>{
+                                        this.toggleCollapsable("addTiming");
+                                    }}>
+                                        + New TimingElement
+                                    </button>
+                                </h5>
+                            </div>
+
+                            <div id="addTiming" className="collapse" data-parent="#addElementAccordion">
+                                <div className="card-body center">
+                                    <div className="form-group">
+                                        <label htmlFor="timing-dalay" className="col-form-label">Delay [s]</label>
+                                        <input type="text" className="form-control" id="timing-delay"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
                 <div className="modal-footer">
                     <div className="text-center w-100 m-0">
-                        <button type="button" className="btn btn-primary m-0 mr-1" data-dismiss="modal">No</button>
-                        <button type="button" className="btn btn-primary m-0" onClick={this.newElement.bind(this)}>Yes</button>
+                        <button type="button" className="btn btn-primary m-0" data-dismiss="modal">Close</button>
+                        <button type="button" className="btn btn-primary" data-dismiss="modal" onClick={()=>{console.log("Must add element")}}>Add selected element</button>
                     </div>
                 </div>
             </div>
     }
-
 }
 
 class ControlCard extends React.Component{
     constructor(props){
         super(props);
-        this.modal_content = <ModalContent modalConfirm={this.handleModal.bind(this)} key="0"/>
+        this.modal_content = <ModalContent modalConfirm={this.handleModal.bind(this)} unmountModal={this.unmountModal.bind(this)} key="0"/>
+        $('.modal').on('hide.bs.modal', ()=>{
+            this.unmountModal();
+        });
+    }
+
+    unmountModal(){
+        ReactDOM.unmountComponentAtNode($("#modal_container")[0]);
     }
 
     handleModal(element){
@@ -124,18 +247,20 @@ class ControlCard extends React.Component{
         $('.modal').modal('hide');
     }
 
-    inject_modal(){                         // uses the modal container to manage the new element addition. not really elegant but cannot do anything different with this setup. A complete react conversion should fix it
+    injectModal(){                         // uses the modal container to manage the new element addition. not really elegant but cannot do anything different with this setup. A complete react conversion should fix it
         const content = [this.modal_content];
         ReactDOM.render(content, $("#modal_container")[0]);
         $('.modal').modal('show');
     }
 
+    // TODO fix the + button animation and position
     render(){
         return <li className="col-lg-3 col-md-4 col-sm-6 col-xs-6 mb-3 nodrag" 
                 id = "control_card"
                 title = "Add a new element">
-                <div className="card hover-zoom control-card" onClick={this.inject_modal.bind(this)}>
-                        +
+                <div className="card hover-zoom control-card" onClick={this.injectModal.bind(this)}>
+                    <div className="pb100"></div>
+                    <div className="position-absolute w-100 h-100 pt-5">+</div>
                 </div>
             </li>
     }
