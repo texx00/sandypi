@@ -11,9 +11,9 @@ import re
 import logging
 from dotenv import load_dotenv
 
-from UIserver.utils import limited_size_dict, buffered_timeout, settings_utils
-from UIserver.hw_controller.device_serial import DeviceSerial
-from UIserver.hw_controller.gcode_rescalers import *
+from server.utils import limited_size_dict, buffered_timeout, settings_utils
+from server.hw_controller.device_serial import DeviceSerial
+from server.hw_controller.gcode_rescalers import *
 
 
 

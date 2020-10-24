@@ -1,7 +1,7 @@
 
-from UIserver.views.drawings_management import create_playlist, playlist, delete_playlist
-from UIserver.sockets_interface.socketio_callbacks import playlist_save, playlist_add_element
-from UIserver import db
+from server.views.drawings_management import create_playlist, playlist, delete_playlist
+from server.sockets_interface.socketio_callbacks import playlist_save, playlist_add_element
+from server import db
 
 
 def test_create_playlist(client):

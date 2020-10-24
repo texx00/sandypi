@@ -1,0 +1,10 @@
+{
+    "presets": ["react"],
+    "plugins": [
+      ["add-header-comment", {
+        "header": [
+          "This file is compiled to plain js by using the babel module.\nPlease, have a look at server/static/js/jsx/readme.md for more info before any modification."
+        ]
+      }]
+    ]
+  }

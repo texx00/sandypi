@@ -1,6 +1,6 @@
-from UIserver import db
-from UIserver.database.playlist_elements_tables import create_playlist_table, get_playlist_table_class
-from UIserver.database.playlist_elements import GenericPlaylistElement
+from server import db
+from server.database.playlist_elements_tables import create_playlist_table, get_playlist_table_class
+from server.database.playlist_elements import GenericPlaylistElement
 
 from datetime import datetime
 import os

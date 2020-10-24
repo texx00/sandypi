@@ -1,5 +1,5 @@
 import traceback
-from UIserver.database.models import UploadedFiles
+from server.database.models import UploadedFiles
 from flask import render_template
 
 class SocketioEmits():

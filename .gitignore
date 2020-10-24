@@ -2,7 +2,8 @@
 env
 instance
 **/__pycache__
-UIserver.egg-info
+.pytest_cache
+server.egg-info
 *.db
 sketches
 build
@@ -12,9 +13,9 @@ dist
 *.pyc
 server.started
 
-UIserver/static/js/bower_components
-UIserver/static/js/node_modules
-UIserver/saves/saved_settings.json
+server/static/js/bower_components
+server/static/js/node_modules
+server/saves/saved_settings.json
 
 start.bat
 start.sh

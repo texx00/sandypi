@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from UIserver import db
+from server import db
 
 # creates base class with common methods
 class PlaylistElements(object):

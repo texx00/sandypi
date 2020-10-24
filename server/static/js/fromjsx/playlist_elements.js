@@ -1,6 +1,6 @@
 /**
 * This file is compiled to plain js by using the babel module.
-* Please, have a look at UIserver/static/js/jsx/readme.md for more info before any modification.
+* Please, have a look at server/static/js/jsx/readme.md for more info before any modification.
 **/
 
 let elements_container = $("#elements");

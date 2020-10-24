@@ -4,12 +4,12 @@ import pickle
 import json
 import datetime
 
-from UIserver import socketio, app, db
+from server import socketio, app, db
 
-from UIserver.utils import settings_utils, software_updates
-from UIserver.database.models import Playlists
-from UIserver.database.playlist_elements import DrawingElement
-from UIserver.database.models import UploadedFiles, Playlists
+from server.utils import settings_utils, software_updates
+from server.database.models import Playlists
+from server.database.playlist_elements import DrawingElement
+from server.database.models import UploadedFiles, Playlists
 
 
 @socketio.on('message')

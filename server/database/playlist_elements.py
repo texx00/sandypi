@@ -1,8 +1,8 @@
 import json
 from abc import abstractclassmethod
 
-from UIserver.database.playlist_elements_tables import PlaylistElements, get_playlist_table_class
-from UIserver import db
+from server.database.playlist_elements_tables import PlaylistElements, get_playlist_table_class
+from server import db
 
 
 """

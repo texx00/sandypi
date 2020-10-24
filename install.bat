@@ -3,7 +3,7 @@ python -m pip install -r requirements.txt
 
 echo '----- Installing js dependencies -----'
 call npm install -g yarn
-call yarn --cwd ./UIserver/static/js
+call yarn --cwd ./server/static/js
 
 echo '----- Upgrading database -----'
 flask db upgrade

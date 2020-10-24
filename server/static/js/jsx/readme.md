@@ -8,4 +8,4 @@ To run the module on windows it is possible to use "start_jsx_babel.bat" availab
 The module will automatically detect any change to a jsx file and will compile it to the js counterpart automatically.
 
 ### File header
-The module is set to add a common header to every file. The header can be changed in the UIserver/static/js/.babelrc file
+The module is set to add a common header to every file. The header can be changed in the server/static/js/.babelrc file

@@ -4,7 +4,7 @@ from setuptools.command.install import install
 import time
 import platform
 import os
-from UIserver.utils import settings_utils
+from server.utils import settings_utils
 
 class PostDevelopCommand(develop):
     def run(self):
@@ -19,8 +19,8 @@ class PostInstallCommand(install):
         settings_utils.update_settings_file_version()
 
 setup(
-    name='UIserver',
-    packages=['UIserver'],
+    name='server',
+    packages=['server'],
     include_package_data=True,
     install_requires=[
         'flask', 'sqlalchemy',

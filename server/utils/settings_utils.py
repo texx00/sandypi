@@ -9,8 +9,8 @@ LINE_SENT = 6
 LINE_RECEIVED = 5
 
 # settings paths
-settings_path = "./UIserver/saves/saved_settings.json"
-defaults_path = "UIserver/saves/default_settings.json"
+settings_path = "./server/saves/saved_settings.json"
+defaults_path = "server/saves/default_settings.json"
 
 def save_settings(settings):
     dataj = json.dumps(settings)

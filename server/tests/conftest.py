@@ -8,21 +8,20 @@ import flask_migrate
 
 import pytest
 
-from UIserver import UIserver
-from UIserver import db
+from server import db
 
-# to run tests use "python -m pytest UIserver/tests" in the main project folder
+# to run tests use "python -m pytest server/tests" in the main project folder
 # at the moment there is a deprecation waring related to the "future" library
 
 
 @pytest.fixture(scope="session")
 def client():
     db_fd, db_fu = tempfile.mkstemp()
-    UIserver.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
-    UIserver.app.config['TESTING'] = True
+    server.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
+    server.app.config['TESTING'] = True
 
-    with UIserver.app.test_client() as client:
-        with UIserver.app.app_context():
+    with server.app.test_client() as client:
+        with server.app.app_context():
             db.create_all() 
             yield client
             db.drop_all()

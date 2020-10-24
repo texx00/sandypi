@@ -3,7 +3,7 @@ import serial
 import time
 import sys
 import logging
-from UIserver.hw_controller.emulator import Emulator
+from server.hw_controller.emulator import Emulator
 
 # This class connect to a serial device
 # If the serial device request is not available it will create a virtual serial device

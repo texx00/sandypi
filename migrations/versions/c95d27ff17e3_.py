@@ -11,7 +11,7 @@ from sqlalchemy.engine.reflection import Inspector
 from sqlalchemy import orm
 
 try:
-    from UIserver.database.models import Playlists
+    from server.database.models import Playlists
 except:
     pass
 

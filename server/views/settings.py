@@ -1,9 +1,9 @@
-from UIserver import app, socketio
+from server import app, socketio
 from flask import render_template
 import os.path
 import shutil
 import json
-from UIserver.utils import settings_utils
+from server.utils import settings_utils
 import os
 from time import sleep
 from threading import Thread

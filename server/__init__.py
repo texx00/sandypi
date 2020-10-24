@@ -21,10 +21,10 @@ import logging
 import sass
 from flask_minify import minify
 
-from UIserver.hw_controller.queue_manager import QueueManager
-from UIserver.hw_controller.feeder import Feeder
-from UIserver.hw_controller.feeder_event_manager import FeederEventManager
-from UIserver.utils import settings_utils, software_updates, migrations
+from server.hw_controller.queue_manager import QueueManager
+from server.hw_controller.feeder import Feeder
+from server.hw_controller.feeder_event_manager import FeederEventManager
+from server.utils import settings_utils, software_updates, migrations
 
 # Logging setup
 load_dotenv()
@@ -40,7 +40,7 @@ logging.getLogger("werkzeug").setLevel(level)
 app = Flask(__name__, template_folder='templates')
 
 app.config['SECRET_KEY'] = 'secret!' # TODO put a key here
-app.config['UPLOAD_FOLDER'] = "./UIserver/static/Drawings"
+app.config['UPLOAD_FOLDER'] = "./server/static/Drawings"
 socketio = SocketIO(app)
 
 # database
@@ -52,16 +52,16 @@ migrate = Migrate(app, db, include_object=migrations.include_object)
 
 
 # scss compiler (already minified)
-if os.path.isdir('./UIserver/static/js/node_modules/bootstrap'):     # check if the bootstrap folder is available (it will not be available in the github workflow for testing)
-    sass.compile(dirname=(os.path.abspath(os.getcwd())+"/UIserver/static/scss", os.path.abspath(os.getcwd())+"/UIserver/static/css"), output_style='compressed')
+if os.path.isdir('./server/static/js/node_modules/bootstrap'):     # check if the bootstrap folder is available (it will not be available in the github workflow for testing)
+    sass.compile(dirname=(os.path.abspath(os.getcwd())+"/server/static/scss", os.path.abspath(os.getcwd())+"/server/static/css"), output_style='compressed')
 # js and html minifier (on request)
 minify(app=app, html=True, js=False)
 
 
-import UIserver.database.models
-import UIserver.views.drawings_management, UIserver.views.settings
-import UIserver.sockets_interface.socketio_callbacks
-from UIserver.sockets_interface.socketio_emits import SocketioEmits
+import server.database.models
+import server.views.drawings_management, server.views.settings
+import server.sockets_interface.socketio_callbacks
+from server.sockets_interface.socketio_emits import SocketioEmits
 
 app.semits = SocketioEmits(app,socketio, db)
 
