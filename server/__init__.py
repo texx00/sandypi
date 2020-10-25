@@ -2,6 +2,7 @@ from flask import Flask, redirect, url_for
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_cors import CORS
 
 import os
 import sys
@@ -42,6 +43,7 @@ app = Flask(__name__, template_folder='templates')
 app.config['SECRET_KEY'] = 'secret!' # TODO put a key here
 app.config['UPLOAD_FOLDER'] = "./server/static/Drawings"
 socketio = SocketIO(app, cors_allowed_origins="*")
+CORS(app)   # setting up cors for react
 
 # database
 file_path = os.path.join(os.path.abspath(os.getcwd()), "database.db")
@@ -60,6 +62,7 @@ minify(app=app, html=True, js=False)
 
 import server.database.models
 import server.views.drawings_management, server.views.settings
+import server.api.drawings
 import server.sockets_interface.socketio_callbacks
 from server.sockets_interface.socketio_emits import SocketioEmits
 

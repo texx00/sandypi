@@ -17,12 +17,6 @@ ALLOWED_EXTENSIONS = ["gcode", "nc"]
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route('/preview')
-def preview():
-    result = db.session.query(UploadedFiles).order_by(UploadedFiles.edit_date.desc()).limit(4)
-    pl_result = db.session.query(Playlists).order_by(Playlists.edit_date.desc())
-    return render_template("management/grid_element.html", drawings = result, parent_template = "management/preview.html", playlists = pl_result)
-
 # Upload route for the dropzone to load new drawings
 @app.route('/upload/<playlist>', methods=['GET','POST'])
 def upload(playlist):

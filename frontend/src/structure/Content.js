@@ -4,7 +4,7 @@ import React, { Component} from 'react';
 import {Tabs, Tab} from 'react-bootstrap';
 
 import Home from './tabs/Home.js'; 
-import Drawings from './tabs/Drawings';
+import Drawings from './tabs/drawings/Drawings';
 import Playlists from './tabs/Playlists';
 import ManualControl from './tabs/ManualControl';
 import Settings from './tabs/Settings';

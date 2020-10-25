@@ -8,6 +8,7 @@ click==7.1.2
 colorama==0.4.3
 ecdsa==0.15
 Flask==1.1.2
+Flask-Cors==3.0.9
 Flask-Migrate==2.5.3
 Flask-Minify==0.27
 Flask-SocketIO==4.3.0
@@ -31,7 +32,7 @@ mccabe==0.6.1
 packaging==20.4
 pid==3.0.3
 Pillow==7.1.2
-pip==20.2.3
+pip==20.2.4
 pluggy==0.13.1
 ply==3.11
 psutil==5.7.0

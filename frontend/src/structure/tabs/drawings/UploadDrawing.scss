@@ -1,0 +1,31 @@
+@import "../../../colors";
+
+.animated-background{
+    border: 3px dashed $dark;
+    border-radius: 5px;
+    animation: pulse 1.5s infinite;
+    animation-direction: alternate;
+}
+
+.animated-background:hover, #upload_dropzone:hover > .animated-background, .animated-background.dragactive{
+    animation: pulse-hover 0.7s infinite;
+    animation-direction: alternate;
+}
+
+@keyframes pulse {
+    0% {
+        background-color: $white;
+    }
+    100% {
+        background-color: $primary;
+    }
+}
+
+@keyframes pulse-hover {
+    0% {
+        background-color: $white;
+    }
+    100% {
+        background-color: $light;
+    }
+}

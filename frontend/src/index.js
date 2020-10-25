@@ -4,6 +4,10 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+import {check_software_updates} from "./utils/SWUpdates";
+
+check_software_updates();
+
 ReactDOM.render(
   <React.StrictMode>
     <App />

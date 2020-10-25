@@ -4,5 +4,4 @@ FLASK_APP=server
 FLASK_ENV=development
 
 # can change this to 1 to make flask autoreload on files change (can set it from the launch.json file in vscode, for production must be 0 until a production server is setup)
-# with react frontend it is not necessary to put this to 1
-FLASK_DEBUG=0               
+FLASK_DEBUG=1               

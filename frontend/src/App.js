@@ -5,16 +5,10 @@ import Footer from './structure/Footer.js';
 import Content from './structure/Content.js';
 import Toasts from './structure/Toasts';
 
-import {check_software_updates} from "./utils/SWUpdates";
-
-import {useState, useEffect} from 'react';
+import {useState} from 'react';
 
 function App() {
   const [tab, setTab] = useState("home");
-
-  useEffect(()=>{
-    check_software_updates();     // check for updates when the app is ready
-  })
 
   function handleTab(tab){
     setTab(tab);
