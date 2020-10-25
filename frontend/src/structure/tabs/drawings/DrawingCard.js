@@ -1,7 +1,7 @@
 import './DrawingCard.scss';
 
 import React, { Component } from 'react';
-import { Card, Modal } from 'react-bootstrap';
+import { Button, Card, Modal } from 'react-bootstrap';
 
 import {static_url} from '../../../project_defaults';
 
@@ -14,6 +14,7 @@ class DrawingCard extends Component{
     getImgUrl(){
         return static_url + "/Drawings/" + this.props.element.id + "/" + this.props.element.id + ".jpg";
     }
+    // TODO drawing options
 
     render(){
         return <div>
@@ -37,8 +38,9 @@ class DrawingCard extends Component{
                 </Modal.Header>
                 <Modal.Body>
                     <div className="center pb-3">
-                        <button>Draw it now</button>
-                        <button>+ Add to playlist</button>
+                        <Button className="btn">Draw it now/add to queue</Button>
+                        <Button className="btn">+ Add to playlist</Button>
+                        <Button className="btn">Delete drawing</Button>
                     </div>
                     <div className="center mb-5">
                         <img className="modal-drawing-preview" src={this.getImgUrl()} alt="Not available"/>

@@ -56,16 +56,16 @@ def playlist_add_element(element, playlist_code):
     pl.save()
 
 # starts to draw a playlist
-@socketio.on("start_playlist")
-def start_playlist(code):
+@socketio.on("playlist_start")
+def playlist_start(code):
     item = db.session.query(Playlists).filter(Playlists.id==code).one()
     for i in item.elements.replace(" ", "").split(","):
         if i != "":
             app.qmanager.queue_drawing(i)
 
 # settings callbacks
-@socketio.on("save_settings")
-def save_settings(data, is_connect):
+@socketio.on("settings_save")
+def settings_save(data, is_connect):
     settings_utils.save_settings(data)
     app.semits.show_toast_on_UI("Settings saved")
     
@@ -77,6 +77,15 @@ def save_settings(data, is_connect):
             app.semits.show_toast_on_UI("Connection to device successful")
         else:
             app.semits.show_toast_on_UI("Device not connected. Opening a fake serial port.")
+
+
+@socketio.on("settings_request")
+def settings_request():
+    settings = settings_utils.load_settings()
+    settings["serial"]["available_baudrates"] = ["2400", "4800", "9600", "19200", "38400", "57600", "115200", "230400", "460800", "921600"]
+    settings["serial"]["available_ports"] = app.feeder.serial_ports_list()
+    settings["serial"]["available_ports"].append("FAKE")
+    app.semits.emit("settings_now", json.dumps(settings))
 
 @socketio.on("send_gcode_command")
 def send_gcode_command(command):

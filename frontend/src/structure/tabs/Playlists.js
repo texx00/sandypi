@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import Section from '../../components/Section';
+import { Section } from '../../components/Section';
 
 class Playlists extends Component{
 

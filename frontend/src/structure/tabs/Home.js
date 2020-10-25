@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
 
-import Section from '../../components/Section.js';
+import { Section } from '../../components/Section.js';
 import PlaceholderCard from '../../components/PlaceholderCard.js';
 
 import UploadDrawingsModal from './drawings/UploadDrawing.js';

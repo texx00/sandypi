@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
-import Section from '../../../components/Section';
+import { Section } from '../../../components/Section';
 import DrawingDataDownloader from './DrawingDataDownloader';
 import UploadDrawingsModal from './UploadDrawing';
 import DrawingCard from './DrawingCard';

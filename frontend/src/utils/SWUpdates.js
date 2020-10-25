@@ -1,5 +1,5 @@
 import {setCookie} from './Cookies';
-import {socket} from "../SAC";
+import {socket} from "../sockets/SAC";
 
 
 function check_software_updates(){

@@ -121,7 +121,7 @@ class Feeder():
         self.reset_line_number()
         self.request_feedrate()
         # send the "on connection" script from the settings
-        self.send_script(settings['scripts']['connection'])
+        self.send_script(settings['scripts']['connected'])
 
     def wait_device_ready(self):
         time.sleep(1) # TODO make it better
