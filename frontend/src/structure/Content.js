@@ -1,9 +1,13 @@
-import './pages.scss';
+import './Content.scss';
 
 import React, { Component} from 'react';
 import {Tabs, Tab} from 'react-bootstrap';
 
 import Home from './tabs/Home.js'; 
+import Drawings from './tabs/Drawings';
+import Playlists from './tabs/Playlists';
+import ManualControl from './tabs/ManualControl';
+import Settings from './tabs/Settings';
 
 class Content extends Component{
     
@@ -14,16 +18,16 @@ class Content extends Component{
                     <Home/>
                 </Tab>
                 <Tab eventKey="drawings" title="Drawings">
-                    drawings
+                    <Drawings/>
                 </Tab>
                 <Tab eventKey="playlists" title="Playlists">
-                    Playlists
+                    <Playlists />
                 </Tab>
                 <Tab eventKey="manual" title="Manual control">
-                    Manual control
+                    <ManualControl />
                 </Tab>
                 <Tab eventKey="settings" title="Settings">
-                    Settings
+                    <Settings />
                 </Tab>
             </Tabs>
         </div>

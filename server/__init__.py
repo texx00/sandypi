@@ -41,7 +41,7 @@ app = Flask(__name__, template_folder='templates')
 
 app.config['SECRET_KEY'] = 'secret!' # TODO put a key here
 app.config['UPLOAD_FOLDER'] = "./server/static/Drawings"
-socketio = SocketIO(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 # database
 file_path = os.path.join(os.path.abspath(os.getcwd()), "database.db")

@@ -100,6 +100,13 @@ button:hover, .btn-dark:hover{
     border: 0px;
 }
 
+.toast{
+    @extend .toast;
+    @extend .m-3;
+    position: relative;
+    z-index: 2000;
+}
+
 /* Carousel mutli overrides */
 button.react-multiple-carousel__arrow{
     background-color: $light;
@@ -120,6 +127,7 @@ button.react-multiple-carousel__arrow:hover{
     position: fixed;
     right: 0px;
     bottom: 0px;
+    z-index: 1035;
 }
 
 .square{
@@ -137,4 +145,10 @@ button.react-multiple-carousel__arrow:hover{
 
 .bg-black{
     background-color: $black;
+}
+
+// development styles 
+.bgred{
+    background-color: red;
+    color: black;
 }

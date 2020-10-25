@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
-import Section from '../components/Section.js';
-import PlaceholderCard from '../components/PlaceholderCard.js';
+import Section from '../../components/Section.js';
+import PlaceholderCard from '../../components/PlaceholderCard.js';
 
 import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
