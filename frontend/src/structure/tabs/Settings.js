@@ -31,7 +31,7 @@ class Settings extends Component{
     }
 
     mergeDicts(og, so) {
-        for (var key in so) {
+        for (let key in so) {
             if (typeof (og[key]) === 'object') {
                 og[key] = this.mergeDicts(og[key], so[key]);
             } else {
@@ -41,17 +41,27 @@ class Settings extends Component{
         return og;
     }
 
+    cloneDict(di){
+        let tmp = {};
+        for (let key in di){
+            if (typeof (di[key]) === 'object') {
+                tmp[key] = this.cloneDict(di[key]);
+            } else {
+                tmp[key] = di[key];
+            }
+        }
+        return tmp;
+    }
+
     updateState(newsettings){
         let oldsettings = this.state.settings;
         oldsettings = this.mergeDicts(oldsettings, newsettings);
-        console.log(oldsettings);
-        console.log(newsettings);
         this.setState(oldsettings);
     }
 
     saveForm(connect=false){
         console.log("Saving settings");
-        let sets = this.state.settings;
+        let sets = this.cloneDict(this.state.settings); // cloning the dict before deleting data
         delete sets.serial.available_baudrates;
         delete sets.serial.available_ports;
         settings_save(sets);
