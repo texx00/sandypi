@@ -3,6 +3,7 @@ import serial
 import time
 import sys
 import logging
+import glob
 from UIserver.hw_controller.emulator import Emulator
 
 # This class connect to a serial device
