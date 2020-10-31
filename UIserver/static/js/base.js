@@ -7,7 +7,7 @@ function document_ready(){};
 
 $( document ).ready(function() {
     // socket callbacks setup
-    socket.on('message_toast', function(message){
+    socket.on('toast_show_message', function(message){
         show_toast(message);
     });
 

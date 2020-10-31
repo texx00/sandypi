@@ -15,7 +15,9 @@
         <div class="col">
             <span>Port number</span>
             <select id="serial_ports">
-                <!--Filled at runtime with js with the data coming from the feeder-->
+                {%for item in serial["available_ports"] %}
+                <option {% if settings['serial']['port']==item %} selected="selected" {%endif%}value="{{item}}">{{item}}</option>
+                {%endfor%}
             </select>
         </div>
         <div class="col">

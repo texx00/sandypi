@@ -1,6 +1,5 @@
 import math
 
-
 # This class is the base class to create different types of stretching/clipping of the drawing to fit it on the table (because the drawing may be for a different table size)
 # The base class can be extended to get different results
 # Can rotate the drawings (angle in degrees)

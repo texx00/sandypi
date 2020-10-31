@@ -2,24 +2,44 @@ from flask import Flask, redirect, url_for
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+
 import os
 import sys
-import logging
+import platform
+
 from subprocess import Popen
 import psutil
 import threading
 import atexit
 import signal
 import urllib.request
-import platform
+
 from time import sleep
-from UIserver.bot_interface.queue_manager import QueueManager
+from dotenv import load_dotenv
+import logging
+
 import sass
 from flask_minify import minify
-from utils import settings_utils, software_updates
 
+from UIserver.hw_controller.queue_manager import QueueManager
+from UIserver.hw_controller.feeder import Feeder
+from UIserver.hw_controller.feeder_event_manager import FeederEventManager
+from UIserver.utils import settings_utils, software_updates
+
+
+
+# Logging setup
+load_dotenv()
+level = os.getenv("FLASK_LEVEL")
+if not level is None:
+    level = int(level)
+else:
+    level = 0
+settings_utils.print_level(level, "app")
+logging.getLogger("werkzeug").setLevel(level)
+
+# app setup
 app = Flask(__name__, template_folder='templates')
-app.logger.setLevel(logging.INFO)
 
 app.config['SECRET_KEY'] = 'secret!' # TODO put a key here
 app.config['UPLOAD_FOLDER'] = "./UIserver/static/Drawings"
@@ -31,16 +51,25 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
+
 # scss compiler (already minified)
 sass.compile(dirname=(os.path.abspath(os.getcwd())+"/UIserver/static/scss", os.path.abspath(os.getcwd())+"/UIserver/static/css"), output_style='compressed')
 # js and html minifier (on request)
 minify(app=app, html=True, js=False)
 
-app.qmanager = QueueManager(app, socketio)
 
 import UIserver.database
 import UIserver.views.drawings_management, UIserver.views.settings
-import UIserver.bot_interface.socketio_callbacks
+import UIserver.sockets_interface.socketio_callbacks
+from UIserver.sockets_interface.socketio_emits import SocketioEmits
+
+app.semits = SocketioEmits(app,socketio, db)
+
+# Device controller initialization
+
+app.feeder = Feeder(FeederEventManager(app))
+app.feeder.connect()
+app.qmanager = QueueManager(app, socketio)
 
 # Context pre-processor variables
 # Global template values to be injected before templates creation
@@ -70,61 +99,6 @@ def versioned_url_for(endpoint, **values):
         values["version"] = sw_version
     return url_for(endpoint, **values)
 
-# This section starts the feeder or restarts it if already running when the server is restarted
-
-# Wait until the server is ready
-def wait_server_ready():
-    try:
-        while urllib.request.urlopen("http://localhost:5000").getcode() != 200:
-            pass
-    except Exception as e:
-        print("__init.py__ error: "+str(e))
-    start_feeder_process()
-
-# run the waiting function in a thread
-starter_thread = threading.Thread(target=wait_server_ready, daemon=True)
-starter_thread.start()
-
-# starts the process
-def start_feeder_process():
-    try:
-        # If the "RUN_FEEDER_MANUALLY" environment variable is set to 'true', the server will not start the feeder which must then be started manually. 
-        # Can be usefull when working on the feeder and it is not necessary to restart the server every time.
-        # To start the feeder manually can use "python NCFeeder/run.py" or also the debugger
-        if os.environ['RUN_FEEDER_MANUALLY'] == 'true':
-            return
-    except:
-        pass
-
-    
-    # terminal window is available only on windows
-    if platform.system() == "Windows":
-        filename = os.path.dirname(__file__) + "\\..\\NCFeeder\\run.py"
-    
-        from subprocess import CREATE_NEW_CONSOLE, CREATE_NO_WINDOW
-        
-        try:
-            # Check if the environment variable is set. If it is will show the ncfeeder terminal window, otherwise will keep it hidden
-            create_window = CREATE_NEW_CONSOLE if os.environ['SHOW_FEEDER_TERMINAL'] == 'true' else CREATE_NO_WINDOW
-        except:
-            create_window = CREATE_NO_WINDOW
-        feeder_process = Popen("env/Scripts/activate.bat & python NCFeeder/run.py", env=os.environ.copy(), creationflags=create_window)
-    else:
-        filename = os.path.dirname(__file__) + "/../NCFeeder/run.py"
-        feeder_process = Popen(["python3", filename],  env=os.environ.copy())
-    app.feeder_pid = feeder_process.pid
-
-@atexit.register
-def terminate_feeder_process():
-    try:
-        # The feeder_process cannot be killed or terminated if saved into the app directly.
-        # Instead of saving the process object save the pid and kill it with that
-        process = psutil.Process(app.feeder_pid)
-        for proc in process.children(recursive=True):
-            proc.kill()
-        process.kill()
-    except:
-        pass
 
 # Home routes
 @app.route('/')

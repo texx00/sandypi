@@ -4,7 +4,7 @@ from setuptools.command.install import install
 import time
 import platform
 import os
-from utils import settings_utils
+from UIserver.utils import settings_utils
 
 class PostDevelopCommand(develop):
     def run(self):

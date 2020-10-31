@@ -1,27 +1,39 @@
 from threading import Thread, Lock
 import os
-import sys
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
-import glob
 from pathlib import Path
-from gcode_rescalers import *
 import time
-import serial.tools.list_ports
-import serial
-import atexit
 import traceback
 import json
-from utils import settings_utils
-from collections import OrderedDict, deque
+from collections import deque
 from copy import deepcopy
+import re
+
+import logging
+from dotenv import load_dotenv
+
+from UIserver.utils import limited_size_dict, buffered_timeout, settings_utils
+from UIserver.hw_controller.device_serial import DeviceSerial
+from UIserver.hw_controller.gcode_rescalers import *
+
+
+
+"""
+
+This class duty is to send commands to the hw. It can be a single command or an entire drawing.
+
+
+"""
+
+# TODO use different logger
+
 
 class FeederEventHandler():
     # called when the drawing is finished
-    def on_drawing_ended(self):
+    def on_drawing_ended(self, code):
         pass
 
     # called when a new drawing is started
-    def on_drawing_started(self):
+    def on_drawing_started(self, code):
         pass
     
     # called when the feeder receives a message from the hw that must be sent to the frontend
@@ -32,13 +44,29 @@ class FeederEventHandler():
     def on_new_line(self, line):
         pass
 
+
+
 # List of commands that are buffered by the controller
 BUFFERED_COMMANDS = ("G0", "G00", "G1", "G01", "G2", "G02", "G3", "G03", "G28")
 
+
 class Feeder():
     def __init__(self, handler = None, **kargvs):
-        self._print_ack = kargvs.pop("print_ack", False)
-        self._print_ack = True
+        # logger setup
+        self.logger = logging.getLogger(__name__)
+        logging.addLevelName(settings_utils.LINE_SENT, "LINE_SENT")
+        logging.addLevelName(settings_utils.LINE_RECEIVED, "LINE_RECEIVED")
+        # load logging level from environment variables
+        load_dotenv()
+        level = os.getenv("FEEDER_LEVEL")
+        if not level is None:
+            level = int(level)
+        else:
+            level = 0
+        self.logger.setLevel(level)
+
+        settings_utils.print_level(level, __name__.split(".")[-1])
+
         self._isrunning = False
         self._ispaused = False
         self.total_commands_number = None
@@ -51,45 +79,53 @@ class Feeder():
         else: self.handler = handler
         self.serial = None
         self.line_number = 0
+        self._timeout_last_line = self.line_number
+        self.feedrate = 0
+
+        # commands parser
+        self.feed_regex = re.compile("[F]([0-9.]+)($|\s)")
 
         # buffer control attrs
         self.command_buffer = deque()
-        self.command_buffer_mutex = Lock()  # mutex used to modify the command buffer
-        self.command_send_mutex = Lock()    # mutex used to pause the thread when the buffer is full
+        self.command_buffer_mutex = Lock()              # mutex used to modify the command buffer
+        self.command_send_mutex = Lock()                # mutex used to pause the thread when the buffer is full
         self.command_buffer_max_length = 8
-        self.command_buffer_history = LimitedSizeDict(size_limit = self.command_buffer_max_length+10)    # keep saved the last n commands
-        self.position_request_difference = 10          # every n lines requires the current position with M114
-        self._timeout = BufferTimeout(20, self._on_timeout)
+        self.command_buffer_history = limited_size_dict.LimitedSizeDict(size_limit = self.command_buffer_max_length+10)    # keep saved the last n commands
+        self.position_request_difference = 10           # every n lines requires the current position with M114
+        self._timeout = buffered_timeout.BufferTimeout(20, self._on_timeout)
         self._timeout.start()
     
     def close(self):
         self.serial.close()
 
     def connect(self):
-        print("Connecting to serial device...")
+        self.logger.info("Connecting to serial device...")
         settings = settings_utils.load_settings()
         with self.serial_mutex:
             if not self.serial is None:
                 self.serial.close()
             try:
-                self.serial = DeviceSerial(settings['serial']['port'], settings['serial']['baud']) 
+                self.serial = DeviceSerial(settings['serial']['port'], settings['serial']['baud'], logger_name = __name__) 
                 self._serial_read_thread = Thread(target = self._thsr, daemon=True)
+                self._serial_read_thread.name = "serial_read"
                 self._serial_read_thread.start()
             except:
-                print("Error during device connection")
-                print(traceback.print_exc())
-                self.serial = DeviceSerial()
+                self.logger.info("Error during device connection")
+                self.logger.info(traceback.print_exc())
+                self.serial = DeviceSerial(logger_name = __name__)
 
         # wait for the device to be ready
         self.wait_device_ready()
 
         # reset line number when connecting
         self.reset_line_number()
+        self.request_feedrate()
         # send the "on connection" script from the settings
         self.send_script(settings['scripts']['connection'])
 
     def wait_device_ready(self):
         time.sleep(1) # TODO make it better
+        # without this function the device may be not ready to receive commands
 
     def set_event_handler(self, handler):
         self.handler = handler
@@ -104,6 +140,7 @@ class Feeder():
                 time.sleep(5)       # wait a little for the thread to stop
             with self.serial_mutex:
                 self._th = Thread(target = self._thf, args=(code,), daemon=True)
+                self._th.name = "drawing_feeder"
                 self._isrunning = True
                 self._ispaused = False
                 self._running_code = code
@@ -111,7 +148,7 @@ class Feeder():
                 with self.command_buffer_mutex:
                     self.command_buffer.clear()
                 self._th.start()
-            self.handler.on_drawing_started()
+            self.handler.on_drawing_started(code)
 
     # ask if the feeder is already sending a file
     def is_running(self):
@@ -150,10 +187,10 @@ class Feeder():
         settings = settings_utils.load_settings()
         self.send_script(settings['scripts']['before'])
 
-        print("Starting new drawing with code {}".format(code))
+        self.logger.info("Starting new drawing with code {}".format(code))
         with self.serial_mutex:
             code = self._running_code
-        filename = os.path.join(str(Path(__file__).parent.parent.absolute()), "UIserver/static/Drawings/{0}/{0}.gcode".format(code))
+        filename = os.path.join(str(Path(__file__).parent.parent.absolute()), "static/Drawings/{0}/{0}.gcode".format(code))
         
         # TODO retrieve saved information for the gcode filter
         dims = {"table_x":100, "table_y":100, "drawing_max_x":100, "drawing_max_y":100, "drawing_min_x":0, "drawing_min_y":0}
@@ -177,17 +214,19 @@ class Feeder():
 
                     self.send_gcode_command(line)
         self.send_script(settings['scripts']['after'])
-        self.handler.on_drawing_ended()
+        self.stop()
+        self.handler.on_drawing_ended(code)
 
     # thread that keep reading the serial port
     def _thsr(self):
+        line = None
         while True:
             with self.serial_mutex:
                 try:
                     line = self.serial.readline()
                 except Exception as e:
-                    print(e)
-                    print("Serial connection lost")
+                    self.logger.error(e)
+                    self.logger.error("Serial connection lost")
             if not line is None:
                 self.parse_device_line(line)
 
@@ -197,10 +236,10 @@ class Feeder():
     
     def _on_timeout(self):
         if (self.command_buffer_mutex.locked and self.line_number == self._timeout_last_line):
-            print("!Buffer timeout. Try to clean the buffer!")
+            # self.logger.warning("!Buffer timeout. Trying to clean the buffer!")
             # to clean the buffer try to send an M114 message. In this way will trigger the buffer cleaning mechanism
             line = self._generate_line("M114")  # may need to send it twice? could also send an older line to trigger the error?
-            with self.serial_mutex:
+            with self.serial_mutex:                
                 self.serial.send(line)
         else:
             self._update_timeout()
@@ -227,15 +266,12 @@ class Feeder():
 
     # parse a line coming from the device
     def parse_device_line(self, line):
-        print_line = True
         if ("start" in line):
             self.wait_device_ready()
             self.reset_line_number()
 
         elif "ok" in line:  # when an "ack" is received free one place in the buffer
             self._ack_received()
-            if not self._print_ack:
-                print_line = False
 
         elif "Resend: " in line:
             line_found = False
@@ -256,20 +292,22 @@ class Feeder():
             self._ack_received(safe_line_number=line_number-1, append_left_extra=True)
             # the resend command is sending an ack. should add an entry to the buffer to keep the right lenght (because the line has been sent 2 times)
             if not line_found: 
-                print("No line was found for the number required. Restart numeration.")
+                self.logger.error("No line was found for the number required. Restart numeration.")
                 self.send_gcode_command("M110 N1")
-                print_line = False
+
+        # TODO check feedrate response for M220 and set feedrate
+        #elif "_______" in line: # must see the real output from marlin
+        #    self.feedrate = .... # must see the real output from marlin
 
         elif "echo:Unknown command:" in line:
-            print("Error: command not found. Can also be a communication error")
+            self.logger.error("Error: command not found. Can also be a communication error")
         
-        if print_line:
-            print(line) 
+        self.logger.log(settings_utils.LINE_RECEIVED, line)
         self.handler.on_message_received(line)
 
     def get_status(self):
         with self.serial_mutex:
-            return {"is_running":self._isrunning, "progress":[self.command_number, self.total_commands_number], "is_paused":self._ispaused, "is_connected":self.serial.is_connected()}
+            return {"is_running":self._isrunning, "progress":[self.command_number, self.total_commands_number], "is_paused":self._ispaused, "is_connected":self.is_connected()}
 
     def _generate_line(self, command):
         self.line_number += 1
@@ -307,7 +345,10 @@ class Feeder():
 
         # check if the command is in the "BUFFERED_COMMANDS" list and stops if the buffer is full
         if any(code in command for code in BUFFERED_COMMANDS):
-            with self.command_send_mutex:     # wait until get some "ok" command to remove an element from the buffer
+            if "F" in command:
+                feed = self.feed_regex.findall(command)
+                self.feedrate = feed[0][0]
+            with self.command_send_mutex:       # wait until get some "ok" command to remove an element from the buffer
                 pass
 
         # send the command after parsing the content
@@ -315,152 +356,42 @@ class Feeder():
         with self.serial_mutex:
             # check if needs to send a "M114" command (actual position request) but not in the first lines
             if (self.line_number % self.position_request_difference) == 0 and self.line_number > 5:
-                #self._generate_line("M114")  # does not send the line to trigger the "resend" event and clean the buffer from messages that are already done
+                #self._generate_line("M114")    # does not send the line to trigger the "resend" event and clean the buffer from messages that are already done
                 pass
 
             line = self._generate_line(command)
 
-            self.serial.send(line)      # send line
+            self.serial.send(line)              # send line
+            self.logger.log(settings_utils.LINE_SENT, line.replace("\n", "")) 
 
             # TODO the problem with small geometries may be with the serial port being to slow. For long (straight) segments the problem is not evident
 
-            self._update_timeout()      # update the timeout because a new command has been sent
+            self._update_timeout()              # update the timeout because a new command has been sent
 
             with self.command_buffer_mutex:
-                if(len(self.command_buffer)>=self.command_buffer_max_length):
+                if(len(self.command_buffer)>=self.command_buffer_max_length and not self.command_send_mutex.locked()):
                     self.command_send_mutex.acquire()     # if the buffer is full acquire the lock so that cannot send new lines until the reception of an ack. Notice that this will stop only buffered commands. The other commands will be sent anyway
     
-            self.handler.on_new_line(line)  # uses the handler callback for the new line
+            self.handler.on_new_line(line)      # uses the handler callback for the new line
 
     # Send a multiline script
     def send_script(self, script):
-        print("Sending script: ")
+        self.logger.info("Sending script")
         script = script.split("\n")
         for s in script:
-            print("> " + s)
             if s != "" and s != " ":
                 self.send_gcode_command(s)
 
     def reset_line_number(self, line_number = 2):
-        print("Resetting line number")
+        self.logger.info("Resetting line number")
         self.send_gcode_command("M110 N{}".format(line_number))
-
-class DeviceSerial():
-    def __init__(self, serialname = None, baudrate = None):
-        self.serialname = serialname
-        self.baudrate = baudrate
-        self.is_fake = False
-        self._buffer = bytearray()
-        self.echo = ""
-        try:
-            args = dict(
-                baudrate = self.baudrate,
-                timeout = 0,
-                write_timeout = 0
-            )
-            self.serial = serial.Serial(**args)
-            self.serial.port = self.serialname
-            self.serial.open()
-            print("Serial device connected")
-        except:
-            print(traceback.print_exc())
-            self.is_fake = True
-            print("Serial not available. Will use the fake serial")
-
-    def send(self, obj):
-        if self.is_fake:
-            print("Fake> " + str(obj))
-            self.echo = obj
-            time.sleep(0.05)
-        else:
-            if self.serial.is_open:
-                try:
-                    while self.readline():
-                        pass
-                    self.serial.write(str(obj).encode())
-                except:
-                    self.close()
-                    print("Error while sending a command")
     
-    def serial_port_list(self):
-        if sys.platform.startswith('win'):
-            plist = serial.tools.list_ports.comports()
-            ports = [port.device for port in plist]
-        elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
-            # this excludes your current terminal "/dev/tty"
-            ports = glob.glob('/dev/tty[A-Za-z]*')
-        else:
-            raise EnvironmentError('Unsupported platform')
-        return ports
+    def request_feedrate(self):
+        self.send_gcode_command("M220")
 
+    def serial_ports_list(self):
+        result = self.serial.serial_port_list()
+        return [] if result is None else result
+    
     def is_connected(self):
-        if(self.is_fake):
-            return False
-        return self.serial.is_open
-    
-    def close(self):
-        try:
-            self.serial.close()
-            print("Serial port closed")
-        except:
-            print("Error: serial already closed or not available")
-    
-    def readline(self):
-        if not self.is_fake:
-            if self.serial.is_open:
-                while self.serial.inWaiting():
-                    line = self.serial.readline()
-                    return line.decode(encoding='UTF-8')
-        else:
-            if not self.echo == "":
-                echo = "ok"         # sends "ok" as ack otherwise the feeder will stop sending buffered commands
-                self.echo = ""
-                return echo
-        return None
-
-class LimitedSizeDict(OrderedDict):
-    def __init__(self, *args, **kwds):
-        self.size_limit = kwds.pop("size_limit", None)
-        OrderedDict.__init__(self, *args, **kwds)
-        self._check_size_limit()
-
-    def __setitem__(self, key, value):
-        OrderedDict.__setitem__(self, key, value)
-        self._check_size_limit()
-
-    def _check_size_limit(self):
-        if self.size_limit is not None:
-            while len(self) > self.size_limit:
-                self.popitem(last=False)
-
-# this thread calls a function after a timeout but only if the "update" method is not called before that timeout expires
-class BufferTimeout(Thread):
-    def __init__(self, timeout_delta, function, group=None, target=None, name=None, args=(), kwargs=None):
-        super(BufferTimeout, self).__init__(group=group, target=target, name=name)
-        self.timeout_delta = timeout_delta
-        self.callback = function
-        self.mutex = Lock()
-        self.is_running = False
-        self.setDaemon(True)
-        self.update()
-
-    def update(self):
-        with self.mutex:
-            self.timeout_time = time.time() + self.timeout_delta
-
-    def stop(self):
-        with self.mutex:
-            self.is_running = False
-
-    def run(self):
-        self.is_running = True
-        while self.is_running:
-            with self.mutex:
-                timeout = self.timeout_time
-            current_time = time.time()
-            if current_time > timeout:
-                self.callback()
-                self.update()
-                with self.mutex:
-                    timeout = self.timeout_time
-            time.sleep(timeout - current_time)
+        return self.serial.is_connected()

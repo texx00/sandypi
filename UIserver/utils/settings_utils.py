@@ -1,7 +1,14 @@
 import shutil
 import os
 import json
+import logging
 
+
+# Logging levels (see the documentation of the logging module for more details)
+LINE_SENT = 6
+LINE_RECEIVED = 5
+
+# settings paths
 settings_path = "./UIserver/saves/saved_settings.json"
 defaults_path = "UIserver/saves/default_settings.json"
 
@@ -17,7 +24,7 @@ def load_settings():
     return settings
     
 def update_settings_file_version():
-    print("Updating settings save files")
+    logging.info("Updating settings save files")
     if(not os.path.exists(settings_path)):
         shutil.copyfile(defaults_path, settings_path)
     else:
@@ -40,6 +47,28 @@ def match_dict(mod_dict, ref_dict):
         else:
             new_dict[k] = ref_dict[k]
     return new_dict
+
+# print the level of the logger selected
+def print_level(level, logger_name):
+    description = ""
+    if level < LINE_RECEIVED:
+        description = "NOT SET"
+    elif level < LINE_SENT:
+        description = "LINE_RECEIVED"
+    elif level < 10:
+        description = "LINE_SENT"
+    elif level < 20:
+        description = "DEBUG"
+    elif level < 30:
+        description = "INFO"
+    elif level < 40:
+        description = "WARNING"
+    elif level < 50:
+        description = "ERROR"
+    else:
+        description = "CRITICAL"
+    print("Logger '{}' level: {} ({})".format(logger_name, level, description))
+
 
 if __name__ == "__main__":
     # testing update_settings_file_version
