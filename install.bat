@@ -9,4 +9,5 @@ echo '----- Upgrading database -----'
 flask db upgrade
 
 echo '----- Installing app -----'
-python setup.py install
+:: With "install.bat develop" will install the package for development. This is necessary to use the editable version of the package and avoid problems with "pip freeze" saving the local package in the requirements.txt
+IF %1==develop ( python setup.py develop -e -b build ) ELSE ( python setup.py install )
