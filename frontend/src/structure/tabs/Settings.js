@@ -64,7 +64,7 @@ class Settings extends Component{
         let sets = this.cloneDict(this.state.settings); // cloning the dict before deleting data
         delete sets.serial.available_baudrates;
         delete sets.serial.available_ports;
-        settings_save(sets);
+        settings_save(sets, connect);
     }
 
     render(){
@@ -80,7 +80,7 @@ class Settings extends Component{
                                     <Form.Group controlId="serial_port">
                                         <Form.Label>Serial port</Form.Label>
                                         <Form.Control as="select" 
-                                            defaultValue={this.state.settings.serial.port} 
+                                            value={this.state.settings.serial.port} 
                                             onChange={(e) => this.updateState({serial: {port: e.target.value}})}>
                                             { this.state.settings.serial.available_ports.map((port, index) => {
                                                 return <option key={index}>{port}</option>}) }
@@ -91,7 +91,7 @@ class Settings extends Component{
                                     <Form.Group controlId="serial_baud">
                                         <Form.Label>Baudrate</Form.Label>
                                         <Form.Control as="select" 
-                                            defaultValue={this.state.settings.serial.baud}
+                                            value={this.state.settings.serial.baud}
                                             onChange={(e) => this.updateState({serial: {baud: e.target.value}})}>
                                             { this.state.settings.serial.available_baudrates.map((baud, index) => {
                                                 return <option key={index}>{baud}</option>
@@ -111,14 +111,14 @@ class Settings extends Component{
                                 <Col>
                                     <Form.Group>
                                         <Form.Label>Width</Form.Label>
-                                        <Form.Control defaultValue={this.state.settings.device.width}
+                                        <Form.Control value={this.state.settings.device.width}
                                             onChange={(e) => this.updateState({device: {width: e.target.value}})}/>
                                     </Form.Group>
                                 </Col>
                                 <Col>
                                     <Form.Group>
                                         <Form.Label>Height</Form.Label>
-                                        <Form.Control defaultValue={this.state.settings.device.height}
+                                        <Form.Control value={this.state.settings.device.height}
                                             onChange={(e) => this.updateState({device: {height: e.target.value}})}/>
                                     </Form.Group>
                                 </Col>
@@ -132,7 +132,7 @@ class Settings extends Component{
                                     <Form.Group>
                                         <Form.Label>On connection</Form.Label>
                                         <Form.Control as="textarea" 
-                                            defaultValue={this.state.settings.scripts.connected}
+                                            value={this.state.settings.scripts.connected}
                                             onChange={(e) => this.updateState({scripts: {connected: e.target.value}})}/>
                                     </Form.Group>
                                 </Col>
@@ -140,7 +140,7 @@ class Settings extends Component{
                                     <Form.Group>
                                         <Form.Label>On before drawing</Form.Label>
                                         <Form.Control as="textarea" 
-                                            defaultValue={this.state.settings.scripts.before}
+                                            value={this.state.settings.scripts.before}
                                             onChange={(e) => this.updateState({scripts: {before: e.target.value}})}/>
                                     </Form.Group>
                                 </Col>
@@ -148,7 +148,7 @@ class Settings extends Component{
                                     <Form.Group>
                                         <Form.Label>On after drawing</Form.Label>
                                         <Form.Control as="textarea" 
-                                            defaultValue={this.state.settings.scripts.after}
+                                            value={this.state.settings.scripts.after}
                                             onChange={(e) => this.updateState({scripts: {after: e.target.value}})}/>
                                     </Form.Group>
                                 </Col>

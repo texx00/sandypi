@@ -1,0 +1,28 @@
+@import '../../../_colors.scss';
+
+@import '~bootstrap/scss/functions';
+@import '~bootstrap/scss/variables';
+@import '~bootstrap/scss/mixins';
+.preview-style{
+    background-color: $primary;
+    width: 100%;
+}
+
+.command-line-history{
+    overflow-y: auto;
+    height: 100%;
+}
+
+.command-viewer{
+    min-height: 40vh;
+}
+
+.command-history-container{
+    max-height: 40vh;
+}
+
+@include media-breakpoint-up(md) {
+    .command-line-history{
+        max-height: 40vh;
+    }
+}

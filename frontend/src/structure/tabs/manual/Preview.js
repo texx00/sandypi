@@ -1,4 +1,4 @@
-import "./Preview.scss";
+import "./ManualControl.scss";
 
 import React, { Component } from 'react';
 
@@ -8,29 +8,32 @@ class Preview extends Component{
     constructor(props){
         super(props);
         this.canvas_ref = React.createRef();
+        this.image_ref = React.createRef();
         this.last_x = 0;
         this.last_y = 0;
         this.primary_color = "#35ea97";
         this.dark_color = "#333333";
-        this.state = {height: 100};
-        this.ratio = parseFloat(props.width/props.height);
+        this.multiplier = 5;    // multiply the pixels to get a better resolution with small tables
+        this.is_mounted = false;
     }
 
-    componentDidMount(){
-        this.canvas = this.canvas_ref.current;
-        this.ctx = this.canvas.getContext("2d");
-        this.clearCanvas();
-        device_new_position(this.newLineFromDevice.bind(this));
-        window.addEventListener('resize', this.updateDimensions.bind(this));
-        this.updateDimensions();
+    componentDidUpdate(){
+        if (!this.is_mounted){
+            this.is_mounted = true;
+            this.canvas = this.canvas_ref.current;
+            this.ctx = this.canvas.getContext("2d");
+            this.clearCanvas();
+            device_new_position(this.newLineFromDevice.bind(this));
+        }
     }
 
-    updateDimensions(){
-        this.setState({height: parseFloat(this.canvas_ref.current.width) / this.ratio});
+    updateImage(){
+        this.image_ref.current.src = this.canvas.toDataURL();
     }
     
     limitValue(value, min, max){
         return Math.min(max, Math.max(min, parseFloat(value)));
+        // TODO fix this: this solution is not really working. It is deforming the drawing. Should calculate the interesction point with the table border, keep in memory the older point to interpolate again next time, etc...
     }
 
     drawLine(line){
@@ -47,22 +50,24 @@ class Preview extends Component{
         }
         x = this.limitValue(x, 0, this.canvas.width);
         y = this.limitValue(y, 0, this.canvas.height);
-        this.ctx.lineTo(x, this.canvas.height-y);
+        this.ctx.lineTo(x * this.multiplier, this.props.height * this.multiplier - y * this.multiplier);
         this.ctx.stroke();
+        this.ctx.lineWidth = this.multiplier;
         this.last_x = x;
         this.last_y = y;
+        this.updateImage();
         // TODO draw the canvas into an image instead of reascaling the canvas entirely
-        // TODO scale the size of the canvas up to avoid aliasing in the picture
     }
 
     clearCanvas(){
         this.ctx.fillStyle = this.primary_color;
-        this.ctx.fillRect(0,0, this.props.width, this.height);
+        this.ctx.fillRect(0,0, this.props.width * this.multiplier, this.props.height * this.multiplier);
         this.ctx.fillStyle = this.dark_color;
         this.last_x = 0;
         this.last_y = 0;
         this.ctx.beginPath();
-        this.ctx.moveTo(this.last_x, this.props.height - this.last_y);
+        this.ctx.moveTo(this.last_x, this.props.height * this.multiplier - this.last_y);
+        this.updateImage();
         // TODO add some sort of animation/fading
     }
 
@@ -75,10 +80,14 @@ class Preview extends Component{
             this.drawLine(line);
         }
     }
+    // need redux to change the height when settings are updated
 
     render(){
         return <div>
-            <canvas ref={this.canvas_ref} className="canvas-style" height={this.state.height}/>
+            <canvas ref={this.canvas_ref} className="d-none" width={this.props.width * this.multiplier} height={this.props.height * this.multiplier}/>
+            <img ref={this.image_ref} 
+                className="preview-style"
+                alt="Error during preview loading"/>
         </div>
     }
 }

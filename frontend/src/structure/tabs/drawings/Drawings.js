@@ -34,27 +34,31 @@ class Drawings extends Component{
     // todo load more on page scroll
 
     render(){
-        return <Section sectionTitle="Drawings"
-            sectionButton="+ Upload new drawing"
-            sectionButtonHandler={()=>this.setState({show_upload: true})}>
-            
-            <div className={(this.state.loaded ? " d-none" : "")}>
-                <div className="w-100 pt-5 center">
-                    <h1>Loading...</h1>
-                </div>
-            </div>
-            
-            <Container>
+        return <Container>
                 <Row>
-                    {this.renderDrawings(this.state.drawings)}
-                </Row>
-            </Container>
+                    <Col>
+                        <Section sectionTitle="Drawings"
+                            sectionButton="+ Upload new drawing"
+                            sectionButtonHandler={()=>this.setState({show_upload: true})}>
+                    
+                        <div className={(this.state.loaded ? " d-none" : "")}>
+                            <div className="w-100 pt-5 center">
+                                <h1>Loading...</h1>
+                            </div>
+                        </div>
+                        
+                        <Row>
+                                {this.renderDrawings(this.state.drawings)}
+                            </Row>
 
-            <UploadDrawingsModal key={2}
-                show={this.state.show_upload}
-                handleClose={()=>{this.setState({show_upload: false})}}
-                handleFileUploaded={this.handleFileUploaded.bind(this)}/>
-        </Section>
+                        <UploadDrawingsModal key={2}
+                            show={this.state.show_upload}
+                            handleClose={()=>{this.setState({show_upload: false})}}
+                            handleFileUploaded={this.handleFileUploaded.bind(this)}/>
+                        </Section>
+                    </Col>
+                </Row>
+        </Container>
     }
 }
 

@@ -8,6 +8,7 @@ import PlaceholderCard from '../../components/PlaceholderCard.js';
 import UploadDrawingsModal from './drawings/UploadDrawing.js';
 import DrawingCard from './drawings/DrawingCard';
 import DrawingDataDownloader from './drawings/DrawingDataDownloader';
+import { Container, Row, Col } from 'react-bootstrap';
 
 class Home extends Component{
     constructor(props){
@@ -63,28 +64,36 @@ class Home extends Component{
     }
 
     render(){
-        return <div>
-            <Section sectionTitle="Drawings"
-                sectionButton="+ Upload new drawing"
-                sectionButtonHandler={()=>this.setState({show_upload: true})}>
-                    <Carousel responsive={this.carousel_responsive} ssr>
-                        {this.renderDrawings(this.state.elements)}
-                    </Carousel>
-            </Section>
-            <Section sectionTitle="Playlists"
-                sectionButton="+ Create new playlist"
-                sectionButtonHandler={this.newPlaylistHandler.bind(this)} ssr>
-                    <Carousel responsive={this.carousel_responsive}>
-                        {[1,2,3,4].map((item, index)=>{
-                            return <PlaceholderCard key={index}/>
-                        })}
-                    </Carousel>
-            </Section>
+        return <Container>
+            <Row>
+                <Col>
+                    <Section sectionTitle="Drawings"
+                        sectionButton="+ Upload new drawing"
+                        sectionButtonHandler={()=>this.setState({show_upload: true})}>
+                            <Carousel responsive={this.carousel_responsive} ssr>
+                                {this.renderDrawings(this.state.elements)}
+                            </Carousel>
+                    </Section>
+                </Col>
+            </Row>
+            <Row>
+                <Col>
+                    <Section sectionTitle="Playlists"
+                        sectionButton="+ Create new playlist"
+                        sectionButtonHandler={this.newPlaylistHandler.bind(this)} ssr>
+                            <Carousel responsive={this.carousel_responsive}>
+                                {[1,2,3,4].map((item, index)=>{
+                                    return <PlaceholderCard key={index}/>
+                                })}
+                            </Carousel>
+                    </Section>
+                </Col>
+            </Row>
             <UploadDrawingsModal 
                 show={this.state.show_upload}
                 handleClose={()=>{this.setState({show_upload: false})}}
                 handleFileUploaded={this.handleFileUploaded.bind(this)}/>
-        </div>
+        </Container>
     }
 }
 

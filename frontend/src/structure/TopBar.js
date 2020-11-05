@@ -7,7 +7,9 @@ class TopBar extends Component{
         return <div>
             
             <Navbar bg="primary" collapseOnSelect expand="lg" sticky="top" className="center">
-                    <Navbar.Brand href="#home"><h1 className="logo">Sandypi</h1></Navbar.Brand>
+                    <Navbar.Brand href="#home" onClick={()=>{this.props.handleTab("home")}}>
+                        <h1 className="logo">Sandypi</h1>
+                    </Navbar.Brand>
                     <Navbar.Toggle aria-controls="topbar-nav" />
                     <Navbar.Collapse id="topbar-nav" className="max-width">
                         <Nav className="mr-auto">

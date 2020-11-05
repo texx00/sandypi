@@ -68,7 +68,7 @@ class CommandLine extends Component{
     }
 
     render(){
-        return <div>
+        return <div className="h-100 p-relative d-flex flex-column command-viewer">
             <CommandViewer showAcks={this.state.show_acks}>
                 {this.state.history}
             </CommandViewer>

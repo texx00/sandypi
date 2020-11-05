@@ -31,6 +31,7 @@ class DeviceSerial():
             self.logger.info("Serial device connected")
         except:
             #print(traceback.print_exc())
+            # TODO should add a check to see if the problem is that cannot use the Serial module because it is not installed correctly on raspberry
             self.is_fake = True
             self.logger.error("Serial not available. Will use the fake serial")
 

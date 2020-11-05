@@ -41,15 +41,15 @@ def update_settings_file_version():
     
 def match_dict(mod_dict, ref_dict):
     new_dict = {}
-    for k in ref_dict.keys():
-        if k in mod_dict:
-            if type(mod_dict[k]) is dict:
+    if type(ref_dict) is dict:
+        for k in ref_dict.keys():
+            if k in mod_dict:
                 new_dict[k] = match_dict(mod_dict[k], ref_dict[k])
             else:
-                new_dict[k] = mod_dict[k]
-        else:
-            new_dict[k] = ref_dict[k]
-    return new_dict
+                new_dict[k] = ref_dict[k]
+        return new_dict
+    else:
+        return ref_dict
 
 # print the level of the logger selected
 def print_level(level, logger_name):
