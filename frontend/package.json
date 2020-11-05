@@ -13,7 +13,7 @@
     "react-dom": "^17.0.1",
     "react-dropzone": "^11.2.1",
     "react-multi-carousel": "^2.5.5",
-    "react-scripts": "4.0.0",
+    "react-scripts": "^4.0.0",
     "react-scroll-horizontal": "^1.6.6",
     "socket.io-client": "^2.3.1",
     "web-vitals": "^0.2.4"
