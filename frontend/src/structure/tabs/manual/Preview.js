@@ -27,8 +27,21 @@ class Preview extends Component{
         }
     }
 
+    shouldComponentUpdate(nextProps){
+        if (nextProps.width !== this.props.width || nextProps.height !== this.props.width){
+            this.is_mounted = false;
+        }
+        return true;
+    }
+
+    getSnapshotBeforeUpdate(){
+        this.updateImage()
+        return null;
+    }
+    
     updateImage(){
-        this.image_ref.current.src = this.canvas.toDataURL();
+        if (this.is_mounted)
+            this.image_ref.current.src = this.canvas.toDataURL();
     }
     
     limitValue(value, min, max){
@@ -56,7 +69,6 @@ class Preview extends Component{
         this.last_x = x;
         this.last_y = y;
         this.updateImage();
-        // TODO draw the canvas into an image instead of reascaling the canvas entirely
     }
 
     clearCanvas(){
@@ -86,6 +98,7 @@ class Preview extends Component{
         return <div>
             <canvas ref={this.canvas_ref} className="d-none" width={this.props.width * this.multiplier} height={this.props.height * this.multiplier}/>
             <img ref={this.image_ref} 
+                key={this.props.imageKey}
                 className="preview-style"
                 alt="Error during preview loading"/>
         </div>

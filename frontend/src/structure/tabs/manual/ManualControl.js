@@ -1,27 +1,23 @@
 import React, { Component } from 'react';
 import { Container, Row, Col, Button } from 'react-bootstrap';
+import { connect } from 'react-redux';
 
 import "./ManualControl.scss";
 
 import { Section } from '../../../components/Section';
 import CommandLine from './CommandLine';
-
-import { send_command } from '../../../sockets/SAE';
-import { settings_now } from '../../../sockets/SAC';
 import Preview from './Preview';
 
-class ManualControl extends Component{
-    constructor(props){
-        super(props);
-        this.state = {width: 0, height: 0}; // TODO should use redux and get the values from there... The same values are retrieved for the settings page
-    }
+import { send_command } from '../../../sockets/SAE';
+import { getDimensions } from './selector.js';
 
-    componentDidMount(){
-        settings_now((val) => {
-            val = JSON.parse(val);
-            this.setState({width: val.device.width, height: val.device.height})
-        });
+const mapStateToProps = (state) => {
+    return {
+        dimensions: getDimensions(state)
     }
+}
+
+class ManualControl extends Component{
 
     render(){
         return <Container>
@@ -33,7 +29,7 @@ class ManualControl extends Component{
                                         <CommandLine/>
                                     </Col>
                                     <Col md>
-                                        <Preview width={this.state.width} height={this.state.height}/>
+                                        <Preview width={this.props.dimensions.width} height={this.props.dimensions.height} imageKey={this.props.imageKey}/>
                                     </Col>
                                 </Row>
                                 <Row>
@@ -49,4 +45,4 @@ class ManualControl extends Component{
     }
 }
 
-export default ManualControl;
+export default connect(mapStateToProps)(ManualControl);
