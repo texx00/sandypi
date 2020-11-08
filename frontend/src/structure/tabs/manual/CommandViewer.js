@@ -1,7 +1,19 @@
 import React, { Component } from 'react';
 
 class CommandViewer extends Component{
-    // TODO set height of the container to fill the row and use vertical scrolling inside the div
+    constructor(props){
+        super(props);
+        this.scrollDiv = React.createRef();
+    }
+
+    scrollToBottom(){
+        this.scrollDiv.current.scrollIntoView({behaviour: "smooth", block: "nearest", inline: "start"});
+    }
+    
+    componentDidUpdate(){
+        this.scrollToBottom();
+    }
+
     render(){
         return <div className="bg-light rounded p-2 mb-2 text-dark command-line-history">
             <div>
@@ -9,6 +21,7 @@ class CommandViewer extends Component{
                     if (!(el.line === "ok" && !this.props.showAcks))   // filter out acks messages
                         return <div key={index}>{(el.device ? "" : "> ") + el.line}</div>;
                     return null;})}
+                <div ref={this.scrollDiv} />
             </div>
         </div>
     }

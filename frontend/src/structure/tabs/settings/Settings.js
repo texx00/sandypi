@@ -31,6 +31,7 @@ class Settings extends Component{
     componentDidMount(){
         settings_now((data) => {
             this.props.updateAllSettings(JSON.parse(data));
+            this.props.setDeviceSize(this.props);
         });
     }
 

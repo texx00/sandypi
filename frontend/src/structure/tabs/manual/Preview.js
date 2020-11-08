@@ -96,7 +96,6 @@ class Preview extends Component{
             this.drawLine(line);
         }
     }
-    // need redux to change the height when settings are updated
 
     render(){
         return <div>
