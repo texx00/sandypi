@@ -15,32 +15,36 @@ class Preview extends Component{
         this.dark_color = "#333333";
         this.multiplier = 5;    // multiply the pixels to get a better resolution with small tables
         this.is_mounted = false;
+        this.force_image_render = false;
     }
 
-    componentDidUpdate(){
+    componentDidMount(){
         if (!this.is_mounted){
             this.is_mounted = true;
             this.canvas = this.canvas_ref.current;
             this.ctx = this.canvas.getContext("2d");
             this.clearCanvas();
+            this.forceUpdate();
             device_new_position(this.newLineFromDevice.bind(this));
+        }
+    }
+    
+    componentDidUpdate(){
+        if (this.force_image_render){
+            this.force_image_render = false;
+            this.updateImage();
         }
     }
 
     shouldComponentUpdate(nextProps){
         if (nextProps.width !== this.props.width || nextProps.height !== this.props.width){
-            this.is_mounted = false;
+            this.force_image_render = true;
         }
         return true;
     }
-
-    getSnapshotBeforeUpdate(){
-        this.updateImage()
-        return null;
-    }
     
     updateImage(){
-        if (this.is_mounted)
+        if (this.canvas !== undefined)
             this.image_ref.current.src = this.canvas.toDataURL();
     }
     

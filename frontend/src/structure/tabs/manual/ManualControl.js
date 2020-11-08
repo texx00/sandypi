@@ -29,7 +29,7 @@ class ManualControl extends Component{
                                         <CommandLine/>
                                     </Col>
                                     <Col md>
-                                        <Preview width={this.props.dimensions.width} height={this.props.dimensions.height} imageKey={this.props.imageKey}/>
+                                        <Preview width={this.props.dimensions.width} height={this.props.dimensions.height}/>
                                     </Col>
                                 </Row>
                                 <Row>

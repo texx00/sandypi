@@ -26,14 +26,11 @@ const mapDispatchToProps = (dispatch) => {
     }
 }
 
-// should really use redux for the settings? may use it just for the device dimensions and save the settings in the local state
-
 class Settings extends Component{
 
     componentDidMount(){
         settings_now((data) => {
             this.props.updateAllSettings(JSON.parse(data));
-            this.props.setDeviceSize(this.props);
         });
     }
 
