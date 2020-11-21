@@ -8,6 +8,7 @@ import Drawings from './tabs/drawings/Drawings';
 import Playlists from './tabs/Playlists';
 import ManualControl from './tabs/manual/ManualControl';
 import Settings from './tabs/settings/Settings';
+import Queue from './tabs/queue/Queue';
 
 class Content extends Component{
     
@@ -28,6 +29,9 @@ class Content extends Component{
                 </Tab>
                 <Tab eventKey="settings" title="Settings">
                     <Settings />
+                </Tab>
+                <Tab eventKey="queue" title="Queue">
+                    <Queue />
                 </Tab>
             </Tabs>
         </div>

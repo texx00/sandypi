@@ -8,7 +8,6 @@ class FeederEventManager(FeederEventHandler):
     def on_drawing_ended(self, code):
         self.app.logger.info("B> Drawing ended")
         self.app.semits.show_toast_on_UI("Drawing ended")
-        self.app.semits.send_nav_drawing_status()
         self.app.qmanager.set_is_drawing(False)
         self.app.qmanager.start_next()
 
@@ -16,7 +15,7 @@ class FeederEventManager(FeederEventHandler):
         self.app.logger.info("B> Drawing started")
         self.app.semits.show_toast_on_UI("Drawing started")
         self.app.qmanager.set_code(code)
-        self.app.semits.send_nav_drawing_status()
+        self.app.qmanager.send_queue_status()
     
     def on_message_received(self, line):
         # Send the line to the server

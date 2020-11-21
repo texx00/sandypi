@@ -1,8 +1,9 @@
 import { createStore } from 'redux';
 import { combineReducers } from '@reduxjs/toolkit';
 
-import settingsReducer from './structure/tabs/settings/Settings.slice.js';
-import manualControlReducer from './structure/tabs/manual/ManualControl.slice.js';
+import settingsReducer from './structure/tabs/settings/Settings.slice';
+import manualControlReducer from './structure/tabs/manual/ManualControl.slice';
+import queueReducer from './structure/tabs/queue/Queue.slice';
 
 
 // save state to local storage
@@ -29,7 +30,8 @@ function loadFromLocalStorage() {
 
 const store = createStore(combineReducers({
         settings: settingsReducer,
-        manualControl: manualControlReducer
+        manualControl: manualControlReducer,
+        queue: queueReducer
     }),
     loadFromLocalStorage()
 );

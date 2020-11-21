@@ -88,7 +88,6 @@ class Preview extends Component{
     }
 
     newLineFromDevice(line){
-        console.log("Received line: " + line);
         if(line.includes("G28")){
             this.clearCanvas();
         }

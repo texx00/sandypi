@@ -1,4 +1,5 @@
 from queue import Queue
+import json
 
 class QueueManager():
     def __init__(self, app, socketio):
@@ -29,6 +30,7 @@ class QueueManager():
             return
         self.app.logger.info("Adding {} to the queue".format(code))
         self.q.put(code)
+        self.send_queue_status()
 
     # return the content of the queue as a string
     def queue_str(self):
@@ -71,9 +73,18 @@ class QueueManager():
             self.start_drawing(self.q.queue.popleft())
             self.app.logger.info("Starting next code")
             return True
+        self._code = None
+        self.send_queue_status()
         return False
 
     # This method send a "start" command to the bot with the code of the drawing
     def start_drawing(self, code):
         self.app.logger.info("Sending gcode start command")
         self.app.feeder.start_code(code, force_stop = True)
+
+    def send_queue_status(self):
+        res = {
+            "now_drawing_id": self._code if self._code is not None else 0,
+            "queue": list(self.q.queue)
+        }
+        self.app.semits.emit("queue_status", json.dumps(res))

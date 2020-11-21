@@ -2,8 +2,25 @@ import './DrawingCard.scss';
 
 import React, { Component } from 'react';
 import { Button, Card, Modal } from 'react-bootstrap';
+import { connect } from 'react-redux';
 
-import {static_url} from '../../../project_defaults';
+import { static_url } from '../../../project_defaults';
+import { drawing_queue } from '../../../sockets/SAE';
+
+import { getQueueEmpty } from '../queue/selector';
+import { setQueueNotEmpty } from '../queue/Queue.slice';
+
+const mapStateToProps = (state) => {
+    return {
+        isQueueEmpty: getQueueEmpty(state)
+    }
+}
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        setQueueNotEmpty: () => dispatch(setQueueNotEmpty()),
+    }
+}
 
 class DrawingCard extends Component{
     constructor(props){
@@ -17,6 +34,10 @@ class DrawingCard extends Component{
     // TODO drawing options
 
     render(){
+        let start_drawing_label = "Queue drawing"
+        if (this.props.isQueueEmpty){
+            start_drawing_label = "Start drawing"
+        }
         return <div>
             <Card className="p-2 hover-zoom" onClick={()=>this.setState({show_details: true})}>
                 <div className="border-0 bg-black rounded text-dark clickable center p-0">
@@ -38,7 +59,11 @@ class DrawingCard extends Component{
                 </Modal.Header>
                 <Modal.Body>
                     <div className="center pb-3">
-                        <Button className="btn">Draw it now/add to queue</Button>
+                        <Button className="btn" onClick={()=>{
+                            drawing_queue(this.props.element.id);
+                        }}>
+                            {start_drawing_label}
+                        </Button>
                         <Button className="btn">+ Add to playlist</Button>
                         <Button className="btn">Delete drawing</Button>
                     </div>
@@ -51,4 +76,4 @@ class DrawingCard extends Component{
     }
 }
 
-export default DrawingCard;
+export default connect(mapStateToProps, mapDispatchToProps)(DrawingCard);

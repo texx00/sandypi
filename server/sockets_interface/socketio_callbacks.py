@@ -90,3 +90,13 @@ def settings_request():
 @socketio.on("send_gcode_command")
 def send_gcode_command(command):
     app.feeder.send_gcode_command(command)
+
+# drawings callbacks
+@socketio.on("drawing_queue")
+def drawing_queue(code):
+    app.qmanager.queue_drawing(code)
+
+# queue callbacks
+@socketio.on("queue_get_status")
+def queue_get_status():
+    app.qmanager.send_queue_status()

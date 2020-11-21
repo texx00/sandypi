@@ -64,7 +64,6 @@ class CommandLine extends Component{
         let ch = this.state.history;
         ch.push({line: line, device: device});
         this.setState({history: ch});
-        console.log(line);
     }
 
     render(){

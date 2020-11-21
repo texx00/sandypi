@@ -22,19 +22,6 @@ class SocketioEmits():
     def update_hw_preview(self, line):
         self.emit("preview_new_position", line)
 
-
-    # updates the nav bar status preview
-    def send_nav_drawing_status(self):
-        if self.app.qmanager.is_drawing():
-            try:
-                item = self.db.session.query(UploadedFiles).filter(UploadedFiles.id == self.app.qmanager.get_code()).one()
-                self.emit("current_drawing_preview", render_template("drawing_status.html", item=item))
-            except Exception as e:
-                self.app.logger.error("Error during nav drawing status update")
-                self.emit("current_drawing_preview", "")
-        else: 
-            self.emit("current_drawing_preview", "")
-
     # general emit
     def emit(self, topic, line):
         self.socketio.emit(topic, line)
