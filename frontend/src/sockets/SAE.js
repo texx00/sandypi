@@ -14,6 +14,11 @@ function settings_save(settings, connect=false){
 
 // ---- DRAWINGS ----
 
+// emit a socket to delete a drawing
+function drawing_delete(code){
+    socket.emit("drawing_delete", code);
+}
+
 // emit a socket to add a drawing to the queue
 function drawing_queue(code){
     socket.emit("drawing_queue", code);
@@ -26,4 +31,4 @@ function queue_get_status(){
     socket.emit("queue_get_status");
 }
 
-export {send_command, settings_save, drawing_queue, queue_get_status};
+export {send_command, settings_save, drawing_delete, drawing_queue, queue_get_status};

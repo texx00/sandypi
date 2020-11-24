@@ -96,6 +96,19 @@ def send_gcode_command(command):
 def drawing_queue(code):
     app.qmanager.queue_drawing(code)
 
+@socketio.on("drawing_delete")
+def drawing_delete(code):
+    item = db.session.query(UploadedFiles).filter_by(id=code).first()
+    # TODO should delete the drawing also from every playlist
+    try:
+        db.session.delete(item)
+        db.session.commit()
+        os.rmdir(app.config["UPLOAD_FOLDER"] +"/" + str(code) +"/")
+        app.logger.info("Drawing code {} deleted".format(code))
+        app.semits.show_toast_on_UI("Drawing deleted")
+    except:
+        app.logger.error("'Delete drawing code {}' error".format(code))
+
 # queue callbacks
 @socketio.on("queue_get_status")
 def queue_get_status():

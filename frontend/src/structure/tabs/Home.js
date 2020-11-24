@@ -56,7 +56,13 @@ class Home extends Component{
     renderDrawings(list){
         let result; 
         if (list.length>0){
-            result = list.map((item, index) => {return <DrawingCard element={item} key={index}/>});
+            result = list.map((item, index) => {
+                return <DrawingCard 
+                    element={item} 
+                    key={index} 
+                    handleDelete={(id)=>{
+                        console.log("Removed "+id);
+                    }}/>});
         }else{
             result = [1,2,3,4,5,6,7].map((item, index)=>{return  <PlaceholderCard key={index}/>});
         }

@@ -1,5 +1,12 @@
 import React, {Component} from 'react';
 import {Navbar, Nav, Button} from 'react-bootstrap';
+import {connect} from 'react-redux';
+
+import { setTab } from './tabs/Tabs.slice';
+
+const mapDispatchToProps = (dispatch) => {
+    return {handleTab: (name) => dispatch(setTab(name))}
+}
 
 class TopBar extends Component{
 
@@ -25,4 +32,4 @@ class TopBar extends Component{
     }
 }
 
-export default TopBar;
+export default connect(null, mapDispatchToProps)(TopBar);

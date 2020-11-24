@@ -1,6 +1,7 @@
 import './Content.scss';
 
 import React, { Component} from 'react';
+import { connect } from 'react-redux';
 import {Tabs, Tab} from 'react-bootstrap';
 
 import Home from './tabs/Home.js'; 
@@ -9,12 +10,21 @@ import Playlists from './tabs/Playlists';
 import ManualControl from './tabs/manual/ManualControl';
 import Settings from './tabs/settings/Settings';
 import Queue from './tabs/queue/Queue';
+import SingleDrawing from './tabs/singleDrawing/SingleDrawing';
+
+import { getTab } from './tabs/selector';
+
+const mapStateToProps = (state) => {
+    return {
+        tab: getTab(state)
+    }
+}
 
 class Content extends Component{
     
     render(){
         return <div className="max-width m-auto text-light pt-5 pb-5">
-            <Tabs id="content_tabs" className="hide-nav" activeKey={this.props.selectedTab}>
+            <Tabs id="content_tabs" className="hide-nav" activeKey={this.props.tab}>
                 <Tab eventKey="home" title="Home">
                     <Home/>
                 </Tab>
@@ -33,9 +43,12 @@ class Content extends Component{
                 <Tab eventKey="queue" title="Queue">
                     <Queue />
                 </Tab>
+                <Tab eventKey="drawing">
+                    <SingleDrawing />
+                </Tab>
             </Tabs>
         </div>
     }
 }
 
-export default Content;
+export default connect(mapStateToProps)(Content);

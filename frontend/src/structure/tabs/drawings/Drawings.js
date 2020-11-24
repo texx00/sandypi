@@ -1,9 +1,17 @@
 import React, { Component } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
+import { connect } from 'react-redux';
+
 import { Section } from '../../../components/Section';
+
 import DrawingDataDownloader from './DrawingDataDownloader';
 import UploadDrawingsModal from './UploadDrawing';
 import DrawingCard from './DrawingCard';
+import { setDrawings } from './Drawings.slice';
+
+const mapDispatchToProps = (dispatch) => {
+    return {setDrawings: (drawings) => dispatch(setDrawings(drawings))}
+}
 
 class Drawings extends Component{
     constructor(props){
@@ -18,6 +26,7 @@ class Drawings extends Component{
 
     addElements(data){
         this.setState({drawings: data, loaded: true});
+        this.props.setDrawings(data);
     }
 
     handleFileUploaded(){
@@ -27,7 +36,9 @@ class Drawings extends Component{
     renderDrawings(drawings){
         return drawings.map((d, index)=>{
             return <Col key={index} sm={4}>
-                    <DrawingCard element={d}/>
+                    <DrawingCard element={d} handleDelete={(id)=>{
+                        console.log("remove id")
+                    }}/>
                 </Col>
         });
     }
@@ -62,4 +73,4 @@ class Drawings extends Component{
     }
 }
 
-export default Drawings;
+export default connect(null, mapDispatchToProps)(Drawings);
