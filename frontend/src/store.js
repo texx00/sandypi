@@ -37,7 +37,8 @@ const store = createStore(combineReducers({
         tabs: tabsReducer,
         drawings: drawingsReducer
     }),
-    loadFromLocalStorage()
+    loadFromLocalStorage(),
+    window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()        // redux setup for chrome dev extension https://github.com/zalmoxisus/redux-devtools-extension
 );
 
 store.subscribe(() => saveToLocalStorage(store.getState()));
