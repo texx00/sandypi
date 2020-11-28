@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import { Card } from 'react-bootstrap';
 import { connect } from 'react-redux';
 
-import { getImgUrl } from '../../../project_defaults';
+import { getImgUrl } from '../../../utils/utils';
 
 import { showSingleDrawing } from '../Tabs.slice';
 

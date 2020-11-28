@@ -6,7 +6,7 @@ import { drawing_delete, drawing_queue } from '../../../sockets/SAE';
 
 import ConfirmButton from '../../../components/ConfirmButton';
 
-import { getImgUrl } from '../../../project_defaults';
+import { getImgUrl } from '../../../utils/utils';
 
 import { getQueueEmpty } from '../queue/selector';
 import { getSingleDrawing } from '../drawings/selector';
@@ -62,9 +62,7 @@ class SingleDrawing extends Component{
                     <img className="modal-drawing-preview" src={getImgUrl(this.props.element.id)} alt="Not available"/>
                 </div>
             </Container>
-        }else{
-            return null;
-        }
+        }else return null;
     }
 }
 

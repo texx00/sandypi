@@ -57,18 +57,3 @@ def api_upload(playlist):
                 app.logger.info("File added")
                 return "1"
     return "0"
-
-
-# return by default first 20 drawings
-@app.route('/api/drawings/')
-def api_drawings():
-    return api_drawings_number(20)
-
-# return the first n drawings
-@app.route('/api/drawings/<number>')
-def api_drawings_number(number):    
-    rows = db.session.query(UploadedFiles).order_by(UploadedFiles.edit_date.desc()).limit(str(number))
-    res = []
-    for r in rows:
-        res.append({"id": r.id, "filename": r.filename})
-    return json.dumps(res)

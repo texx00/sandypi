@@ -1,8 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-
-function checkArray(arr){
-    return arr.filter((el) => el !== null && el !== undefined);
-}
+import { checkArray } from '../../../utils/utils';
 
 const drawingsSlice = createSlice({
     name: "drawings",

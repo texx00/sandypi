@@ -6,7 +6,7 @@ import {Tabs, Tab} from 'react-bootstrap';
 
 import Home from './tabs/Home.js'; 
 import Drawings from './tabs/drawings/Drawings';
-import Playlists from './tabs/Playlists';
+import Playlists from './tabs/playlists/Playlists';
 import ManualControl from './tabs/manual/ManualControl';
 import Settings from './tabs/settings/Settings';
 import Queue from './tabs/queue/Queue';
@@ -26,6 +26,7 @@ class Content extends Component{
     render(){
         return <div className="max-width m-auto text-light pt-5 pb-5">
             <DrawingDataDownloader />
+            
             <Tabs id="content_tabs" className="hide-nav" activeKey={this.props.tab}>
                 <Tab eventKey="home" title="Home">
                     <Home/>

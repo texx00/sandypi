@@ -112,6 +112,14 @@ def drawing_delete(code):
     except Exception as e:
         app.logger.error("'Delete drawing code {}' error".format(code))
 
+@socketio.on("drawings_refresh")
+def drawings_refresh():
+    rows = db.session.query(UploadedFiles).order_by(UploadedFiles.edit_date.desc())
+    res = []
+    for r in rows:
+        res.append({"id": r.id, "filename": r.filename})
+    app.semits.emit("drawings_refresh_response", json.dumps(res))
+
 # queue callbacks
 @socketio.on("queue_get_status")
 def queue_get_status():

@@ -55,8 +55,7 @@ class Home extends Component{
     }
 
     renderDrawings(list){
-        let result; 
-        console.log(list)
+        let result;
         if (list.length>0){
             result = list.map((item, index) => {
                 return <DrawingCard 
