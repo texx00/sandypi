@@ -5,6 +5,7 @@ const tabsSlice = createSlice({
     initialState: {
         tab: "home",
         drawing_code: 0,
+        playlist_code: 0,
         back_tab: "home"
     },
     reducers: {
@@ -14,6 +15,10 @@ const tabsSlice = createSlice({
         showSingleDrawing(state, action){
             const back_tab = state.tab;
             return {tab: "drawing", drawing_code: action.payload, back_tab: back_tab}
+        },
+        showSinglePlaylist(state, action){
+            const back_tab = state.tab;
+            return {tab: "playlist", playlist_code: action.payload, back_tab: back_tab}
         },
         tabBack(state){
             const back_tab = state.back_tab;

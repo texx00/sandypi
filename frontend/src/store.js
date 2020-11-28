@@ -6,6 +6,7 @@ import manualControlReducer from './structure/tabs/manual/ManualControl.slice';
 import queueReducer from './structure/tabs/queue/Queue.slice';
 import tabsReducer from './structure/tabs/Tabs.slice';
 import drawingsReducer from './structure/tabs/drawings/Drawings.slice';
+import playlistReducer from './structure/tabs/playlists/Playlists.slice';
 
 
 // save state to local storage
@@ -35,7 +36,8 @@ const store = createStore(combineReducers({
         manualControl: manualControlReducer,
         queue: queueReducer,
         tabs: tabsReducer,
-        drawings: drawingsReducer
+        drawings: drawingsReducer,
+        playlists: playlistReducer
     }),
     loadFromLocalStorage(),
     window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()        // redux setup for chrome dev extension https://github.com/zalmoxisus/redux-devtools-extension

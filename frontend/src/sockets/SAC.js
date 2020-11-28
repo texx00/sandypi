@@ -1,15 +1,20 @@
 // Sockets Api Callbacks
 
 import openSocket from 'socket.io-client';
+import { domain } from '../utils/utils';
 
-const socket = openSocket("http://localhost:5000");     // uses flask's port
-
+const socket = openSocket(domain);     // uses flask's address and port 
 
 /* ----- Sockets callbacks ----- */
 
 // ---- Drawings ----
 function drawings_refresh_response(cb){
-    socket.on("drawings_refresh_response", (val) => {cb(val)});
+    socket.on("drawings_refresh_response", (val) => cb(val));
+}
+
+// ---- Playlists ----
+function playlists_refresh_response(cb){
+    socket.on("playlists_refresh_response", (val) => cb(val));
 }
 
 // ---- Queue ----
@@ -45,4 +50,4 @@ function show_toast(cb){
 }
 
 
-export {socket, drawings_refresh_response, queue_status, device_command_line_return, device_new_position, settings_now, show_toast};
+export {socket, drawings_refresh_response, playlists_refresh_response, queue_status, device_command_line_return, device_new_position, settings_now, show_toast};

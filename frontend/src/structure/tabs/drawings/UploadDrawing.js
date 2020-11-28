@@ -2,7 +2,7 @@ import "./UploadDrawing.scss";
 
 import React, { Component } from 'react';
 
-import {api_url} from "../../../project_defaults";
+import { domain } from '../../../utils/utils';
 
 import Dropzone from 'react-dropzone';
 import Modal from 'react-bootstrap/Modal';
@@ -23,7 +23,7 @@ class UploadDrawingsModal extends Component{
             let data = new FormData();
             data.append("file", f);
             data.append("filename", f.name);
-            return fetch(api_url + "/upload/" + this.props.playlist, {
+            return fetch(domain + "/api/upload/" + this.props.playlist, {
                 method: "POST",
                 body: data
             }).then((response => {

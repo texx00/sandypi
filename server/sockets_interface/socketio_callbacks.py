@@ -37,8 +37,11 @@ def handle_software_updates_check():
 @socketio.on("request_nav_drawing_status")
 def nav_drawing_request():
     app.semits.send_nav_drawing_status()
-    
-# playlist sockets
+
+# TODO split in multiple files?    
+
+# --------------------------------------------------------- PLAYLISTS CALLBACKS -------------------------------------------------------------------------------
+
 # save the changes to the playlist
 @socketio.on("playlist_save")
 def playlist_save(playlist):
@@ -64,6 +67,23 @@ def playlist_start(code):
         if i != "":
             app.qmanager.queue_drawing(i)
 
+
+@socketio.on("playlist_create")
+def playlist_create():
+    pl = Playlists.create_playlist()
+    playlist_refresh_id(id=pl.id)
+
+@socketio.on("playlists_refresh")
+def playlist_refresh():
+    playlist_refresh_id()
+
+def playlist_refresh_id(id=0):
+    playlists = db.session.query(Playlists).order_by(Playlists.edit_date.desc()).all()
+    app.semits.emit("playlists_refresh_response", json.dumps({"playlists": playlists, "id": id}))
+
+
+# --------------------------------------------------------- SETTINGS CALLBACKS -------------------------------------------------------------------------------
+
 # settings callbacks
 @socketio.on("settings_save")
 def settings_save(data, is_connect):
@@ -88,11 +108,13 @@ def settings_request():
     settings["serial"]["available_ports"].append("FAKE")
     app.semits.emit("settings_now", json.dumps(settings))
 
+
 @socketio.on("send_gcode_command")
 def send_gcode_command(command):
     app.feeder.send_gcode_command(command)
 
-# drawings callbacks
+# --------------------------------------------------------- DRAWINGS CALLBACKS -------------------------------------------------------------------------------
+
 @socketio.on("drawing_queue")
 def drawing_queue(code):
     app.qmanager.queue_drawing(code)
@@ -120,7 +142,9 @@ def drawings_refresh():
         res.append({"id": r.id, "filename": r.filename})
     app.semits.emit("drawings_refresh_response", json.dumps(res))
 
-# queue callbacks
+
+# --------------------------------------------------------- QUEUE CALLBACKS -------------------------------------------------------------------------------
+
 @socketio.on("queue_get_status")
 def queue_get_status():
     app.qmanager.send_queue_status()

@@ -9,10 +9,10 @@ import ConfirmButton from '../../../components/ConfirmButton';
 import { getImgUrl } from '../../../utils/utils';
 
 import { getQueueEmpty } from '../queue/selector';
-import { getSingleDrawing } from '../drawings/selector';
+import { getSingleDrawing } from './selector';
 import { setQueueNotEmpty } from '../queue/Queue.slice';
 import { tabBack } from '../Tabs.slice';
-import { deleteDrawing, setRefreshDrawing } from '../drawings/Drawings.slice';
+import { deleteDrawing, setRefreshDrawing } from './Drawings.slice';
 
 const mapStateToProps = (state) => {
     return {

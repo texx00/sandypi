@@ -1,5 +1,5 @@
 const getRefreshDrawings = state => {
-    return state.drawings.mustRefresh;
+    return state.drawings.must_refresh;
 }
 
 const getDrawings = state => { 

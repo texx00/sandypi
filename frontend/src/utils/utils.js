@@ -1,4 +1,4 @@
-import { static_url } from '../project_defaults';
+const domain = document.location.protocol + '//' + document.domain + ":5000";
 
 // removes undefined and null values from an array
 function checkArray(arr){
@@ -8,8 +8,8 @@ function checkArray(arr){
 // get the url of given images
 function getImgUrl(id){
     if (id !== undefined)
-        return static_url + "/Drawings/" + id + "/" + id + ".jpg";
+        return domain + "/static/Drawings/" + id + "/" + id + ".jpg";
     else return "";
 }
 
-export { getImgUrl, checkArray };
+export { domain, getImgUrl, checkArray };

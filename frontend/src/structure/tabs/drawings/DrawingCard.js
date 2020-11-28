@@ -13,10 +13,6 @@ const mapDispatchToProps = (dispatch) => {
 }
 
 class DrawingCard extends Component{
-    constructor(props){
-        super(props);
-        this.state = {show_details: false};
-    }
 
     render(){
         if (this.props.element === undefined || this.props.element === null)

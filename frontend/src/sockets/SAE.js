@@ -31,6 +31,13 @@ function drawing_queue(code){
 }
 
 
+// ---- PLAYLISTS ----
+// emit a socket to request an updated list of playlists
+function playlists_request(){
+    socket.emit("playlists_refresh");
+}
+
+
 // ---- QUEUE ----
 
 // ask for an updated queue
@@ -38,4 +45,4 @@ function queue_get_status(){
     socket.emit("queue_get_status");
 }
 
-export {send_command, settings_save, drawing_delete, drawings_request, drawing_queue, queue_get_status};
+export {send_command, settings_save, drawing_delete, drawings_request, drawing_queue, playlists_request, queue_get_status};

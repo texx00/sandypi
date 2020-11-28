@@ -10,10 +10,12 @@ import Playlists from './tabs/playlists/Playlists';
 import ManualControl from './tabs/manual/ManualControl';
 import Settings from './tabs/settings/Settings';
 import Queue from './tabs/queue/Queue';
-import SingleDrawing from './tabs/singleDrawing/SingleDrawing';
+import SingleDrawing from './tabs/drawings/SingleDrawing';
 
 import { getTab } from './tabs/selector';
 import DrawingDataDownloader from '../components/DrawingDataDownloader';
+import PlaylistDataDownloader from '../components/PlaylistDataDownloader';
+import SinglePlaylist from './tabs/playlists/SinglePlaylist';
 
 const mapStateToProps = (state) => {
     return {
@@ -26,6 +28,7 @@ class Content extends Component{
     render(){
         return <div className="max-width m-auto text-light pt-5 pb-5">
             <DrawingDataDownloader />
+            <PlaylistDataDownloader />
             
             <Tabs id="content_tabs" className="hide-nav" activeKey={this.props.tab}>
                 <Tab eventKey="home" title="Home">
@@ -48,6 +51,9 @@ class Content extends Component{
                 </Tab>
                 <Tab eventKey="drawing">
                     <SingleDrawing />
+                </Tab>
+                <Tab eventKey="playlist">
+                    <SinglePlaylist />
                 </Tab>
             </Tabs>
         </div>
