@@ -3,6 +3,7 @@ from flask import render_template
 import pickle
 import json
 import datetime
+import shutil
 
 from server import socketio, app, db
 
@@ -100,13 +101,15 @@ def drawing_queue(code):
 def drawing_delete(code):
     item = db.session.query(UploadedFiles).filter_by(id=code).first()
     # TODO should delete the drawing also from every playlist
+    
     try:
-        db.session.delete(item)
-        db.session.commit()
-        os.rmdir(app.config["UPLOAD_FOLDER"] +"/" + str(code) +"/")
-        app.logger.info("Drawing code {} deleted".format(code))
-        app.semits.show_toast_on_UI("Drawing deleted")
-    except:
+        if not item is None:
+            db.session.delete(item)
+            db.session.commit()
+            shutil.rmtree(app.config["UPLOAD_FOLDER"] +"/" + str(code) +"/")
+            app.logger.info("Drawing code {} deleted".format(code))
+            app.semits.show_toast_on_UI("Drawing deleted")
+    except Exception as e:
         app.logger.error("'Delete drawing code {}' error".format(code))
 
 # queue callbacks

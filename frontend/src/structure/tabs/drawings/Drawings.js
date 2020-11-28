@@ -4,45 +4,51 @@ import { connect } from 'react-redux';
 
 import { Section } from '../../../components/Section';
 
-import DrawingDataDownloader from './DrawingDataDownloader';
 import UploadDrawingsModal from './UploadDrawing';
 import DrawingCard from './DrawingCard';
-import { setDrawings } from './Drawings.slice';
+
+import { setRefreshDrawing } from './Drawings.slice';
+import { getDrawings } from './selector';
+
+const mapStateToProps = (state) => {
+    return { drawings: getDrawings(state) }
+}
 
 const mapDispatchToProps = (dispatch) => {
-    return {setDrawings: (drawings) => dispatch(setDrawings(drawings))}
+    return {setRefreshDrawing: () => dispatch(setRefreshDrawing(true))}
 }
 
 class Drawings extends Component{
     constructor(props){
         super(props);
-        this.state = {show_upload: false, loaded: false, drawings: []}
-        this.dhandler = new DrawingDataDownloader(this.addElements.bind(this));
+        this.state = {show_upload: false, loaded: false}
     }
 
     componentDidMount(){
-        this.dhandler.requestDrawings();
-    }
-
-    addElements(data){
-        this.setState({drawings: data, loaded: true});
-        this.props.setDrawings(data);
+        if (this.props.drawings.length > 0){
+            this.setState({loaded: true});
+        }
     }
 
     handleFileUploaded(){
-        this.dhandler.requestDrawings();
+        this.props.setRefreshDrawing();
+        this.setState({loaded: true});
     }
 
     renderDrawings(drawings){
-        return drawings.map((d, index)=>{
-            return <Col key={index} sm={4}>
-                    <DrawingCard element={d} handleDelete={(id)=>{
-                        console.log("remove id")
-                    }}/>
-                </Col>
-        });
+        if (drawings !== undefined)
+            return drawings.map((d, index)=>{
+                return <Col key={index} sm={4}>
+                        <DrawingCard element={d} handleDelete={(id)=>{
+                            console.log("remove id")
+                        }}/>
+                    </Col>
+            });
+        else{
+            return <div></div>
+        }
     }
-    // todo load more on page scroll
+    // TODO load more on page scroll
 
     render(){
         return <Container>
@@ -59,7 +65,7 @@ class Drawings extends Component{
                         </div>
                         
                         <Row>
-                                {this.renderDrawings(this.state.drawings)}
+                                {this.renderDrawings(this.props.drawings)}
                             </Row>
 
                         <UploadDrawingsModal key={2}
@@ -73,4 +79,4 @@ class Drawings extends Component{
     }
 }
 
-export default connect(null, mapDispatchToProps)(Drawings);
+export default connect(mapStateToProps, mapDispatchToProps)(Drawings);

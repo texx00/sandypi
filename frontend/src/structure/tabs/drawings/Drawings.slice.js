@@ -1,23 +1,50 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+function checkArray(arr){
+    return arr.filter((el) => el !== null && el !== undefined);
+}
+
 const drawingsSlice = createSlice({
     name: "drawings",
     initialState: {
-        drawings: []
+        drawings: [],
+        mustRefresh: true
     },
     reducers: {
-        setDrawings(state, action){
-            return {drawings: action.payload};
+        // action.payload must be the id of the drawing to delete
+        deleteDrawing(state, action){
+            let dr = state.drawings;
+            let res = dr.filter((el) => {
+                return el.id !== action.payload;
+            });
+            return { drawings: res };
         },
+        // action.payload must be true (must refresh) or false (set automatically after refreshing)
+        setRefreshDrawing(state, action){
+            return { mustRefresh: action.payload };
+        },
+        // action.payload must be the complete list of drawings
+        setDrawings(state, action){
+            return { drawings: action.payload };
+        },
+        // action.payload must be the element to update
         setSingleDrawing(state, action){
-            throw Error("Not implemented");
-            return 
+            let drawing = action.payload;
+            let drawings = checkArray(state.drawings.drawings);
+            return {drawings: drawings.map((el) => {
+                if (el.id === drawing.id)
+                    return drawing;
+                else return el;
+            })};
         }
     }
 });
 
 export const {
-    setDrawings
+    deleteDrawing,
+    setRefreshDrawing,
+    setDrawings,
+    setSingleDrawing
 } = drawingsSlice.actions;
 
 export default drawingsSlice.reducer;

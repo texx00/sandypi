@@ -13,6 +13,7 @@ import Queue from './tabs/queue/Queue';
 import SingleDrawing from './tabs/singleDrawing/SingleDrawing';
 
 import { getTab } from './tabs/selector';
+import DrawingDataDownloader from '../components/DrawingDataDownloader';
 
 const mapStateToProps = (state) => {
     return {
@@ -24,6 +25,7 @@ class Content extends Component{
     
     render(){
         return <div className="max-width m-auto text-light pt-5 pb-5">
+            <DrawingDataDownloader />
             <Tabs id="content_tabs" className="hide-nav" activeKey={this.props.tab}>
                 <Tab eventKey="home" title="Home">
                     <Home/>

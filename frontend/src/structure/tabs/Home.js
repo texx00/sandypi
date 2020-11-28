@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
 
@@ -7,8 +8,18 @@ import PlaceholderCard from '../../components/PlaceholderCard.js';
 
 import UploadDrawingsModal from './drawings/UploadDrawing.js';
 import DrawingCard from './drawings/DrawingCard';
-import DrawingDataDownloader from './drawings/DrawingDataDownloader';
 import { Container, Row, Col } from 'react-bootstrap';
+
+import { getDrawingsLimited } from './drawings/selector';
+import { setRefreshDrawing } from './drawings/Drawings.slice';
+
+const mapStateToProps = (state) => {
+    return { drawings: getDrawingsLimited(state) }
+}
+
+const mapDispatchToProps = (dispatch) => {
+    return {setRefreshDrawing: () => dispatch(setRefreshDrawing(true))}
+}
 
 class Home extends Component{
     constructor(props){
@@ -31,22 +42,12 @@ class Home extends Component{
               items: 1
             }
         };
-        this.state = {show_upload: false, show_create_playlist: false, elements: []}
-        this.dhandler = new DrawingDataDownloader(this.setElements.bind(this));
-    }
-
-    componentDidMount(){
-        this.dhandler.requestDrawings();
+        this.state = {show_upload: false, show_create_playlist: false}
     }
 
     handleFileUploaded(){
-        this.dhandler.requestDrawings();
         window.show_toast("Updating drawing previews...");
-    }
-
-
-    setElements(elements){
-        this.setState({elements : elements});
+        this.props.setRefreshDrawing();
     }
 
     newPlaylistHandler(){
@@ -55,6 +56,7 @@ class Home extends Component{
 
     renderDrawings(list){
         let result; 
+        console.log(list)
         if (list.length>0){
             result = list.map((item, index) => {
                 return <DrawingCard 
@@ -77,7 +79,7 @@ class Home extends Component{
                         sectionButton="+ Upload new drawing"
                         sectionButtonHandler={()=>this.setState({show_upload: true})}>
                             <Carousel responsive={this.carousel_responsive} ssr>
-                                {this.renderDrawings(this.state.elements)}
+                                {this.renderDrawings(this.props.drawings)}
                             </Carousel>
                     </Section>
                 </Col>
@@ -103,4 +105,4 @@ class Home extends Component{
     }
 }
 
-export default Home;
+export default connect(mapStateToProps, mapDispatchToProps)(Home);

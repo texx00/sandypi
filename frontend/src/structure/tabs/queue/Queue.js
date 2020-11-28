@@ -29,7 +29,7 @@ class Queue extends Component{
             this.props.setQueueNotEmpty();
         else this.props.setQueueEmpty();
 
-        console.log(res);
+        //console.log(res);
     }
 
 
