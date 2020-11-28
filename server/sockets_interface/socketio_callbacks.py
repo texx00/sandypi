@@ -45,8 +45,7 @@ def nav_drawing_request():
 # save the changes to the playlist
 @socketio.on("playlist_save")
 def playlist_save(playlist):
-    playlist = json.loads(playlist)
-    pl = Playlists.get_playlist(playlist['id'])
+    pl = Playlists.create_playlist() if playlist['id'] == 0 else Playlists.get_playlist(playlist['id'])
     pl.name = playlist['name']
     pl.clear_elements()
     pl.add_element(playlist['elements'])
@@ -67,19 +66,11 @@ def playlist_start(code):
         if i != "":
             app.qmanager.queue_drawing(i)
 
-
-@socketio.on("playlist_create")
-def playlist_create():
-    pl = Playlists.create_playlist()
-    playlist_refresh_id(id=pl.id)
-
 @socketio.on("playlists_refresh")
 def playlist_refresh():
-    playlist_refresh_id()
-
-def playlist_refresh_id(id=0):
     playlists = db.session.query(Playlists).order_by(Playlists.edit_date.desc()).all()
-    app.semits.emit("playlists_refresh_response", json.dumps({"playlists": playlists, "id": id}))
+    pls = list(map(lambda el: el.to_json(), playlists))
+    app.semits.emit("playlists_refresh_response", list(map(lambda el: el.to_json(), playlists)))
 
 
 # --------------------------------------------------------- SETTINGS CALLBACKS -------------------------------------------------------------------------------

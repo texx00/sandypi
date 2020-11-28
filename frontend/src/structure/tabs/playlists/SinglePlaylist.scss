@@ -1,0 +1,9 @@
+@import '../../../_colors.scss';
+
+.editable-title{
+    color: $light;
+}
+.editable-title:focus{
+    background-color: $light;
+    color: $dark;
+}

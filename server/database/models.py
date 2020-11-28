@@ -53,6 +53,13 @@ class Playlists(db.Model):
         els = self.get_elements()
         return json.dumps([e.get_dict() for e in els])
 
+    def to_json(self):
+        return json.dumps({
+            "name": self.name,
+            "elements": self._ec().get_playlist_elements(),
+            "id": self.id
+        })
+
     # returns the database table class for the elements of that playlist
     def _ec(self):
         if not hasattr(self, "_tc"):

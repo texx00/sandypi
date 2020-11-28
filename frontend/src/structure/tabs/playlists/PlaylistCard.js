@@ -17,6 +17,9 @@ class PlaylistCard extends Component{
             return "";
         return <div>
             <Card className="p-2 hover-zoom" onClick={() => this.props.showSinglePlaylist(this.props.playlist.id)}>
+                <div className="border-0 bg-black rounded text-dark clickable center p-0">
+                    <div className="card-text text-center text-dark pb-1 bg-primary rounded-bottom">{this.props.playlist.name}</div>
+                </div>
             </Card>
         </div>
     }

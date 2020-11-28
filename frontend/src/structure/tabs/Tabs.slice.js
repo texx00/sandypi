@@ -10,6 +10,7 @@ const tabsSlice = createSlice({
     },
     reducers: {
         setTab(state, action){
+            // TODO check if it is leaving the playlist tab without saving and ask to save before leaving
             return {tab: action.payload};
         },
         showSingleDrawing(state, action){
@@ -29,7 +30,8 @@ const tabsSlice = createSlice({
 
 export const {
     setTab,
-    showSingleDrawing, 
+    showSingleDrawing,
+    showSinglePlaylist, 
     tabBack
 } = tabsSlice.actions;
 

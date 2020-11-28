@@ -31,8 +31,7 @@ class PlaylistDataDownloader extends Component{
     }
 
     onDataReceived(res){
-        res = JSON.parse(res);
-        this.props.setPlaylists(res.playlists);
+        this.props.setPlaylists(res.map((el)=>{return JSON.parse(el)}));
     }
 
     render(){

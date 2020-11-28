@@ -37,7 +37,20 @@ function playlists_request(){
     socket.emit("playlists_refresh");
 }
 
+// delete a playlist
+function playlist_delete(id){
 
+}
+
+// queue selected playlist
+function playlist_queue(id){
+
+}
+
+//emit a socket to create a new playlist
+function playlist_save(pl){
+    socket.emit("playlist_save", pl);
+}
 // ---- QUEUE ----
 
 // ask for an updated queue
@@ -45,4 +58,15 @@ function queue_get_status(){
     socket.emit("queue_get_status");
 }
 
-export {send_command, settings_save, drawing_delete, drawings_request, drawing_queue, playlists_request, queue_get_status};
+export {
+    send_command, 
+    settings_save, 
+    drawing_delete, 
+    drawings_request, 
+    drawing_queue, 
+    playlists_request, 
+    playlist_delete,
+    playlist_queue,
+    playlist_save, 
+    queue_get_status
+};

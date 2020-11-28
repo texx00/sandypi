@@ -1,24 +1,33 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import { Container, Row, Col } from 'react-bootstrap';
 import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
 
-import { Section } from '../../components/Section.js';
-import PlaceholderCard from '../../components/PlaceholderCard.js';
+import { Section } from '../../components/Section';
+import PlaceholderCard from '../../components/PlaceholderCard';
 
-import UploadDrawingsModal from './drawings/UploadDrawing.js';
+import UploadDrawingsModal from './drawings/UploadDrawing';
 import DrawingCard from './drawings/DrawingCard';
-import { Container, Row, Col } from 'react-bootstrap';
+import PlaylistCard from './playlists/PlaylistCard';
 
 import { getDrawingsLimited } from './drawings/selector';
+import { getPlaylistsLimited } from './playlists/selector';
 import { setRefreshDrawing } from './drawings/Drawings.slice';
+import { showSinglePlaylist } from './Tabs.slice';
 
 const mapStateToProps = (state) => {
-    return { drawings: getDrawingsLimited(state) }
+    return { 
+        drawings: getDrawingsLimited(state),
+        playlists: getPlaylistsLimited(state)
+     }
 }
 
 const mapDispatchToProps = (dispatch) => {
-    return {setRefreshDrawing: () => dispatch(setRefreshDrawing(true))}
+    return {
+        setRefreshDrawing: () => dispatch(setRefreshDrawing(true)),
+        createNewPlaylist: () => dispatch(showSinglePlaylist(0))
+    }
 }
 
 class Home extends Component{
@@ -50,20 +59,26 @@ class Home extends Component{
         this.props.setRefreshDrawing();
     }
 
-    newPlaylistHandler(){
-        console.log("Create playlist")
-    }
-
     renderDrawings(list){
         let result;
         if (list.length>0){
             result = list.map((item, index) => {
                 return <DrawingCard 
-                    element={item} 
-                    key={index} 
-                    handleDelete={(id)=>{
-                        console.log("Removed "+id);
-                    }}/>});
+                    drawing={item} 
+                    key={index} />});
+        }else{
+            result = [1,2,3,4,5,6,7].map((item, index)=>{return  <PlaceholderCard key={index}/>});
+        }
+        return result;
+    }
+
+    renderPlaylists(list){
+        let result;
+        if (list.length>0){
+            result = list.map((item, index) => {
+                return <PlaylistCard
+                    playlist={item} 
+                    key={index}/>});
         }else{
             result = [1,2,3,4,5,6,7].map((item, index)=>{return  <PlaceholderCard key={index}/>});
         }
@@ -87,11 +102,9 @@ class Home extends Component{
                 <Col>
                     <Section sectionTitle="Playlists"
                         sectionButton="+ Create new playlist"
-                        sectionButtonHandler={this.newPlaylistHandler.bind(this)} ssr>
+                        sectionButtonHandler={()=> this.props.createNewPlaylist()} ssr>
                             <Carousel responsive={this.carousel_responsive}>
-                                {[1,2,3,4].map((item, index)=>{
-                                    return <PlaceholderCard key={index}/>
-                                })}
+                                {this.renderPlaylists(this.props.playlists)}
                             </Carousel>
                     </Section>
                 </Col>

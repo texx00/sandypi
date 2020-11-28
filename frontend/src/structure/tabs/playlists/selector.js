@@ -1,8 +1,19 @@
+function createEmptyPlaylist(){
+    return {
+        name: "NewPlaylist",
+        elements: [],
+        id: 0
+    }
+}
+
 const getRefreshPlaylists = state => {
     return state.playlists.must_refresh;
 }
 
 const getSinglePlaylist = state => {
+    if (state.tabs.playlist_code === 0 || state.tabs.playlist_code === undefined){
+        return createEmptyPlaylist();
+    }
     let ret = {}
     const pl = state.playlists.playlists;
     for (let el in pl){
