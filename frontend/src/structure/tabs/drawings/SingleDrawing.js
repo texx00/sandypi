@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Button, Container } from 'react-bootstrap';
+import { FileEarmarkX, Play, PlusSquare } from 'react-bootstrap-icons';
 import { connect } from 'react-redux';
 
 import { drawing_delete, drawing_queue } from '../../../sockets/SAE';
@@ -41,22 +42,32 @@ class SingleDrawing extends Component{
                 start_drawing_label = "Start drawing";
             }
             return <Container>
-                <div>
-                    <Button onClick={()=>{this.props.handleTabBack()}}>BACK</Button>
-                    <div>{this.props.element.filename}</div>
+                <div className="mb-3 w-100 center">
+                    <h1 className="d-inline-block ml-3">{this.props.element.filename}</h1>
                 </div>
                 <div className="center pb-3">
                     <Button className="btn" onClick={()=>{
                         drawing_queue(this.props.element.id);
                     }}>
-                        {start_drawing_label}
+                        <div className="d-flex">
+                                <Play className="mr-1 align-self-center"/>
+                                <span className="align-self-center">{start_drawing_label}</span>
+                            </div>
                     </Button>
-                    <Button className="btn">+ Add to playlist</Button>
+                    <Button className="btn"><div className="d-flex">
+                                <PlusSquare className="mr-2 align-self-center"/>
+                                <span className="align-self-center">Add to playlist</span>
+                            </div></Button>
                     <ConfirmButton className="btn" onClick={()=> {
                         drawing_delete(this.props.element.id);
                         this.props.deleteDrawing(this.props.element.id);
                         this.props.handleTabBack();
-                    }}>Delete drawing</ConfirmButton>
+                    }}>
+                        <div className="d-flex">
+                            <FileEarmarkX className="mr-2 align-self-center"/>
+                            <span className="align-self-center">Delete drawing</span>
+                        </div>
+                    </ConfirmButton>
                 </div>
                 <div className="center mb-5">
                     <img className="modal-drawing-preview" src={getImgUrl(this.props.element.id)} alt="Not available"/>

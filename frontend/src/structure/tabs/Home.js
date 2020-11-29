@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Container, Row, Col } from 'react-bootstrap';
+import { Container, Row, Col, Button } from 'react-bootstrap';
+import { FileEarmarkPlus, PlusSquare } from 'react-bootstrap-icons';
 import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
 
@@ -14,7 +15,7 @@ import PlaylistCard from './playlists/PlaylistCard';
 import { getDrawingsLimited } from './drawings/selector';
 import { getPlaylistsLimited } from './playlists/selector';
 import { setRefreshDrawing } from './drawings/Drawings.slice';
-import { showSinglePlaylist } from './Tabs.slice';
+import { setTab, showSinglePlaylist } from './Tabs.slice';
 
 const mapStateToProps = (state) => {
     return { 
@@ -26,7 +27,8 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
     return {
         setRefreshDrawing: () => dispatch(setRefreshDrawing(true)),
-        createNewPlaylist: () => dispatch(showSinglePlaylist(0))
+        createNewPlaylist: () => dispatch(showSinglePlaylist(0)),
+        handleTab: (name) => dispatch(setTab(name))
     }
 }
 
@@ -79,8 +81,14 @@ class Home extends Component{
                 return <PlaylistCard
                     playlist={item} 
                     key={index}/>});
+                    
+            result = <Carousel responsive={this.carousel_responsive}>
+                {result}
+            </Carousel>
         }else{
-            result = [1,2,3,4,5,6,7].map((item, index)=>{return  <PlaceholderCard key={index}/>});
+            result = <div className="center w-100">
+                    <Button onClick={()=> this.props.createNewPlaylist()}>Start by creating a new playlist now</Button>
+                </div>
         }
         return result;
     }
@@ -90,8 +98,12 @@ class Home extends Component{
             <Row>
                 <Col>
                     <Section sectionTitle="Drawings"
-                        sectionButton="+ Upload new drawing"
-                        sectionButtonHandler={()=>this.setState({show_upload: true})}>
+                        sectionButton={<div className="d-flex">
+                                <FileEarmarkPlus className="mr-2 align-self-center"/>
+                                <span className="align-self-center">Upload new drawing</span>
+                            </div>}
+                        sectionButtonHandler={()=>this.setState({show_upload: true})}
+                        titleButtonHandler={()=>this.props.handleTab("drawings")}>
                             <Carousel responsive={this.carousel_responsive} ssr>
                                 {this.renderDrawings(this.props.drawings)}
                             </Carousel>
@@ -101,11 +113,14 @@ class Home extends Component{
             <Row>
                 <Col>
                     <Section sectionTitle="Playlists"
-                        sectionButton="+ Create new playlist"
-                        sectionButtonHandler={()=> this.props.createNewPlaylist()} ssr>
-                            <Carousel responsive={this.carousel_responsive}>
-                                {this.renderPlaylists(this.props.playlists)}
-                            </Carousel>
+                        sectionButton={<div className="d-flex">
+                                <PlusSquare className="mr-2 align-self-center"/>
+                                <span className="align-self-center">Create new playlist</span>
+                            </div>}
+                        sectionButtonHandler={()=> this.props.createNewPlaylist()}
+                        titleButtonHandler={()=>this.props.handleTab("playlists")}
+                        ssr>
+                            {this.renderPlaylists(this.props.playlists)}
                     </Section>
                 </Col>
             </Row>

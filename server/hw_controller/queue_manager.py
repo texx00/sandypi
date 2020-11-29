@@ -69,13 +69,17 @@ class QueueManager():
         if(self.is_drawing()):
             if not force_stop:
                 return False
-        if self.queue_length() > 0:
-            self.start_drawing(self.q.queue.popleft())
-            self.app.logger.info("Starting next code")
-            return True
-        self._code = None
-        self.send_queue_status()
-        return False
+        try:
+            if self.queue_length() > 0:
+                self.start_drawing(self.q.queue.popleft())
+                self.app.logger.info("Starting next code")
+                return True
+            self._code = None
+            self.send_queue_status()
+            return False
+        except Exception as e:
+            self.app.logger.error("An error occured while starting a new drawing from the queue:\n{}".format(str(e)))
+            self.start_next()
 
     # This method send a "start" command to the bot with the code of the drawing
     def start_drawing(self, code):

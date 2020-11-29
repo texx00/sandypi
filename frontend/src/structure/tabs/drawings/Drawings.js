@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
+import { FileEarmarkPlus } from 'react-bootstrap-icons';
 import { connect } from 'react-redux';
 
 import { Section } from '../../../components/Section';
@@ -55,7 +56,10 @@ class Drawings extends Component{
                 <Row>
                     <Col>
                         <Section sectionTitle="Drawings"
-                            sectionButton="+ Upload new drawing"
+                            sectionButton={<div className="d-flex">
+                                    <FileEarmarkPlus className="mr-2 align-self-center"/>
+                                    <span className="align-self-center">Upload new drawing</span>
+                                </div>}
                             sectionButtonHandler={()=>this.setState({show_upload: true})}>
                     
                         <div className={(this.state.loaded ? " d-none" : "")}>

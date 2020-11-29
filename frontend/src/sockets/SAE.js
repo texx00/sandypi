@@ -39,12 +39,12 @@ function playlists_request(){
 
 // delete a playlist
 function playlist_delete(id){
-
+    socket.emit("playlist_delete", id);
 }
 
-// queue selected playlist
+// add selected playlist to the queue
 function playlist_queue(id){
-
+    socket.emit("playlist_queue", id);
 }
 
 //emit a socket to create a new playlist

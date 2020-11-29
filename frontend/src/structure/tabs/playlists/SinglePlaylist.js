@@ -6,9 +6,10 @@ import { Container, Button, Row, Col } from 'react-bootstrap';
 
 import ConfirmButton from '../../../components/ConfirmButton';
 
-import { playlist_queue, playlist_save } from '../../../sockets/SAE';
+import { playlists_request, playlist_delete, playlist_queue, playlist_save } from '../../../sockets/SAE';
 
 import { tabBack } from '../Tabs.slice';
+import { deletePlaylist, updateSinglePlaylist } from './Playlists.slice';
 import { getSinglePlaylist } from './selector';
 
 const mapStateToProps = (state) => {
@@ -17,7 +18,9 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleTabBack: () => dispatch(tabBack())
+        handleTabBack: () => dispatch(tabBack()),
+        deletePlaylist: (id) => dispatch(deletePlaylist(id)),
+        updateSinglePlaylist: (pl) => dispatch(updateSinglePlaylist(pl))
     }
 }
 
@@ -38,8 +41,12 @@ class SinglePlaylist extends Component{
             id: this.props.playlist.id
         };
         playlist_save(playlist);
-        if (this.props.playlist.id === 0)
+        if (this.props.playlist.id === 0){
             this.props.handleTabBack();
+            playlists_request()
+        }else{
+            this.props.updateSinglePlaylist(playlist);
+        }
     }
 
     handleSaveBeforeBack(){
@@ -48,17 +55,21 @@ class SinglePlaylist extends Component{
     }
 
     renderElements(){
-        return <Row>
-            {this.state.elements.map((el) => {
-                return <div>el</div>
-            })}
+        if (this.state.elements !== null && this.state.elements !== undefined)
+            return <Row>
+                {this.state.elements.map((el) => {
+                    return <div>el</div>
+                })}
+            </Row>
+        else return <Row>
+            <Col>No element</Col>
         </Row>
     }
 
     renderStartButton(){
         if (this.props.playlist.id === 0){
             return ""
-        }else return <Button onClick={()=>playlist_queue()}>Start playlist</Button>
+        }else return <Button onClick={()=>playlist_queue(this.props.playlist.id)}>Start playlist</Button>
     }
 
     renderDeleteButton(){
@@ -67,7 +78,7 @@ class SinglePlaylist extends Component{
         else
             return <ConfirmButton className="btn" 
                     onClick={()=> {
-                        //playlist_delete(this.props.playlist.id);
+                        playlist_delete(this.props.playlist.id);
                         this.props.deletePlaylist(this.props.playlist.id);
                         this.props.handleTabBack();}}>
                     Delete playlist

@@ -42,6 +42,16 @@ def nav_drawing_request():
 
 # --------------------------------------------------------- PLAYLISTS CALLBACKS -------------------------------------------------------------------------------
 
+# delete a playlist
+@socketio.on("playlist_delete")
+def playlist_delete(id):
+    try:
+        Playlists.delete_playlist(id)
+        app.logger.info("Playlist code {} deleted".format(id))
+    except Exception as e:
+        app.logger.error("'Delete playlist code {}' error".format(id))
+    playlist_refresh()
+
 # save the changes to the playlist
 @socketio.on("playlist_save")
 def playlist_save(playlist):
@@ -58,11 +68,12 @@ def playlist_add_element(element, playlist_code):
     pl.add_element(DrawingElement(element))
     pl.save()
 
-# starts to draw a playlist
-@socketio.on("playlist_start")
-def playlist_start(code):
+# adds a playlist to the drawings queue
+@socketio.on("playlist_queue")
+def playlist_queue(code):
     item = db.session.query(Playlists).filter(Playlists.id==code).one()
-    for i in item.elements.replace(" ", "").split(","):
+    elements = item.get_elements()
+    for i in elements:
         if i != "":
             app.qmanager.queue_drawing(i)
 

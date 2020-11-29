@@ -48,3 +48,10 @@ def create_playlist_table(id):
     """
     p_class = get_playlist_table_class(id)
     p_class.__table__.create(db.get_engine())
+
+def delete_playlist_table(id):
+    """
+    Delete a table associated to a single playlist.
+    """
+    p_class = get_playlist_table_class(id)
+    p_class.__table__.drop(db.get_engine())

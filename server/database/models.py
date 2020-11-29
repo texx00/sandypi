@@ -1,5 +1,5 @@
 from server import db
-from server.database.playlist_elements_tables import create_playlist_table, get_playlist_table_class
+from server.database.playlist_elements_tables import create_playlist_table, delete_playlist_table, get_playlist_table_class
 from server.database.playlist_elements import GenericPlaylistElement
 
 from datetime import datetime
@@ -80,6 +80,12 @@ class Playlists(db.Model):
             raise ValueError("An id is necessary to select a playlist")
         return db.session.query(Playlists).filter(Playlists.id==id).one()
 
+    @classmethod
+    def delete_playlist(cls, id):
+        item = db.session.query(Playlists).filter_by(id=id).first()
+        db.session.delete(item)
+        db.session.commit()
+        delete_playlist_table(id)
 
     
 
