@@ -15,7 +15,7 @@ import SingleDrawing from './tabs/drawings/SingleDrawing';
 import { getTab } from './tabs/selector';
 import DrawingDataDownloader from '../components/DrawingDataDownloader';
 import PlaylistDataDownloader from '../components/PlaylistDataDownloader';
-import SinglePlaylist from './tabs/playlists/SinglePlaylist';
+import SinglePlaylist from './tabs/playlists/SinglePlaylist/SinglePlaylist';
 
 const mapStateToProps = (state) => {
     return {

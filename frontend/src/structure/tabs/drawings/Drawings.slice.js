@@ -24,7 +24,7 @@ const drawingsSlice = createSlice({
         setDrawings(state, action){
             return { drawings: action.payload };
         },
-        // action.payload must be the element to update
+        // action.payload must be the drawing to update
         setSingleDrawing(state, action){
             let drawing = action.payload;
             let drawings = checkArray(state.drawings.drawings);

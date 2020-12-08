@@ -56,7 +56,7 @@ class Playlists(db.Model):
     def to_json(self):
         return json.dumps({
             "name": self.name,
-            "elements": self._ec().get_playlist_elements(),
+            "elements": self.get_elements_json(),
             "id": self.id
         })
 

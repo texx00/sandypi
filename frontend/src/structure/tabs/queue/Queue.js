@@ -28,8 +28,6 @@ class Queue extends Component{
         if (res.now_drawing_id !== 0)
             this.props.setQueueNotEmpty();
         else this.props.setQueueEmpty();
-
-        //console.log(res);
     }
 
 

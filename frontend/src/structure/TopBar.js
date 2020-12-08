@@ -21,7 +21,6 @@ const mapDispatchToProps = (dispatch) => {
 class TopBar extends Component{
 
     renderBack(){
-        console.log(this.props.show_back)
         if (this.props.show_back)
             return <Nav.Link key={5} className="text-bold" onClick={()=>{this.props.handleTabBack()}}><ChevronCompactLeft/>Back</Nav.Link>
         else return "";

@@ -36,7 +36,6 @@ class Settings extends Component{
     }
 
     saveForm(connect=false){
-        console.log("Saving settings");
         let sets = cloneDict(this.props.settings); // cloning the dict before deleting data
         delete sets.serial.available_baudrates;
         delete sets.serial.available_ports;

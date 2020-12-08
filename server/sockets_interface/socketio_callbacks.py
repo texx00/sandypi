@@ -55,9 +55,10 @@ def playlist_delete(id):
 # save the changes to the playlist
 @socketio.on("playlist_save")
 def playlist_save(playlist):
+    playlist = json.loads(playlist)
     pl = Playlists.create_playlist() if playlist['id'] == 0 else Playlists.get_playlist(playlist['id'])
-    pl.name = playlist['name']
     pl.clear_elements()
+    pl.name = playlist['name']
     pl.add_element(playlist['elements'])
     pl.save()
 

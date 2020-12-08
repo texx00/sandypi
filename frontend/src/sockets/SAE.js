@@ -49,7 +49,7 @@ function playlist_queue(id){
 
 //emit a socket to create a new playlist
 function playlist_save(pl){
-    socket.emit("playlist_save", pl);
+    socket.emit("playlist_save", JSON.stringify(pl));
 }
 // ---- QUEUE ----
 

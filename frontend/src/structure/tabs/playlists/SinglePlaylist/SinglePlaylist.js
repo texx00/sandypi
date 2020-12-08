@@ -1,16 +1,17 @@
 import './SinglePlaylist.scss';
 
-import { Component } from 'react';
+import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Container, Button, Row, Col } from 'react-bootstrap';
 
-import ConfirmButton from '../../../components/ConfirmButton';
+import ConfirmButton from '../../../../components/ConfirmButton';
 
-import { playlists_request, playlist_delete, playlist_queue, playlist_save } from '../../../sockets/SAE';
+import { playlists_request, playlist_delete, playlist_queue, playlist_save } from '../../../../sockets/SAE';
 
-import { tabBack } from '../Tabs.slice';
-import { deletePlaylist, updateSinglePlaylist } from './Playlists.slice';
-import { getSinglePlaylist } from './selector';
+import { tabBack } from '../../Tabs.slice';
+import { deletePlaylist, updateSinglePlaylist } from '../Playlists.slice';
+import { getSinglePlaylist } from '../selector';
+import SortableElements from './SortableElements';
 
 const mapStateToProps = (state) => {
     return { playlist: getSinglePlaylist(state) };
@@ -28,18 +29,19 @@ class SinglePlaylist extends Component{
     constructor(props){
         super(props);
         this.state = {
-            name: props.playlist.name,
             elements: props.playlist.elements,
             edited: false
         }
+        this.nameRef = React.createRef();
     }
 
     save(){
         let playlist = {
-            name: this.state.name,
+            name: this.nameRef.current.innerHTML,
             elements: this.state.elements,
             id: this.props.playlist.id
         };
+        // TODO save new elements order
         playlist_save(playlist);
         if (this.props.playlist.id === 0){
             this.props.handleTabBack();
@@ -54,14 +56,17 @@ class SinglePlaylist extends Component{
         this.props.handleTabBack()
     }
 
+    handleSortableUpdate(event){
+        //TODO handle this
+    }    
+
     renderElements(){
-        if (this.state.elements !== null && this.state.elements !== undefined)
-            return <Row>
-                {this.state.elements.map((el) => {
-                    return <div>el</div>
-                })}
-            </Row>
-        else return <Row>
+        if (this.state.elements !== null && this.state.elements !== undefined){
+            return <SortableElements
+                    list={this.state.elements}
+                    onUpdate={this.handleSortableUpdate.bind(this)}>
+                </SortableElements>
+        } else return <Row>
             <Col>No element</Col>
         </Row>
     }
@@ -86,17 +91,23 @@ class SinglePlaylist extends Component{
     }
 
     render(){
+        if (this.state.elements !== this.props.playlist.elements){
+            if (this.state.edited){
+                //TODO show a popup to tell the user that some change has been done in the background
+            }else{
+                this.setState({elements: this.props.playlist.elements});
+            }
+            
+        }
         return <Container>
             <div>
                 <h1 className="d-inline-block mr-3 text-primary">Playlist name: </h1>
                 <h1 className="d-inline-block rounded p-1 editable-title" 
+                    ref={this.nameRef}
                     title="Click to edit"
                     contentEditable="true" 
-                    suppressContentEditableWarning={true}
-                    onChange={(evt)=>{
-                        this.setState({name: evt.target.value, edited: true});
-                    }}>
-                    {this.state.name}
+                    suppressContentEditableWarning={true}>
+                    {this.props.playlist.name}
                 </h1>
             </div>
             <Row>

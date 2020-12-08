@@ -15,7 +15,7 @@ const getSinglePlaylist = state => {
         return createEmptyPlaylist();
     }
     let ret = {}
-    const pl = state.playlists.playlists;
+    const pl = getPlaylists(state);
     for (let el in pl){
         if (pl[el] !== undefined && pl[el] !== null) 
             if (pl[el].id === state.tabs.playlist_code)
@@ -26,16 +26,24 @@ const getSinglePlaylist = state => {
 
 
 const getPlaylistsLimited = state => { 
-    if (Array.isArray(state.playlists.playlists))
-        return state.playlists.playlists.slice(0,10);
-    else return [];
+    return getPlaylists(state).slice(0,10);
 };
 
 const getPlaylists = state => { 
-    if (Array.isArray(state.playlists.playlists))
+    try{
+        if (Array.isArray(state.playlists.playlists))
         return state.playlists.playlists;
-    else return [];
+        else return [];
+    }catch(error){
+        console.error(error);
+        return [];
+    }
 };
 
+const getPlaylistsList = state => {
+    return getPlaylists(state).map((el) => {
+        return {name: el.name, id: el.id}
+    });
+}
 
-export { getRefreshPlaylists, getSinglePlaylist, getPlaylists, getPlaylistsLimited };
+export { getRefreshPlaylists, getSinglePlaylist, getPlaylists, getPlaylistsLimited, getPlaylistsList };
