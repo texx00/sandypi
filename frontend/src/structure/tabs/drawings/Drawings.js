@@ -56,10 +56,8 @@ class Drawings extends Component{
                 <Row>
                     <Col>
                         <Section sectionTitle="Drawings"
-                            sectionButton={<div className="d-flex">
-                                    <FileEarmarkPlus className="mr-2 align-self-center"/>
-                                    <span className="align-self-center">Upload new drawing</span>
-                                </div>}
+                            sectionButton="Upload new drawing"
+                            buttonIcon={FileEarmarkPlus}
                             sectionButtonHandler={()=>this.setState({show_upload: true})}>
                     
                         <div className={(this.state.loaded ? " d-none" : "")}>

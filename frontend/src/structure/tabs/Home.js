@@ -98,10 +98,8 @@ class Home extends Component{
             <Row>
                 <Col>
                     <Section sectionTitle="Drawings"
-                        sectionButton={<div className="d-flex">
-                                <FileEarmarkPlus className="mr-2 align-self-center"/>
-                                <span className="align-self-center">Upload new drawing</span>
-                            </div>}
+                        sectionButton="Upload new drawing"
+                        buttonIcon={FileEarmarkPlus}
                         sectionButtonHandler={()=>this.setState({show_upload: true})}
                         titleButtonHandler={()=>this.props.handleTab("drawings")}>
                             <Carousel responsive={this.carousel_responsive} ssr>
@@ -113,10 +111,8 @@ class Home extends Component{
             <Row>
                 <Col>
                     <Section sectionTitle="Playlists"
-                        sectionButton={<div className="d-flex">
-                                <PlusSquare className="mr-2 align-self-center"/>
-                                <span className="align-self-center">Create new playlist</span>
-                            </div>}
+                        sectionButton="Create new playlist"
+                        buttonIcon={PlusSquare}
                         sectionButtonHandler={()=> this.props.createNewPlaylist()}
                         titleButtonHandler={()=>this.props.handleTab("playlists")}
                         ssr>

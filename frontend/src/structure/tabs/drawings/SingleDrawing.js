@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Container } from 'react-bootstrap';
+import { Container } from 'react-bootstrap';
 import { FileEarmarkX, Play, PlusSquare } from 'react-bootstrap-icons';
 import { connect } from 'react-redux';
 
@@ -14,6 +14,7 @@ import { getSingleDrawing } from './selector';
 import { setQueueNotEmpty } from '../queue/Queue.slice';
 import { tabBack } from '../Tabs.slice';
 import { deleteDrawing, setRefreshDrawing } from './Drawings.slice';
+import IconButton from '../../../components/IconButton';
 
 const mapStateToProps = (state) => {
     return {
@@ -46,27 +47,25 @@ class SingleDrawing extends Component{
                     <h1 className="d-inline-block ml-3">{this.props.element.filename}</h1>
                 </div>
                 <div className="center pb-3">
-                    <Button className="btn" onClick={()=>{
-                        drawing_queue(this.props.element.id);
+                    <IconButton className="btn" 
+                        icon={Play}
+                        onClick={()=>{
+                            drawing_queue(this.props.element.id);
                     }}>
-                        <div className="d-flex">
-                                <Play className="mr-1 align-self-center"/>
-                                <span className="align-self-center">{start_drawing_label}</span>
-                            </div>
-                    </Button>
-                    <Button className="btn"><div className="d-flex">
-                                <PlusSquare className="mr-2 align-self-center"/>
-                                <span className="align-self-center">Add to playlist</span>
-                            </div></Button>
-                    <ConfirmButton className="btn" onClick={()=> {
-                        drawing_delete(this.props.element.id);
-                        this.props.deleteDrawing(this.props.element.id);
-                        this.props.handleTabBack();
+                        {start_drawing_label}
+                    </IconButton>
+                    <IconButton className="btn"
+                        icon={PlusSquare}>
+                        Add to playlist
+                    </IconButton>
+                    <ConfirmButton className="btn" 
+                        icon={FileEarmarkX}
+                        onClick={()=> {
+                            drawing_delete(this.props.element.id);
+                            this.props.deleteDrawing(this.props.element.id);
+                            this.props.handleTabBack();
                     }}>
-                        <div className="d-flex">
-                            <FileEarmarkX className="mr-2 align-self-center"/>
-                            <span className="align-self-center">Delete drawing</span>
-                        </div>
+                        Delete drawing
                     </ConfirmButton>
                 </div>
                 <div className="center mb-5">

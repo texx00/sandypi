@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { Navbar, Nav, Button } from 'react-bootstrap';
+import { Navbar, Nav } from 'react-bootstrap';
 import { ChevronCompactLeft, Sliders } from 'react-bootstrap-icons';
 import { connect } from 'react-redux';
+import IconButton from '../components/IconButton';
 
 import { showBack } from './tabs/selector';
 import { setTab, tabBack } from './tabs/Tabs.slice';
@@ -42,16 +43,16 @@ class TopBar extends Component{
                             <Nav.Link key={4} onClick={()=>{this.props.handleTab("manual")}}>Manual control</Nav.Link>
                             {this.renderBack()}
                         </Nav>
-                        <Button className="btn btn-dark" onClick={()=>{this.props.handleTab("settings")}}>
-                            <div className="d-flex">
-                                <Sliders className="mr-2 align-self-center"/>
-                                <span className="align-self-center">Settings</span>
-                            </div>
-                        </Button>
+                        <IconButton className="btn btn-dark" 
+                            onClick={()=>{this.props.handleTab("settings")}}
+                            icon={Sliders}>
+                                Settings
+                        </IconButton>
                     </Navbar.Collapse>
             </Navbar>
         </div>
     }
 }
+// TODO add linux shutdown/restart
 
 export default connect(mapStateToProps, mapDispatchToProps)(TopBar);

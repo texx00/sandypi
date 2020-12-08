@@ -114,6 +114,11 @@ button:hover, .btn-dark:hover{
     }
 }
 
+.icon{
+    @extend .mr-2;
+    @extend .align-self-center;
+}
+
 /* Bootstrap overrides */
 .card{
     @extend .card;

@@ -45,10 +45,8 @@ class Playlists extends Component{
     render(){
         return <Container>
             <Section sectionTitle="Playlists"
-                sectionButton={<div className="d-flex">
-                        <PlusSquare className="mr-2 align-self-center"/>
-                        <span className="align-self-center">Create new playlist</span>
-                    </div>}
+                sectionButton="Create new playlist"
+                buttonIcon={PlusSquare}
                 sectionButtonHandler={this.createPlaylistHandler.bind(this)}>
                     <Row>
                         {this.renderPlaylists()}

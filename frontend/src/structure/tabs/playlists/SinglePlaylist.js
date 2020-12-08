@@ -67,7 +67,7 @@ class SinglePlaylist extends Component{
     }
 
     renderStartButton(){
-        if (this.props.playlist.id === 0){
+        if (this.props.playlist.id === 0 || this.state.elements.length === 0){
             return ""
         }else return <Button onClick={()=>playlist_queue(this.props.playlist.id)}>Start playlist</Button>
     }
@@ -88,7 +88,6 @@ class SinglePlaylist extends Component{
     render(){
         return <Container>
             <div>
-                <Button onClick={this.handleSaveBeforeBack.bind(this)}>BACK</Button>
                 <h1 className="d-inline-block mr-3 text-primary">Playlist name: </h1>
                 <h1 className="d-inline-block rounded p-1 editable-title" 
                     title="Click to edit"

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button } from 'react-bootstrap';
+import IconButton from './IconButton';
 
 function renderTitle(component, tag){
     const TagName = tag;
@@ -15,9 +15,12 @@ class Section extends Component{
         return <div className="text-primary mb-5">
             <div className="section-header mb-2 pb-3 w-100">
                 {renderTitle(this, "h2")}
-                <Button className={"float-right" + (this.props.sectionButton ? "" : " d-none")} onClick={()=>this.props.sectionButtonHandler()}>
+                <IconButton 
+                    className={"float-right" + (this.props.sectionButton ? "" : " d-none")} 
+                    onClick={()=>this.props.sectionButtonHandler()}
+                    icon={this.props.buttonIcon}>
                     {this.props.sectionButton}
-                </Button>
+                </IconButton>
             </div>
             {this.props.children}
         </div>
@@ -31,9 +34,11 @@ class Subsection extends Component{
         return <div className="text-primary mb-5">
             <div className="section-header mb-2 pb-3 w-100">
                 {renderTitle(this, "h4")}
-                <Button className={"float-right" + (this.props.sectionButton ? "" : " d-none")} onClick={()=>{this.props.sectionButtonHandler()}}>
+                <IconButton className={"float-right" + (this.props.sectionButton ? "" : " d-none")} 
+                    onClick={()=>{this.props.sectionButtonHandler()}}
+                    icon={this.props.buttonIcon}>
                     {this.props.sectionButton}
-                </Button>
+                </IconButton>
             </div>
             {this.props.children}
         </div>
@@ -47,9 +52,11 @@ class SectionGroup extends Component{
         return <div className="text-primary mb-5">
             <div className="mb-2 pb-3 w-100">
                 {renderTitle(this, "h4")}
-                <Button className={"btn float-right" + (this.props.sectionButton ? "" : " d-none")} onClick={()=>{this.props.sectionButtonHandler()}}>
+                <IconButton className={"btn float-right" + (this.props.sectionButton ? "" : " d-none")} 
+                    onClick={()=>{this.props.sectionButtonHandler()}}
+                    icon={this.props.buttonIcon}>
                     {this.props.sectionButton}
-                </Button>
+                </IconButton>
             </div>
         {this.props.children}
     </div>
