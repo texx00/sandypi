@@ -84,6 +84,9 @@ button:hover, .btn-dark:hover{
     &:hover{
         transform: scale(1.05);
     }
+    &:hover .glass{
+        transform: scale(1.001);
+    }
     transition: all ease-in-out 0.15s;
 }
 
@@ -101,6 +104,15 @@ button:hover, .btn-dark:hover{
     color: white;
 }
 
+.glass{
+    background-color: rgba(83, 83, 83, 0.5);
+}
+@supports (-webkit-backdrop-filter: none) or (backdrop-filter: none) {
+    .glass {
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+    }
+}
 
 /* Bootstrap overrides */
 .card{
