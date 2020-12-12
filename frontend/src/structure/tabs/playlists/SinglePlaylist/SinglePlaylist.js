@@ -2,22 +2,16 @@ import './SinglePlaylist.scss';
 
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Container, Button, Row, Col, Modal } from 'react-bootstrap';
+import { Container, Button, Row, Col } from 'react-bootstrap';
 
 import ConfirmButton from '../../../../components/ConfirmButton';
 import SortableElements from './SortableElements';
-import IconButton from '../../../../components/IconButton';
 
 import { playlists_request, playlist_delete, playlist_queue, playlist_save } from '../../../../sockets/SAE';
 import { listsAreEqual } from '../../../../utils/dictUtils';
 
 import { tabBack } from '../../Tabs.slice';
 import { deletePlaylist, updateSinglePlaylist } from '../Playlists.slice';
-import { getSinglePlaylist } from '../selector';
-
-const mapStateToProps = (state) => {
-    return { playlist: getSinglePlaylist(state) };
-}
 
 const mapDispatchToProps = (dispatch) => {
     return {
@@ -30,16 +24,20 @@ const mapDispatchToProps = (dispatch) => {
 class SinglePlaylist extends Component{
     constructor(props){
         super(props);
+        console.log(this.props.playlist)
+        this.control_card = {element_type: "control_card"}
         this.state = {
-            elements: props.playlist.elements,
-            ordered_elements: this.addControlCard(props.playlist.elements),
+            elements: this.props.playlist.elements,
+            ordered_elements: this.addControlCard(this.props.playlist.elements),
             edited: false
         }
         this.nameRef = React.createRef();
     }
 
     addControlCard(elements){
-        return [...elements, {element_type: "control_card"}]
+        if (elements !== undefined)
+            return [...elements, this.control_card]
+        else return [this.control_card]
     }
 
     save(){
@@ -66,6 +64,7 @@ class SinglePlaylist extends Component{
     handleSortableUpdate(list){
         if (!listsAreEqual(list, this.state.elements)){
             this.setState({ordered_elements: list})
+            // TODO  does not understand where is getting the duplicates in the sortable list. Multiple cards are created instead of using just the originals
         }
     }    
 
@@ -126,34 +125,8 @@ class SinglePlaylist extends Component{
             </Row>
             {this.renderElements(askSync)}
 
-            <Modal show={askSync}
-                aria-labelledby="contained-modal-title-vcenter"
-                centered>
-                <Modal.Header className="center">
-                    <Modal.Title>
-                        The playlist has some changes
-                    </Modal.Title>
-                </Modal.Header>
-                <Modal.Body className="p-5 center">
-                    The playlist has been modified in another window. What do you want to do?
-                </Modal.Body>
-                <Modal.Footer className="center">
-                    <IconButton className="center"
-                        onClick={()=>{
-                            this.setState({elements: this.props.playlist.elements});
-                        }}>
-                        Load the new version
-                    </IconButton>
-                    <IconButton className="center" 
-                        onClick={()=>{
-                            this.save();
-                        }}>
-                        Save the local changes and overwrite
-                    </IconButton>
-                </Modal.Footer>
-            </Modal>
         </Container>
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(SinglePlaylist);
+export default connect(null, mapDispatchToProps)(SinglePlaylist);

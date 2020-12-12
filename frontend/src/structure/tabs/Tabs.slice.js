@@ -5,13 +5,13 @@ const tabsSlice = createSlice({
     initialState: {
         tab: "home",
         drawing_code: 0,
-        playlist_code: 0,
         back_tab: "home"
     },
     reducers: {
         setTab(state, action){
             // TODO check if it is leaving the playlist tab without saving and ask to save before leaving
-            return {tab: action.payload};
+            state.tab = action.payload;
+            return state;
         },
         showSingleDrawing(state, action){
             const back_tab = state.tab;
@@ -19,7 +19,7 @@ const tabsSlice = createSlice({
         },
         showSinglePlaylist(state, action){
             const back_tab = state.tab;
-            return {tab: "playlist", playlist_code: action.payload, back_tab: back_tab}
+            return {tab: "playlist", back_tab: back_tab}
         },
         tabBack(state){
             const back_tab = state.back_tab;

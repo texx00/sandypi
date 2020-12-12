@@ -11,19 +11,21 @@ const getRefreshPlaylists = state => {
 }
 
 const getSinglePlaylist = state => {
-    if (state.tabs.playlist_code === 0 || state.tabs.playlist_code === undefined){
+    let id = getSinglePlaylistId(state);
+    if (id === 0 || id === undefined){
         return createEmptyPlaylist();
     }
     let ret = {}
     const pl = getPlaylists(state);
     for (let el in pl){
         if (pl[el] !== undefined && pl[el] !== null) 
-            if (pl[el].id === state.tabs.playlist_code)
+            if (pl[el].id === state.playlists.playlist_id)
                 ret = pl[el];
     }
+    if (ret.elements === undefined)
+        ret.elements = [];
     return ret;
 }
-
 
 const getPlaylistsLimited = state => { 
     return getPlaylists(state).slice(0,10);
@@ -46,4 +48,12 @@ const getPlaylistsList = state => {
     });
 }
 
-export { getRefreshPlaylists, getSinglePlaylist, getPlaylists, getPlaylistsLimited, getPlaylistsList };
+const getPlaylistResync = state => {
+    return state.playlists.playlist_resync;
+}
+
+const getSinglePlaylistId = state => {
+    return state.playlists.playlist_id;
+}
+
+export { getRefreshPlaylists, getSinglePlaylist, getPlaylists, getPlaylistsLimited, getPlaylistsList, getPlaylistResync };

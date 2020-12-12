@@ -16,6 +16,7 @@ import { getDrawingsLimited } from './drawings/selector';
 import { getPlaylistsLimited } from './playlists/selector';
 import { setRefreshDrawing } from './drawings/Drawings.slice';
 import { setTab, showSinglePlaylist } from './Tabs.slice';
+import { setSinglePlaylistId } from './playlists/Playlists.slice';
 
 const mapStateToProps = (state) => {
     return { 
@@ -27,7 +28,10 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
     return {
         setRefreshDrawing: () => dispatch(setRefreshDrawing(true)),
-        createNewPlaylist: () => dispatch(showSinglePlaylist(0)),
+        createNewPlaylist: () => {
+                dispatch(setSinglePlaylistId(0))
+                dispatch(showSinglePlaylist(0))
+            ;},
         handleTab: (name) => dispatch(setTab(name))
     }
 }

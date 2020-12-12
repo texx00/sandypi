@@ -5,9 +5,13 @@ import { Card } from 'react-bootstrap';
 import { connect } from 'react-redux';
 
 import { showSinglePlaylist } from '../Tabs.slice';
+import { setSinglePlaylistId } from './Playlists.slice';
 
 const mapDispatchToProps = (dispatch) => {
-    return { showSinglePlaylist: (id) => dispatch(showSinglePlaylist(id))};
+    return { showSinglePlaylist: (id) => {
+        dispatch(setSinglePlaylistId(id));
+        dispatch(showSinglePlaylist(id));
+    }};
 }
 
 class PlaylistCard extends Component{

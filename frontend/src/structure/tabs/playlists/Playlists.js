@@ -6,6 +6,7 @@ import { connect } from 'react-redux';
 import { Section } from '../../../components/Section';
 import { showSinglePlaylist } from '../Tabs.slice';
 import PlaylistCard from './PlaylistCard';
+import { setSinglePlaylistId } from './Playlists.slice';
 import { getPlaylists } from './selector';
 
 const mapStateToProps = (state) => {
@@ -16,7 +17,10 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        createNewPlaylist: () => dispatch(showSinglePlaylist(0))
+        createNewPlaylist: () => {
+            dispatch(setSinglePlaylistId(0));
+            dispatch(showSinglePlaylist(0));
+        }
     }
 }
 

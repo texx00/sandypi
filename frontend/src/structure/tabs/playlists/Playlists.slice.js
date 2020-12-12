@@ -1,27 +1,39 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 import { playlist_save } from '../../../sockets/SAE';
+import { listsAreEqual } from '../../../utils/dictUtils';
+import { getSinglePlaylist } from './selector';
 
 const playlistsSlice = createSlice({
     name: "playlists",
     initialState: {
         playlists: [],
-        must_refresh: true
+        must_refresh: true,
+        playlist_id: 0,
+        playlist_resync: false
     },
     reducers: {
         deletePlaylist: (state, action) => {
-            return { playlists: state.playlists.filter((item) => {
+            return { ...state, playlists: state.playlists.filter((item) => {
                 return item.id !== action.payload;
             })}
         },
         setRefreshPlaylists: (state, action) => {
-            return { must_refresh: action.payload };
+            return {...state, must_refresh: action.payload };
         },
         setPlaylists: (state, action) => {
-            return { playlists: action.payload.map((pl)=>{
+            let sync = false;
+            let pls = action.payload.map((pl)=>{
                 pl.elements = JSON.parse(pl.elements);
+                if (pl.id === state.playlist_id){
+                    if (!listsAreEqual(pl, getSinglePlaylist({playlists: state}))){
+                        sync = true;
+                    }
+                }
                 return pl;
-            }) }; 
+            })
+            console.log({ ...state, playlists: pls, playlist_resync: sync })
+            return { ...state, playlists: pls, playlist_resync: sync }; 
         },
         updateSinglePlaylist: (state, action) => {
             let playlist = action.payload;
@@ -43,6 +55,12 @@ const playlistsSlice = createSlice({
                     break;
                 } 
             }
+        },
+        setSinglePlaylistId: (state, action) => {
+            return { ...state, playlist_id: action.payload }
+        },
+        setResyncPlaylist: (state, action) => {
+            return { ...state, playlist_resync: action.payload };
         }
     }
 });
@@ -52,7 +70,9 @@ export const {
     setPlaylists,
     setRefreshPlaylists,
     updateSinglePlaylist,
-    addToPlaylist
+    addToPlaylist,
+    setSinglePlaylistId,
+    setResyncPlaylist
 } = playlistsSlice.actions;
 
 export default playlistsSlice.reducer;

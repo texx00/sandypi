@@ -14,8 +14,6 @@ class SortableElements extends Component{
         };
     }
 
-
-
     removeElement(idx){
         let oldState = this.state.list;
         this.setState({list: oldState.filter((el, i)=> {return el.id !==idx})});
