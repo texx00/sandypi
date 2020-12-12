@@ -2,10 +2,12 @@ import './SinglePlaylist.scss';
 
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Container, Button, Row, Col } from 'react-bootstrap';
+import { Container, Row, Col } from 'react-bootstrap';
+import { FileEarmarkCheck, Play, X } from 'react-bootstrap-icons';
 
 import ConfirmButton from '../../../../components/ConfirmButton';
 import SortableElements from './SortableElements';
+import IconButton from '../../../../components/IconButton';
 
 import { playlists_request, playlist_delete, playlist_queue, playlist_save } from '../../../../sockets/SAE';
 import { listsAreEqual } from '../../../../utils/dictUtils';
@@ -24,11 +26,9 @@ const mapDispatchToProps = (dispatch) => {
 class SinglePlaylist extends Component{
     constructor(props){
         super(props);
-        console.log(this.props.playlist)
         this.control_card = {element_type: "control_card"}
         this.state = {
-            elements: this.props.playlist.elements,
-            ordered_elements: this.addControlCard(this.props.playlist.elements),
+            elements: this.addControlCard(this.props.playlist.elements),
             edited: false
         }
         this.nameRef = React.createRef();
@@ -41,7 +41,7 @@ class SinglePlaylist extends Component{
     }
 
     save(){
-        let orderedEls = this.state.ordered_elements.filter((el) => {return el.element_type!=="control_card"});   // remove control card from the end
+        let orderedEls = this.state.elements.filter((el) => {return el.element_type!=="control_card"});   // remove control card from the end
         let playlist = {
             name: this.nameRef.current.innerHTML,
             elements: orderedEls,
@@ -63,17 +63,22 @@ class SinglePlaylist extends Component{
 
     handleSortableUpdate(list){
         if (!listsAreEqual(list, this.state.elements)){
-            this.setState({ordered_elements: list})
-            // TODO  does not understand where is getting the duplicates in the sortable list. Multiple cards are created instead of using just the originals
+            this.setState({...this.state, elements: list, edited: true})
         }
-    }    
+    }
 
-    renderElements(askSync){
-        if (this.state.ordered_elements !== null && 
-            this.state.ordered_elements !== undefined &&
-            !askSync){
+    componentDidUpdate(){
+        if(this.props.shouldUpdateList){
+            this.setState({...this.state, elements: this.addControlCard(this.props.playlist.elements), edited: false});
+            this.props.onListRefreshed();
+        }
+    }
+
+    renderElements(){
+        if (this.state.elements !== null && 
+            this.state.elements !== undefined){
             return <SortableElements
-                    list={this.state.ordered_elements}
+                    list={this.state.elements}
                     onUpdate={this.handleSortableUpdate.bind(this)}>
                 </SortableElements>
         } else return <Row>
@@ -84,7 +89,11 @@ class SinglePlaylist extends Component{
     renderStartButton(){
         if (this.props.playlist.id === 0 || this.state.elements.length === 0){
             return ""
-        }else return <Button onClick={()=>playlist_queue(this.props.playlist.id)}>Start playlist</Button>
+        }else return <IconButton 
+                icon={Play} 
+                onClick={()=>playlist_queue(this.props.playlist.id)}>
+                Start playlist
+            </IconButton>
     }
 
     renderDeleteButton(){
@@ -92,19 +101,17 @@ class SinglePlaylist extends Component{
             return ""
         else
             return <ConfirmButton className="btn" 
+                    icon={X}
                     onClick={()=> {
                         playlist_delete(this.props.playlist.id);
                         this.props.deletePlaylist(this.props.playlist.id);
-                        this.props.handleTabBack();}}>
+                        this.props.handleTabBack();
+                    }}>
                     Delete playlist
                 </ConfirmButton>
     }
 
     render(){
-        let askSync = false;
-        if (!listsAreEqual(this.state.elements, this.props.playlist.elements))   // compare local elements with remote elements
-            askSync = true;                 // if the redux playlist elements are different from the one in this tab means somebody else changed them and they must be resyncronized
-        askSync = false         // TODO not working correctly
         return <Container>
             <div>
                 <h1 className="d-inline-block mr-3 text-primary">Playlist name: </h1>
@@ -119,11 +126,11 @@ class SinglePlaylist extends Component{
             <Row>
                 {this.renderStartButton()}
                 <Col>
-                    <Button onClick={this.save.bind(this)}>Save playlist</Button>
+                    <IconButton icon={FileEarmarkCheck} onClick={this.save.bind(this)}>Save playlist</IconButton>
                 </Col>
                 {this.renderDeleteButton()}
             </Row>
-            {this.renderElements(askSync)}
+            {this.renderElements()}
 
         </Container>
     }

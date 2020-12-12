@@ -4,6 +4,7 @@ import { Col } from 'react-bootstrap';
 
 import { DrawingElement } from './ElementsCards';
 import ControlCard from './ControlCard';
+import { listsAreEqual } from '../../../../utils/dictUtils';
 
 class SortableElements extends Component{
     constructor(props){
@@ -14,9 +15,16 @@ class SortableElements extends Component{
         };
     }
 
+    componentDidUpdate(){
+        if (!listsAreEqual(this.state.list, this.props.list)){
+            this.setState({...this.state, list: this.props.list});
+        }
+    }
+
     removeElement(idx){
         let oldState = this.state.list;
-        this.setState({list: oldState.filter((el, i)=> {return el.id !==idx})});
+        this.setState({...this.state, list: oldState.filter((el, i)=> {return el.id !==idx})});
+        this.props.onUpdate(this.state.list);
     }
 
     render(){
