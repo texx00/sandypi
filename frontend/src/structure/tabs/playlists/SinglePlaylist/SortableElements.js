@@ -5,23 +5,20 @@ import { Col } from 'react-bootstrap';
 import { DrawingElement } from './ElementsCards';
 import ControlCard from './ControlCard';
 
-export default class SortableElements extends Component{
+class SortableElements extends Component{
     constructor(props){
         super(props);
         this.state = {
-            list: [...this.props.list, {element_type: "control_card"}],
+            list: this.props.list,
             show_child_cross: true
         };
     }
 
-    static getDerivedStateFromProps(nextProps, prevState){
-        return {list: [...nextProps.list, {element_type: "control_card"}]}
-    }
+
 
     removeElement(idx){
         let oldState = this.state.list;
-        this.setState({list: oldState.filter((el, i)=> {return idx !==i})});
-        // TODO fix this
+        this.setState({list: oldState.filter((el, i)=> {return el.id !==idx})});
     }
 
     render(){
@@ -30,17 +27,19 @@ export default class SortableElements extends Component{
             ghostClass="sortable-ghost"
             chosenClass="sortable-chosen"
             filter=".nodrag"
-            className="row mt-5"                 // need to put this manually to set a correct grid layout
+            className="row mt-5"                            // need to put this manually to set a correct grid layout
             list={this.state.list}
-            setList={(newList) => this.setState({list: newList})}//TODO check this. It is not changing the order when an element is dragged around
-            onStart={(evt) => {                          // when starts to drag it removes the "delete element" button and disable it until the object is released
+            setList={(newList) => {
+                this.setState({list: newList});
+            }}
+            onStart={(evt) => {                             // when starts to drag it removes the "delete element" button and disable it until the object is released
                 this.setState({show_child_cross: false});
             }}
-            onEnd={(evt) => {                           // when the element is released reactivate the "delete element" activation
+            onEnd={(evt) => {                               // when the element is released reactivate the "delete element" activation
                 this.setState({show_child_cross: true});
             }}
             onUpdate={(evt) => {
-                this.props.onUpdate(evt.newIndex, evt.oldIndex);
+                this.props.onUpdate(this.state.list);
             }}
             onMove={(evt1, evt2) => {
                 // when the element is dragged over the control card disable movements
@@ -51,11 +50,11 @@ export default class SortableElements extends Component{
             }}>
                 {this.state.list.map((el, idx)=>{
                     if (el.element_type === "control_card"){
-                        return <ControlCard key={idx}/>
-                    }else return <ElementCard 
-                                handleUnmount={()=>this.removeElement(idx)}
+                        return <ControlCard key={-1}/>
+                    }else return <ElementCard key={el.id} 
+                                handleUnmount={()=>this.removeElement(el.id)}
                                 showCross={this.state.show_child_cross}>
-                            <DrawingElement key={idx} element={el}/>
+                            <DrawingElement element={el}/>
                         </ElementCard>
                 })}
         </ReactSortable>
@@ -104,3 +103,5 @@ class ElementCard extends React.Component{
         </Col>
     }
 }
+
+export default SortableElements;

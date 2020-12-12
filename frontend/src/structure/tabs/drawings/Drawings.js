@@ -40,9 +40,7 @@ class Drawings extends Component{
         if (drawings !== undefined)
             return drawings.map((d, index)=>{
                 return <Col key={index} sm={4}>
-                        <DrawingCard drawing={d} handleDelete={(id)=>{
-                            console.log("remove id")
-                        }}/>
+                        <DrawingCard drawing={d}/>
                     </Col>
             });
         else{

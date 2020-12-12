@@ -89,12 +89,12 @@ class SingleDrawing extends Component{
                     onHide={() => this.setState({showPlaylists: false})}
                     aria-labelledby="contained-modal-title-vcenter"
                     centered>
-                    <Modal.Header>
+                    <Modal.Header className="center">
                         <Modal.Title>
                             Choose a playlist
                         </Modal.Title>
                     </Modal.Header>
-                    <Modal.Body className="p-5">
+                    <Modal.Body className="p-5 center">
                         <Form>
                             <Form.Group>
                                 <Form.Control as="select" ref={this.selectRef}>

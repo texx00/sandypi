@@ -1,4 +1,5 @@
 
+// merges two dicts that contains child dicts
 const mergeDicts = (og, so) => {
     for (let key in so) {
         if (typeof (og[key]) === 'object') {
@@ -10,6 +11,7 @@ const mergeDicts = (og, so) => {
     return og;
 }
 
+// clones a dict
 const cloneDict = di => {
     let tmp = {};
     for (let key in di){
@@ -41,4 +43,9 @@ const getSubKey = (dict, keys) => {
     else return getSubKey(cloneDict(dict[keys[0]]), keys.pop());
 }
 
-export {mergeDicts, cloneDict, setSubKey, getSubKey};
+// compares to dict lists (should work with every kind of list really)
+const listsAreEqual = (dictList1, dictList2) => {
+    return JSON.stringify(dictList1) === JSON.stringify(dictList2);
+}
+
+export {mergeDicts, cloneDict, setSubKey, getSubKey, listsAreEqual};
