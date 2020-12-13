@@ -5,11 +5,20 @@ const tabsSlice = createSlice({
     initialState: {
         tab: "home",
         drawing_code: 0,
-        back_tab: "home"
+        back_tab: "home",
+        save_before_back: false,
+        show_save_before_back: false
     },
     reducers: {
+        resetShowSaveBeforeBack(state){
+            return {...state, show_save_before_back: false, save_before_back: false }
+        },
+        setSaveBeforeBack(state, action){
+            return {...state, save_before_back: action.payload};
+        },
         setTab(state, action){
-            // TODO check if it is leaving the playlist tab without saving and ask to save before leaving
+            if (state.tab === "playlist" && state.save_before_back)
+                return {...state, show_save_before_back: true}
             state.tab = action.payload;
             return state;
         },
@@ -22,6 +31,8 @@ const tabsSlice = createSlice({
             return {tab: "playlist", back_tab: back_tab}
         },
         tabBack(state){
+            if (state.save_before_back)        // if must save before going back, will prompt the user to save or to leave
+                return {...state, show_save_before_back: true};
             const back_tab = state.back_tab;
             return {tab: back_tab}
         }
@@ -29,6 +40,8 @@ const tabsSlice = createSlice({
 });
 
 export const {
+    resetShowSaveBeforeBack,
+    setSaveBeforeBack,
     setTab,
     showSingleDrawing,
     showSinglePlaylist, 

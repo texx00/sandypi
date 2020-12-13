@@ -12,14 +12,23 @@ import IconButton from '../../../../components/IconButton';
 import { playlist_delete, playlist_queue, playlist_save } from '../../../../sockets/SAE';
 import { listsAreEqual } from '../../../../utils/dictUtils';
 
-import { tabBack } from '../../Tabs.slice';
+import { resetShowSaveBeforeBack, setSaveBeforeBack, tabBack } from '../../Tabs.slice';
 import { deletePlaylist, updateSinglePlaylist } from '../Playlists.slice';
+import { getShowSaveBeforeBack } from '../../selector';
+
+const mapStateToProps = (state) => {
+    return {
+        save_before_back: getShowSaveBeforeBack(state)
+    }
+}
 
 const mapDispatchToProps = (dispatch) => {
     return {
         handleTabBack: () => dispatch(tabBack()),
         deletePlaylist: (id) => dispatch(deletePlaylist(id)),
-        updateSinglePlaylist: (pl) => dispatch(updateSinglePlaylist(pl))
+        updateSinglePlaylist: (pl) => dispatch(updateSinglePlaylist(pl)),
+        saveBeforeBack: () => dispatch(setSaveBeforeBack(true)),
+        resetShowSaveBeforeBack: () => dispatch(resetShowSaveBeforeBack())
     }
 }
 
@@ -49,6 +58,7 @@ class SinglePlaylist extends Component{
             id: this.props.playlist.id
         };
         if (this.props.playlist.id === 0){
+            this.props.resetShowSaveBeforeBack();
             this.props.handleTabBack();
             playlist_save(playlist);
         }else{
@@ -57,13 +67,13 @@ class SinglePlaylist extends Component{
     }
 
     handleSaveBeforeBack(){
-        //TODO check if must save something before going back
-        this.props.handleTabBack()
+        this.props.saveBeforeBack();
     }
 
     handleSortableUpdate(list){
         if (!listsAreEqual(list, this.state.elements)){
-            this.setState({...this.state, elements: list, edited: true})
+            this.setState({...this.state, elements: list, edited: true});
+            this.handleSaveBeforeBack();
         }
     }
 
@@ -118,6 +128,19 @@ class SinglePlaylist extends Component{
             <div>
                 <h1 className="d-inline-block mr-3 text-primary">Playlist name: </h1>
                 <h1 className="d-inline-block rounded p-1 editable-title" 
+                    onBlur={()=> {
+                        if (this.state.playlist !== undefined)
+                            if (this.state.playlist.name !== this.nameRef.current.innerHTML) 
+                                this.handleSaveBeforeBack();
+                        }}
+                    onFocus={()=>{
+                        // select automatically the full text of the playlist name on focus
+                        let range = document.createRange();
+                        range.selectNodeContents(this.nameRef.current);
+                        let sel = window.getSelection();
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                    }}
                     ref={this.nameRef}
                     title="Click to edit"
                     contentEditable="true" 
@@ -147,15 +170,46 @@ class SinglePlaylist extends Component{
                     The playlist has been modified in another window. What do you want to do?
                 </Modal.Body>
                 <Modal.Footer className="center">
-                    <IconButton className="center"
-                        onClick={() => this.props.onRefreshList()}>
+                    <IconButton onClick={() => this.props.onRefreshList()}>
                         Load the new version
                     </IconButton>
-                    <IconButton className="center" 
-                        onClick={()=>{
+                    <IconButton onClick={()=>{
                             this.save();
                         }}>
                         Save the local changes and overwrite
+                    </IconButton>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal show={this.props.save_before_back}
+                aria-labelledby="contained-modal-title-vcenter"
+                centered>
+                <Modal.Header className="center">
+                    <Modal.Title>
+                        Save playlist changes?
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="p-5 center">
+                    The playlist have some unsaved changes, are you sure you want to go back?
+                </Modal.Body>
+                <Modal.Footer className="center">
+                    <IconButton onClick={()=>{
+                            this.save();
+                            this.props.resetShowSaveBeforeBack();
+                        }}>
+                        Save
+                    </IconButton>
+                    <IconButton onClick={()=>{
+                            this.props.resetShowSaveBeforeBack();
+                            this.handleSaveBeforeBack();
+                        }}>
+                        Undo
+                    </IconButton>
+                    <IconButton onClick={()=>{
+                            this.props.resetShowSaveBeforeBack();
+                            this.props.handleTabBack();
+                        }}>
+                        Do not save and go back
                     </IconButton>
                 </Modal.Footer>
             </Modal>
@@ -163,4 +217,4 @@ class SinglePlaylist extends Component{
     }
 }
 
-export default connect(null, mapDispatchToProps)(SinglePlaylist);
+export default connect(mapStateToProps, mapDispatchToProps)(SinglePlaylist);
