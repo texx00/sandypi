@@ -13,7 +13,7 @@ import { playlist_delete, playlist_queue, playlist_save } from '../../../../sock
 import { listsAreEqual } from '../../../../utils/dictUtils';
 
 import { resetShowSaveBeforeBack, setSaveBeforeBack, tabBack } from '../../Tabs.slice';
-import { deletePlaylist, updateSinglePlaylist } from '../Playlists.slice';
+import { addToPlaylist, deletePlaylist, updateSinglePlaylist } from '../Playlists.slice';
 import { getShowSaveBeforeBack } from '../../selector';
 
 const mapStateToProps = (state) => {
@@ -28,7 +28,8 @@ const mapDispatchToProps = (dispatch) => {
         deletePlaylist: (id) => dispatch(deletePlaylist(id)),
         updateSinglePlaylist: (pl) => dispatch(updateSinglePlaylist(pl)),
         saveBeforeBack: () => dispatch(setSaveBeforeBack(true)),
-        resetShowSaveBeforeBack: () => dispatch(resetShowSaveBeforeBack())
+        resetShowSaveBeforeBack: () => dispatch(resetShowSaveBeforeBack()),
+        addElements: (elements) => dispatch(addToPlaylist(elements))
     }
 }
 
@@ -89,7 +90,9 @@ class SinglePlaylist extends Component{
             this.state.elements !== undefined){
             return <SortableElements
                     list={this.state.elements}
+                    playlistId={this.props.playlist.id}
                     onUpdate={this.handleSortableUpdate.bind(this)}
+                    addElements={this.props.addElements.bind(this)}
                     refreshList={this.state.refreshList}
                     onListRefreshed={()=>this.setState({...this.state, refreshList: false})}>
                 </SortableElements>

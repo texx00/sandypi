@@ -1,6 +1,6 @@
 from server import app, socketio, db
 from server.database.models import UploadedFiles, Playlists
-from flask import render_template, request, url_for, redirect
+from flask import render_template, request, url_for, redirect, jsonify
 from werkzeug.utils import secure_filename
 from server.utils.gcode_converter import gcode_to_image
 from server.database.models import Playlists
@@ -20,8 +20,8 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Upload route for the dropzone to load new drawings
-@app.route('/api/upload/<playlist>', methods=['GET','POST'])
-def api_upload(playlist):
+@app.route('/api/upload/', methods=['GET','POST'])
+def api_upload():
     if request.method == "POST":
         if 'file' in request.files:
             file = request.files['file']
@@ -48,12 +48,6 @@ def api_upload(playlist):
                     app.logger.error(traceback.print_exc())
                     shutil.copy2(app.config["UPLOAD_FOLDER"]+"/placeholder.jpg", os.path.join(folder, str(new_file.id)+".jpg"))
 
-                playlist = int(playlist)
-                if (playlist):
-                    pl = Playlists.get_playlist(playlist)
-                    pl.add_element(DrawingElement(new_file.id))
-                    pl.save()
-
                 app.logger.info("File added")
-                return "1"
-    return "0"
+                return jsonify(new_file.id)
+    return jsonify(-1)

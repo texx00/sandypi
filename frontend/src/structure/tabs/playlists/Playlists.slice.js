@@ -15,11 +15,12 @@ const playlistsSlice = createSlice({
     },
     reducers: {
         addToPlaylist: (state, action) => {
-            const element = action.payload.element;
+            const elements = action.payload.elements;
             const playlistId = action.payload.playlistId;
             for (let pl in state.playlists){
                 if (state.playlists[pl].id === playlistId){
-                    state.playlists[pl].elements.push(element);
+                    // TODO fix this: check if elements is an array and append, then return
+                    state.playlists[pl].elements.append(elements);
                     playlist_save(state.playlists[pl]);                 // saves playlist also on the server
                     break;
                 } 
