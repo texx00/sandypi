@@ -1,25 +1,28 @@
 import React, { Component } from 'react';
-import { Container, Modal } from 'react-bootstrap';
+import { Container } from 'react-bootstrap';
 import { connect } from 'react-redux';
 
-import IconButton from '../../../../components/IconButton';
 import SinglePlaylist from './SinglePlaylist';
 
-import { getPlaylistResync, getSinglePlaylist } from '../selector';
+import { getPlaylistResync, getSinglePlaylist, isPlaylistDeleted } from '../selector';
 import { isSinglePlaylist } from '../../selector';
-import { setResyncPlaylist } from '../Playlists.slice';
+import { setResyncPlaylist, resetPlaylistDeletedFlag } from '../Playlists.slice';
+import { tabBack } from '../../Tabs.slice';
 
 const mapStateToProps = (state) => {
     return {
         playlist: getSinglePlaylist(state),
         playlistRequiresResync: getPlaylistResync(state),
-        isSinglePlaylist: isSinglePlaylist(state)
+        isSinglePlaylist: isSinglePlaylist(state),
+        isPlaylistDeleted: isPlaylistDeleted(state)
     }
 }
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        resetResync: () => dispatch(setResyncPlaylist(false))
+        resetResync: () => dispatch(setResyncPlaylist(false)),
+        tabBack: () => dispatch(tabBack()),
+        resetPlaylistDeleted: () => dispatch(resetPlaylistDeletedFlag())
     }
 }
 
@@ -38,15 +41,19 @@ class SinglePlaylistContainer extends Component{
     }
 
     componentDidUpdate(){
+        // if the playlist has been deleted, go back to the previous tab
+        if (this.props.isPlaylistDeleted && !this.props.playlistRequiresResync){
+            this.props.tabBack();
+            this.props.resetPlaylistDeleted();
+            return;
+        }
         // if is not working on the playlist can reload the page on the background without prompting the modal
         if (this.props.playlistRequiresResync && !this.props.isSinglePlaylist){
             this.refreshPlaylist();
-            console.log("prova")
         }
         // if the selected playlist (props) is not the same as the one in the state should update the state
         if (this.state.playlist.id !== this.props.playlist.id){
             this.refreshPlaylist();
-            console.log("prova2")
         }
     }
 
@@ -61,32 +68,9 @@ class SinglePlaylistContainer extends Component{
                     resync={this.props.playlist_require_resync}
                     shouldUpdateList={this.state.refreshedList}
                     onListRefreshed={this.onListRefreshed.bind(this)}
+                    onRefreshList={this.refreshPlaylist.bind(this)}
+                    showModal={this.props.playlistRequiresResync && this.props.isSinglePlaylist}
                     />
-                
-                <Modal show={this.props.playlistRequiresResync && this.props.isSinglePlaylist}
-                    aria-labelledby="contained-modal-title-vcenter"
-                    centered>
-                    <Modal.Header className="center">
-                        <Modal.Title>
-                            The playlist has some changes
-                        </Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body className="p-5 center">
-                        The playlist has been modified in another window. What do you want to do?
-                    </Modal.Body>
-                    <Modal.Footer className="center">
-                        <IconButton className="center"
-                            onClick={this.refreshPlaylist.bind(this)}>
-                            Load the new version
-                        </IconButton>
-                        <IconButton className="center" 
-                            onClick={()=>{
-                                this.save();
-                            }}>
-                            Save the local changes and overwrite
-                        </IconButton>
-                    </Modal.Footer>
-                </Modal>
             </Container>
     }
 }

@@ -2,14 +2,14 @@ import './SinglePlaylist.scss';
 
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Container, Row, Col } from 'react-bootstrap';
+import { Container, Row, Col, Modal } from 'react-bootstrap';
 import { FileEarmarkCheck, Play, X } from 'react-bootstrap-icons';
 
 import ConfirmButton from '../../../../components/ConfirmButton';
 import SortableElements from './SortableElements';
 import IconButton from '../../../../components/IconButton';
 
-import { playlists_request, playlist_delete, playlist_queue, playlist_save } from '../../../../sockets/SAE';
+import { playlist_delete, playlist_queue, playlist_save } from '../../../../sockets/SAE';
 import { listsAreEqual } from '../../../../utils/dictUtils';
 
 import { tabBack } from '../../Tabs.slice';
@@ -29,7 +29,8 @@ class SinglePlaylist extends Component{
         this.control_card = {element_type: "control_card"}
         this.state = {
             elements: this.addControlCard(this.props.playlist.elements),
-            edited: false
+            edited: false,
+            refreshList: false
         }
         this.nameRef = React.createRef();
     }
@@ -47,10 +48,9 @@ class SinglePlaylist extends Component{
             elements: orderedEls,
             id: this.props.playlist.id
         };
-        playlist_save(playlist);
         if (this.props.playlist.id === 0){
             this.props.handleTabBack();
-            playlists_request()
+            playlist_save(playlist);
         }else{
             this.props.updateSinglePlaylist(playlist);
         }
@@ -69,7 +69,7 @@ class SinglePlaylist extends Component{
 
     componentDidUpdate(){
         if(this.props.shouldUpdateList){
-            this.setState({...this.state, elements: this.addControlCard(this.props.playlist.elements), edited: false});
+            this.setState({...this.state, elements: this.addControlCard(this.props.playlist.elements), edited: false, refreshList: true});
             this.props.onListRefreshed();
         }
     }
@@ -79,7 +79,9 @@ class SinglePlaylist extends Component{
             this.state.elements !== undefined){
             return <SortableElements
                     list={this.state.elements}
-                    onUpdate={this.handleSortableUpdate.bind(this)}>
+                    onUpdate={this.handleSortableUpdate.bind(this)}
+                    refreshList={this.state.refreshList}
+                    onListRefreshed={()=>this.setState({...this.state, refreshList: false})}>
                 </SortableElements>
         } else return <Row>
             <Col>No element</Col>
@@ -132,6 +134,31 @@ class SinglePlaylist extends Component{
             </Row>
             {this.renderElements()}
 
+            
+            <Modal show={this.props.showModal}
+                aria-labelledby="contained-modal-title-vcenter"
+                centered>
+                <Modal.Header className="center">
+                    <Modal.Title>
+                        The playlist has some changes
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="p-5 center">
+                    The playlist has been modified in another window. What do you want to do?
+                </Modal.Body>
+                <Modal.Footer className="center">
+                    <IconButton className="center"
+                        onClick={() => this.props.onRefreshList()}>
+                        Load the new version
+                    </IconButton>
+                    <IconButton className="center" 
+                        onClick={()=>{
+                            this.save();
+                        }}>
+                        Save the local changes and overwrite
+                    </IconButton>
+                </Modal.Footer>
+            </Modal>
         </Container>
     }
 }

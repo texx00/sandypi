@@ -55,5 +55,8 @@ const getPlaylistResync = state => {
 const getSinglePlaylistId = state => {
     return state.playlists.playlist_id;
 }
+const isPlaylistDeleted = state => {
+    return state.playlists.playlist_deleted;
+}
 
-export { getRefreshPlaylists, getSinglePlaylist, getPlaylists, getPlaylistsLimited, getPlaylistsList, getPlaylistResync };
+export { getRefreshPlaylists, getSinglePlaylist, getPlaylists, getPlaylistsLimited, getPlaylistsList, getPlaylistResync, isPlaylistDeleted };

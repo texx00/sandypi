@@ -4,7 +4,6 @@ import { Col } from 'react-bootstrap';
 
 import { DrawingElement } from './ElementsCards';
 import ControlCard from './ControlCard';
-import { listsAreEqual } from '../../../../utils/dictUtils';
 
 class SortableElements extends Component{
     constructor(props){
@@ -16,15 +15,17 @@ class SortableElements extends Component{
     }
 
     componentDidUpdate(){
-        if (!listsAreEqual(this.state.list, this.props.list)){
+        if (this.props.refreshList){
             this.setState({...this.state, list: this.props.list});
+            this.props.onListRefreshed();
         }
     }
 
     removeElement(idx){
         let oldState = this.state.list;
-        this.setState({...this.state, list: oldState.filter((el, i)=> {return el.id !==idx})});
-        this.props.onUpdate(this.state.list);
+        let newList = oldState.filter((el, i)=> {return el.id !==idx});
+        this.setState({...this.state, list: newList, edited: true});
+        this.props.onUpdate(newList);
     }
 
     render(){
@@ -37,15 +38,13 @@ class SortableElements extends Component{
             list={this.state.list}
             setList={(newList) => {
                 this.setState({list: newList});
+                this.props.onUpdate(newList);
             }}
             onStart={(evt) => {                             // when starts to drag it removes the "delete element" button and disable it until the object is released
                 this.setState({show_child_cross: false});
             }}
             onEnd={(evt) => {                               // when the element is released reactivate the "delete element" activation
                 this.setState({show_child_cross: true});
-            }}
-            onUpdate={(evt) => {
-                this.props.onUpdate(this.state.list);
             }}
             onMove={(evt1, evt2) => {
                 // when the element is dragged over the control card disable movements
@@ -78,11 +77,11 @@ class ElementCard extends React.Component{
     }
     
     show_cross(val){
-        this.setState({show_cross: true});
+        this.setState({...this.state, show_cross: true});
     }
 
     hide_cross(val){
-        this.setState({show_cross: false});
+        this.setState({...this.state, show_cross: false});
     }
 
     onTransitionEnd(){
