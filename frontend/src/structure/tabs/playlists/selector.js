@@ -6,8 +6,8 @@ function createEmptyPlaylist(){
     }
 }
 
-const getRefreshPlaylists = state => {
-    return state.playlists.must_refresh;
+const getMandatoryRefresh = state => {
+    return state.playlists.mandatory_refresh;
 }
 
 const getSinglePlaylist = state => {
@@ -52,6 +52,10 @@ const getPlaylistResync = state => {
     return state.playlists.playlist_resync;
 }
 
+const getRefreshPlaylists = state => {
+    return state.playlists.refresh_request;
+}
+
 const getSinglePlaylistId = state => {
     return state.playlists.playlist_id;
 }
@@ -59,4 +63,4 @@ const isPlaylistDeleted = state => {
     return state.playlists.playlist_deleted;
 }
 
-export { getRefreshPlaylists, getSinglePlaylist, getPlaylists, getPlaylistsLimited, getPlaylistsList, getPlaylistResync, isPlaylistDeleted };
+export { getMandatoryRefresh, getSinglePlaylist, getPlaylists, getPlaylistsLimited, getPlaylistsList, getPlaylistResync, getRefreshPlaylists, isPlaylistDeleted };

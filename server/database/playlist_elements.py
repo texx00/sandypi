@@ -43,6 +43,8 @@ class GenericPlaylistElement():
 
     @classmethod
     def create_element_from_dict(cls, dict_val):
+        if not type(dict_val) is dict:
+            raise ValueError("The argument must be a dict")
         if 'element_type' in dict_val:
             el_type = dict_val.pop("element_type")      # remove element type. Should be already be choosen when using the class
         else:
@@ -81,7 +83,7 @@ class DrawingElement(GenericPlaylistElement):
             drawing_id = int(drawing_id)
             self.drawing_id = drawing_id
         except:
-            raise ValueError("The drawing code must be an integer")
+            raise ValueError("The drawing id must be an integer")
             self.drawing_id = None
     
     def save(self, element_table):

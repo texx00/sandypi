@@ -109,7 +109,7 @@ class SingleDrawing extends Component{
                         <IconButton icon={X} onClick={() => this.setState({showPlaylists: false})}>Undo</IconButton>
                         <IconButton icon={Plus} 
                             onClick={() => {this.props.addToPlaylist({
-                                    element: create_drawing_element(this.props.drawing),
+                                    elements: [create_drawing_element(this.props.drawing)],
                                     playlistId: parseInt(this.selectRef.current.value)
                                 });
                                 this.setState({showPlaylists: false});

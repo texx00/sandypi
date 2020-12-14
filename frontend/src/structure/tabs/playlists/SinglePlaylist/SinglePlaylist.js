@@ -92,7 +92,7 @@ class SinglePlaylist extends Component{
                     list={this.state.elements}
                     playlistId={this.props.playlist.id}
                     onUpdate={this.handleSortableUpdate.bind(this)}
-                    addElements={this.props.addElements.bind(this)}
+                    addElements={(els) => this.props.addElements({playlistId: this.props.playlist.id, elements: els})}
                     refreshList={this.state.refreshList}
                     onListRefreshed={()=>this.setState({...this.state, refreshList: false})}>
                 </SortableElements>

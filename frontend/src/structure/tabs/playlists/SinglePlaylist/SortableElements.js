@@ -57,7 +57,7 @@ class SortableElements extends Component{
                     if (el.element_type === "control_card"){
                         return <ControlCard key={-1} 
                             playlistId={this.props.playlistId}
-                            onElementsAdded={this.props.addElements.bind(this)}/>
+                            onElementsAdded={(ids) => this.props.addElements(ids)}/>
                     }else return <ElementCard key={el.id} 
                                 handleUnmount={()=>this.removeElement(el.id)}
                                 showCross={this.state.show_child_cross}>

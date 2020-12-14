@@ -25,7 +25,10 @@ class ConfirmButton extends Component{
                         <Col>
                             <Button
                                 className="btn-success"
-                                onClick={ (evt)=> this.props.onClick(evt)}>
+                                onClick={ (evt)=> {
+                                    this.setState({mustConfirm: false});
+                                    this.props.onClick(evt);
+                                }}>
                                 Yes
                             </Button>
                         </Col>

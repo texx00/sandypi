@@ -1,4 +1,4 @@
-import React, { Component, createElement } from 'react';
+import React, { Component } from 'react';
 import { Col } from 'react-bootstrap';
 
 import UploadDrawingsModal from '../../drawings/UploadDrawing';
@@ -25,9 +25,10 @@ class ControlCard extends Component{
                     show={this.state.show_upload}
                     handleClose={()=>{this.setState({show_upload: false})}}
                     handleFileUploaded={(ids) => {
-                        this.props.onElementsAdded(ids.map((id)=>{
-                            return create_drawing_element(id);
-                        }));
+                        let els = ids.map((id)=>{
+                            return create_drawing_element({id: id});
+                        })
+                        this.props.onElementsAdded(els);
                     }}/>
             </Col>
     }

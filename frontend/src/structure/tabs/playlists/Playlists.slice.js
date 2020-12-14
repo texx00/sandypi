@@ -7,24 +7,27 @@ import { getSinglePlaylist } from './selector';
 const playlistsSlice = createSlice({
     name: "playlists",
     initialState: {
+        mandatory_refresh: false,
         playlists: [],
-        must_refresh: true,
         playlist_id: 0,
         playlist_resync: false,
-        playlist_deleted: false
+        playlist_deleted: false,
+        refresh_request_id: -1,
+        refresh_request: true
     },
     reducers: {
         addToPlaylist: (state, action) => {
             const elements = action.payload.elements;
             const playlistId = action.payload.playlistId;
-            for (let pl in state.playlists){
-                if (state.playlists[pl].id === playlistId){
-                    // TODO fix this: check if elements is an array and append, then return
-                    state.playlists[pl].elements.append(elements);
-                    playlist_save(state.playlists[pl]);                 // saves playlist also on the server
-                    break;
-                } 
-            }
+            let pls = state.playlists.map((pl) => {
+                let p = {...pl};
+                if (pl.id === playlistId){
+                    p.elements = [...p.elements, ...elements];
+                    playlist_save(p);                 // saves playlist also on the server (only one playlist at a time, there will be no problem with mutliple save calls)
+                }
+                return p;
+            });
+            return {...state, playlists: pls, refresh_request_id: playlistId};
         },
         deletePlaylist: (state, action) => {
             return { ...state, playlists: state.playlists.filter((item) => {
@@ -35,7 +38,7 @@ const playlistsSlice = createSlice({
             return {...state, playlist_deleted: false };
         },
         setRefreshPlaylists: (state, action) => {
-            return {...state, must_refresh: action.payload };
+            return {...state, refresh_request: action.payload };
         },
         setPlaylists: (state, action) => {
             let sync = false;
@@ -43,7 +46,7 @@ const playlistsSlice = createSlice({
             let pls = action.payload.map((pl)=>{
                 pl.elements = JSON.parse(pl.elements);
                 if (pl.id === state.playlist_id){
-                    if (!listsAreEqual(pl, getSinglePlaylist({playlists: state}))){
+                    if (!listsAreEqual(pl, getSinglePlaylist({playlists: state})) && pl.id !== state.refresh_request_id){
                         sync = true;    // check if any change to the playlist in use has been done on another device
                     }
                     playlist_deleted = false;
@@ -53,13 +56,24 @@ const playlistsSlice = createSlice({
             if (state.playlist_id === 0){   // if the playlist is a new playlist should not go back if the others are updated
                 playlist_deleted = false;
             }
-            return { ...state, playlists: pls, playlist_resync: sync, playlist_deleted: playlist_deleted }; 
+            let must_refresh = false;
+            if (state.refresh_request_id !== -1){
+                must_refresh= true;
+            }
+            return { 
+                ...state, 
+                playlists: pls, 
+                playlist_resync: sync, 
+                playlist_deleted: playlist_deleted, 
+                refresh_request_id: -1, 
+                mandatory_refresh: must_refresh 
+            }; 
         },
         setSinglePlaylistId: (state, action) => {
             return { ...state, playlist_id: action.payload };
         },
         setResyncPlaylist: (state, action) => {
-            return { ...state, playlist_resync: action.payload };
+            return { ...state, playlist_resync: action.payload, mandatory_refresh: false };
         },
         updateSinglePlaylist: (state, action) => {
             let playlist = action.payload;

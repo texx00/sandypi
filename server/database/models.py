@@ -32,6 +32,8 @@ class Playlists(db.Model):
         db.session.commit()
 
     def add_element(self, elements):
+        if isinstance(elements, str):
+            elements = json.loads(elements)
         if not isinstance(elements, list):
             elements = [elements]
         for i in elements:

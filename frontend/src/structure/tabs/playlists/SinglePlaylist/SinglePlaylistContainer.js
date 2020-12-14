@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 
 import SinglePlaylist from './SinglePlaylist';
 
-import { getPlaylistResync, getSinglePlaylist, isPlaylistDeleted } from '../selector';
+import { getMandatoryRefresh, getPlaylistResync, getSinglePlaylist, isPlaylistDeleted } from '../selector';
 import { isSinglePlaylist } from '../../selector';
 import { setResyncPlaylist, resetPlaylistDeletedFlag } from '../Playlists.slice';
 import { tabBack } from '../../Tabs.slice';
@@ -14,7 +14,8 @@ const mapStateToProps = (state) => {
         playlist: getSinglePlaylist(state),
         playlistRequiresResync: getPlaylistResync(state),
         isSinglePlaylist: isSinglePlaylist(state),
-        isPlaylistDeleted: isPlaylistDeleted(state)
+        isPlaylistDeleted: isPlaylistDeleted(state),
+        isMandatoryRefresh: getMandatoryRefresh(state)
     }
 }
 
@@ -55,6 +56,9 @@ class SinglePlaylistContainer extends Component{
         if (this.state.playlist.id !== this.props.playlist.id){
             this.refreshPlaylist();
         }
+
+        if (this.props.isMandatoryRefresh)
+            this.refreshPlaylist();
     }
 
     onListRefreshed(){
