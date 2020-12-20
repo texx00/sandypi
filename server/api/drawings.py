@@ -1,18 +1,13 @@
-from server import app, socketio, db
-from server.database.models import UploadedFiles, Playlists
-from flask import render_template, request, url_for, redirect, jsonify
+from server import app, db
+from server.database.models import UploadedFiles
+from flask import request, jsonify
 from werkzeug.utils import secure_filename
 from server.utils.gcode_converter import gcode_to_image
-from server.database.models import Playlists
-from server.database.playlist_elements import DrawingElement
 
 import traceback
-import datetime
 
 import os
-import logging
 import shutil
-import json
 
 ALLOWED_EXTENSIONS = ["gcode", "nc"]
 

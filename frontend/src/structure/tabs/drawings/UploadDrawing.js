@@ -19,6 +19,7 @@ class UploadDrawingsModal extends Component{
             loading: false
         };
         this.files = undefined;
+        this.is_loading = false;
     }
 
     static defaultProps = {
@@ -27,7 +28,8 @@ class UploadDrawingsModal extends Component{
     }
 
     componentDidUpdate(){
-        if (this.state.loading){
+        if (this.state.loading && !this.is_loading){
+            this.is_loading = true;
             let promises = this.files.map(f => {
                 let data = new FormData();
                 data.append("file", f);
@@ -58,6 +60,7 @@ class UploadDrawingsModal extends Component{
     }
 
     handleClose(){
+        this.is_loading = false;
         this.setState({...this.state, loading: false});
         this.props.handleClose();
     }
@@ -68,7 +71,6 @@ class UploadDrawingsModal extends Component{
     }
 
     render(){
-        console.log(this.state.loading)
         return <Modal show={this.props.show} onHide={this.handleClose.bind(this)} size="lg" centered>
             <Modal.Header className="center">
                 <Modal.Title>Upload new drawing</Modal.Title>

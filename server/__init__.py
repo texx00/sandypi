@@ -5,15 +5,7 @@ from flask_migrate import Migrate
 from flask_cors import CORS
 
 import os
-import sys
 import platform
-
-from subprocess import Popen
-import psutil
-import threading
-import atexit
-import signal
-import urllib.request
 
 from time import sleep
 from dotenv import load_dotenv
@@ -60,8 +52,6 @@ if os.path.isdir('./server/static/js/node_modules/bootstrap'):     # check if th
 minify(app=app, html=True, js=False)
 
 
-import server.database.models
-import server.views.drawings_management, server.views.settings
 import server.api.drawings
 import server.sockets_interface.socketio_callbacks
 from server.sockets_interface.socketio_emits import SocketioEmits
