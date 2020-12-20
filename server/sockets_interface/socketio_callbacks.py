@@ -70,7 +70,7 @@ def playlist_queue(code):
     elements = item.get_elements()
     for i in elements:
         if i != "":
-            app.qmanager.queue_drawing(i)
+            app.qmanager.queue_drawing(i.drawing_id)
 
 @socketio.on("playlists_refresh")
 def playlist_refresh():

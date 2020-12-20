@@ -8,7 +8,7 @@ function checkArray(arr){
 // get the url of given images
 function getImgUrl(id){
     if (id !== undefined)
-        return domain + "/static/Drawings/" + id + "/" + id + ".jpg";
+        return domain + "/Drawings/" + id;
     else return "";
 }
 

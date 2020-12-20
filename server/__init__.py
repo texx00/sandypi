@@ -1,8 +1,11 @@
-from flask import Flask, redirect, url_for
+from flask import Flask, render_template, url_for
+from flask.helpers import send_from_directory
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
+
+from werkzeug.utils import secure_filename
 
 import os
 import platform
@@ -30,12 +33,20 @@ settings_utils.print_level(level, "app")
 logging.getLogger("werkzeug").setLevel(level)
 
 # app setup
-app = Flask(__name__, template_folder='templates')
+# is using the frontend build forlder for the static path
+app = Flask(__name__, template_folder='templates', static_folder="../frontend/build", static_url_path="/")
 
 app.config['SECRET_KEY'] = 'secret!' # TODO put a key here
 app.config['UPLOAD_FOLDER'] = "./server/static/Drawings"
 socketio = SocketIO(app, cors_allowed_origins="*")
 CORS(app)   # setting up cors for react
+
+# 
+@app.route('/Drawings/<path:filename>')
+def base_static(filename):
+    filename = secure_filename(filename)
+    qqq  = app.root_path + app.config['UPLOAD_FOLDER'].replace("./server", "")
+    return send_from_directory(app.root_path + app.config['UPLOAD_FOLDER'].replace("./server", "")+ "/{}/".format(filename), "{}.jpg".format(filename))
 
 # database
 file_path = os.path.join(os.path.abspath(os.getcwd()), "database.db")
@@ -97,7 +108,7 @@ def versioned_url_for(endpoint, **values):
 # Home routes
 @app.route('/')
 def home():
-    return redirect(url_for('preview'))
+    return send_from_directory(app.static_folder, "index.html")
 
 if __name__ == '__main__':
     socketio.run(app)

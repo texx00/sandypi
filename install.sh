@@ -1,9 +1,10 @@
 echo '----- Installing python dependencies -----'
 python3 -m pip install -r requirements.txt
 
-echo '\n\n----- Installing js dependencies -----'
+echo '\n\n----- Installing js dependencies and building frontend app -----'
 sudo npm install -g yarn
-sudo yarn --cwd ./server/static/js
+sudo yarn --cwd ./frontend install
+sudo yarn --cwd ./frontend build
 
 echo '\n\n----- Upgrading database -----'
 flask db upgrade
