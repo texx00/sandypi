@@ -1,0 +1,14 @@
+@import "../../../_colors.scss";
+
+.preview-bar-container{
+    background-color: $dark;
+}
+
+.preview-bar-image{
+    height:40px;
+    max-height: 40px;
+    position: relative;
+    img{
+        height: 100%;
+    }
+}

@@ -6,7 +6,7 @@ import { Container, Row, Col, Modal } from 'react-bootstrap';
 import { FileEarmarkCheck, Play, X } from 'react-bootstrap-icons';
 
 import ConfirmButton from '../../../../components/ConfirmButton';
-import SortableElements from './SortableElements';
+import SortableElements from '../../../../components/SortableElements';
 import IconButton from '../../../../components/IconButton';
 
 import { playlist_delete, playlist_queue, playlist_save } from '../../../../sockets/SAE';
@@ -15,6 +15,7 @@ import { listsAreEqual } from '../../../../utils/dictUtils';
 import { resetShowSaveBeforeBack, setSaveBeforeBack, tabBack } from '../../Tabs.slice';
 import { addToPlaylist, deletePlaylist, updateSinglePlaylist } from '../Playlists.slice';
 import { getShowSaveBeforeBack } from '../../selector';
+import ControlCard from './ControlCard';
 
 const mapStateToProps = (state) => {
     return {
@@ -90,12 +91,13 @@ class SinglePlaylist extends Component{
             this.state.elements !== undefined){
             return <SortableElements
                     list={this.state.elements}
-                    playlistId={this.props.playlist.id}
                     onUpdate={this.handleSortableUpdate.bind(this)}
-                    addElements={(els) => this.props.addElements({playlistId: this.props.playlist.id, elements: els})}
                     refreshList={this.state.refreshList}
                     onListRefreshed={()=>this.setState({...this.state, refreshList: false})}>
-                </SortableElements>
+                        <ControlCard key={-1} 
+                            playlistId={this.props.playlistId}
+                            onElementsAdded={(ids) => this.props.addElements({playlistId: this.props.playlist.id, elements: ids})}/>
+                    </SortableElements>
         } else return <Row>
             <Col>No element</Col>
         </Row>

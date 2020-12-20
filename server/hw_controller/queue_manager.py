@@ -89,6 +89,6 @@ class QueueManager():
     def send_queue_status(self):
         res = {
             "now_drawing_id": self._code if self._code is not None else 0,
-            "queue": list(self.q.queue)
+            "elements": list(self.q.queue)
         }
         self.app.semits.emit("queue_status", json.dumps(res))

@@ -2,8 +2,7 @@ import React, { Component } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { Col } from 'react-bootstrap';
 
-import { DrawingElement } from './ElementsCards';
-import ControlCard from './ControlCard';
+import { DrawingElement } from '../structure/tabs/playlists/SinglePlaylist/ElementsCards';
 
 class SortableElements extends Component{
     constructor(props){
@@ -49,15 +48,13 @@ class SortableElements extends Component{
             onMove={(evt1, evt2) => {
                 // when the element is dragged over the control card disable movements
                 if (evt1.related.id === "control_card"){
-                    return false;                       // cannot put something after the elements control card
+                    return false;                           // cannot put something after the elements control card
                 }
                 return true;
             }}>
                 {this.state.list.map((el, idx)=>{
-                    if (el.element_type === "control_card"){
-                        return <ControlCard key={-1} 
-                            playlistId={this.props.playlistId}
-                            onElementsAdded={(ids) => this.props.addElements(ids)}/>
+                    if (el.element_type === "control_card"){    // the control card element must be available in the list to be shown. If show, will put the child element as the control card element
+                        return this.props.children;
                     }else return <ElementCard key={el.id} 
                                 handleUnmount={()=>this.removeElement(el.id)}
                                 showCross={this.state.show_child_cross}>

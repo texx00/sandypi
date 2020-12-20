@@ -3,6 +3,7 @@ import { Navbar, Nav } from 'react-bootstrap';
 import { ChevronCompactLeft, Sliders } from 'react-bootstrap-icons';
 import { connect } from 'react-redux';
 import IconButton from '../components/IconButton';
+import QueuePreview from './tabs/queue/QueuePreview';
 
 import { showBack } from './tabs/selector';
 import { setTab, tabBack } from './tabs/Tabs.slice';
@@ -42,6 +43,7 @@ class TopBar extends Component{
                             <Nav.Link key={4} onClick={()=>{this.props.handleTab("manual")}}>Manual control</Nav.Link>
                             {this.renderBack()}
                         </Nav>
+                        <QueuePreview onClick={()=>{this.props.handleTab("queue")}}/>
                         <IconButton className="btn btn-dark" 
                             onClick={()=>{this.props.handleTab("settings")}}
                             icon={Sliders}>
