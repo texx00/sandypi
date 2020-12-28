@@ -145,3 +145,13 @@ def drawings_refresh():
 @socketio.on("queue_get_status")
 def queue_get_status():
     app.qmanager.send_queue_status()
+
+@socketio.on("queue_set_order")
+def queue_set_order(elements):
+    app.qmanager.set_new_order(map(lambda e: e['drawing_id'], json.loads(elements)))
+
+@socketio.on("queue_stop_drawing")
+def queue_stop_drawing():
+    app.qmanager.stop_drawing()
+    if not app.qmanager.is_drawing():   # if the drawing was the last in the queue must send the updated status
+        app.qmanager.send_queue_status()

@@ -1,17 +1,18 @@
 import React, { Component } from 'react';
-import { Container } from 'react-bootstrap';
+import { Button, Container } from 'react-bootstrap';
+import { Stop, Trash } from 'react-bootstrap-icons';
 import { connect } from 'react-redux';
 
 import { Section, Subsection } from '../../../components/Section';
 import SortableElements from '../../../components/SortableElements';
 
 import { queue_status } from '../../../sockets/SAC';
-import { queue_get_status } from '../../../sockets/SAE';
+import { queue_get_status, queue_set_order, queue_stop_drawing } from '../../../sockets/SAE';
 import { listsAreEqual } from '../../../utils/dictUtils';
 import { getImgUrl } from '../../../utils/utils';
 
-import { tabBack } from '../Tabs.slice';
-import { setQueueStatus } from './Queue.slice';
+import { setTab, tabBack } from '../Tabs.slice';
+import { setQueueElements, setQueueStatus } from './Queue.slice';
 import { getQueueDrawingId, getQueueElements, getQueueEmpty } from './selector';
 
 const mapStateToProps = (state) => {
@@ -25,8 +26,9 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
     return {
         setQueueStatus: (val) => dispatch(setQueueStatus(val)),
-        handleTabBack: () => dispatch(tabBack())
-
+        handleTabBack: () => dispatch(tabBack()),
+        setQueueElements: (list) => dispatch(setQueueElements(list)),
+        setTabHome: () => dispatch(setTab('home'))
     }
 }
 
@@ -58,17 +60,32 @@ class Queue extends Component{
         this.props.setQueueStatus(res);
     }
 
-    handleSortableUpdate(val){
-        console.log(val);
+    handleSortableUpdate(list){
+        if (!listsAreEqual(list, this.state.elements)){
+            this.setState({...this.state, elements: list});
+            this.props.setQueueElements(list);
+            queue_set_order(list);
+        }
+    }
+
+    clearQueue(){
+        // save an empty list
+        this.handleSortableUpdate([]);
+    }
+
+    stopDrawing(){
+        queue_stop_drawing();
     }
 
     renderList(){
         if (this.state.elements !== undefined)
             if (this.state.elements.length > 0){
-                let list = this.state.elements.map(el => {return {drawing_id: el};});
-                return <Subsection sectionTitle="Coming next...">
+                return <Subsection sectionTitle="Coming next..."
+                        sectionButton="Clear queue"
+                        buttonIcon={Trash}
+                        sectionButtonHandler={this.clearQueue.bind(this)}>
                     <SortableElements
-                        list={list}
+                        list={this.state.elements}
                         onUpdate={this.handleSortableUpdate.bind(this)}
                         refreshList={this.state.refreshList}
                         onListRefreshed={()=>this.setState({...this.state, refreshList: false})}>
@@ -79,16 +96,25 @@ class Queue extends Component{
     }
 
     render(){
+        // TODO add onerror on images to check if the image can be loaded or not. If there is an error should load the placeholder image or use a nice visualization instead of the alt
         if (this.props.isQueueEmpty){
             return <Container>
                 <div className="center pt-5">
                     Nothing is being drawn at the moment
                 </div>
+                <div className="center pt-3">
+                    <Button onClick={() => this.props.setTabHome()}>Homepage</Button>
+                </div>
             </Container>
         }else return <Container>
-            <Section sectionTitle="Now drawing">
+            <Section sectionTitle="Now drawing"
+                    sectionButton="Stop drawing"
+                    buttonIcon={Stop}
+                    sectionButtonHandler={this.stopDrawing.bind(this)}>
                 <div className="center mb-5">
-                    <img className="modal-drawing-preview" src={getImgUrl(this.props.drawingId)} alt="Not available"/>
+                    <img className="modal-drawing-preview" 
+                        src={getImgUrl(this.props.drawingId)} 
+                        alt="Not available"/>
                 </div>
             </Section>
             {this.renderList()}

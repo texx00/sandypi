@@ -8,7 +8,10 @@ import CommandViewer from './CommandViewer';
 class CommandLine extends Component{
     constructor(props){
         super(props);
-        this.state = {history: [], show_acks: true};
+        this.state = {
+            history: [], 
+            show_acks: false
+        };
         this.command_history_counter = 0;
         this.command_history = [];
         this.input_ref = React.createRef();
@@ -61,8 +64,11 @@ class CommandLine extends Component{
     }
 
     addLine(line, device=true){
-        let ch = this.state.history;
+        let ch = [...this.state.history];
         ch.push({line: line, device: device});
+        // limiting the number of lines in the preview (for performance)
+        while(ch.lenght>20) // TODO check this limit value
+            ch.shift();
         this.setState({history: ch});
     }
 

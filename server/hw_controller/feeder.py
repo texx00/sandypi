@@ -67,6 +67,7 @@ class Feeder():
         settings_utils.print_level(level, __name__.split(".")[-1])
 
         self._isrunning = False
+        self._stopped = False
         self._ispaused = False
         self.total_commands_number = None
         self.command_number = 0
@@ -132,15 +133,15 @@ class Feeder():
     # starts to send gcode to the machine
     def start_code(self, code, force_stop=False):
         if(not force_stop and self.is_running()):
-            return False    # if a file is already being sent it will not start a new one
+            return False        # if a file is already being sent it will not start a new one
         else:
             if self.is_running():
-                self.stop()
-                time.sleep(5)       # wait a little for the thread to stop
+                self.stop()     # stop -> blocking function: wait until the thread is stopped for real
             with self.serial_mutex:
                 self._th = Thread(target = self._thf, args=(code,), daemon=True)
                 self._th.name = "drawing_feeder"
                 self._isrunning = True
+                self._stopped = False
                 self._ispaused = False
                 self._running_code = code
                 self.command_number = 0
@@ -165,10 +166,20 @@ class Feeder():
             return self._running_code
     
     # stops the drawing
+    # blocking function: waits until the thread is stopped
     def stop(self):
         if(self.is_running()):
+            tmp = self._running_code
             with self.status_mutex:
                 self._isrunning = False
+                self._running_code = 0
+            # block the function until the thread is stopped otherwise the thread may still be running when the new thread is started 
+            # (_isrunning will turn True and the old thread will keep going)
+            while True:
+                with self.status_mutex:
+                    if self._stopped:
+                        break
+            self.handler.on_drawing_ended(tmp)
     
     # pause the drawing
     # can resume with "resume()"
@@ -205,16 +216,19 @@ class Feeder():
                 if not self.is_running():
                     break
                 while self.is_paused():
-                    time.sleep(1)
+                    time.sleep(0.1)
                 if not line[0]==";":
                     # TODO parse line to scale/add padding to the drawing according to the drawing settings (in order to keep the original .gcode file)
                     #line = filter.parse_line(line)
                     #line = "N{} ".format(file_line) + line
 
                     self.send_gcode_command(line)
-        self.send_script(settings['scripts']['after'])
-        self.stop()
-        self.handler.on_drawing_ended(code)
+        with self.serial_mutex:
+            self._stopped = True
+        if self.is_running():
+            self.send_script(settings['scripts']['after'])
+            self.stop()
+            self.handler.on_drawing_ended(code)
 
     # thread that keep reading the serial port
     def _thsr(self):

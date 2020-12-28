@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for
+from flask import Flask, url_for
 from flask.helpers import send_from_directory
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy

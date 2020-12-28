@@ -23,6 +23,10 @@ class QueueManager():
         self._code = code
         self.set_is_drawing(True)
 
+    # stop the current drawing and start the next
+    def stop_drawing(self):
+        self.app.feeder.stop()
+
     # add a code to the queue
     def queue_drawing(self, code):
         if self.q.empty() and not self.is_drawing():
@@ -30,6 +34,7 @@ class QueueManager():
             return
         self.app.logger.info("Adding {} to the queue".format(code))
         self.q.put(code)
+        self.app.semits.show_toast_on_UI("Drawing added to the queue")
         self.send_queue_status()
 
     # return the content of the queue as a string
@@ -42,6 +47,13 @@ class QueueManager():
     # clear the queue
     def clear_queue(self):
         self.q.queue.clear()
+    
+    def set_new_order(self, elements):
+        self.clear_queue()
+        for el in elements:
+            if el!= 0:
+                self.q.put(el)
+        self.send_queue_status()
     
     # remove the first element with the given code
     def remove(self, code):
@@ -74,8 +86,9 @@ class QueueManager():
                 self.start_drawing(self.q.queue.popleft())
                 self.app.logger.info("Starting next code")
                 return True
+            else: 
+                self.app.feeder.stop()
             self._code = None
-            self.send_queue_status()
             return False
         except Exception as e:
             self.app.logger.error("An error occured while starting a new drawing from the queue:\n{}".format(str(e)))

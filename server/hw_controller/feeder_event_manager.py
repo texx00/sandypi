@@ -1,3 +1,4 @@
+from logging import fatal
 from server.hw_controller.feeder import FeederEventHandler
 
 class FeederEventManager(FeederEventHandler):

@@ -58,6 +58,16 @@ function queue_get_status(){
     socket.emit("queue_get_status");
 }
 
+// set a new order for the queue
+function queue_set_order(list){
+    socket.emit("queue_set_order", JSON.stringify(list));
+}
+
+function queue_stop_drawing(){
+    socket.emit("queue_stop_drawing");
+}
+
+
 export {
     send_command, 
     settings_save, 
@@ -68,5 +78,7 @@ export {
     playlist_delete,
     playlist_queue,
     playlist_save, 
-    queue_get_status
+    queue_get_status,
+    queue_set_order,
+    queue_stop_drawing
 };
