@@ -1,1 +1,1 @@
-{"serial": {"port": null, "baud": "115200"}, "device": {"width": "100", "height": "100"}, "scripts": {"connected": "", "before": "", "after": ""}, "system": {"isLinux": false}}
+{"serial": {"port": null, "baud": "115200"}, "device": {"width": "100", "height": "100"}, "scripts": {"connected": "", "before": "", "after": ""}, "system": {"is_linux": false}}

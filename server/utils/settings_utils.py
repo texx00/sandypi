@@ -26,7 +26,7 @@ def load_settings():
     with open(tmp_settings_path) as f:
         settings = json.load(f) 
     settings["system"] = {}
-    settings["system"]["isLinux"] = platform.system() == "Linux"
+    settings["system"]["is_linux"] = platform.system() == "Linux"
     return settings
     
 def update_settings_file_version():
