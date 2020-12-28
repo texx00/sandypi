@@ -25,6 +25,7 @@ def load_settings():
         tmp_settings_path = defaults_path
     with open(tmp_settings_path) as f:
         settings = json.load(f) 
+    settings["system"] = {}
     settings["system"]["isLinux"] = platform.system() == "Linux"
     return settings
     
