@@ -19,7 +19,7 @@ import ControlCard from './ControlCard';
 
 const mapStateToProps = (state) => {
     return {
-        saveBeforeBack: getShowSaveBeforeBack(state)
+        is_save_before_back: getShowSaveBeforeBack(state)
     }
 }
 
@@ -59,8 +59,8 @@ class SinglePlaylist extends Component{
             elements: orderedEls,
             id: this.props.playlist.id
         };
+        this.props.resetShowSaveBeforeBack();
         if (this.props.playlist.id === 0){
-            this.props.resetShowSaveBeforeBack();
             this.props.handleTabBack();
             playlist_save(playlist);
         }else{
@@ -186,7 +186,7 @@ class SinglePlaylist extends Component{
                 </Modal.Footer>
             </Modal>
 
-            <Modal show={this.props.saveBeforeBack && this.props.isSinglePlaylist}
+            <Modal show={this.props.is_save_before_back && this.props.isSinglePlaylist}
                 aria-labelledby="contained-modal-title-vcenter"
                 centered>
                 <Modal.Header className="center">
@@ -200,7 +200,6 @@ class SinglePlaylist extends Component{
                 <Modal.Footer className="center">
                     <IconButton onClick={()=>{
                             this.save();
-                            this.props.resetShowSaveBeforeBack();
                         }}>
                         Save
                     </IconButton>

@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-import { mergeDicts, cloneDict } from '../../../utils/dictUtils';
+import { mergeDicts, cloneDict, setSubKey } from '../../../utils/dictUtils';
 
 const settingsSlice = createSlice({
     name: "settings",
@@ -19,16 +19,20 @@ const settingsSlice = createSlice({
             connected: "", 
             before: "", 
             after: ""
+        },
+        system: {
+            is_linux: false
         }
     },
     reducers: {
         updateAllSettings(state, action){
-            return action.payload;
+            return {...state, ...action.payload};
         },
         updateSetting(state, action){
             let newValue = action.payload;
             let settings = cloneDict(state);
-            return mergeDicts(settings, newValue);
+            settings = setSubKey(settings, newValue[0], newValue[1]);
+            return settings;
         },
     }
 });

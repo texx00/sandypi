@@ -4,6 +4,7 @@ import pickle
 import json
 import datetime
 import shutil
+import os
 
 from server import socketio, app, db
 
@@ -96,7 +97,6 @@ def settings_save(data, is_connect):
         else:
             app.semits.show_toast_on_UI("Device not connected. Opening a fake serial port.")
 
-
 @socketio.on("settings_request")
 def settings_request():
     settings = settings_utils.load_settings()
@@ -105,10 +105,19 @@ def settings_request():
     settings["serial"]["available_ports"].append("FAKE")
     app.semits.emit("settings_now", json.dumps(settings))
 
-
 @socketio.on("send_gcode_command")
 def send_gcode_command(command):
     app.feeder.send_gcode_command(command)
+
+@socketio.on("settings_shutdown_system")
+def settings_shutdown_system():
+    app.semits.show_toast_on_UI("Shutting down the device")
+    os.system("sudo shutdown now")
+
+@socketio.on("settings_reboot_system")
+def settings_reboot_system():
+    app.semits.show_toast_on_UI("Rebooting system...")
+    os.system("sudo reboot")
 
 # --------------------------------------------------------- DRAWINGS CALLBACKS -------------------------------------------------------------------------------
 

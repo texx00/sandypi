@@ -8,14 +8,10 @@ from flask_cors import CORS
 from werkzeug.utils import secure_filename
 
 import os
-import platform
 
 from time import sleep
 from dotenv import load_dotenv
 import logging
-
-import sass
-from flask_minify import minify
 
 from server.hw_controller.queue_manager import QueueManager
 from server.hw_controller.feeder import Feeder
@@ -45,8 +41,9 @@ CORS(app)   # setting up cors for react
 @app.route('/Drawings/<path:filename>')
 def base_static(filename):
     filename = secure_filename(filename)
-    qqq  = app.root_path + app.config['UPLOAD_FOLDER'].replace("./server", "")
     return send_from_directory(app.root_path + app.config['UPLOAD_FOLDER'].replace("./server", "")+ "/{}/".format(filename), "{}.jpg".format(filename))
+
+# TODO clean requirements.txt from unused modules
 
 # database
 file_path = os.path.join(os.path.abspath(os.getcwd()), "database.db")
@@ -54,13 +51,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+file_path
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db, include_object=migrations.include_object)
-
-
-# scss compiler (already minified)
-if os.path.isdir('./server/static/js/node_modules/bootstrap'):     # check if the bootstrap folder is available (it will not be available in the github workflow for testing)
-    sass.compile(dirname=(os.path.abspath(os.getcwd())+"/server/static/scss", os.path.abspath(os.getcwd())+"/server/static/css"), output_style='compressed')
-# js and html minifier (on request)
-minify(app=app, html=True, js=False)
 
 
 import server.api.drawings
@@ -75,24 +65,8 @@ app.feeder = Feeder(FeederEventManager(app))
 app.feeder.connect()
 app.qmanager = QueueManager(app, socketio)
 
-# Context pre-processor variables
-# Global template values to be injected before templates creation
-global_context_dict = dict(
-    # System check
-    is_windows = platform.system() == "Windows",
-    is_linux = platform.system() != "Windows",
-    # Loads settings
-    settings = settings_utils.load_settings()
-)
 # Get lates commit short hash to use as a version to refresh cached files
 sw_version = software_updates.get_commit_shash()
-
-# Inject globals context before creating templates
-@app.context_processor
-def inject_global_context():
-    global_context_dict["settings"] = settings_utils.load_settings()  # loads the latest settings
-    global_context_dict["jsdevorprod"] = "development" if os.environ['FLASK_ENV'] == 'development' else "production.min"
-    return global_context_dict
 
 @app.context_processor
 def override_url_for():

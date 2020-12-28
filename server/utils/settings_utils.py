@@ -2,6 +2,7 @@ import shutil
 import os
 import json
 import logging
+import platform
 
 
 # Logging levels (see the documentation of the logging module for more details)
@@ -24,6 +25,7 @@ def load_settings():
         tmp_settings_path = defaults_path
     with open(tmp_settings_path) as f:
         settings = json.load(f) 
+    settings["system"]["isLinux"] = platform.system() == "Linux"
     return settings
     
 def update_settings_file_version():

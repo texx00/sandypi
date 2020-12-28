@@ -12,6 +12,13 @@ function settings_save(settings, connect=false){
     socket.emit("settings_save", settings, connect);
 }
 
+function settings_shutdown_system(){
+    socket.emit("settings_shutdown_system");
+}
+
+function settings_reboot_system(){
+    socket.emit("settings_reboot_system");
+}
 
 // ---- DRAWINGS ----
 
@@ -69,8 +76,7 @@ function queue_stop_drawing(){
 
 
 export {
-    send_command, 
-    settings_save, 
+    send_command,  
     drawing_delete, 
     drawings_request, 
     drawing_queue, 
@@ -80,5 +86,8 @@ export {
     playlist_save, 
     queue_get_status,
     queue_set_order,
-    queue_stop_drawing
+    queue_stop_drawing,
+    settings_save,
+    settings_shutdown_system,
+    settings_reboot_system
 };

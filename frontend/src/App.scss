@@ -66,7 +66,11 @@ button{
 
 .hover-light:hover{
     background-color: $primary;
-    transition: 0.15s;
+    transition: 0.2s;
+}
+.hover-primary:hover{
+    background-color: $primary;
+    transition: background-color 0.2s;
 }
 
 button:hover, .btn-dark:hover{

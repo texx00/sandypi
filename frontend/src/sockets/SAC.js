@@ -4,6 +4,7 @@ import openSocket from 'socket.io-client';
 import { domain } from '../utils/utils';
 
 const socket = openSocket(domain);     // uses flask's address and port 
+//TODO on connection lost show a message
 
 /* ----- Sockets callbacks ----- */
 

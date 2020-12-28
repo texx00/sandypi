@@ -1,15 +1,21 @@
 import React, { Component } from 'react';
-import { Navbar, Nav } from 'react-bootstrap';
+import { Navbar, Nav, Dropdown, ButtonGroup } from 'react-bootstrap';
 import { ChevronCompactLeft, Sliders } from 'react-bootstrap-icons';
 import { connect } from 'react-redux';
 import IconButton from '../components/IconButton';
+
 import QueuePreview from './tabs/queue/QueuePreview';
 
 import { showBack } from './tabs/selector';
 import { setTab, tabBack } from './tabs/Tabs.slice';
+import { systemIsLinux } from './tabs/settings/selector';
+import { settings_reboot_system, settings_shutdown_system } from '../sockets/SAE';
 
 const mapStateToProps = (state) => {
-    return { show_back: showBack(state) }
+    return { 
+        show_back: showBack(state),
+        is_linux: systemIsLinux(state)
+    }
 }
 
 const mapDispatchToProps = (dispatch) => {
@@ -25,6 +31,30 @@ class TopBar extends Component{
         if (this.props.show_back)
             return <Nav.Link key={5} className="text-bold" onClick={()=>{this.props.handleTabBack()}}><ChevronCompactLeft/>Back</Nav.Link>
         else return "";
+    }
+
+    renderSettingsButton(){
+        if (this.props.is_linux)
+            return <Dropdown as={ButtonGroup}>
+                <IconButton className="btn btn-dark mr-0" 
+                    onClick={()=>{this.props.handleTab("settings")}}
+                    icon={Sliders}>
+                        Settings
+                </IconButton>
+
+                <Dropdown.Toggle split className="btn btn-dark ml-0" id="dropdown-split-basic" />
+                <Dropdown.Menu className="bg-light" value="undefined">
+                    <Dropdown.Item className="hover-primary"
+                        onClick={() => settings_shutdown_system()}>Shutdown</Dropdown.Item>
+                    <Dropdown.Item className="hover-primary"
+                        onClick={() => settings_reboot_system()}>Reboot</Dropdown.Item>
+                </Dropdown.Menu>
+            </Dropdown>
+        else return <IconButton className="btn btn-dark" 
+                onClick={()=>{this.props.handleTab("settings")}}
+                icon={Sliders}>
+                    Settings
+            </IconButton>
     }
 
     render(){
@@ -44,11 +74,7 @@ class TopBar extends Component{
                             {this.renderBack()}
                         </Nav>
                         <QueuePreview onClick={()=>{this.props.handleTab("queue")}}/>
-                        <IconButton className="btn btn-dark" 
-                            onClick={()=>{this.props.handleTab("settings")}}
-                            icon={Sliders}>
-                                Settings
-                        </IconButton>
+                        {this.renderSettingsButton()}
                     </Navbar.Collapse>
             </Navbar>
         </div>
