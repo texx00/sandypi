@@ -49,12 +49,12 @@ $> \env\Scripts\activate.bat
 (env)$> 
 ```
 
-Now you can install SandyPi:
+Now you can install SandyPi (will take a while):
 ```
 (env)$> install.bat
 ```
 
-## Raspbian OS
+## Raspbian OS (Buster and above)
 
 Make sure on your system git, npm, pip and virtualenv are already available:
 
@@ -83,7 +83,7 @@ $> source env/bin/activate
 (env)$> 
 ```
 
-Now you can install SandyPi:
+Now you can install SandyPi (will take a while):
 ```
 (env)$> sh install.sh
 ```

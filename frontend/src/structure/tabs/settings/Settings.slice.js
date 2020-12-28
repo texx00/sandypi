@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-import { setSubKey } from '../../../utils/dictUtils.js';
+import { mergeDicts, cloneDict } from '../../../utils/dictUtils';
 
 const settingsSlice = createSlice({
     name: "settings",
@@ -26,9 +26,9 @@ const settingsSlice = createSlice({
             return action.payload;
         },
         updateSetting(state, action){
-            let setting = action.payload;
-            state = setSubKey(state, setting[0], setting[1]);
-            return state;
+            let newValue = action.payload;
+            let settings = cloneDict(state);
+            return mergeDicts(settings, newValue);
         },
     }
 });

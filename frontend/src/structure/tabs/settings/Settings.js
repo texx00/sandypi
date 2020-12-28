@@ -57,7 +57,7 @@ class Settings extends Component{
                                         <Form.Label>Serial port</Form.Label>
                                         <Form.Control as="select" 
                                             value={this.props.settings.serial.port} 
-                                            onChange={(e) => this.props.updateSetting(["serial.port", e.target.value])}>
+                                            onChange={(e) => this.props.updateSetting({serial: { port: e.target.value }})}>
                                             { this.props.settings.serial.available_ports.map((port, index) => {
                                                 return <option key={index}>{port}</option>}) }
                                         </Form.Control>
@@ -68,7 +68,7 @@ class Settings extends Component{
                                         <Form.Label>Baudrate</Form.Label>
                                         <Form.Control as="select" 
                                             value={this.props.settings.serial.baud}
-                                            onChange={(e) => this.props.updateSetting(["serial.baud", e.target.value])}>
+                                            onChange={(e) => this.props.updateSetting({serial: { baud: e.target.value }})}>
                                             { this.props.settings.serial.available_baudrates.map((baud, index) => {
                                                 return <option key={index}>{baud}</option>
                                             })}

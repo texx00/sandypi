@@ -18,3 +18,7 @@ start.sh
 
 .env
 node_modules
+
+# server.started is a debug file to see if the server started automatically on boot (will create the file every time the server is started)
+# this file is created only on linux
+server.started

@@ -2,7 +2,7 @@
 // merges two dicts that contains child dicts
 const mergeDicts = (og, so) => {
     for (let key in so) {
-        if (typeof (og[key]) === 'object') {
+        if (typeof (og[key]) === 'object' && !Array.isArray(og[key])) {
             og[key] = mergeDicts(og[key], so[key]);
         } else {
             og[key] = so[key];
@@ -15,7 +15,7 @@ const mergeDicts = (og, so) => {
 const cloneDict = di => {
     let tmp = {};
     for (let key in di){
-        if (typeof (di[key]) === 'object') {
+        if (typeof (di[key]) === 'object'  && !Array.isArray(di[key])) {
             tmp[key] = cloneDict(di[key]);
         } else {
             tmp[key] = di[key];

@@ -4,6 +4,7 @@ import time
 import sys
 import logging
 from server.hw_controller.emulator import Emulator
+import glob
 
 # This class connect to a serial device
 # If the serial device request is not available it will create a virtual serial device
