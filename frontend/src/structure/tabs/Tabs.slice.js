@@ -19,22 +19,21 @@ const tabsSlice = createSlice({
         setTab(state, action){
             if (state.tab === "playlist" && state.save_before_back)
                 return {...state, show_save_before_back: true}
-            state.tab = action.payload;
-            return state;
+            return {...state, tab: action.payload};
         },
         showSingleDrawing(state, action){
             const back_tab = state.tab;
-            return {tab: "drawing", drawing_code: action.payload, back_tab: back_tab}
+            return {...state, tab: "drawing", drawing_code: action.payload, back_tab: back_tab}
         },
         showSinglePlaylist(state, action){
             const back_tab = state.tab;
-            return {tab: "playlist", back_tab: back_tab}
+            return {...state, tab: "playlist", back_tab: back_tab}
         },
         tabBack(state){
             if (state.save_before_back)        // if must save before going back, will prompt the user to save or to leave
                 return {...state, show_save_before_back: true};
             const back_tab = state.back_tab;
-            return {tab: back_tab}
+            return {...state, tab: back_tab}
         }
     }
 });

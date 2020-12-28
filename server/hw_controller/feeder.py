@@ -228,7 +228,6 @@ class Feeder():
         if self.is_running():
             self.send_script(settings['scripts']['after'])
             self.stop()
-            self.handler.on_drawing_ended(code)
 
     # thread that keep reading the serial port
     def _thsr(self):

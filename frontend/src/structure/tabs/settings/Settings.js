@@ -88,14 +88,14 @@ class Settings extends Component{
                                     <Form.Group>
                                         <Form.Label>Width</Form.Label>
                                         <Form.Control value={this.props.settings.device.width}
-                                            onChange={(e) => this.props.updateSetting(["device.width", e.target.value])}/>
+                                            onChange={(e) => this.props.updateSetting({device: {width: e.target.value}})}/>
                                     </Form.Group>
                                 </Col>
                                 <Col>
                                     <Form.Group>
                                         <Form.Label>Height</Form.Label>
                                         <Form.Control value={this.props.settings.device.height}
-                                            onChange={(e) => this.props.updateSetting(["device.height", e.target.value])}/>
+                                            onChange={(e) => this.props.updateSetting({device: {height: e.target.value}})}/>
                                     </Form.Group>
                                 </Col>
                             </Form.Row>
@@ -109,7 +109,7 @@ class Settings extends Component{
                                         <Form.Label>On connection</Form.Label>
                                         <Form.Control as="textarea" 
                                             value={this.props.settings.scripts.connected}
-                                            onChange={(e) => this.props.updateSetting(["scripts.connected", e.target.value])}/>
+                                            onChange={(e) => this.props.updateSetting({scripts: {connected: e.target.value}})}/>
                                     </Form.Group>
                                 </Col>
                                 <Col>
@@ -117,7 +117,7 @@ class Settings extends Component{
                                         <Form.Label>On before drawing</Form.Label>
                                         <Form.Control as="textarea" 
                                             value={this.props.settings.scripts.before}
-                                            onChange={(e) => this.props.updateSetting(["scripts.before", e.target.value])}/>
+                                            onChange={(e) => this.props.updateSetting({scripts: {before: e.target.value}})}/>
                                     </Form.Group>
                                 </Col>
                                 <Col>
@@ -125,7 +125,7 @@ class Settings extends Component{
                                         <Form.Label>On after drawing</Form.Label>
                                         <Form.Control as="textarea" 
                                             value={this.props.settings.scripts.after}
-                                            onChange={(e) => this.props.updateSetting(["scripts.after", e.target.value])}/>
+                                            onChange={(e) => this.props.updateSetting({scripts: {after: e.target.value}})}/>
                                     </Form.Group>
                                 </Col>
                             </Form.Row>

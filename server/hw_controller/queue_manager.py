@@ -1,5 +1,6 @@
 from queue import Queue
 import json
+import queue
 
 class QueueManager():
     def __init__(self, app, socketio):
@@ -11,6 +12,9 @@ class QueueManager():
     
     def is_drawing(self):
         return self._isdrawing
+
+    def is_queue_empty(self):
+        return not self._isdrawing and len(self.q.queue)==0
 
     def set_is_drawing(self, dr):
         self._isdrawing = dr

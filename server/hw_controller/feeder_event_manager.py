@@ -11,6 +11,8 @@ class FeederEventManager(FeederEventHandler):
         self.app.semits.show_toast_on_UI("Drawing ended")
         self.app.qmanager.set_is_drawing(False)
         self.app.qmanager.start_next()
+        if self.app.qmanager.is_queue_empty():
+            self.app.qmanager.send_queue_status()
 
     def on_drawing_started(self, code):
         self.app.logger.info("B> Drawing started")

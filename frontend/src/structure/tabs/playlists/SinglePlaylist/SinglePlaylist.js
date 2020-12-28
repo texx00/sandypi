@@ -186,7 +186,7 @@ class SinglePlaylist extends Component{
                 </Modal.Footer>
             </Modal>
 
-            <Modal show={this.props.save_before_back}
+            <Modal show={this.props.saveBeforeBack && this.props.isSinglePlaylist}
                 aria-labelledby="contained-modal-title-vcenter"
                 centered>
                 <Modal.Header className="center">

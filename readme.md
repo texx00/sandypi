@@ -147,8 +147,8 @@ $> source env/bin/activate
 
 Any help in the app development is accepted.
 Also testing the software counts! If you find any bug or you have any idea just check if an issue is already open for that topic or open it yourself.
-For the coding, debugging and so on check the [wiki](https://github.com/texx00/sandypi/wiki)
-In this case it is necessary to run `(env) $> install.bat develop` instead.
+For the coding, debugging and so on check the [development section](/docs/development.md).
+In this case, during the installation it is necessary to run `(env) $> install.bat develop`.
 
 
 # Current status
