@@ -49,10 +49,10 @@ class Content extends Component{
                 <Tab eventKey="queue" title="Queue">
                     <Queue />
                 </Tab>
-                <Tab eventKey="drawing">
+                <Tab eventKey="drawing" title="Drawing">
                     <SingleDrawing />
                 </Tab>
-                <Tab eventKey="playlist">
+                <Tab eventKey="playlist" title="Playlist">
                     <SinglePlaylistContainer />
                 </Tab>
             </Tabs>

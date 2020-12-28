@@ -43,7 +43,7 @@ class SinglePlaylistContainer extends Component{
 
     componentDidUpdate(){
         // if the playlist has been deleted, go back to the previous tab
-        if (this.props.isPlaylistDeleted && !this.props.playlistRequiresResync){
+        if (this.props.isPlaylistDeleted && !this.props.playlistRequiresResync && this.props.isSinglePlaylist){
             this.props.tabBack();
             this.props.resetPlaylistDeleted();
             return;
@@ -53,7 +53,7 @@ class SinglePlaylistContainer extends Component{
             this.refreshPlaylist();
         }
         // if the selected playlist (props) is not the same as the one in the state should update the state
-        if (this.state.playlist.id !== this.props.playlist.id){
+        if (this.state.playlist.id !== this.props.playlist.id && !this.props.isSinglePlaylist){
             this.refreshPlaylist();
         }
 

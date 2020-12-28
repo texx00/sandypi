@@ -10,10 +10,7 @@ build
 dist
 *.save
 *.pyc
-server.started
 
-server/static/js/bower_components
-server/static/js/node_modules
 server/saves/saved_settings.json
 
 start.bat

@@ -43,6 +43,9 @@ class Queue extends Component{
         if (!listsAreEqual(this.state.elements, this.props.elements)){
             this.setState({...this.state, elements: this.props.elements, refreshList: true});
         }
+        if (this.props.isQueueEmpty){
+            this.props.handleTabBack();
+        }
     }
 
     componentDidMount(){
@@ -77,7 +80,6 @@ class Queue extends Component{
 
     render(){
         if (this.props.isQueueEmpty){
-            this.props.handleTabBack();
             return <Container>
                 <div className="center pt-5">
                     Nothing is being drawn at the moment

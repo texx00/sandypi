@@ -1,6 +1,8 @@
 @import "../../../_colors.scss";
 
 .preview-bar-container{
+    animation: pulse-queue-preview 1s infinite;
+    animation-direction: alternate;
     background-color: $dark;
 }
 
@@ -10,5 +12,14 @@
     position: relative;
     img{
         height: 100%;
+    }
+}
+
+@keyframes pulse-queue-preview {
+    0% {
+        opacity: 70%;
+    }
+    100% {
+        opacity: 100%;
     }
 }

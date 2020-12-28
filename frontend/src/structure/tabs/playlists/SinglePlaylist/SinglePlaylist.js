@@ -19,7 +19,7 @@ import ControlCard from './ControlCard';
 
 const mapStateToProps = (state) => {
     return {
-        save_before_back: getShowSaveBeforeBack(state)
+        saveBeforeBack: getShowSaveBeforeBack(state)
     }
 }
 
