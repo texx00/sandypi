@@ -49,12 +49,12 @@ $> \env\Scripts\activate.bat
 (env)$> 
 ```
 
-Now you can install SandyPi:
+Now you can install SandyPi (will take a while):
 ```
 (env)$> install.bat
 ```
 
-## Raspbian OS
+## Raspbian OS (Buster and above)
 
 Make sure on your system git, npm, pip and virtualenv are already available:
 
@@ -83,7 +83,7 @@ $> source env/bin/activate
 (env)$> 
 ```
 
-Now you can install SandyPi:
+Now you can install SandyPi (will take a while):
 ```
 (env)$> sh install.sh
 ```
@@ -147,7 +147,9 @@ $> source env/bin/activate
 
 Any help in the app development is accepted.
 Also testing the software counts! If you find any bug or you have any idea just check if an issue is already open for that topic or open it yourself.
-For the coding, debugging and so on check the [wiki](https://github.com/texx00/sandypi/wiki)
+For the coding, debugging and so on check the [development section](/docs/development.md).
+In this case, during the installation it is necessary to run `(env) $> install.bat develop`.
+
 
 # Current status
 
@@ -174,7 +176,7 @@ In a far far away future:
 Todos:
 * [ ] Create logo
 * [ ] Run the server not on a production server
-* [ ] Upload of multiple files at once
+* [x] Upload of multiple files at once
 * [ ] Show the realtime gcode simulation with time estimate (on a live page?)
 * [ ] Possibility to modify the settings of the single file and save them in the gcode as comments?
 * [ ] Create a playlist for "cleanup" drawings with some defaults

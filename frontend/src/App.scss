@@ -1,0 +1,188 @@
+@import "_colors.scss";
+
+@import "~bootstrap/scss/bootstrap";
+
+
+/** ----------------------------------------------------- **/
+/** ---------------  Custom base styles  ---------------- **/
+/** ----------------------------------------------------- **/
+
+
+.bg-light-alpha{
+    background-color: $light_alpha;
+}
+
+a, a:visited {
+    text-decoration: none;
+    font-weight: 700;
+    color: $dark;
+    cursor: pointer;
+}
+a:hover{
+    text-decoration: underline;
+}
+
+button{
+    @extend .btn;
+    @extend .m-1;
+    background-color: $primary;
+    color: $dark;
+}
+
+.btn-dark{
+    @extend .btn-dark;
+    background-color: $dark;
+    color: $primary;
+}
+
+.section-header{
+    @extend .border-bottom;
+    @extend .border-light;
+    @extend .align-item-center !optional;
+    @extend .mt-4;
+    @extend .mb-3;
+    @extend .pb-2;
+}
+
+.center{
+    @extend .d-flex;
+    @extend .text-center;
+    @extend .justify-content-center;
+}
+
+.data{
+    display: none;
+}
+
+.clickable{
+    cursor: pointer;
+}
+
+.text-bold{
+    font-weight: 900;
+}
+
+/* HOVERS */
+
+.hover-light:hover{
+    background-color: $primary;
+    transition: 0.2s;
+}
+.hover-primary:hover{
+    background-color: $primary;
+    transition: background-color 0.2s;
+}
+
+button:hover, .btn-dark:hover{
+    background-color: $primary;
+    transition: 0.15s;
+    color: $white;
+}
+.btn-primary:hover{
+    background-color: $light;
+    color: $dark;
+    border-color: $dark;
+}
+
+.hover-zoom{
+    &:hover{
+        transform: scale(1.05);
+    }
+    &:hover .glass{
+        transform: scale(1.001);
+    }
+    transition: all ease-in-out 0.15s;
+}
+
+.disappear{
+    transform: scale(0);
+    transition: all ease-in-out 0.2s;
+}
+
+.max-width{
+    max-width: 960px;
+}
+
+.logo{
+    font-weight: bold;
+    color: white;
+}
+
+.glass{
+    background-color: rgba(83, 83, 83, 0.5);
+}
+@supports (-webkit-backdrop-filter: none) or (backdrop-filter: none) {
+    .glass {
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+    }
+}
+
+.icon{
+    @extend .mr-2;
+    @extend .align-self-center;
+}
+
+/* Bootstrap overrides */
+.card{
+    @extend .card;
+    background-color: transparent;
+    border: 0px;
+}
+
+.toast{
+    @extend .toast;
+    @extend .m-3;
+    position: relative;
+    z-index: 2000;
+}
+
+/* Carousel mutli overrides */
+button.react-multiple-carousel__arrow{
+    background-color: $light;
+    color: $dark;
+}
+
+button.react-multiple-carousel__arrow:hover{
+    background-color: $primary;
+}
+
+/* special styles */
+.fade-top{
+    margin-bottom: -1px;
+    background-image: linear-gradient(transparent, $primary);
+}
+
+.toast_container_position{
+    position: fixed;
+    right: 0px;
+    bottom: 0px;
+    z-index: 1035;
+}
+
+.pb100{
+    padding-bottom: 100%;
+}
+
+.square{
+    width:100%;
+    padding-top:100% !important;
+    position: relative;
+    div{
+        position: absolute;
+        top:45%;
+        width:100%;
+        @extend .center;
+        @extend .text-light;
+    }
+}
+
+.bg-black{
+    background-color: $black;
+}
+
+// development styles 
+.bgred{
+    background-color: red;
+    color: black;
+}
