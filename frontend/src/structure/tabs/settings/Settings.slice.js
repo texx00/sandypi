@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-import { mergeDicts, cloneDict, setSubKey } from '../../../utils/dictUtils';
+import { cloneDict, setSubKey } from '../../../utils/dictUtils';
 
 const settingsSlice = createSlice({
     name: "settings",
