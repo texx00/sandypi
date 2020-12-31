@@ -23,8 +23,6 @@ This class duty is to send commands to the hw. It can be a single command or an 
 
 """
 
-# TODO use different logger
-
 
 class FeederEventHandler():
     # called when the drawing is finished
@@ -85,7 +83,7 @@ class Feeder():
         # commands parser
         self.feed_regex = re.compile("[F]([0-9.]+)($|\s)")
 
-        # buffer control attrs
+        # buffer controll attrs
         self.command_buffer = deque()
         self.command_buffer_mutex = Lock()              # mutex used to modify the command buffer
         self.command_send_mutex = Lock()                # mutex used to pause the thread when the buffer is full
@@ -124,7 +122,7 @@ class Feeder():
         self.send_script(settings['scripts']['connected'])
 
     def wait_device_ready(self):
-        time.sleep(1) # TODO make it better
+        time.sleep(1)
         # without this function the device may be not ready to receive commands
 
     def set_event_handler(self, handler):
@@ -360,6 +358,7 @@ class Feeder():
             if "F" in command:
                 feed = self.feed_regex.findall(command)
                 self.feedrate = feed[0][0]
+
             with self.command_send_mutex:       # wait until get some "ok" command to remove an element from the buffer
                 pass
 
@@ -376,7 +375,7 @@ class Feeder():
             self.serial.send(line)              # send line
             self.logger.log(settings_utils.LINE_SENT, line.replace("\n", "")) 
 
-            # TODO the problem with small geometries may be with the serial port being to slow. For long (straight) segments the problem is not evident
+            # TODO fix the problem with small geometries may be with the serial port being to slow. For long (straight) segments the problem is not evident. Do not understand why it is happening
 
             self._update_timeout()              # update the timeout because a new command has been sent
 

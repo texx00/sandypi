@@ -47,7 +47,6 @@ class Drawings extends Component{
             return <div></div>
         }
     }
-    // TODO load more on page scroll
 
     render(){
         return <Container>
