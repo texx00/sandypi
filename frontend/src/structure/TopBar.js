@@ -80,6 +80,5 @@ class TopBar extends Component{
         </div>
     }
 }
-// TODO add linux shutdown/restart
 
 export default connect(mapStateToProps, mapDispatchToProps)(TopBar);

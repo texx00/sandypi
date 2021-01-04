@@ -43,8 +43,6 @@ def base_static(filename):
     filename = secure_filename(filename)
     return send_from_directory(app.root_path + app.config['UPLOAD_FOLDER'].replace("./server", "")+ "/{}/".format(filename), "{}.jpg".format(filename))
 
-# TODO clean requirements.txt from unused modules
-
 # database
 file_path = os.path.join(os.path.abspath(os.getcwd()), "database.db")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+file_path

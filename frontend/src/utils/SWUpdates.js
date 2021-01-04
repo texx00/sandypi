@@ -11,7 +11,6 @@ function check_software_updates(){
         setCookie("check_update", "", 7);  // the cookie expires after 7 days
         socket.emit("software_updates_check");
     }
-    // TODO add a cookie disclaimer?
     if (!document.cookie.split(';').some((item) => item.trim().startsWith('check_update='))) {
         console.log('The cookie "check_update" doesn\'t exists (ES6)')
         send_check()

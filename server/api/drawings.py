@@ -42,6 +42,7 @@ def api_upload():
                     app.logger.error("Error during image creation")
                     app.logger.error(traceback.print_exc())
                     shutil.copy2(app.config["UPLOAD_FOLDER"]+"/placeholder.jpg", os.path.join(folder, str(new_file.id)+".jpg"))
+                    # TODO create a better placeholder? or add a routine to fix missing images?
 
                 app.logger.info("File added")
                 return jsonify(new_file.id)

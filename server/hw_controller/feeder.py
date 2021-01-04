@@ -12,8 +12,7 @@ from dotenv import load_dotenv
 
 from server.utils import limited_size_dict, buffered_timeout, settings_utils
 from server.hw_controller.device_serial import DeviceSerial
-from server.hw_controller.gcode_rescalers import *
-
+from server.hw_controller.gcode_rescalers import Fit
 
 
 """
@@ -191,6 +190,7 @@ class Feeder():
             self._ispaused = False
 
     # thread function
+    # TODO move this function in a different class
     def _thf(self, code):
         settings = settings_utils.load_settings()
         self.send_script(settings['scripts']['before'])

@@ -97,7 +97,6 @@ class Queue extends Component{
     }
 
     render(){
-        // TODO add onerror on images to check if the image can be loaded or not. If there is an error should load the placeholder image or use a nice visualization instead of the alt
         if (this.props.isQueueEmpty){
             return <Container>
                 <div className="center pt-5">
