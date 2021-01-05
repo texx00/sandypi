@@ -89,7 +89,7 @@ class Feeder():
         self.command_buffer_max_length = 8
         self.command_buffer_history = limited_size_dict.LimitedSizeDict(size_limit = self.command_buffer_max_length+10)    # keep saved the last n commands
         self.position_request_difference = 10           # every n lines requires the current position with M114
-        self._timeout = buffered_timeout.BufferTimeout(20, self._on_timeout)
+        self._timeout = buffered_timeout.BufferTimeout(15, self._on_timeout)
         self._timeout.start()
     
     def close(self):
@@ -168,6 +168,8 @@ class Feeder():
         if(self.is_running()):
             tmp = self._running_code
             with self.status_mutex:
+                if not self._stopped:
+                    self.logger.info("Stopping drawing")
                 self._isrunning = False
                 self._running_code = 0
             # block the function until the thread is stopped otherwise the thread may still be running when the new thread is started 
@@ -176,6 +178,14 @@ class Feeder():
                 with self.status_mutex:
                     if self._stopped:
                         break
+             # waiting command buffer to be clear before calling the "drawing ended" event
+            while True:
+                with self.command_buffer_mutex:
+                    if len(self.command_buffer) == 0:
+                        break
+            # resetting line number between drawings
+            self.reset_line_number()
+            # calling "drawing ended" event
             self.handler.on_drawing_ended(tmp)
     
     # pause the drawing
@@ -221,7 +231,7 @@ class Feeder():
                     #line = "N{} ".format(file_line) + line
 
                     self.send_gcode_command(line)
-        with self.serial_mutex:
+        with self.status_mutex:
             self._stopped = True
         if self.is_running():
             self.send_script(settings['scripts']['after'])
@@ -229,16 +239,26 @@ class Feeder():
 
     # thread that keep reading the serial port
     def _thsr(self):
-        line = None
+        line = ""
+        l = None
         while True:
             with self.serial_mutex:
                 try:
-                    line = self.serial.readline()
+                    l = self.serial.readline()
                 except Exception as e:
                     self.logger.error(e)
                     self.logger.error("Serial connection lost")
-            if not line is None:
-                self.parse_device_line(line)
+            if not l is None:
+                # readline is not returning the full line but only a buffer 
+                # must break the line on "\n" to correctly parse the result
+                line += l
+                if "\n" in line:
+                    line = line.replace("\r", "").split("\n")
+                    if len(line) >1:
+                        for l in line[0:-1]:
+                            self.parse_device_line(l)
+                    line = line[-1]
+            
 
     def _update_timeout(self):
         self._timeout_last_line = self.line_number
@@ -248,7 +268,7 @@ class Feeder():
         if (self.command_buffer_mutex.locked and self.line_number == self._timeout_last_line):
             # self.logger.warning("!Buffer timeout. Trying to clean the buffer!")
             # to clean the buffer try to send an M114 message. In this way will trigger the buffer cleaning mechanism
-            line = self._generate_line("M114")  # may need to send it twice? could also send an older line to trigger the error?
+            line = self._generate_line("M114", no_buffer=True)  # use the no_buffer to clean one position of the buffer after adding the command
             with self.serial_mutex:                
                 self.serial.send(line)
         else:
@@ -319,7 +339,7 @@ class Feeder():
         with self.serial_mutex:
             return {"is_running":self._isrunning, "progress":[self.command_number, self.total_commands_number], "is_paused":self._ispaused, "is_connected":self.is_connected()}
 
-    def _generate_line(self, command):
+    def _generate_line(self, command, no_buffer=False):
         self.line_number += 1
         line = "N{} {} ".format(self.line_number, command)
 
@@ -335,6 +355,8 @@ class Feeder():
         with self.command_buffer_mutex:
             self.command_buffer.append(self.line_number)
             self.command_buffer_history["N{}".format(self.line_number)] = line
+            if no_buffer:
+                self.command_buffer.popleft()   # remove an element to get a free ack from the non buffered command. Still must keep it in the buffer in the case of an error in sending the line
 
         return line
 

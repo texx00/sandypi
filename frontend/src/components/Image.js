@@ -41,7 +41,7 @@ class Image extends Component{
         if (this.state.error)
             return <div className={this.props.className + " w-100"} ref={this.divRef} style={{height: this.state.height}}>
                     <div className="position-relative w-100 h-100 center">
-                        <Spinner animation="border" className="m-5"/>
+                        <Spinner animation="border" className={this.props.no_margin ? "" : "m-5"}/>
                     </div>
                 </div>
         else return <img {...this.props} alt={this.props.alt} onError={this.onError.bind(this)}/>
