@@ -4,18 +4,26 @@ import React, { Component } from 'react';
 
 import { device_new_position } from '../../../sockets/SAC';
 
+const ANIMATION_FRAMES_MAX = 10;
+const ANIMATION_DURATION = 1000;
+
 class Preview extends Component{
     constructor(props){
         super(props);
         this.canvas_ref = React.createRef();
         this.image_ref = React.createRef();
-        this.last_x = 0;
-        this.last_y = 0;
         this.primary_color = "#35ea97";
         this.dark_color = "#333333";
         this.multiplier = 5;    // multiply the pixels to get a better resolution with small tables
         this.is_mounted = false;
         this.force_image_render = false;
+        this.animation_frames = 0;
+
+        // previous commanded point
+        this.pp = {
+            x: 0,
+            y: 0
+        }
     }
 
     componentDidMount(){
@@ -47,16 +55,18 @@ class Preview extends Component{
         if (this.canvas !== undefined)
             this.image_ref.current.src = this.canvas.toDataURL();
     }
-    
+
     limitValue(value, min, max){
+        // this is not the optimal solution for limiting the value. Will not keep the integrity of the drawing.
+        // this limitation is necessary only when the drawing is bigger than the device sizes. 
+        // If the sizes are set correctly in the settings, the feeder can adjust the external points to fit the device size this it is not necessary to limit the value
         return Math.min(max, Math.max(min, parseFloat(value)));
-        // TODO fix this: this solution is not really working. It is deforming the drawing. Should calculate the interesction point with the table border, keep in memory the older point to interpolate again next time, etc...
     }
 
     drawLine(line){
         let l = line.split(" ");
-        let x = this.last_x;
-        let y = this.last_y;
+        let x = this.pp.x;
+        let y = this.pp.y;
         for(const i in l){
             if(l[i].includes("X")){
                 x = l[i].replace(/[^\d.-]/g, '');
@@ -65,26 +75,35 @@ class Preview extends Component{
                 y = l[i].replace(/[^\d.-]/g, '');
             }
         }
-        x = this.limitValue(x, 0, this.canvas.width);
-        y = this.limitValue(y, 0, this.canvas.height);
+        x = this.limitValue(x, 0, this.props.width);
+        y = this.limitValue(y, 0, this.props.height);
         this.ctx.lineTo(x * this.multiplier, this.props.height * this.multiplier - y * this.multiplier);
         this.ctx.stroke();
         this.ctx.lineWidth = this.multiplier;
-        this.last_x = x;
-        this.last_y = y;
+        this.pp.x = x;
+        this.pp.y = y;
         this.updateImage();
     }
 
     clearCanvas(){
+        this.pp.x = 0;
+        this.pp.y = 0;
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.pp.x, this.props.height * this.multiplier - this.pp.x);
+        this.animation_frames = 0;
+        this.animateClear();
+    }
+
+    animateClear(){
+        this.ctx.globalAlpha = 0.7;
         this.ctx.fillStyle = this.primary_color;
         this.ctx.fillRect(0,0, this.props.width * this.multiplier, this.props.height * this.multiplier);
         this.ctx.fillStyle = this.dark_color;
-        this.last_x = 0;
-        this.last_y = 0;
-        this.ctx.beginPath();
-        this.ctx.moveTo(this.last_x, this.props.height * this.multiplier - this.last_y);
+        this.ctx.globalAlpha = 1;
         this.updateImage();
-        // TODO add some sort of animation/fading
+        if (this.animation_frames++ < ANIMATION_FRAMES_MAX){
+            setTimeout(this.animateClear.bind(this), ANIMATION_DURATION/ANIMATION_FRAMES_MAX);
+        }
     }
 
     newLineFromDevice(line){
@@ -102,7 +121,7 @@ class Preview extends Component{
             <img ref={this.image_ref} 
                 key={this.props.imageKey}
                 className="preview-style"
-                alt="Error during preview loading"/>
+                alt="Preview"/>
         </div>
     }
 }

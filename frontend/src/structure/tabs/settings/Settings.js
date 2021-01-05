@@ -44,6 +44,8 @@ class Settings extends Component{
     }
 
     render(){
+        let port = this.props.settings.serial.port ? this.props.settings.serial.port : "";
+        let baud = this.props.settings.serial.baud ? this.props.settings.serial.baud : "";
         return <Form>
             <Section sectionTitle="Settings"
                 sectionButtonHandler={this.saveForm.bind(this)}
@@ -56,7 +58,7 @@ class Settings extends Component{
                                     <Form.Group controlId="serial_port">
                                         <Form.Label>Serial port</Form.Label>
                                         <Form.Control as="select" 
-                                            value={this.props.settings.serial.port} 
+                                            value={port} 
                                             onChange={(e) => this.props.updateSetting(["serial.port", e.target.value ])}>
                                             { this.props.settings.serial.available_ports.map((port, index) => {
                                                 return <option key={index}>{port}</option>}) }
@@ -67,7 +69,7 @@ class Settings extends Component{
                                     <Form.Group controlId="serial_baud">
                                         <Form.Label>Baudrate</Form.Label>
                                         <Form.Control as="select" 
-                                            value={this.props.settings.serial.baud}
+                                            value={baud}
                                             onChange={(e) => this.props.updateSetting(["serial.baud", e.target.value])}>
                                             { this.props.settings.serial.available_baudrates.map((baud, index) => {
                                                 return <option key={index}>{baud}</option>

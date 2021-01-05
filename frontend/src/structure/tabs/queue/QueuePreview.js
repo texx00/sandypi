@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 
 import { getQueueDrawingId, getQueueElements, getQueueEmpty } from './selector';
 import { getImgUrl } from '../../../utils/utils';
+import Image from '../../../components/Image';
 
 
 const mapStateToProps = (state) => {
@@ -20,7 +21,7 @@ class QueuePreview extends Component{
         return <div onClick={this.props.onClick.bind(this)} className={"preview-bar-container p-2 m-2 rounded clickable"+ (this.props.isQueueEmpty ? " d-none" : "")}>
             <div className="text-primary  d-inline-block mr-2">Now drawing: </div>
             <div className="d-inline-block preview-bar-image">
-                <img src={getImgUrl(this.props.drawingId)} alt="Queued drawing"/>
+                <Image src={getImgUrl(this.props.drawingId)} alt="Queued drawing" no_margin/>
             </div>
         </div>
     }

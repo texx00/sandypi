@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-import { mergeDicts, cloneDict, setSubKey } from '../../../utils/dictUtils';
+import { cloneDict, setSubKey } from '../../../utils/dictUtils';
 
 const settingsSlice = createSlice({
     name: "settings",
@@ -21,12 +21,15 @@ const settingsSlice = createSlice({
             after: ""
         },
         system: {
-            is_linux: false
+            is_linux: false,
+            last_update_check_time: 0
         }
     },
     reducers: {
         updateAllSettings(state, action){
-            return {...state, ...action.payload};
+            let res = action.payload;
+            res = setSubKey(res, "system.last_update_check_time", state.system.last_update_check_time);
+            return {...state, ...res};
         },
         updateSetting(state, action){
             let newValue = action.payload;
@@ -34,11 +37,17 @@ const settingsSlice = createSlice({
             settings = setSubKey(settings, newValue[0], newValue[1]);
             return settings;
         },
+        updateCheckTime(state, action){
+            let settings = cloneDict(state);
+            settings = setSubKey(settings, "system.last_update_check_time", new Date()/8.64e7 );    // 8.64e7 -> ms in one day -> convert in day
+            return settings;
+        }
     }
 });
 
 export const {
     updateAllSettings, 
+    updateCheckTime,
     updateSetting
 } = settingsSlice.actions;
 

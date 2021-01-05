@@ -4,7 +4,27 @@ import openSocket from 'socket.io-client';
 import { domain } from '../utils/utils';
 
 const socket = openSocket(domain);     // uses flask's address and port 
-//TODO on connection lost show a message
+
+let _last_checked = true;
+const _check_interval = 1000;
+let _connection_cb;
+let id;
+
+
+// checks periodically if the connection is still available
+function _check_connection(){
+    if (_last_checked !== socket.connected){
+        _last_checked = socket.connected;
+        _connection_cb(_last_checked);
+    }
+}
+
+// set the callback and starts the check
+function connection_status_callback(cb){
+    if (id === undefined)   // starts the interval again only if not already running
+        _connection_cb = cb;
+        id=setInterval(_check_connection, _check_interval);
+}
 
 /* ----- Sockets callbacks ----- */
 
@@ -51,4 +71,4 @@ function show_toast(cb){
 }
 
 
-export {socket, drawings_refresh_response, playlists_refresh_response, queue_status, device_command_line_return, device_new_position, settings_now, show_toast};
+export {socket, connection_status_callback, drawings_refresh_response, playlists_refresh_response, queue_status, device_command_line_return, device_new_position, settings_now, show_toast};

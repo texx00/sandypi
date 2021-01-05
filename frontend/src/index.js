@@ -5,11 +5,7 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Provider } from 'react-redux';
 
-import {check_software_updates} from "./utils/SWUpdates";
-
 import store from './store.js';
-
-check_software_updates(); // TODO move the check to a dedicated component and add the value to the local storage (redux) instead of using cookies? (https://developer.aliyun.com/mirror/npm/package/redux-persist-transform-expire-in/v/0.1.0)
 
 ReactDOM.render(
   <React.StrictMode>

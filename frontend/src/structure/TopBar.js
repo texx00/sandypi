@@ -67,7 +67,6 @@ class TopBar extends Component{
                     <Navbar.Toggle aria-controls="topbar-nav" />
                     <Navbar.Collapse id="topbar-nav" className="max-width">
                         <Nav className="mr-auto">
-                            <Nav.Link key={1} onClick={()=>{this.props.handleTab("home")}}>Home</Nav.Link>
                             <Nav.Link key={2} onClick={()=>{this.props.handleTab("drawings")}}>Drawings</Nav.Link>
                             <Nav.Link key={3} onClick={()=>{this.props.handleTab("playlists")}}>Playlists</Nav.Link>
                             <Nav.Link key={4} onClick={()=>{this.props.handleTab("manual")}}>Manual control</Nav.Link>
@@ -80,6 +79,5 @@ class TopBar extends Component{
         </div>
     }
 }
-// TODO add linux shutdown/restart
 
 export default connect(mapStateToProps, mapDispatchToProps)(TopBar);

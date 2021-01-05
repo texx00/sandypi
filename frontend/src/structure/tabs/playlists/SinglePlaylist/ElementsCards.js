@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Image from '../../../../components/Image';
 import { getImgUrl } from '../../../../utils/utils';
 
 class BasicElement extends Component{
@@ -26,7 +27,7 @@ class DrawingElement extends BasicElement{
     }
 
     render(){
-        return <img className="card-img-top" 
+        return <Image className="w-100" 
                     src = {getImgUrl(this.props.element.drawing_id)} 
                     alt={"Drawing "+this.props.element.drawing_id}/>
     }

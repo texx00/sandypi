@@ -94,7 +94,7 @@ class ElementCard extends React.Component{
             title="Drag me around to sort the list"
             onTransitionEnd={this.onTransitionEnd.bind(this)}>
             <div className="pb100 position-absolute"></div>
-            <div className="card hover-zoom" 
+            <div className="card hover-zoom bg-black" 
                 onMouseEnter={this.show_cross.bind(this)} 
                 onMouseLeave={this.hide_cross.bind(this)}>
                 <div className="card-img-overlay show-cross">

@@ -18,6 +18,7 @@ import { setQueueNotEmpty } from '../queue/Queue.slice';
 import { tabBack } from '../Tabs.slice';
 import { deleteDrawing, setRefreshDrawing } from './Drawings.slice';
 import { addToPlaylist } from '../playlists/Playlists.slice';
+import Image from '../../../components/Image';
 
 
 const mapStateToProps = (state) => {
@@ -37,8 +38,6 @@ const mapDispatchToProps = (dispatch) => {
         addToPlaylist: (bundle) => dispatch(addToPlaylist(bundle))
     }
 }
-
-// TODO refine options and layout
 
 class SingleDrawing extends Component{
     constructor(props){
@@ -69,7 +68,7 @@ class SingleDrawing extends Component{
                     </IconButton>
                     <IconButton className="btn"
                         icon={PlusSquare}
-                        onClick={() => this.setState({showPlaylists: true})}>
+                        onClick={() => this.setState({...this.state, showPlaylists: true})}>
                         Add to playlist
                     </IconButton>
                     <ConfirmButton className="btn" 
@@ -83,10 +82,10 @@ class SingleDrawing extends Component{
                     </ConfirmButton>
                 </div>
                 <div className="center mb-5">
-                    <img className="modal-drawing-preview" src={getImgUrl(this.props.drawing.id)} alt="Not available"/>
+                    <Image className="modal-drawing-preview" src={getImgUrl(this.props.drawing.id)} alt="Drawing image"/>
                 </div>
                 <Modal show={this.state.showPlaylists}
-                    onHide={() => this.setState({showPlaylists: false})}
+                    onHide={() => this.setState({...this.state, showPlaylists: false})}
                     aria-labelledby="contained-modal-title-vcenter"
                     centered>
                     <Modal.Header className="center">
@@ -106,13 +105,13 @@ class SingleDrawing extends Component{
                         </Form>
                     </Modal.Body>
                     <Modal.Footer>
-                        <IconButton icon={X} onClick={() => this.setState({showPlaylists: false})}>Undo</IconButton>
+                        <IconButton icon={X} onClick={() => this.setState({...this.state, showPlaylists: false})}>Undo</IconButton>
                         <IconButton icon={Plus} 
                             onClick={() => {this.props.addToPlaylist({
                                     elements: [create_drawing_element(this.props.drawing)],
                                     playlistId: parseInt(this.selectRef.current.value)
                                 });
-                                this.setState({showPlaylists: false});
+                                this.setState({...this.state, showPlaylists: false});
                                 window.show_toast("Drawing added to the playlist");
                             }}>
                                 Add to selected playlist

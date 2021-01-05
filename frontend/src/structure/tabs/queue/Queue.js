@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Button, Container } from 'react-bootstrap';
 import { Stop, Trash } from 'react-bootstrap-icons';
 import { connect } from 'react-redux';
+import Image from '../../../components/Image';
 
 import { Section, Subsection } from '../../../components/Section';
 import SortableElements from '../../../components/SortableElements';
@@ -96,7 +97,6 @@ class Queue extends Component{
     }
 
     render(){
-        // TODO add onerror on images to check if the image can be loaded or not. If there is an error should load the placeholder image or use a nice visualization instead of the alt
         if (this.props.isQueueEmpty){
             return <Container>
                 <div className="center pt-5">
@@ -112,9 +112,9 @@ class Queue extends Component{
                     buttonIcon={Stop}
                     sectionButtonHandler={this.stopDrawing.bind(this)}>
                 <div className="center mb-5">
-                    <img className="modal-drawing-preview" 
+                    <Image className="modal-drawing-preview" 
                         src={getImgUrl(this.props.drawingId)} 
-                        alt="Not available"/>
+                        alt="Queued element"/>
                 </div>
             </Section>
             {this.renderList()}
