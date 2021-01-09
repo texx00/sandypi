@@ -1,6 +1,5 @@
 import './App.scss';
 
-
 import TopBar from './structure/TopBar.js';
 import Footer from './structure/Footer.js';
 import Content from './structure/Content.js';

@@ -11,6 +11,7 @@ class Preview extends Component{
     constructor(props){
         super(props);
         this.canvas_ref = React.createRef();
+        this.canvas_leds = React.createRef();
         this.image_ref = React.createRef();
         this.primary_color = "#35ea97";
         this.dark_color = "#333333";
@@ -116,8 +117,10 @@ class Preview extends Component{
     }
 
     render(){
+        // TODO set leds canvas alpha, add leds and add it to the final image
         return <div>
             <canvas ref={this.canvas_ref} className="d-none" width={this.props.width * this.multiplier} height={this.props.height * this.multiplier}/>
+            <canvas ref={this.canvas_leds} className="d-none" width={this.props.width * this.multiplier} height={this.props.height * this.multiplier}/>
             <img ref={this.image_ref} 
                 key={this.props.imageKey}
                 className="preview-style"

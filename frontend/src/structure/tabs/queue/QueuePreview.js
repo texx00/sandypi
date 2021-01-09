@@ -21,7 +21,7 @@ class QueuePreview extends Component{
         return <div onClick={this.props.onClick.bind(this)} className={"preview-bar-container p-2 m-2 rounded clickable"+ (this.props.isQueueEmpty ? " d-none" : "")}>
             <div className="text-primary  d-inline-block mr-2">Now drawing: </div>
             <div className="d-inline-block preview-bar-image">
-                <Image src={getImgUrl(this.props.drawingId)} alt="Queued drawing" no_margin/>
+                <Image src={getImgUrl(this.props.drawingId)} alt="Queued drawing" no_margin={"true"}/>
             </div>
         </div>
     }

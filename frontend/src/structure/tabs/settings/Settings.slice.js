@@ -23,6 +23,13 @@ const settingsSlice = createSlice({
         system: {
             is_linux: false,
             last_update_check_time: 0
+        },
+        leds: {
+            width: 0,
+            height: 0,
+            type: "WS2812B",
+            available_types: ["WS2812B"],
+            pin1: 18
         }
     },
     reducers: {

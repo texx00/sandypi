@@ -56,6 +56,11 @@ function device_new_position(cb){
     socket.on("preview_new_position", (val) => {cb(val)});
 }
 
+// pass to the callback the leds values
+function device_leds(cb){
+    socket.on("preview_leds", (val) => {cb(val)});
+}
+
 // ---- Settings ----
 
 // receive actual settings from server after sending a request.
@@ -71,4 +76,4 @@ function show_toast(cb){
 }
 
 
-export {socket, connection_status_callback, drawings_refresh_response, playlists_refresh_response, queue_status, device_command_line_return, device_new_position, settings_now, show_toast};
+export {socket, connection_status_callback, drawings_refresh_response, playlists_refresh_response, queue_status, device_command_line_return, device_new_position, device_leds, settings_now, show_toast};
