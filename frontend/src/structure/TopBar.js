@@ -70,6 +70,7 @@ class TopBar extends Component{
                             <Nav.Link key={2} onClick={()=>{this.props.handleTab("drawings")}}>Drawings</Nav.Link>
                             <Nav.Link key={3} onClick={()=>{this.props.handleTab("playlists")}}>Playlists</Nav.Link>
                             <Nav.Link key={4} onClick={()=>{this.props.handleTab("manual")}}>Manual control</Nav.Link>
+                            <Nav.Link key={5} onClick={()=>{this.props.handleTab("leds")}}>LEDs</Nav.Link>
                             {this.renderBack()}
                         </Nav>
                         <QueuePreview onClick={()=>{this.props.handleTab("queue")}}/>

@@ -4,10 +4,10 @@ from dotenv import load_dotenv
 import time
 import colorsys
 
-
-class LedDriver:
+# keep led driver and led controller separate in order to test leds without running or restarting the server everytime
+# this class must not use anything server/application related
+class LedsDriver:
     def __init__(self, dimensions):
-        super().__init__()
         # logger setup
         self.logger = logging.getLogger(__name__)
         load_dotenv()
@@ -26,11 +26,11 @@ class LedDriver:
         self.led_number = 2*(dimensions[0] + dimensions[1])
         self.leds = None
     
-    def use_WS2812B(self):
+    def use_WS2812B(self, pin):
         # platform dependent imports
         try:
             from WS2812B import WS2812B
-            self.leds = WS2812B(self.led_number)
+            self.leds = WS2812B(self.led_number, pin)
             return True
 
         except Exception as e:
@@ -40,11 +40,11 @@ class LedDriver:
         if self.is_ok():
             res = []
             for i in range(0, self.led_number):
-                res.append(self.h2rgb((offset+float(i)/self.led_number) % 1))
+                res.append(self.hsv2rgb((offset+float(i)/self.led_number) % 1))
             self.fill(res)
     
-    def h2rgb(self, col):
-        return tuple(round(i*255) for i in colorsys.hsv_to_rgb(col,1,1))
+    def hsv2rgb(self, color, saturation=1, value=1):
+        return tuple(round(i*255) for i in colorsys.hsv_to_rgb(color, saturation, value)) # TODO check if darkness is in the right spot
     
     def _on_import_error(self, e):
         self.logger.error("There was an error during the preparation of the led controller. Check that you installed the correct libraries to run the led of the choosen type")
@@ -91,7 +91,7 @@ class LedDriver:
 
 
 if __name__=="__main__":
-    ld = LedDriver((30,20))
+    ld = LedsDriver((30,20))
     ld.use_WS2812B()
     for i in range(200):
         ld.rainbow(i/200.0)

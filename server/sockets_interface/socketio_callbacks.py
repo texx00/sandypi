@@ -88,6 +88,10 @@ def settings_save(data, is_connect):
     settings_utils.save_settings(data)
     app.semits.show_toast_on_UI("Settings saved")
     
+    # updating leds controller
+    app.leds_controller.update_dimensions((data["leds"]["width"], data["leds"]["height"]), data["leds"]["type"], data["leds"]["pin1"])
+
+    # updating feeder
     if is_connect:
         app.logger.info("Connecting device")
         
@@ -165,3 +169,10 @@ def queue_stop_drawing():
     app.qmanager.stop_drawing()
     if not app.qmanager.is_drawing():   # if the drawing was the last in the queue must send the updated status
         app.qmanager.send_queue_status()
+
+# --------------------------------------------------------- LEDS CALLBACKS -------------------------------------------------------------------------------
+
+@socketio.on("leds_set_color")
+def leds_set_color(data):
+    color = json.loads(data)
+    app.leds_controller.set_color((color["h"], color["s"], color["v"]))

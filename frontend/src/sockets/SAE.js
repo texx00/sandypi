@@ -20,6 +20,7 @@ function settings_reboot_system(){
     socket.emit("settings_reboot_system");
 }
 
+
 // ---- DRAWINGS ----
 
 // emit a socket to delete a drawing
@@ -35,6 +36,13 @@ function drawings_request(){
 // emit a socket to add a drawing to the queue
 function drawing_queue(code){
     socket.emit("drawing_queue", code);
+}
+
+
+// ---- LEDS ----
+
+function leds_set_color(color){
+    socket.emit("leds_set_color", JSON.stringify(color));
 }
 
 
@@ -58,6 +66,8 @@ function playlist_queue(id){
 function playlist_save(pl){
     socket.emit("playlist_save", JSON.stringify(pl));
 }
+
+
 // ---- QUEUE ----
 
 // ask for an updated queue
@@ -80,6 +90,7 @@ export {
     drawing_delete, 
     drawings_request, 
     drawing_queue, 
+    leds_set_color,
     playlists_request, 
     playlist_delete,
     playlist_queue,
