@@ -37,11 +37,13 @@ If you are developing on linux you can find the correct pip freeze sequence insi
 The project uses flask-migrate.
 When the database requires a schema variation, it is necessary to use the `flask db migrate` command as explained in `UIserver/database.py`.
 
+Flask migrate will not work on single playlists tables. If any change is done to their schema (in the server.database.playlist_elements_tables.py file), the migration script must be modified manually.
+
 Flask-migrate is a powerful tool to manage the migration between versions automatically and allow to update from one version of the schema to another flawlessly
 
 ## Frontend
 
-The frontend of the app is using *React*, *Reduc* and *Bootstrap 4*. If you are not confortable with those check them out before having a look at the project.
+The frontend of the app is using *React*, *Redux* and *Bootstrap 4*. If you are not confortable with those check them out before having a look at the project.
 
 To work on the frontend it is necessary to run the react server:
 ```

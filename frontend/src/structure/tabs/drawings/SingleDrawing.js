@@ -8,7 +8,7 @@ import { drawing_delete, drawing_queue } from '../../../sockets/SAE';
 import ConfirmButton from '../../../components/ConfirmButton';
 import IconButton from '../../../components/IconButton';
 
-import { create_drawing_element } from '../playlists/elements';
+import { create_element_drawing } from '../playlists/elements';
 import { getImgUrl } from '../../../utils/utils';
 
 import { getQueueEmpty } from '../queue/selector';
@@ -108,7 +108,7 @@ class SingleDrawing extends Component{
                         <IconButton icon={X} onClick={() => this.setState({...this.state, showPlaylists: false})}>Undo</IconButton>
                         <IconButton icon={Plus} 
                             onClick={() => {this.props.addToPlaylist({
-                                    elements: [create_drawing_element(this.props.drawing)],
+                                    elements: [create_element_drawing(this.props.drawing)],
                                     playlistId: parseInt(this.selectRef.current.value)
                                 });
                                 this.setState({...this.state, showPlaylists: false});

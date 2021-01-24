@@ -40,6 +40,7 @@ class Playlists(db.Model):
             if not isinstance(i, GenericPlaylistElement):
                 i = GenericPlaylistElement.create_element_from_dict(i)
             i.save(self._ec())
+        db.session.commit()
     
     def clear_elements(self):
         return self._ec().clear_elements()

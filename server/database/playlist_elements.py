@@ -13,6 +13,8 @@ class GenericPlaylistElement():
     
     def __init__(self, element_type, **kwargs):
         self.element_type = element_type
+        self._pop_options = []
+        self.add_column_field("element_type")       # need to pop the element_type from the final dict because this option is a column of the table
         for v in kwargs:
             setattr(self, v, kwargs[v])
     
@@ -31,11 +33,20 @@ class GenericPlaylistElement():
             else:
                 raise ValueError
     
+    # add options that must be saved in a dedicated column insted of saving them inside the generic options of the element (like the element_type)
+    def add_column_field(self, option):
+        self._pop_options.append(option)
+    
     def save(self, element_table):
         options = self.get_dict()
-        options.pop("element_type")
+        # filter other pop options
+        kwargs = []
+        for op in self._pop_options:
+            kwargs.append(options.pop(op))
+        kwargs = zip(self._pop_options, kwargs)
+        kwargs = dict(kwargs)
         options = json.dumps(options)
-        element_table(element_type=self.element_type, element_options = options)
+        db.session.add(element_table(element_options = options, **kwargs))
 
     @classmethod
     def clean_dict(cls, val):
@@ -79,19 +90,12 @@ class DrawingElement(GenericPlaylistElement):
 
     def __init__(self, drawing_id=None, **kwargs):
         super(DrawingElement, self).__init__(element_type=DrawingElement.element_type, **kwargs)         # define the element type
+        self.add_column_field("drawing_id")             # the drawing id must be saved in a dedicated column to be able to query the database and find for example in which playlist the drawing is used
         try:
             drawing_id = int(drawing_id)
             self.drawing_id = drawing_id
         except:
             raise ValueError("The drawing id must be an integer")
-            self.drawing_id = None
-    
-    def save(self, element_table):
-        options = self.get_dict()
-        options.pop("element_type")
-        options.pop("drawing_id")
-        options = json.dumps(options)
-        db.session.add(element_table(element_type=self.element_type, drawing_id = self.drawing_id, element_options = options))
 
 
 
@@ -101,7 +105,7 @@ class DrawingElement(GenericPlaylistElement):
 class TimeElement(GenericPlaylistElement):
     element_type = "timing"
 
-    def __init__(self, delay=None, expiry_date=None):
+    def __init__(self, delay=None, expiry_date=None, **kwargs):
         super(TimeElement, self).__init__(element_type=TimeElement.element_type)
         non_none = sum(i is not None for i in [delay, expiry_date])
         if non_none != 1:
@@ -119,15 +123,16 @@ class TimeElement(GenericPlaylistElement):
 class CommandElement(GenericPlaylistElement):
     element_type = "command"
 
-    def __init__(self, command):
+    def __init__(self, command, **kwargs):
         super().__init__(element_type=CommandElement.element_type)
+        self.command = command
 
 """
     Identifies a particular behaviour for the ball between drawings (like: move to the closest border, start from the center)
 """
 class PositioningElement(GenericPlaylistElement):
     element_type = "positioning"
-    def __init__(self):
+    def __init__(self, **kwargs):
         super().__init__(element_type=PositioningElement.element_type)
 
 """
@@ -136,7 +141,7 @@ class PositioningElement(GenericPlaylistElement):
 class ClearElement(GenericPlaylistElement):
     element_type = "clear"
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         super().__init__(element_type=ClearElement.element_type)
 
 

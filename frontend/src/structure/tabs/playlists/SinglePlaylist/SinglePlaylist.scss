@@ -41,3 +41,12 @@
     width: 100%;
     transition: font-size pulse 2s infinite;
 }
+
+.playlist-control-create{
+    border: 1px $light solid;
+    transition: 0.15s;
+}
+
+.playlist-control-create:hover{
+    background-color: $light;
+}

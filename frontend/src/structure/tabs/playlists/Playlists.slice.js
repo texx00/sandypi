@@ -23,6 +23,7 @@ const playlistsSlice = createSlice({
                 let p = {...pl};
                 if (pl.id === playlistId){
                     p.elements = [...p.elements, ...elements];
+                    console.log("saving playlist")
                     playlist_save(p);                 // saves playlist also on the server (only one playlist at a time, there will be no problem with mutliple save calls)
                 }
                 return p;
