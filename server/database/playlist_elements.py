@@ -106,7 +106,7 @@ class TimeElement(GenericPlaylistElement):
     element_type = "timing"
 
     def __init__(self, delay=None, expiry_date=None, **kwargs):
-        super(TimeElement, self).__init__(element_type=TimeElement.element_type)
+        super(TimeElement, self).__init__(element_type=TimeElement.element_type, **kwargs)
         non_none = sum(i is not None for i in [delay, expiry_date])
         if non_none != 1:
             if non_none == 0:
@@ -124,7 +124,7 @@ class CommandElement(GenericPlaylistElement):
     element_type = "command"
 
     def __init__(self, command, **kwargs):
-        super().__init__(element_type=CommandElement.element_type)
+        super().__init__(element_type=CommandElement.element_type, **kwargs)
         self.command = command
 
 """
@@ -133,7 +133,7 @@ class CommandElement(GenericPlaylistElement):
 class PositioningElement(GenericPlaylistElement):
     element_type = "positioning"
     def __init__(self, **kwargs):
-        super().__init__(element_type=PositioningElement.element_type)
+        super().__init__(element_type=PositioningElement.element_type, **kwargs)
 
 """
     Identifies a "clear all" pattern
@@ -142,7 +142,7 @@ class ClearElement(GenericPlaylistElement):
     element_type = "clear"
 
     def __init__(self, **kwargs):
-        super().__init__(element_type=ClearElement.element_type)
+        super().__init__(element_type=ClearElement.element_type, **kwargs)
 
 
 _child_types = [DrawingElement, TimeElement, CommandElement, PositioningElement, ClearElement]

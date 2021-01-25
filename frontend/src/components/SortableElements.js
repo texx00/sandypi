@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { Col } from 'react-bootstrap';
 
-import { DrawingElement } from '../structure/tabs/playlists/SinglePlaylist/ElementsCards';
+import { CommandElement, DrawingElement } from '../structure/tabs/playlists/SinglePlaylist/Elements';
+import { X } from 'react-bootstrap-icons';
 
 class SortableElements extends Component{
     constructor(props){
@@ -52,14 +53,23 @@ class SortableElements extends Component{
                 }
                 return true;
             }}>
-                {this.state.list.map((el, idx)=>{
-                    if (el.element_type === "control_card"){    // the control card element must be available in the list to be shown. If show, will put the child element as the control card element
-                        return this.props.children;
-                    }else return <ElementCard key={el.id} 
-                                handleUnmount={()=>this.removeElement(el.id)}
-                                showCross={this.state.show_child_cross}>
-                            <DrawingElement element={el}/>
-                        </ElementCard>
+                {this.state.list.map((el)=>{
+                    let element;
+                    switch (el.element_type){    
+                        case "control_card":   
+                            return this.props.children; // return the child as the control card 
+                        case "command":
+                            element = <CommandElement element={el} />
+                            break;
+                        default:
+                            element = <DrawingElement element={el} />
+                    }
+
+                    return <ElementCard key={el.id} 
+                            handleUnmount={()=>this.removeElement(el.id)}
+                            showCross={this.state.show_child_cross}>
+                        {element}
+                    </ElementCard>
                 })}
         </ReactSortable>
     }
@@ -93,16 +103,16 @@ class ElementCard extends React.Component{
         return <Col sm={4} className={"mb-3"+ (this.state.active ? "" : " disappear")} 
             title="Drag me around to sort the list"
             onTransitionEnd={this.onTransitionEnd.bind(this)}>
-            <div className="pb100 position-absolute"></div>
-            <div className="card hover-zoom bg-black" 
+            <div className="pb100 position-absolute rounded"></div>
+            <div className="card hover-zoom bg-black rounded" 
                 onMouseEnter={this.show_cross.bind(this)} 
                 onMouseLeave={this.hide_cross.bind(this)}>
-                <div className="card-img-overlay show-cross">
-                    <div className={"justify-content-md-center btn-cross nodrag" + (this.state.show_cross && this.props.showCross ? " show" : "")}
-                        onClick={() => {this.setState({active: false})}} 
-                        title="Remove this drawing from the list">X</div>
-                </div>
                 {this.props.children}
+                <div className="card-img-overlay show-cross">
+                    <div className={"justify-content-md-center btn-cross nodrag rounded" + (this.state.show_cross && this.props.showCross ? " show" : "")}
+                        onClick={() => {this.setState({active: false})}} 
+                        title="Remove this drawing from the list"><X/></div>
+                </div>
             </div>
         </Col>
     }

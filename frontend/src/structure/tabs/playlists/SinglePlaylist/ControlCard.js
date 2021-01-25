@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { Col, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { Gear, Plus, Upload } from 'react-bootstrap-icons';
 
+import SquareContainer from '../../../../components/SquareContainer';
+
 import UploadDrawingsModal from '../../drawings/UploadDrawing';
 import { create_element_drawing, create_element_gcode } from '../elements';
 
@@ -36,18 +38,15 @@ class ControlCard extends Component{
 
     render(){
         return <Col sm={4} id="control_card" className="nodrag">
-                <div className="card hover-zoom">
-                    <div className="pb100"></div>
+                <div className="card hover-zoom rounded">
                     <OverlayTrigger overlay={
                         <Tooltip>
                             Click to add an element to the playlist
                         </Tooltip>}
                         delay={{ show: 3000, hide: 250 }}>
-                        <div className="position-absolute h-100 w-100 control-card clickable" onClick={()=>this.setState({...this.state, show_modal: true})}>
-                            <div className="position-relative d-flex h-100 w-100 align-items-center center">
-                                <Plus className="w-50 h-50"/>
-                            </div>
-                        </div>
+                        <SquareContainer onClick={()=>this.setState({...this.state, show_modal: true})}>
+                            <Plus className="w-50 h-50"/>
+                        </SquareContainer>
                     </OverlayTrigger>
                 </div>
 

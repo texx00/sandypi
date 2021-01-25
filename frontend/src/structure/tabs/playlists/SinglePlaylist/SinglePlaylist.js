@@ -188,7 +188,9 @@ class SinglePlaylist extends Component{
 
             <Modal show={this.props.is_save_before_back && this.props.isSinglePlaylist}
                 aria-labelledby="contained-modal-title-vcenter"
-                centered>
+                centered
+                onHide={()=>{this.props.resetShowSaveBeforeBack(); 
+                    this.props.handleSaveBeforeBack()}}>
                 <Modal.Header className="center">
                     <Modal.Title>
                         Save playlist changes?

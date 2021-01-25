@@ -23,7 +23,12 @@
     justify-content: center;
     align-items: center;
     border-radius: 0px 0px 0px 5px;
+    border: 1px solid $primary;
     cursor: pointer;
+    pointer-events: all;
+}
+.show-cross{
+    pointer-events: none;
 }
 
 .show{
