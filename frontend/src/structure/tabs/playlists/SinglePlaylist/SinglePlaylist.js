@@ -10,7 +10,7 @@ import SortableElements from '../../../../components/SortableElements';
 import IconButton from '../../../../components/IconButton';
 
 import { playlist_delete, playlist_queue, playlist_save } from '../../../../sockets/SAE';
-import { listsAreEqual } from '../../../../utils/dictUtils';
+import { cloneDict, listsAreEqual } from '../../../../utils/dictUtils';
 
 import { resetShowSaveBeforeBack, setSaveBeforeBack, tabBack } from '../../Tabs.slice';
 import { addToPlaylist, deletePlaylist, updateSinglePlaylist } from '../Playlists.slice';
@@ -86,6 +86,17 @@ class SinglePlaylist extends Component{
         }
     }
 
+    handleElementUpdate(element){
+        let tmp = this.state.elements.map((el) => {return el});
+        tmp.map((el)=>{
+            if (el.id === element.id)
+                return element;
+            else return el;
+        });
+        this.setState({...this.state, elements: tmp, edited: true});
+        this.handleSaveBeforeBack();
+    }
+
     renderElements(){
         if (this.state.elements !== null && 
             this.state.elements !== undefined){
@@ -93,7 +104,8 @@ class SinglePlaylist extends Component{
                     list={this.state.elements}
                     onUpdate={this.handleSortableUpdate.bind(this)}
                     refreshList={this.state.refreshList}
-                    onListRefreshed={()=>this.setState({...this.state, refreshList: false})}>
+                    onListRefreshed={()=>this.setState({...this.state, refreshList: false})}
+                    onElementOptionsChange={this.handleElementUpdate.bind(this)}>
                         <ControlCard key={-1} 
                             playlistId={this.props.playlistId}
                             onElementsAdded={(ids) => this.props.addElements({playlistId: this.props.playlist.id, elements: ids})}/>
@@ -165,6 +177,7 @@ class SinglePlaylist extends Component{
             
             <Modal show={this.props.showModal}
                 aria-labelledby="contained-modal-title-vcenter"
+                onHide={()=> this.props.onRefreshList()}
                 centered>
                 <Modal.Header className="center">
                     <Modal.Title>
@@ -190,7 +203,7 @@ class SinglePlaylist extends Component{
                 aria-labelledby="contained-modal-title-vcenter"
                 centered
                 onHide={()=>{this.props.resetShowSaveBeforeBack(); 
-                    this.props.handleSaveBeforeBack()}}>
+                    this.handleSaveBeforeBack()}}>
                 <Modal.Header className="center">
                     <Modal.Title>
                         Save playlist changes?

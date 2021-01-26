@@ -4,6 +4,7 @@ import { Col } from 'react-bootstrap';
 
 import { CommandElement, DrawingElement } from '../structure/tabs/playlists/SinglePlaylist/Elements';
 import { X } from 'react-bootstrap-icons';
+import BasicElement from '../structure/tabs/playlists/SinglePlaylist/BasicElement';
 
 class SortableElements extends Component{
     constructor(props){
@@ -53,22 +54,23 @@ class SortableElements extends Component{
                 }
                 return true;
             }}>
-                {this.state.list.map((el)=>{
-                    let element;
+                {this.state.list.map((el)=>{                // generate list of elements to show in the list
+                    let ElementType;
                     switch (el.element_type){    
                         case "control_card":   
-                            return this.props.children; // return the child as the control card 
+                            return this.props.children;     // return the child as the control card 
                         case "command":
-                            element = <CommandElement element={el} />
+                            ElementType = CommandElement;
                             break;
                         default:
-                            element = <DrawingElement element={el} />
+                            ElementType = BasicElement;
                     }
 
                     return <ElementCard key={el.id} 
                             handleUnmount={()=>this.removeElement(el.id)}
                             showCross={this.state.show_child_cross}>
-                        {element}
+                        <ElementType element={el} 
+                            onOptionsChange={(el) => this.props.onElementOptionsChange(el)}/>
                     </ElementCard>
                 })}
         </ReactSortable>
@@ -104,7 +106,7 @@ class ElementCard extends React.Component{
             title="Drag me around to sort the list"
             onTransitionEnd={this.onTransitionEnd.bind(this)}>
             <div className="pb100 position-absolute rounded"></div>
-            <div className="card hover-zoom bg-black rounded" 
+            <div className="card hover-zoom bg-black rounded clickable" 
                 onMouseEnter={this.show_cross.bind(this)} 
                 onMouseLeave={this.hide_cross.bind(this)}>
                 {this.props.children}

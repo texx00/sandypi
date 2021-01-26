@@ -8,7 +8,7 @@ import { drawing_delete, drawing_queue } from '../../../sockets/SAE';
 import ConfirmButton from '../../../components/ConfirmButton';
 import IconButton from '../../../components/IconButton';
 
-import { create_element_drawing } from '../playlists/elements';
+import { create_element_drawing } from '../playlists/elementsFactory';
 import { getImgUrl } from '../../../utils/utils';
 
 import { getQueueEmpty } from '../queue/selector';

@@ -5,7 +5,7 @@ import { Gear, Plus, Upload } from 'react-bootstrap-icons';
 import SquareContainer from '../../../../components/SquareContainer';
 
 import UploadDrawingsModal from '../../drawings/UploadDrawing';
-import { create_element_drawing, create_element_gcode } from '../elements';
+import { create_element_drawing, create_element_gcode } from '../elementsFactory';
 
 class ControlCard extends Component{
     constructor(props){
@@ -38,7 +38,7 @@ class ControlCard extends Component{
 
     render(){
         return <Col sm={4} id="control_card" className="nodrag">
-                <div className="card hover-zoom rounded">
+                <div className="card hover-zoom rounded clickable">
                     <OverlayTrigger overlay={
                         <Tooltip>
                             Click to add an element to the playlist
