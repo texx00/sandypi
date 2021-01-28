@@ -80,8 +80,7 @@ class DrawingElement(GenericPlaylistElement):
     def __init__(self, drawing_id=None, **kwargs):
         super(DrawingElement, self).__init__(element_type=DrawingElement.element_type, **kwargs)         # define the element type
         try:
-            drawing_id = int(drawing_id)
-            self.drawing_id = drawing_id
+            self.drawing_id = int(drawing_id)
         except:
             raise ValueError("The drawing id must be an integer")
             self.drawing_id = None
