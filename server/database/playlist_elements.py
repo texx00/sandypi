@@ -92,8 +92,7 @@ class DrawingElement(GenericPlaylistElement):
         super(DrawingElement, self).__init__(element_type=DrawingElement.element_type, **kwargs)         # define the element type
         self.add_column_field("drawing_id")             # the drawing id must be saved in a dedicated column to be able to query the database and find for example in which playlist the drawing is used
         try:
-            drawing_id = int(drawing_id)
-            self.drawing_id = drawing_id
+            self.drawing_id = int(drawing_id)
         except:
             raise ValueError("The drawing id must be an integer")
 

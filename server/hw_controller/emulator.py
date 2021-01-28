@@ -3,6 +3,8 @@ from collections import deque
 
 emulated_commands_with_delay = ["G0", "G00", "G1", "G01"]
 
+ACK = "ok\n\r"
+
 class Emulator():
     def __init__(self):
         self.feedrate = 5000.0
@@ -33,7 +35,7 @@ class Emulator():
         if "G28" in command:
             self.last_x = 0.0
             self.last_y = 0.0
-            self.message_buffer.append("ok")
+            self.message_buffer.append(ACK)
 
         # when receives a line calculate the time between the line received and when the ack must be sent back with the feedrate
         if any(code in command for code in emulated_commands_with_delay):
@@ -54,7 +56,7 @@ class Emulator():
             # calculate time
             t = math.sqrt((x-self.last_x)**2 + (y-self.last_y)**2) / self.feedrate * 60.0
             if t == 0.0:
-                self.message_buffer.append("ok")
+                self.message_buffer.append(ACK)
                 return
 
             # update positions
@@ -66,7 +68,7 @@ class Emulator():
             self.ack_buffer.append(self.last_time)
 
         else:
-            self.message_buffer.append("ok")
+            self.message_buffer.append(ACK)
 
     def readline(self):
         # special commands response
@@ -81,4 +83,4 @@ class Emulator():
             self.ack_buffer.appendleft(oldest)
             return None
         else:
-            return "ok"
+            return ACK
