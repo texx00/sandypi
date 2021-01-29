@@ -54,10 +54,10 @@ class SinglePlaylist extends Component{
 
     save(){
         let orderedEls = this.state.elements.filter((el) => {return el.element_type!=="control_card"});   // remove control card from the end
-        /*orderedEls = orderedEls.map((el) -> {
-            delete el.
-            delete el.
-        });*/
+        orderedEls = orderedEls.map((el) => {
+            delete el.selected;
+            return el;
+        });
         let playlist = {
             name: this.nameRef.current.innerHTML,
             elements: orderedEls,

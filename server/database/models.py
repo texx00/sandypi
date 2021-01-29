@@ -81,7 +81,7 @@ class Playlists(db.Model):
     def get_playlist(cls, id):
         if id is None:
             raise ValueError("An id is necessary to select a playlist")
-        return db.session.query(Playlists).filter(Playlists.id==id).one()
+        return db.session.query(Playlists).filter(Playlists.id==id).one()       # todo check if there is at leas one line (if the playlist exist)
 
     @classmethod
     def delete_playlist(cls, id):

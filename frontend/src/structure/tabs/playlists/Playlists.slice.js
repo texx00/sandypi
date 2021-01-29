@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 import { playlist_save } from '../../../sockets/SAE';
-import { listsAreEqual } from '../../../utils/dictUtils';
+import { cloneDict, listsAreEqual } from '../../../utils/dictUtils';
 import { getSinglePlaylist } from './selector';
 
 const playlistsSlice = createSlice({
@@ -47,10 +47,9 @@ const playlistsSlice = createSlice({
             let pls = action.payload.map((pl)=>{
                 pl.elements = JSON.parse(pl.elements);
                 if (pl.id === state.playlist_id){
-                    if (!listsAreEqual(pl, getSinglePlaylist({playlists: state})) && pl.id !== state.refresh_request_id){
-                        console.log("comparing playlists")
-                        console.log(pl);
-                        console.log(getSinglePlaylist({playlists: state}))
+                    let pl_clone = cloneDict(getSinglePlaylist({playlists: state}));
+                    let list_equal = listsAreEqual(pl_clone, pl);
+                    if (!list_equal && pl.id !== state.refresh_request_id){
                         sync = true;    // check if any change to the playlist in use has been done on another device
                     }
                     playlist_deleted = false;
