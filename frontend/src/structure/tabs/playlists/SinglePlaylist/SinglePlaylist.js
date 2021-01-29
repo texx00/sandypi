@@ -10,7 +10,7 @@ import SortableElements from '../../../../components/SortableElements';
 import IconButton from '../../../../components/IconButton';
 
 import { playlist_delete, playlist_queue, playlist_save } from '../../../../sockets/SAE';
-import { cloneDict, listsAreEqual } from '../../../../utils/dictUtils';
+import { listsAreEqual } from '../../../../utils/dictUtils';
 
 import { resetShowSaveBeforeBack, setSaveBeforeBack, tabBack } from '../../Tabs.slice';
 import { addToPlaylist, deletePlaylist, updateSinglePlaylist } from '../Playlists.slice';
@@ -54,6 +54,10 @@ class SinglePlaylist extends Component{
 
     save(){
         let orderedEls = this.state.elements.filter((el) => {return el.element_type!=="control_card"});   // remove control card from the end
+        /*orderedEls = orderedEls.map((el) -> {
+            delete el.
+            delete el.
+        });*/
         let playlist = {
             name: this.nameRef.current.innerHTML,
             elements: orderedEls,
@@ -199,7 +203,7 @@ class SinglePlaylist extends Component{
                 </Modal.Footer>
             </Modal>
 
-            <Modal show={this.props.is_save_before_back && this.props.isSinglePlaylist}
+            <Modal show={this.props.is_save_before_back && this.props.isViewSinglePlaylist}
                 aria-labelledby="contained-modal-title-vcenter"
                 centered
                 onHide={()=>{this.props.resetShowSaveBeforeBack(); 

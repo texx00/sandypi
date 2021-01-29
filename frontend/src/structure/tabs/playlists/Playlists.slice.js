@@ -48,6 +48,9 @@ const playlistsSlice = createSlice({
                 pl.elements = JSON.parse(pl.elements);
                 if (pl.id === state.playlist_id){
                     if (!listsAreEqual(pl, getSinglePlaylist({playlists: state})) && pl.id !== state.refresh_request_id){
+                        console.log("comparing playlists")
+                        console.log(pl);
+                        console.log(getSinglePlaylist({playlists: state}))
                         sync = true;    // check if any change to the playlist in use has been done on another device
                     }
                     playlist_deleted = false;

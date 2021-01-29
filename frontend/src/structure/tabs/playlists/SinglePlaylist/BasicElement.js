@@ -134,6 +134,11 @@ class BasicElement extends Component{
         </Modal>
     }
 
+    handleClick(){
+        if (this.props.onClick) this.props.onClick();
+        this.setState({...this.state, showModal: true });
+    }
+
     // render a trigger for a tooltip around the card content
     renderTip(){
         if (this.tip !== ""){
@@ -143,12 +148,12 @@ class BasicElement extends Component{
                 </Tooltip>}
                 delay={{ show: 3000, hide: 250 }}>
                 
-                <div onClick={()=>this.setState({...this.state, showModal: true })}>
+                <div onClick={this.handleClick.bind(this)}>
                     {this.renderElement()}
                 </div>
             </OverlayTrigger>
         }else{
-            return <div onClick={()=>this.setState({...this.state, showModal: true })}>
+            return <div onClick={this.handleClick.bind(this)}>
                 {this.renderElement()} 
             </div>
         }

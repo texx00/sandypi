@@ -62,6 +62,9 @@ class SortableElements extends Component{
                         case "command":
                             ElementType = CommandElement;
                             break;
+                        case "drawing":
+                            ElementType = DrawingElement;
+                            break;
                         default:
                             ElementType = BasicElement;
                     }
@@ -109,7 +112,7 @@ class ElementCard extends React.Component{
             <div className="card hover-zoom bg-black rounded clickable" 
                 onMouseEnter={this.show_cross.bind(this)} 
                 onMouseLeave={this.hide_cross.bind(this)}>
-                {this.props.children}
+                {React.cloneElement( this.props.children, { onClick: this.hide_cross.bind(this) })}     {/* adding an "onclick" method to hide the cross when the child is clicked and the modal is open */}
                 <div className="card-img-overlay show-cross">
                     <div className={"justify-content-md-center btn-cross nodrag rounded" + (this.state.show_cross && this.props.showCross ? " show" : "")}
                         onClick={() => {this.setState({active: false})}} 

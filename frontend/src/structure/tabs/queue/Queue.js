@@ -11,6 +11,7 @@ import { queue_status } from '../../../sockets/SAC';
 import { queue_get_status, queue_set_order, queue_stop_drawing } from '../../../sockets/SAE';
 import { listsAreEqual } from '../../../utils/dictUtils';
 import { getImgUrl } from '../../../utils/utils';
+import { isViewQueue } from '../selector';
 
 import { setTab, tabBack } from '../Tabs.slice';
 import { setQueueElements, setQueueStatus } from './Queue.slice';
@@ -20,7 +21,8 @@ const mapStateToProps = (state) => {
     return {
         elements: getQueueElements(state),
         drawingId: getQueueDrawingId(state),
-        isQueueEmpty: getQueueEmpty(state)
+        isQueueEmpty: getQueueEmpty(state),
+        isViewQueue: isViewQueue(state)
     }
 }
 
@@ -46,7 +48,7 @@ class Queue extends Component{
         if (!listsAreEqual(this.state.elements, this.props.elements)){
             this.setState({...this.state, elements: this.props.elements, refreshList: true});
         }
-        if (this.props.isQueueEmpty){
+        if (this.props.isQueueEmpty && this.props.isViewQueue){
             this.props.handleTabBack();
         }
     }
