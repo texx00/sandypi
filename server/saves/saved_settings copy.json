@@ -1,1 +1,0 @@
-{"serial": {"port": "/dev/ttyS0", "baud": "115200"}, "device": {"width": "450", "height": "300"}, "scripts": {"connected": "", "before": "", "after": ""}, "system": {"is_linux": true, "last_update_check_time": 0}, "leds": {"width": "30", "height": "20", "type": "WS2812B", "available_types": ["WS2812B", "Dimmable"], "pin1": 18}}

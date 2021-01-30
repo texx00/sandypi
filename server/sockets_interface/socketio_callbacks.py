@@ -157,4 +157,4 @@ def queue_stop_drawing():
 @socketio.on("leds_set_color")
 def leds_set_color(data):
     color = json.loads(data)
-    app.leds_controller.set_color((color["h"], color["s"], color["v"]))
+    app.leds_controller.set_color((color["r"], color["g"], color["b"]))

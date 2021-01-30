@@ -40,6 +40,7 @@ class SortableElements extends Component{
 
     render(){
         return <ReactSortable
+            distance={1}
             animation={150}
             ghostClass="sortable-ghost"
             chosenClass="sortable-chosen"
@@ -71,8 +72,10 @@ class SortableElements extends Component{
 
                     return <ElementCard key={el.id} 
                             handleUnmount={()=>this.removeElement(el.id)}
-                            showCross={this.state.show_child_cross}>
+                            showCross={this.state.show_child_cross}
+                            onClick={()=>console.log("click2")}>
                         <ElementType element={el} 
+                            onClick={()=>console.log("click")}
                             onOptionsChange={(el) => this.props.onElementOptionsChange(el)}
                             hideOptions={this.props.hideOptions}/>
                     </ElementCard>

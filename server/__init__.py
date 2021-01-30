@@ -63,6 +63,7 @@ from server.hw_controller.queue_manager import QueueManager
 from server.hw_controller.feeder import Feeder
 from server.hw_controller.feeder_event_manager import FeederEventManager
 from server.hw_controller.leds.leds_controller import LedsController
+from server.hw_controller.leds.leds_driver import LedsDriver
 
 
 # Initializes sockets emits
@@ -74,6 +75,7 @@ app.feeder.connect()
 app.qmanager = QueueManager(app, socketio)
 
 app.leds_controller = LedsController(app)
+app.leds_controller.start()
 
 # Get lates commit short hash to use as a version to refresh cached files
 sw_version = software_updates.get_commit_shash()

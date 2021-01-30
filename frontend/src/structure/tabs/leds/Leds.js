@@ -20,7 +20,7 @@ class LedsController extends Component{
     handleColorChange(color){
         this.setState({...this.state, color: color.hex});
         this.background_ref.current.style.backgroundColor = color.hex;
-        leds_set_color(color.hsv);
+        leds_set_color(color.rgb);
     }
 
     render(){

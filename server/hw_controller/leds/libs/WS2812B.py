@@ -23,3 +23,7 @@ class WS2812B():
     
     def deinit(self):
         self.pixels.deinit()
+
+if __name__ == "__main__":
+    leds = WS2812B(100,18)
+    leds.fill((255,255,255))

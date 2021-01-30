@@ -22,13 +22,13 @@ class LedsDriver:
             raise ValueError("It is necessary to set a width and height for the leds frame")
 
         # setting up leds
-        self.dimensions = dimensions
-        self.led_number = 2*(dimensions[0] + dimensions[1])
+        self.dimensions = (int(dimensions[0]), int(dimensions[1]))
+        self.led_number = 2*(self.dimensions[0] + self.dimensions[1])
         self.leds = None
     
     def use_dimmable(self, pin):
         try:
-            if __name__ == "__main__":
+            if __name__ == "__main__":                                              # in order to test the file directly
                 from libs.dimmable import Dimmable
             else:
                 from server.hw_controller.leds.libs.dimmable import Dimmable
@@ -41,10 +41,11 @@ class LedsDriver:
         # platform dependent imports
         try:
             if __name__ == "__main__":
-                from libs.WS2812B import WS2812B
+                from libs.WS2812B import WS2812B                                    # in order to test the file directly
             else:
                 from server.hw_controller.leds.libs.WS2812B import WS2812B
-            self.leds = WS2812B(int(self.led_number), pin)
+            
+            self.leds = WS2812B(self.led_number, pin)
             return True
 
         except Exception as e:
@@ -79,20 +80,14 @@ class LedsDriver:
     def fill(self, color):
         if self.is_ok():
             if type(color) is list:
-                print("0", flush=True)
                 if len(color[0]) == 1:                  # check if the list contains lists or tuples with lenght 3
-                    print(1, flush=True)
                     if len(color) == 3:                 # check if the list itself must be a color tuple
                         color = tuple(color)
-                        print(2, flush=True)
                     else: 
-                        print(3, flush=True)
                         return False
                 else: 
                     self.leds[0:len(color)] = color
-                    print(4, flush=True)
                     return True
-            print(5, flush=True)
             self.leds.fill(color)
             return True
         return False
@@ -107,11 +102,11 @@ class LedsDriver:
         self.leds.deinit()
         self.leds = None
 
-
-
 if __name__=="__main__":
     ld = LedsDriver((30,20))
     ld.use_WS2812B(18)
+    ld.white()
+    time.sleep(2)
     for i in range(20):
         ld.rainbow(i/200.0)
         time.sleep(0.1)
@@ -119,3 +114,4 @@ if __name__=="__main__":
     ld.white()
     time.sleep(2)
     ld.clear()
+    ld.deinit()

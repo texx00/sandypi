@@ -135,6 +135,7 @@ class BasicElement extends Component{
     }
 
     handleClick(){
+        console.log("prova")
         if (this.props.onClick) this.props.onClick();
         if (!this.props.hideOptions === "true")
             this.setState({...this.state, showModal: true });

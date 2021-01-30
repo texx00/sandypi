@@ -1,18 +1,41 @@
 from server.utils import settings_utils
 from server.hw_controller.leds.leds_driver import LedsDriver
+from threading import Thread, Lock
 
 class LedsController:
     def __init__(self, app):
         self.app = app
         settings = settings_utils.load_settings()
-        dimensions = (settings["leds"]["width"], settings["leds"]["height"])
         self.dimensions = None
         self.update_settings(settings)
+        self._should_update = False
+        self.mutex = Lock()
+        # may have problems with the leds controller if self.driver.deinit or self.stop is not called on app shutdown
+
+    def start(self):
+        self._running = True
+        self._th = Thread(target = self._thf, daemon=True)
+        self._th.name = "leds_controller"
+        self._th.start()
+    
+    def stop(self):
+        self._running = False
+    
+    def _thf(self):
+        self.app.logger.error("Leds controller started")
+        while(self._running):
+            with self.mutex:
+                if (self._should_update):
+                    self.driver.fill(self._color)
+                    self._should_update = False
+        self.app.logger.error("test")
+        self.driver.deinit()
 
     # sets a fixed color for the leds
-    def set_color(self, color_hsv):
-        self.app.logger.warn("Color")
-        self.driver.fill(self.driver.hsv2rgb(color_hsv[0], color_hsv[1], color_hsv[2]))
+    def set_color(self, color):
+        with self.mutex:
+            self._color = color
+            self._should_update = True
 
     def start_animation(self, animation):
         # TODO add animations picker:

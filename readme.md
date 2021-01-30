@@ -25,6 +25,7 @@ The project is opensource under MIT license and thus anyone can help (there is s
 ![Main page](docs/images/preview.png)
 ![Playlist](docs/images/playlist.png)
 ![Drawing](docs/images/drawing.png)
+![Manual](docs/images/control.png)
 
 # Installation
 
@@ -108,17 +109,12 @@ To stop the server starting automatically use `$> python start.py -a=off`
 Once the service is running it is possible to connect through a browser by typing the device ip address and connecting to the port 5000 like `192.168.1.15:5000`
 If you are running on the local device you can also use `127.0.0.1:5000`
 
-## Installation troubleshooting
+# Installation troubleshooting
 
-It may happen that the serial port is not working correctly.
-In this case activate the environment, uninstall the "serial" and the "pyserial" modules and install again the "pyserial":
-```
-$> source env/bin/activate
-(env) $> python3 -m pip uninstall serial pyserial
-(env) $> python3 -m pip install pyserial
-```
+If you find problems during the installation check the [troubleshooting](/docs/troubleshooting.md) page
 
-If you find any bug or problem please open an issue in the dedicated page.
+**If you find any bug or problem please feel free to open an [issue](https://github.com/texx00/sandypi/issues) in the dedicated page.**
+___
 
 # Updates
 
@@ -142,11 +138,7 @@ $> source env/bin/activate
 (env) $> install.bat
 ```
 
-After the update it may be necessary to clear the browser cache.
-It is also possible to use the following command in the browser console (google "javascript console browser_model"):
-```
-localStorage.clear()
-```
+If you have problems after the update check the [troubleshooting](/docs/troubleshooting.md) guide.
 
 # Development and testing
 

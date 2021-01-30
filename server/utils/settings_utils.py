@@ -4,7 +4,6 @@ import json
 import logging
 import platform
 from netifaces import interfaces, ifaddresses, AF_INET
-from deepmerge import always_merger
 
 # Logging levels (see the documentation of the logging module for more details)
 LINE_SENT = 6
@@ -37,16 +36,20 @@ def update_settings_file_version():
     else:
         old_settings = load_settings()
         def_settings = ""
-        print(old_settings)
         with open(defaults_path) as f:
             def_settings = json.load(f)
-        print(def_settings)
         new_settings = match_dict(old_settings, def_settings)
-        print(new_settings)
         save_settings(new_settings)
     
 def match_dict(mod_dict, ref_dict):
-    return always_merger.merge(ref_dict, mod_dict)
+    if type(ref_dict) is dict:
+        new_dict = dict(mod_dict)
+        for k in ref_dict.keys():
+            if not k in mod_dict:
+                new_dict[k] = match_dict(mod_dict[k], ref_dict[k])
+        return new_dict
+    else:
+        return ref_dict
 
 # print the level of the logger selected
 def print_level(level, logger_name):
@@ -91,7 +94,7 @@ if __name__ == "__main__":
     print(get_ip4_addresses())
     a = {"a":0, "b":{"c":2, "d":4}}
     b = {"a":1, "b":{"c":1, "e":5}, "c":3}
-    c = match_dict(b,a)
+    c = match_dict(a,b)
     print(a)
     print(b)
     print(c)
