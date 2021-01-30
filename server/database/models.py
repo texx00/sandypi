@@ -1,10 +1,11 @@
+from datetime import datetime
+import os
+import json
+
 from server import db
 from server.database.playlist_elements_tables import create_playlist_table, delete_playlist_table, get_playlist_table_class
 from server.database.playlist_elements import GenericPlaylistElement
 
-from datetime import datetime
-import os
-import json
 
 # Gcode files table
 # Stores information about the single drawing

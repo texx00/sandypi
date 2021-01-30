@@ -1,7 +1,6 @@
 import './SinglePlaylist.scss';
 
 import React, { Component } from 'react';
-import ReactDomServer from 'react-dom/server';
 import { connect } from 'react-redux';
 import { Container, Row, Col, Modal } from 'react-bootstrap';
 import { FileEarmarkCheck, Play, X, Check } from 'react-bootstrap-icons';

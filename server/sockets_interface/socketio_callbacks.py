@@ -1,8 +1,4 @@
-from flask import render_template
-
-import pickle
 import json
-import datetime
 import shutil
 import os
 
@@ -10,20 +6,10 @@ from server import socketio, app, db
 
 from server.utils import settings_utils, software_updates
 from server.database.models import Playlists
-from server.database.playlist_elements import DrawingElement
+from server.database.playlist_elements import DrawingElement, GenericPlaylistElement
 from server.database.models import UploadedFiles, Playlists
 
-
-@socketio.on('message')
-def handle_message(message):
-    app.logger.info("Received message from js")
-    res = message['data'].split(":")
-    if res[0]=="start":
-        app.qmanager.start_drawing(res[1])
-    if res[0]=="queue":
-        app.qmanager.queue_drawing(res[1])
-
-# 
+# request to check if a new version of the software is available 
 @socketio.on('software_updates_check')
 def handle_software_updates_check():
     result = software_updates.compare_local_remote_tags()
@@ -35,9 +21,6 @@ def handle_software_updates_check():
             """.format(result["remote_latest"], result["local"])
             socketio.emit("software_updates_response", toast)
 
-@socketio.on("request_nav_drawing_status")
-def nav_drawing_request():
-    app.semits.send_nav_drawing_status()
 
 # TODO split in multiple files?    
 
@@ -70,8 +53,7 @@ def playlist_queue(code):
     item = db.session.query(Playlists).filter(Playlists.id==code).one()
     elements = item.get_elements()
     for i in elements:
-        if i != "":
-            app.qmanager.queue_drawing(i.drawing_id)
+        app.qmanager.queue_element(i, show_toast = False)
 
 @socketio.on("playlists_refresh")
 def playlist_refresh():
@@ -123,7 +105,8 @@ def settings_reboot_system():
 
 @socketio.on("drawing_queue")
 def drawing_queue(code):
-    app.qmanager.queue_drawing(code)
+    element = DrawingElement(drawing_id=code)
+    app.qmanager.queue_element(element)
 
 @socketio.on("drawing_delete")
 def drawing_delete(code):

@@ -26,7 +26,6 @@ Base.query = db.session.query_property()
 
 
 def get_playlist_table_class(id):
-    # TODO may be better to use reflection methods from sql alchemy here after the table has been created?
     if id is None: raise ValueError("A playlist id must be specified")
     table_name = "_playlist_{}".format(id)                              # table name is prefix + table_id
     

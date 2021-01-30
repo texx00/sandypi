@@ -14,9 +14,6 @@ from time import sleep
 from dotenv import load_dotenv
 import logging
 
-from server.hw_controller.queue_manager import QueueManager
-from server.hw_controller.feeder import Feeder
-from server.hw_controller.feeder_event_manager import FeederEventManager
 from server.utils import settings_utils, software_updates, migrations
 
 # Shows ipv4 adresses
@@ -55,14 +52,19 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db, include_object=migrations.include_object)
 
 
+# After setting up the database it is possible to import the app components
 import server.api.drawings
 import server.sockets_interface.socketio_callbacks
 from server.sockets_interface.socketio_emits import SocketioEmits
+from server.hw_controller.queue_manager import QueueManager
+from server.hw_controller.feeder import Feeder
+from server.hw_controller.feeder_event_manager import FeederEventManager
 
+
+# Initializes sockets emits
 app.semits = SocketioEmits(app,socketio, db)
 
 # Device controller initialization
-
 app.feeder = Feeder(FeederEventManager(app))
 app.feeder.connect()
 app.qmanager = QueueManager(app, socketio)
