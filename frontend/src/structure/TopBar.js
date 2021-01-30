@@ -29,7 +29,7 @@ class TopBar extends Component{
 
     renderBack(){
         if (this.props.show_back)
-            return <Nav.Link key={5} className="text-bold" onClick={()=>{this.props.handleTabBack()}}><ChevronCompactLeft/>Back</Nav.Link>
+            return <Nav.Link key={20} className="text-bold" onClick={()=>{this.props.handleTabBack()}}><ChevronCompactLeft/>Back</Nav.Link>
         else return "";
     }
 

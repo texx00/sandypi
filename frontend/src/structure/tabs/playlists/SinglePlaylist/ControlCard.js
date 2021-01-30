@@ -21,6 +21,7 @@ class ControlCard extends Component{
     }
 
     createElement(type, element_factory){
+        // TODO check why it is taking so long to create/add an element
         switch(type){
             case "drawing":
                 this.setState({...this.state, show_modal: false, show_upload: true});

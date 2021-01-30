@@ -135,10 +135,9 @@ class BasicElement extends Component{
     }
 
     handleClick(){
-        console.log("prova")
-        if (this.props.onClick) this.props.onClick();
-        if (!this.props.hideOptions === "true")
+        if (!(this.props.hideOptions === "true"))
             this.setState({...this.state, showModal: true });
+        if (this.props.onClick) this.props.onClick();
     }
 
     // render a trigger for a tooltip around the card content
