@@ -1,9 +1,10 @@
 import './SinglePlaylist.scss';
 
 import React, { Component } from 'react';
+import ReactDomServer from 'react-dom/server';
 import { connect } from 'react-redux';
 import { Container, Row, Col, Modal } from 'react-bootstrap';
-import { FileEarmarkCheck, Play, X } from 'react-bootstrap-icons';
+import { FileEarmarkCheck, Play, X, Check } from 'react-bootstrap-icons';
 
 import ConfirmButton from '../../../../components/ConfirmButton';
 import SortableElements from '../../../../components/SortableElements';
@@ -54,10 +55,6 @@ class SinglePlaylist extends Component{
 
     save(){
         let orderedEls = this.state.elements.filter((el) => {return el.element_type!=="control_card"});   // remove control card from the end
-        orderedEls = orderedEls.map((el) => {
-            delete el.selected;
-            return el;
-        });
         let playlist = {
             name: this.nameRef.current.innerHTML,
             elements: orderedEls,
@@ -70,6 +67,7 @@ class SinglePlaylist extends Component{
         }else{
             this.props.updateSinglePlaylist(playlist);
         }
+        window.show_toast(<div>Playlist saved <Check /></div>);
     }
 
     handleSaveBeforeBack(){
@@ -77,8 +75,8 @@ class SinglePlaylist extends Component{
     }
 
     handleSortableUpdate(list){
-        if (!listsAreEqual(list, this.state.elements)){
-            this.setState({...this.state, elements: list, edited: true});
+        if (!listsAreEqual(list, this.state.elements)){                     // updates only if the new and old lists are different
+            this.setState({...this.state, elements: list, edited: true, refreshList: true});
             this.handleSaveBeforeBack();
         }
     }
@@ -92,13 +90,12 @@ class SinglePlaylist extends Component{
 
     handleElementUpdate(element){
         let tmp = this.state.elements.map((el) => {return el});
-        tmp.map((el)=>{
+        let res = tmp.map((el)=>{
             if (el.id === element.id)
                 return element;
             else return el;
         });
-        this.setState({...this.state, elements: tmp, edited: true});
-        this.handleSaveBeforeBack();
+        this.handleSortableUpdate(res);
     }
 
     renderElements(){
@@ -179,7 +176,7 @@ class SinglePlaylist extends Component{
             {this.renderElements()}
 
             
-            <Modal show={this.props.showModal}
+            <Modal show={this.props.showResyncModal}
                 aria-labelledby="contained-modal-title-vcenter"
                 onHide={()=> this.props.onRefreshList()}
                 centered>

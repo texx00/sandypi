@@ -29,9 +29,9 @@ def handle_software_updates_check():
     result = software_updates.compare_local_remote_tags()
     if result:
         if result["behind_remote"]:
-            toast = """A new update is available ({0}).<br>
-            Your version is {1}.<br>
-            Check <a href="https://github.com/texx00/sandypi">sandipy</a> github page to update to the latest version.
+            toast = """A new update is available ({0})\n
+            Your version is {1}\n
+            Check the github page to update to the latest version.
             """.format(result["remote_latest"], result["local"])
             socketio.emit("software_updates_response", toast)
 
@@ -56,7 +56,6 @@ def playlist_delete(id):
 # save the changes to the playlist
 @socketio.on("playlist_save")
 def playlist_save(playlist):
-    tmp = playlist
     playlist = json.loads(playlist)
     pl = Playlists.create_playlist() if not "id" in playlist else Playlists.get_playlist(playlist['id'])
     pl.clear_elements()

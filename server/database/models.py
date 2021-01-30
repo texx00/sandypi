@@ -37,6 +37,8 @@ class Playlists(db.Model):
         if not isinstance(elements, list):
             elements = [elements]
         for i in elements:
+            if "id" in i:   # delete old ids to mantain the new sorting scheme (the elements list should be already ordered, for this reason we clear the elements and add them in the right order)
+                del i["id"]
             if not isinstance(i, GenericPlaylistElement):
                 i = GenericPlaylistElement.create_element_from_dict(i)
             i.save(self._ec())

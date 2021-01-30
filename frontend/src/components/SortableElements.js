@@ -13,6 +13,7 @@ class SortableElements extends Component{
             list: this.props.list,
             show_child_cross: true
         };
+        this.lastList = this.props.list;
     }
 
     componentDidUpdate(){
@@ -22,11 +23,20 @@ class SortableElements extends Component{
         }
     }
 
+    // removes sortable options before sending the updated data
+    prepareUpdate(list){
+        this.props.onUpdate(list.map((el) => {
+            if ("selected" in el) delete el.selected;
+            if ("chosen" in el) delete el.chosen;
+            return el;
+        }));
+    }
+
     removeElement(idx){
         let oldState = this.state.list;
         let newList = oldState.filter((el, i)=> {return el.id !==idx});
         this.setState({...this.state, list: newList, edited: true});
-        this.props.onUpdate(newList);
+        this.prepareUpdate(newList);
     }
 
     render(){
@@ -39,7 +49,7 @@ class SortableElements extends Component{
             list={this.state.list}
             setList={(newList) => {
                 this.setState({list: newList});
-                this.props.onUpdate(newList);
+                this.prepareUpdate(newList);
             }}
             onStart={(evt) => {                             // when starts to drag it removes the "delete element" button and disable it until the object is released
                 this.setState({show_child_cross: false});

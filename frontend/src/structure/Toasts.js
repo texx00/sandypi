@@ -4,6 +4,7 @@ import { Spinner } from 'react-bootstrap';
 import Toast from 'react-bootstrap/Toast';
 
 import { connection_status_callback, show_toast } from "../sockets/SAC";
+import { cloneDict } from '../utils/dictUtils';
 
 class CustomToast extends Component{
     constructor(props){
@@ -52,15 +53,16 @@ class Toasts extends Component{
     }
 
     render(){
+        let toasts = cloneDict(this.state.toasts);
+        toasts.push(<CustomToast key={0} 
+            message={<div>
+                    <Spinner animation='border' size="sm" className="mr-2"/>
+                    Connection lost. Check if the server is up.
+                </div>} 
+            show={this.state.show_connection} 
+            autohide={false}/>);
         return <div className="toast_container_position">
-            <CustomToast key={0} 
-                message={<div>
-                        <Spinner animation='border' size="sm" className="mr-2"/>
-                        Connection lost. Check if the server is up.
-                    </div>} 
-                show={this.state.show_connection} 
-                autohide={false}/>
-            {this.state.toasts}
+            {toasts}
         </div>
     }
 }

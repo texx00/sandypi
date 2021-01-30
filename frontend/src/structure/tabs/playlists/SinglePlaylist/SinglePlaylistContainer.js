@@ -73,7 +73,7 @@ class SinglePlaylistContainer extends Component{
                     shouldUpdateList={this.state.refreshedList}
                     onListRefreshed={this.onListRefreshed.bind(this)}
                     onRefreshList={this.refreshPlaylist.bind(this)}
-                    showModal={this.props.playlistRequiresResync && this.props.isViewSinglePlaylist}
+                    showResyncModal={this.props.playlistRequiresResync && this.props.isViewSinglePlaylist}
                     isViewSinglePlaylist={this.props.isViewSinglePlaylist}/>
             </Container>
     }
