@@ -1,3 +1,4 @@
+from server.utils.settings_utils import get_ip4_addresses
 from flask import Flask, url_for
 from flask.helpers import send_from_directory
 from flask_socketio import SocketIO
@@ -17,6 +18,9 @@ from server.hw_controller.queue_manager import QueueManager
 from server.hw_controller.feeder import Feeder
 from server.hw_controller.feeder_event_manager import FeederEventManager
 from server.utils import settings_utils, software_updates, migrations
+
+# Shows ipv4 adresses
+print("\nTo run the server use 'ip:5000' in your browser with one of the following ip adresses: {}\n".format(str(get_ip4_addresses())), flush=True)
 
 # Logging setup
 load_dotenv()

@@ -7,17 +7,18 @@ from packaging import version
 def compare_local_remote_tags(verbose=False):
     result = {}
     if not verbose:
-        def print(val):
+        def printv(val):
             pass
+    else: printv = print
 
     # Requesting remote tags
     try:
-        remote_tags = subprocess.check_output(['git', 'ls-remote', '--tags'])
+        remote_tags = subprocess.check_output(['git', 'ls-remote', '--tags'], stderr=subprocess.STDOUT)
     except:
-        print("No connection available. Cannot check latest version.")
+        printv("No connection available. Cannot check latest version.")
         return False
     remote_tags = remote_tags.decode(encoding="UTF-8").split("\n")
-    print("Remote tags: \n{}\n\n".format(remote_tags))
+    printv("Remote tags: \n{}\n\n".format(remote_tags))
 
     # Cleaning output
     remote_versions = []
@@ -30,12 +31,12 @@ def compare_local_remote_tags(verbose=False):
     remote_versions = [version.parse(t) for t in remote_versions]
     remote_versions = sorted(remote_versions, reverse=True)
     result["remote_latest"] = remote_versions[0]
-    print("Remote latest version: {}".format(result["remote_latest"]))
+    printv("Remote latest version: {}".format(result["remote_latest"]))
     
     # Requesting local tag
     local_tag = subprocess.check_output(['git', 'describe', '--tags', '--abbrev=0'])
     local_tag = version.parse(local_tag.decode(encoding="UTF-8"))
-    print("Local tag: {}".format(local_tag))
+    printv("Local tag: {}".format(local_tag))
     result["local"] = local_tag
 
     # Comparing outputs
