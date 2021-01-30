@@ -19,6 +19,10 @@ from server.hw_controller.feeder_event_manager import FeederEventManager
 from server.hw_controller.leds.leds_controller import LedsController
 from server.utils import settings_utils, software_updates, migrations
 
+
+# Updating setting files (will apply changes only when a new SW version is installed)
+settings_utils.update_settings_file_version()
+
 # Logging setup
 load_dotenv()
 level = os.getenv("FLASK_LEVEL")
