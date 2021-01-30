@@ -136,12 +136,13 @@ class BasicElement extends Component{
 
     handleClick(){
         if (this.props.onClick) this.props.onClick();
-        this.setState({...this.state, showModal: true });
+        if (!this.props.hideOptions === "true")
+            this.setState({...this.state, showModal: true });
     }
 
     // render a trigger for a tooltip around the card content
     renderTip(){
-        if (this.tip !== ""){
+        if (this.tip !== "" && !this.props.hideOptions === "true"){
             return <OverlayTrigger overlay={
                 <Tooltip>
                     {this.tip}

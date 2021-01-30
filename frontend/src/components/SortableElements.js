@@ -2,9 +2,8 @@ import React, { Component } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { Col } from 'react-bootstrap';
 
-import { CommandElement, DrawingElement } from '../structure/tabs/playlists/SinglePlaylist/Elements';
+import { getElementClass } from '../structure/tabs/playlists/SinglePlaylist/Elements';
 import { X } from 'react-bootstrap-icons';
-import BasicElement from '../structure/tabs/playlists/SinglePlaylist/BasicElement';
 
 class SortableElements extends Component{
     constructor(props){
@@ -65,25 +64,17 @@ class SortableElements extends Component{
                 return true;
             }}>
                 {this.state.list.map((el)=>{                // generate list of elements to show in the list
-                    let ElementType;
-                    switch (el.element_type){    
-                        case "control_card":   
-                            return this.props.children;     // return the child as the control card 
-                        case "command":
-                            ElementType = CommandElement;
-                            break;
-                        case "drawing":
-                            ElementType = DrawingElement;
-                            break;
-                        default:
-                            ElementType = BasicElement;
-                    }
+                    if (el.element_type === "control_card")  
+                        return this.props.children;         // return the child as the control card 
+                    
+                    let ElementType = getElementClass(el);
 
                     return <ElementCard key={el.id} 
                             handleUnmount={()=>this.removeElement(el.id)}
                             showCross={this.state.show_child_cross}>
                         <ElementType element={el} 
-                            onOptionsChange={(el) => this.props.onElementOptionsChange(el)}/>
+                            onOptionsChange={(el) => this.props.onElementOptionsChange(el)}
+                            hideOptions={this.props.hideOptions}/>
                     </ElementCard>
                 })}
         </ReactSortable>

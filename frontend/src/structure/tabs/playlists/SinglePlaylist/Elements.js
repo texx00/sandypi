@@ -41,4 +41,17 @@ class CommandElement extends BasicElement{
     }
 }
 
-export {DrawingElement, CommandElement};
+function getElementClass(element){
+    if (element === undefined)
+        return BasicElement;
+    switch (element.element_type){ 
+        case "command":
+            return CommandElement;
+        case "drawing":
+            return DrawingElement;
+        default:
+            return BasicElement;
+    }
+}
+
+export {DrawingElement, CommandElement, getElementClass};

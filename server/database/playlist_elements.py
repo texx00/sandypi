@@ -23,7 +23,7 @@ class GenericPlaylistElement():
     
     def __init__(self, element_type, **kwargs):
         self.element_type = element_type
-        self._pop_options = []
+        self._pop_options = []                                                                      # list of fields that are column in the database and must be removed from the standard options (string column)
         self.add_column_field("element_type")                                                       # need to pop the element_type from the final dict because this option is a column of the table
         for v in kwargs:
             setattr(self, v, kwargs[v])
@@ -109,8 +109,8 @@ class DrawingElement(GenericPlaylistElement):
             raise ValueError("The drawing id must be an integer")
         
     def execute(self):
-        self.filename = os.path.join(str(Path(__file__).parent.parent.absolute()), "static/Drawings/{0}/{0}.gcode".format(self.drawing_id))
-        with open(self.filename) as f:
+        filename = os.path.join(str(Path(__file__).parent.parent.absolute()), "static/Drawings/{0}/{0}.gcode".format(self.drawing_id))
+        with open(filename) as f:
             for line in f:
                 if line.startswith(";"):                                                            # skips commented lines
                     continue

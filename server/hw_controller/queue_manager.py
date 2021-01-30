@@ -110,7 +110,7 @@ class QueueManager():
     def send_queue_status(self):
         elements = list(map(lambda x: str(x), self.q.queue))                                                # converts elements to json
         res = {
-            "now_drawing_id": self._element.drawing_id if self._element is not None else 0,
+            "current_element": str(self._element),
             "elements": elements
         }
         self.app.semits.emit("queue_status", json.dumps(res))
