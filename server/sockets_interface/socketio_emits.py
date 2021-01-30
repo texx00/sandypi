@@ -1,4 +1,3 @@
-from flask import render_template
 
 class SocketioEmits():
     def __init__(self, app, socketio, db):

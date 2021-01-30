@@ -1,8 +1,6 @@
 from queue import Queue
 import json
 
-from server.database.playlist_elements import DrawingElement
-
 class QueueManager():
     def __init__(self, app, socketio):
         self._isdrawing = False
@@ -24,8 +22,6 @@ class QueueManager():
         return self._element
     
     def set_element(self, element):
-        if type(element) is int:
-            element = DrawingElement(drawing_id=element)
         self.app.logger.info("Code: {}".format(element))
         self._element = element
         self.set_is_drawing(True)
@@ -108,7 +104,7 @@ class QueueManager():
         self.app.feeder.start_element(element, force_stop = True)
 
     def send_queue_status(self):
-        elements = list(map(lambda x: str(x), self.q.queue))                                                # converts elements to json
+        elements = list(map(lambda x: str(x), self.q.queue)) if len(self.q.queue) > 0 else []                       # converts elements to json
         res = {
             "current_element": str(self._element),
             "elements": elements

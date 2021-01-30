@@ -112,8 +112,6 @@ class Queue extends Component{
             </Container>
         }else{
             let ElementType = getElementClass(this.props.currentElement);
-            console.log("Current element")
-            console.log(this.props.currentElement)
             return <Container>
                 <Section sectionTitle="Now drawing"
                         sectionButton="Stop drawing"

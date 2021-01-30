@@ -140,7 +140,7 @@ def queue_get_status():
 
 @socketio.on("queue_set_order")
 def queue_set_order(elements):
-    app.qmanager.set_new_order(map(lambda e: e['drawing_id'], json.loads(elements)))
+    app.qmanager.set_new_order(map(lambda e: GenericPlaylistElement.create_element_from_dict(e), json.loads(elements)))
 
 @socketio.on("queue_stop_drawing")
 def queue_stop_drawing():

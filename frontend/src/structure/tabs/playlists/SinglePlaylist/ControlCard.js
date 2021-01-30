@@ -21,7 +21,6 @@ class ControlCard extends Component{
     }
 
     createElement(type, element_factory){
-        console.log("Creating a new element of type: "+ type);
         switch(type){
             case "drawing":
                 this.setState({...this.state, show_modal: false, show_upload: true});

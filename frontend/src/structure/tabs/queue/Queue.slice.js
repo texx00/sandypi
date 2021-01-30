@@ -15,11 +15,9 @@ const queueSlice = createSlice({
             }
         },
         setQueueStatus(state, action){
-            console.log("Slice")
             let res = action.payload;
             res.current_element = res.current_element === "None" ? undefined : JSON.parse(res.current_element);
             let queueEmpty = res.current_element === undefined;
-            console.log(res)
             return {
                 isQueueEmpty: queueEmpty,
                 elements: res.elements,

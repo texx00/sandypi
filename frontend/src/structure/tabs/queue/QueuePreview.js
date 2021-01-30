@@ -16,8 +16,6 @@ const mapStateToProps = (state) => {
 
 class QueuePreview extends Component{
     render(){
-        console.log("preview")
-        console.log(this.props.currentElement)
         if (this.props.currentElement !== undefined){
             let ElementType = getElementClass(this.props.currentElement);
             return <div onClick={this.props.onClick.bind(this)} className={"preview-bar-container p-2 m-2 rounded clickable"+ (this.props.isQueueEmpty ? " d-none" : "")}>
