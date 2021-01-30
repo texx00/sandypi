@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import { Container, Form, Col, Button } from 'react-bootstrap';
 import { connect } from 'react-redux';
 
-import {Section, Subsection, SectionGroup} from '../../../components/Section';
+import { Section, Subsection, SectionGroup } from '../../../components/Section';
 
 import { getSettings } from "./selector.js";
 import { updateAllSettings, updateSetting } from "./Settings.slice.js";

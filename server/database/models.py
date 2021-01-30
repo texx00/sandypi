@@ -1,10 +1,11 @@
+from datetime import datetime
+import os
+import json
+
 from server import db
 from server.database.playlist_elements_tables import create_playlist_table, delete_playlist_table, get_playlist_table_class
 from server.database.playlist_elements import GenericPlaylistElement
 
-from datetime import datetime
-import os
-import json
 
 # Gcode files table
 # Stores information about the single drawing
@@ -37,9 +38,12 @@ class Playlists(db.Model):
         if not isinstance(elements, list):
             elements = [elements]
         for i in elements:
+            if "id" in i:   # delete old ids to mantain the new sorting scheme (the elements list should be already ordered, for this reason we clear the elements and add them in the right order)
+                del i["id"]
             if not isinstance(i, GenericPlaylistElement):
                 i = GenericPlaylistElement.create_element_from_dict(i)
             i.save(self._ec())
+        db.session.commit()
     
     def clear_elements(self):
         return self._ec().clear_elements()
@@ -80,7 +84,7 @@ class Playlists(db.Model):
     def get_playlist(cls, id):
         if id is None:
             raise ValueError("An id is necessary to select a playlist")
-        return db.session.query(Playlists).filter(Playlists.id==id).one()
+        return db.session.query(Playlists).filter(Playlists.id==id).one()       # todo check if there is at leas one line (if the playlist exist)
 
     @classmethod
     def delete_playlist(cls, id):

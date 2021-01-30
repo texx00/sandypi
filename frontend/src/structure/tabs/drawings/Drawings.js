@@ -74,4 +74,6 @@ class Drawings extends Component{
     }
 }
 
+// TODO possibility to create elements instead of loading drawings. This will allow to share same elements between different playlists
+
 export default connect(mapStateToProps, mapDispatchToProps)(Drawings);

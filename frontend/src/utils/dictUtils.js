@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 
 // merges two dicts that contains child dicts
 const mergeDicts = (og, so) => {
@@ -13,15 +15,17 @@ const mergeDicts = (og, so) => {
 
 // clones a dict
 const cloneDict = di => {
+    return _.cloneDeep(di);
+    /*
     let tmp = {};
     for (let key in di){
-        if (typeof (di[key]) === 'object'  && !Array.isArray(di[key])) {
+        if ((typeof (di[key]) === 'object' || typeof (di[key]) === 'Proxy')  && !Array.isArray(di[key])) {
             tmp[key] = cloneDict(di[key]);
         } else {
             tmp[key] = di[key];
         }
     }
-    return tmp;
+    return tmp;*/
 }
 
 const setSubKey = (dict, keys, value) => {

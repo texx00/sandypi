@@ -1,4 +1,3 @@
-from logging import fatal
 from server.hw_controller.feeder import FeederEventHandler
 
 class FeederEventManager(FeederEventHandler):
@@ -6,7 +5,7 @@ class FeederEventManager(FeederEventHandler):
         super().__init__()
         self.app = app
 
-    def on_drawing_ended(self, code):
+    def on_element_ended(self, element):
         self.app.logger.info("B> Drawing ended")
         self.app.semits.show_toast_on_UI("Drawing ended")
         self.app.qmanager.set_is_drawing(False)
@@ -14,10 +13,10 @@ class FeederEventManager(FeederEventHandler):
         if self.app.qmanager.is_queue_empty():
             self.app.qmanager.send_queue_status()
 
-    def on_drawing_started(self, code):
+    def on_element_started(self, element):
         self.app.logger.info("B> Drawing started")
         self.app.semits.show_toast_on_UI("Drawing started")
-        self.app.qmanager.set_code(code)
+        self.app.qmanager.set_element(element)
         self.app.qmanager.send_queue_status()
     
     def on_message_received(self, line):

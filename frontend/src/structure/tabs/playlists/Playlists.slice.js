@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 import { playlist_save } from '../../../sockets/SAE';
-import { listsAreEqual } from '../../../utils/dictUtils';
+import { cloneDict, listsAreEqual } from '../../../utils/dictUtils';
 import { getSinglePlaylist } from './selector';
 
 const playlistsSlice = createSlice({
@@ -23,6 +23,7 @@ const playlistsSlice = createSlice({
                 let p = {...pl};
                 if (pl.id === playlistId){
                     p.elements = [...p.elements, ...elements];
+                    console.log("Saving playlist")
                     playlist_save(p);                 // saves playlist also on the server (only one playlist at a time, there will be no problem with mutliple save calls)
                 }
                 return p;
@@ -42,22 +43,23 @@ const playlistsSlice = createSlice({
         },
         setPlaylists: (state, action) => {
             let sync = false;
-            let playlist_deleted = true;
+            let playlist_deleted = true;                // to check if the playlist has been deleted from someone else
             let pls = action.payload.map((pl)=>{
                 pl.elements = JSON.parse(pl.elements);
                 if (pl.id === state.playlist_id){
-                    if (!listsAreEqual(pl, getSinglePlaylist({playlists: state})) && pl.id !== state.refresh_request_id){
-                        sync = true;    // check if any change to the playlist in use has been done on another device
+                    let pl_clone = cloneDict(getSinglePlaylist({playlists: state}));
+                    if (!listsAreEqual(pl_clone, pl) && pl.id !== state.refresh_request_id){
+                        sync = true;                    // check if any change to the playlist in use has been done on another device
                     }
                     playlist_deleted = false;
                 }
                 return pl;
             });
-            if (state.playlist_id === 0){   // if the playlist is a new playlist should not go back if the others are updated
+            if (state.playlist_id === 0){               // if the playlist is a new playlist should not go back if the others are updated
                 playlist_deleted = false;
             }
             let must_refresh = false;
-            if (state.refresh_request_id !== -1){
+            if (state.refresh_request_id !== -1){       // if the refresh request id is different than -1 means that we saved the playlist and we want to refresh it
                 must_refresh= true;
             }
             return { 
@@ -81,7 +83,7 @@ const playlistsSlice = createSlice({
                 return pl.id === playlist.id ? playlist : pl;
             });
             playlist_save(playlist);
-            return { ...state, playlists: res, playlist_deleted: false };
+            return { ...state, playlists: res, playlist_deleted: false, refresh_request_id: playlist.id };
         }
     }
 });

@@ -16,16 +16,12 @@ const queueSlice = createSlice({
         },
         setQueueStatus(state, action){
             let res = action.payload;
-            let queueEmpty = res.now_drawing_id === 0;
+            res.current_element = res.current_element === "None" ? undefined : JSON.parse(res.current_element);
+            let queueEmpty = res.current_element === undefined;
             return {
                 isQueueEmpty: queueEmpty,
-                elements: res.elements.map((el, idx) => {   // must set a drawing_id and id so they can be used with the sortable component. When elements are introduced on the server side, should send the element description instead of the drawing id so that this mapping will not be needed
-                    return {
-                        drawing_id: el,
-                        id: idx
-                    }
-                }),
-                drawingId: res.now_drawing_id
+                elements: res.elements,
+                currentElement: res.current_element
             }
         },
         setQueueNotEmpty(state, action){

@@ -1,11 +1,10 @@
 from queue import Queue
 import json
-import queue
 
 class QueueManager():
     def __init__(self, app, socketio):
         self._isdrawing = False
-        self._code = None
+        self._element = None
         self.app = app
         self.socketio = socketio
         self.q = Queue()
@@ -19,26 +18,27 @@ class QueueManager():
     def set_is_drawing(self, dr):
         self._isdrawing = dr
 
-    def get_code(self):
-        return self._code
+    def get_element(self):
+        return self._element
     
-    def set_code(self, code):
-        self.app.logger.info("Code: {}".format(code))
-        self._code = code
+    def set_element(self, element):
+        self.app.logger.info("Code: {}".format(element))
+        self._element = element
         self.set_is_drawing(True)
 
     # stop the current drawing and start the next
     def stop_drawing(self):
         self.app.feeder.stop()
 
-    # add a code to the queue
-    def queue_drawing(self, code):
+    # add an element to the queue
+    def queue_element(self, element, show_toast=True):
         if self.q.empty() and not self.is_drawing():
-            self.start_drawing(code)
+            self.start_element(element)
             return
-        self.app.logger.info("Adding {} to the queue".format(code))
-        self.q.put(code)
-        self.app.semits.show_toast_on_UI("Drawing added to the queue")
+        self.app.logger.info("Adding {} to the queue".format(element.drawing_id))
+        self.q.put(element)
+        if show_toast:
+            self.app.semits.show_toast_on_UI("Element added to the queue")
         self.send_queue_status()
 
     # return the content of the queue as a string
@@ -87,25 +87,26 @@ class QueueManager():
                 return False
         try:
             if self.queue_length() > 0:
-                self.start_drawing(self.q.queue.popleft())
+                self.start_element(self.q.queue.popleft())
                 self.app.logger.info("Starting next code")
                 return True
             else: 
                 self.app.feeder.stop()
-            self._code = None
+            self._element = None
             return False
         except Exception as e:
             self.app.logger.error("An error occured while starting a new drawing from the queue:\n{}".format(str(e)))
             self.start_next()
 
-    # This method send a "start" command to the bot with the code of the drawing
-    def start_drawing(self, code):
+    # This method send a "start" command to the bot with the element
+    def start_element(self, element):
         self.app.logger.info("Sending gcode start command")
-        self.app.feeder.start_code(code, force_stop = True)
+        self.app.feeder.start_element(element, force_stop = True)
 
     def send_queue_status(self):
+        elements = list(map(lambda x: str(x), self.q.queue)) if len(self.q.queue) > 0 else []                       # converts elements to json
         res = {
-            "now_drawing_id": self._code if self._code is not None else 0,
-            "elements": list(self.q.queue)
+            "current_element": str(self._element),
+            "elements": elements
         }
         self.app.semits.emit("queue_status", json.dumps(res))

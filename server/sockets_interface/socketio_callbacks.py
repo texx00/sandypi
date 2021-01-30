@@ -1,8 +1,4 @@
-from flask import render_template
-
-import pickle
 import json
-import datetime
 import shutil
 import os
 
@@ -10,34 +6,21 @@ from server import socketio, app, db
 
 from server.utils import settings_utils, software_updates
 from server.database.models import Playlists
-from server.database.playlist_elements import DrawingElement
+from server.database.playlist_elements import DrawingElement, GenericPlaylistElement
 from server.database.models import UploadedFiles, Playlists
 
-
-@socketio.on('message')
-def handle_message(message):
-    app.logger.info("Received message from js")
-    res = message['data'].split(":")
-    if res[0]=="start":
-        app.qmanager.start_drawing(res[1])
-    if res[0]=="queue":
-        app.qmanager.queue_drawing(res[1])
-
-# 
+# request to check if a new version of the software is available 
 @socketio.on('software_updates_check')
 def handle_software_updates_check():
     result = software_updates.compare_local_remote_tags()
     if result:
         if result["behind_remote"]:
-            toast = """A new update is available ({0}).<br>
-            Your version is {1}.<br>
-            Check <a href="https://github.com/texx00/sandypi">sandipy</a> github page to update to the latest version.
+            toast = """A new update is available ({0})\n
+            Your version is {1}\n
+            Check the github page to update to the latest version.
             """.format(result["remote_latest"], result["local"])
             socketio.emit("software_updates_response", toast)
 
-@socketio.on("request_nav_drawing_status")
-def nav_drawing_request():
-    app.semits.send_nav_drawing_status()
 
 # TODO split in multiple files?    
 
@@ -57,7 +40,7 @@ def playlist_delete(id):
 @socketio.on("playlist_save")
 def playlist_save(playlist):
     playlist = json.loads(playlist)
-    pl = Playlists.create_playlist() if playlist['id'] == 0 else Playlists.get_playlist(playlist['id'])
+    pl = Playlists.create_playlist() if not "id" in playlist else Playlists.get_playlist(playlist['id'])
     pl.clear_elements()
     pl.name = playlist['name']
     pl.add_element(playlist['elements'])
@@ -70,8 +53,7 @@ def playlist_queue(code):
     item = db.session.query(Playlists).filter(Playlists.id==code).one()
     elements = item.get_elements()
     for i in elements:
-        if i != "":
-            app.qmanager.queue_drawing(i.drawing_id)
+        app.qmanager.queue_element(i, show_toast = False)
 
 @socketio.on("playlists_refresh")
 def playlist_refresh():
@@ -127,7 +109,8 @@ def settings_reboot_system():
 
 @socketio.on("drawing_queue")
 def drawing_queue(code):
-    app.qmanager.queue_drawing(code)
+    element = DrawingElement(drawing_id=code)
+    app.qmanager.queue_element(element)
 
 @socketio.on("drawing_delete")
 def drawing_delete(code):
@@ -161,14 +144,15 @@ def queue_get_status():
 
 @socketio.on("queue_set_order")
 def queue_set_order(elements):
-    app.qmanager.set_new_order(map(lambda e: e['drawing_id'], json.loads(elements)))
+    app.qmanager.set_new_order(map(lambda e: GenericPlaylistElement.create_element_from_dict(e), json.loads(elements)))
 
 @socketio.on("queue_stop_drawing")
 def queue_stop_drawing():
-    app.semits.show_toast_on_UI("Stopping drawing...")
+    app.semits.show_toast_on_UI("Stopping drawing...") 
     app.qmanager.stop_drawing()
     if not app.qmanager.is_drawing():   # if the drawing was the last in the queue must send the updated status
         app.qmanager.send_queue_status()
+<<<<<<< HEAD
 
 # --------------------------------------------------------- LEDS CALLBACKS -------------------------------------------------------------------------------
 
@@ -176,3 +160,5 @@ def queue_stop_drawing():
 def leds_set_color(data):
     color = json.loads(data)
     app.leds_controller.set_color((color["h"], color["s"], color["v"]))
+=======
+>>>>>>> origin/playlists_upgrade

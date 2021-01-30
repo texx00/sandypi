@@ -1,4 +1,7 @@
+import sqlite3
+import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.sql.schema import Table
 from server import db
 
 # creates base class with common methods
@@ -23,21 +26,28 @@ Base.query = db.session.query_property()
 
 
 def get_playlist_table_class(id):
-    # may be better to use reflection methods from sql alchemy here after the table has been created?
     if id is None: raise ValueError("A playlist id must be specified")
-    table_name = "_playlist_{}".format(id)
+    table_name = "_playlist_{}".format(id)                              # table name is prefix + table_id
+    
+    # if table exist use autoload otherwise create the table
+    table_exist = table_name in sqlalchemy.inspect(db.engine).get_table_names()
 
     class PTable(Base):
-        """
-        These tables are not updated automatically with flask migrate.
-        If a schema change is applied to this tables must use a custom migrate script for the upgrade to a new database version
-        """
-        __tablename__ = table_name
-        __table_args__ = {'extend_existing': True}                      # necessary to modify a table
+        __tablename__ = table_name                                      # table name
+        # set table args to load existing table if possible
+        __table_args__ = {'extend_existing': True, 'autoload': table_exist, 'autoload_with': db.get_engine()}
         id = db.Column(db.Integer, primary_key=True)
         element_type = db.Column(db.String(10), default="")
         drawing_id = db.Column(db.Integer, default = None)              # drawing id added explicitely for possible queries
         element_options = db.Column(db.String(1000), default="")        # element options
+
+    # change class attrs manually to avoid getting a warning ("This declarative base already contains a class with the same class name and module name")
+    PTable.__name__ = table_name
+    PTable.__qualname__ = table_name
+    PTable.__module__ = table_name
+
+    if not table_exist:
+        PTable.__table__.create(db.get_engine())
 
     return PTable
 
@@ -47,7 +57,6 @@ def create_playlist_table(id):
     The number of tables will be the same as the number of playlists.
     """
     p_class = get_playlist_table_class(id)
-    p_class.__table__.create(db.get_engine())
 
 def delete_playlist_table(id):
     """

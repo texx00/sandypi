@@ -3,7 +3,7 @@ import os
 import json
 import logging
 import platform
-
+from netifaces import interfaces, ifaddresses, AF_INET
 
 # Logging levels (see the documentation of the logging module for more details)
 LINE_SENT = 6
@@ -75,9 +75,23 @@ def print_level(level, logger_name):
         description = "CRITICAL"
     print("Logger '{}' level: {} ({})".format(logger_name, level, description))
 
+def get_ip4_addresses():
+    ip_list = []
+    for interface in interfaces():
+        try:
+            for link in ifaddresses(interface)[AF_INET]:
+                ip_list.append(link['addr'])
+        except:
+            # if the interface is whitout ipv4 adresses can just pass
+            pass
 
+    return ip_list
+
+
+# To run it must be in "$(env) server>" and use "python utils/settings_utils.py"
 if __name__ == "__main__":
     # testing update_settings_file_version
     settings_path = "../"+settings_path
     defaults_path = "../"+defaults_path
     update_settings_file_version()
+    print(get_ip4_addresses())

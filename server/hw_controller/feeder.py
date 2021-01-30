@@ -1,12 +1,10 @@
 from threading import Thread, Lock
 import os
-from pathlib import Path
 import time
 import traceback
 from collections import deque
 from copy import deepcopy
 import re
-
 import logging
 from dotenv import load_dotenv
 
@@ -25,11 +23,11 @@ This class duty is to send commands to the hw. It can be a single command or an 
 
 class FeederEventHandler():
     # called when the drawing is finished
-    def on_drawing_ended(self, code):
+    def on_element_ended(self, element):
         pass
 
     # called when a new drawing is started
-    def on_drawing_started(self, code):
+    def on_element_started(self, element):
         pass
     
     # called when the feeder receives a message from the hw that must be sent to the frontend
@@ -128,24 +126,24 @@ class Feeder():
         self.handler = handler
 
     # starts to send gcode to the machine
-    def start_code(self, code, force_stop=False):
+    def start_element(self, element, force_stop=False):
         if(not force_stop and self.is_running()):
             return False        # if a file is already being sent it will not start a new one
         else:
             if self.is_running():
                 self.stop()     # stop -> blocking function: wait until the thread is stopped for real
             with self.serial_mutex:
-                self._th = Thread(target = self._thf, args=(code,), daemon=True)
+                self._th = Thread(target = self._thf, args=(element,), daemon=True)
                 self._th.name = "drawing_feeder"
                 self._isrunning = True
                 self._stopped = False
                 self._ispaused = False
-                self._running_code = code
+                self._current_element = element
                 self.command_number = 0
                 with self.command_buffer_mutex:
                     self.command_buffer.clear()
                 self._th.start()
-            self.handler.on_drawing_started(code)
+            self.handler.on_element_started(element)
 
     # ask if the feeder is already sending a file
     def is_running(self):
@@ -158,20 +156,20 @@ class Feeder():
             return self._ispaused
 
     # return the code of the drawing on the go
-    def get_drawing_code(self):
+    def get_element(self):
         with self.status_mutex:
-            return self._running_code
+            return self._current_element
     
     # stops the drawing
     # blocking function: waits until the thread is stopped
     def stop(self):
         if(self.is_running()):
-            tmp = self._running_code
+            tmp = self._current_element
             with self.status_mutex:
                 if not self._stopped:
                     self.logger.info("Stopping drawing")
                 self._isrunning = False
-                self._running_code = 0
+                self._current_element = None
             # block the function until the thread is stopped otherwise the thread may still be running when the new thread is started 
             # (_isrunning will turn True and the old thread will keep going)
             while True:
@@ -186,7 +184,7 @@ class Feeder():
             # resetting line number between drawings
             self.reset_line_number()
             # calling "drawing ended" event
-            self.handler.on_drawing_ended(tmp)
+            self.handler.on_element_ended(tmp)
     
     # pause the drawing
     # can resume with "resume()"
@@ -201,14 +199,13 @@ class Feeder():
 
     # thread function
     # TODO move this function in a different class
-    def _thf(self, code):
+    def _thf(self, element):
         settings = settings_utils.load_settings()
         self.send_script(settings['scripts']['before'])
 
-        self.logger.info("Starting new drawing with code {}".format(code))
+        self.logger.info("Starting new drawing with code {}".format(element))
         with self.serial_mutex:
-            code = self._running_code
-        filename = os.path.join(str(Path(__file__).parent.parent.absolute()), "static/Drawings/{0}/{0}.gcode".format(code))
+            element = self._current_element
         
         # TODO retrieve saved information for the gcode filter
         dims = {"table_x":100, "table_y":100, "drawing_max_x":100, "drawing_max_y":100, "drawing_min_x":0, "drawing_min_y":0}
@@ -217,20 +214,17 @@ class Feeder():
 
         filter = Fit(dims)
         
-        with open(filename, "r") as file:
-            file_line = 1
-            for k, line in enumerate(file):
-                line = line.upper()
-                if not self.is_running():
-                    break
-                while self.is_paused():
-                    time.sleep(0.1)
-                if not line[0]==";":
-                    # TODO parse line to scale/add padding to the drawing according to the drawing settings (in order to keep the original .gcode file)
-                    #line = filter.parse_line(line)
-                    #line = "N{} ".format(file_line) + line
+        for k, line in enumerate(element.execute()):        # execute the element (iterate over the commands or do what the element is designed for)
+            line = line.upper()
+            if not self.is_running():
+                break
+            while self.is_paused():
+                time.sleep(0.1)
+                # TODO parse line to scale/add padding to the drawing according to the drawing settings (in order to keep the original .gcode file)
+                #line = filter.parse_line(line)
+                #line = "N{} ".format(file_line) + line
 
-                    self.send_gcode_command(line)
+            self.send_gcode_command(line)
         with self.status_mutex:
             self._stopped = True
         if self.is_running():

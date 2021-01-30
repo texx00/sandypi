@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { Button, Container } from 'react-bootstrap';
 import { Stop, Trash } from 'react-bootstrap-icons';
 import { connect } from 'react-redux';
-import Image from '../../../components/Image';
 
 import { Section, Subsection } from '../../../components/Section';
 import SortableElements from '../../../components/SortableElements';
@@ -10,17 +9,19 @@ import SortableElements from '../../../components/SortableElements';
 import { queue_status } from '../../../sockets/SAC';
 import { queue_get_status, queue_set_order, queue_stop_drawing } from '../../../sockets/SAE';
 import { listsAreEqual } from '../../../utils/dictUtils';
-import { getImgUrl } from '../../../utils/utils';
+import { getElementClass } from '../playlists/SinglePlaylist/Elements';
+import { isViewQueue } from '../selector';
 
 import { setTab, tabBack } from '../Tabs.slice';
 import { setQueueElements, setQueueStatus } from './Queue.slice';
-import { getQueueDrawingId, getQueueElements, getQueueEmpty } from './selector';
+import { getQueueCurrent, getQueueElements, getQueueEmpty } from './selector';
 
 const mapStateToProps = (state) => {
     return {
         elements: getQueueElements(state),
-        drawingId: getQueueDrawingId(state),
-        isQueueEmpty: getQueueEmpty(state)
+        currentElement: getQueueCurrent(state),
+        isQueueEmpty: getQueueEmpty(state),
+        isViewQueue: isViewQueue(state)
     }
 }
 
@@ -46,7 +47,7 @@ class Queue extends Component{
         if (!listsAreEqual(this.state.elements, this.props.elements)){
             this.setState({...this.state, elements: this.props.elements, refreshList: true});
         }
-        if (this.props.isQueueEmpty){
+        if (this.props.isQueueEmpty && this.props.isViewQueue){
             this.props.handleTabBack();
         }
     }
@@ -58,6 +59,7 @@ class Queue extends Component{
 
     parseQueue(data){
         let res = JSON.parse(data);
+        res.elements = res.elements.map((el) => { return JSON.parse(el) });
         this.props.setQueueStatus(res);
     }
 
@@ -79,6 +81,7 @@ class Queue extends Component{
     }
 
     renderList(){
+        // TODO fix issue with the list that when is modified will delete every element in the queue
         if (this.state.elements !== undefined)
             if (this.state.elements.length > 0){
                 return <Subsection sectionTitle="Coming next..."
@@ -89,7 +92,8 @@ class Queue extends Component{
                         list={this.state.elements}
                         onUpdate={this.handleSortableUpdate.bind(this)}
                         refreshList={this.state.refreshList}
-                        onListRefreshed={()=>this.setState({...this.state, refreshList: false})}>
+                        onListRefreshed={()=>this.setState({...this.state, refreshList: false})}
+                        hideOptions={true}>
                     </SortableElements>
                 </Subsection>
             }
@@ -106,19 +110,21 @@ class Queue extends Component{
                     <Button onClick={() => this.props.setTabHome()}>Homepage</Button>
                 </div>
             </Container>
-        }else return <Container>
-            <Section sectionTitle="Now drawing"
-                    sectionButton="Stop drawing"
-                    buttonIcon={Stop}
-                    sectionButtonHandler={this.stopDrawing.bind(this)}>
-                <div className="center mb-5">
-                    <Image className="modal-drawing-preview" 
-                        src={getImgUrl(this.props.drawingId)} 
-                        alt="Queued element"/>
-                </div>
-            </Section>
-            {this.renderList()}
-        </Container>
+        }else{
+            let ElementType = getElementClass(this.props.currentElement);
+            return <Container>
+                <Section sectionTitle="Now drawing"
+                        sectionButton="Stop drawing"
+                        buttonIcon={Stop}
+                        sectionButtonHandler={this.stopDrawing.bind(this)}>
+                    <div className="center mb-5 w-100">
+                        <ElementType element={this.props.currentElement}
+                            hideOptions={"true"}/>
+                    </div>
+                </Section>
+                {this.renderList()}
+            </Container>
+        }
     }
 }
 

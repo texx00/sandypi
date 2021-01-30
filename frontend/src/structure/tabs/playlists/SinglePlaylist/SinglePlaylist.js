@@ -3,7 +3,7 @@ import './SinglePlaylist.scss';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Container, Row, Col, Modal } from 'react-bootstrap';
-import { FileEarmarkCheck, Play, X } from 'react-bootstrap-icons';
+import { FileEarmarkCheck, Play, X, Check } from 'react-bootstrap-icons';
 
 import ConfirmButton from '../../../../components/ConfirmButton';
 import SortableElements from '../../../../components/SortableElements';
@@ -66,6 +66,7 @@ class SinglePlaylist extends Component{
         }else{
             this.props.updateSinglePlaylist(playlist);
         }
+        window.show_toast(<div>Playlist saved <Check /></div>);
     }
 
     handleSaveBeforeBack(){
@@ -73,8 +74,8 @@ class SinglePlaylist extends Component{
     }
 
     handleSortableUpdate(list){
-        if (!listsAreEqual(list, this.state.elements)){
-            this.setState({...this.state, elements: list, edited: true});
+        if (!listsAreEqual(list, this.state.elements)){                     // updates only if the new and old lists are different
+            this.setState({...this.state, elements: list, edited: true, refreshList: true});
             this.handleSaveBeforeBack();
         }
     }
@@ -86,6 +87,16 @@ class SinglePlaylist extends Component{
         }
     }
 
+    handleElementUpdate(element){
+        let tmp = this.state.elements.map((el) => {return el});
+        let res = tmp.map((el)=>{
+            if (el.id === element.id)
+                return element;
+            else return el;
+        });
+        this.handleSortableUpdate(res);
+    }
+
     renderElements(){
         if (this.state.elements !== null && 
             this.state.elements !== undefined){
@@ -93,7 +104,8 @@ class SinglePlaylist extends Component{
                     list={this.state.elements}
                     onUpdate={this.handleSortableUpdate.bind(this)}
                     refreshList={this.state.refreshList}
-                    onListRefreshed={()=>this.setState({...this.state, refreshList: false})}>
+                    onListRefreshed={()=>this.setState({...this.state, refreshList: false})}
+                    onElementOptionsChange={this.handleElementUpdate.bind(this)}>
                         <ControlCard key={-1} 
                             playlistId={this.props.playlistId}
                             onElementsAdded={(ids) => this.props.addElements({playlistId: this.props.playlist.id, elements: ids})}/>
@@ -163,8 +175,9 @@ class SinglePlaylist extends Component{
             {this.renderElements()}
 
             
-            <Modal show={this.props.showModal}
+            <Modal show={this.props.showResyncModal}
                 aria-labelledby="contained-modal-title-vcenter"
+                onHide={()=> this.props.onRefreshList()}
                 centered>
                 <Modal.Header className="center">
                     <Modal.Title>
@@ -186,9 +199,11 @@ class SinglePlaylist extends Component{
                 </Modal.Footer>
             </Modal>
 
-            <Modal show={this.props.is_save_before_back && this.props.isSinglePlaylist}
+            <Modal show={this.props.is_save_before_back && this.props.isViewSinglePlaylist}
                 aria-labelledby="contained-modal-title-vcenter"
-                centered>
+                centered
+                onHide={()=>{this.props.resetShowSaveBeforeBack(); 
+                    this.handleSaveBeforeBack()}}>
                 <Modal.Header className="center">
                     <Modal.Title>
                         Save playlist changes?
