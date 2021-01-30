@@ -142,6 +142,11 @@ $> source env/bin/activate
 (env) $> install.bat
 ```
 
+After the update it may be necessary to clear the browser cache.
+It is also possible to use the following command in the browser console (google "javascript console browser_model"):
+```
+localStorage.clear()
+```
 
 # Development and testing
 

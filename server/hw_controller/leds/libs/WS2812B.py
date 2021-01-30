@@ -1,6 +1,5 @@
 import board
 import neopixel
-import time
 
 LED_FREQ = 800000
 
@@ -11,7 +10,7 @@ class WS2812B():
         # TODO use the selected pin number
         self.pixels = neopixel.NeoPixel(board.D18, self.led_n)
         # turn off all leds
-        self.fill((0,0,0))
+        #self.fill((0,0,0))
     
     def fill(self, color):
         self.pixels.fill(color)

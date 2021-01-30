@@ -62,6 +62,7 @@ from server.sockets_interface.socketio_emits import SocketioEmits
 from server.hw_controller.queue_manager import QueueManager
 from server.hw_controller.feeder import Feeder
 from server.hw_controller.feeder_event_manager import FeederEventManager
+from server.hw_controller.leds.leds_controller import LedsController
 
 
 # Initializes sockets emits
