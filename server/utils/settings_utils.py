@@ -43,13 +43,15 @@ def update_settings_file_version():
     
 def match_dict(mod_dict, ref_dict):
     if type(ref_dict) is dict:
-        new_dict = dict(mod_dict)
+        new_dict = dict(mod_dict)   # clone object
         for k in ref_dict.keys():
-            if not k in mod_dict:
-                new_dict[k] = match_dict(mod_dict[k], ref_dict[k])
+            if not k in new_dict:
+                new_dict[k] = ref_dict[k]    # if key is not set, adds the key as an empty dict
+            else:
+                new_dict[k] = match_dict(new_dict[k], ref_dict[k])
         return new_dict
     else:
-        return ref_dict
+        return mod_dict
 
 # print the level of the logger selected
 def print_level(level, logger_name):
@@ -90,11 +92,14 @@ if __name__ == "__main__":
     # testing update_settings_file_version
     settings_path = "../"+settings_path
     defaults_path = "../"+defaults_path
-    update_settings_file_version()
-    print(get_ip4_addresses())
-    a = {"a":0, "b":{"c":2, "d":4}}
+
+    a = {"a":0, "b":{"c":2, "d":4}, "d":5}
     b = {"a":1, "b":{"c":1, "e":5}, "c":3}
     c = match_dict(a,b)
     print(a)
     print(b)
     print(c)
+    print(c=={"a":0, "b":{"c":2, "d":4, "e":5}, "d":5, "c":3})
+
+    update_settings_file_version()
+    print(get_ip4_addresses())
