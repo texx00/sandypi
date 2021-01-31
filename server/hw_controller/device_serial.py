@@ -1,6 +1,7 @@
 import serial.tools.list_ports
 import serial
 import time
+import traceback
 import sys
 import logging
 from server.hw_controller.emulator import Emulator
@@ -31,10 +32,10 @@ class DeviceSerial():
             self.serial.open()
             self.logger.info("Serial device connected")
         except:
-            #print(traceback.print_exc())
+            self.logger.error(traceback.print_exc())
             # TODO should add a check to see if the problem is that cannot use the Serial module because it is not installed correctly on raspberry
             self.is_fake = True
-            self.logger.error("Serial not available. Will use the fake serial")
+            self.logger.error("Serial not available. Are you sure the device is connected and is not in use by other softwares? (Will use the fake serial)")
 
     def send(self, obj):
         if self.is_fake:

@@ -14,7 +14,7 @@ settings_path = "./server/saves/saved_settings.json"
 defaults_path = "./server/saves/default_settings.json"
 
 def save_settings(settings):
-    dataj = json.dumps(settings)
+    dataj = json.dumps(settings, indent=4)
     with open(settings_path,"w") as f:
         f.write(dataj)
 

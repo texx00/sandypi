@@ -13,16 +13,17 @@ class LedsController:
         # may have problems with the leds controller if self.driver.deinit or self.stop is not called on app shutdown
 
     def start(self):
-        self._running = True
-        self._th = Thread(target = self._thf, daemon=True)
-        self._th.name = "leds_controller"
-        self._th.start()
+        if not self.driver is None:
+            self._running = True
+            self._th = Thread(target = self._thf, daemon=True)
+            self._th.name = "leds_controller"
+            self._th.start()
     
     def stop(self):
         self._running = False
     
     def _thf(self):
-        self.app.logger.error("Leds controller started")
+        self.app.logger.info("Leds controller started")
         while(self._running):
             with self.mutex:
                 if (self._should_update):
@@ -50,6 +51,7 @@ class LedsController:
     # Updates dimensions of the led matrix
     # Updates the led driver object only if the dimensions are changed
     def update_settings(self, settings):
+        self.stop()
         dims = (settings["leds"]["width"], settings["leds"]["height"])
         if self.dimensions != dims:
             self.dimensions = dims
@@ -65,6 +67,8 @@ class LedsController:
             elif self.leds_type == "Dimmable":
                 is_ok = self.driver.use_dimmable(self.pin)
             if not is_ok: 
+                self.driver = None
                 self.app.semits.show_toast_on_UI("Led driver type not compatible with current HW")
                 self.app.logger.error("Cannot initialize leds controller")
+        self.start()
         

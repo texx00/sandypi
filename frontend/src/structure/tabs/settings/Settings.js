@@ -80,6 +80,14 @@ class Settings extends Component{
                                         </Form.Group>
                                     </Col>
                                     <Col>
+                                        <Form.Group controlId="checksum">
+                                            <Form.Label></Form.Label>
+                                            <Form.Check type="switch" label="Send code checksum"
+                                                checked={this.props.settings.serial.checksum==="true"}
+                                                onChange={(e) => this.props.updateSetting(["serial.checksum", ""+e.target.checked])}/>
+                                        </Form.Group>
+                                    </Col>
+                                    <Col>
                                         <Button className="w-100 h-100" onClick={() => this.saveForm(true)}>Save and connect</Button>
                                     </Col>
                                 </Form.Row>

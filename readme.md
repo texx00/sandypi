@@ -116,6 +116,17 @@ If you find problems during the installation check the [troubleshooting](/docs/t
 **If you find any bug or problem please feel free to open an [issue](https://github.com/texx00/sandypi/issues) in the dedicated page.**
 ___
 
+# Boards and firmwares
+At the moment, the sw is tested only with Marlin 2.0 and Grbl 1.1
+Should be compatible with other firmwares as well. If not please open an issue.
+
+## Marlin 2.0 setup
+In the settings select the port and the correct baudrate (usually 115200 or 250000). Marlin needs the command checksum to be enable (enable "send code checksum" in the settings).
+
+## Grbl 1.1
+In the settings select the port and the correct baudrate (usually 115200 or 250000). Grbl may not need the command checksum (disable "send code checksum" in the settings).
+
+
 # Updates
 
 The software will prompt weekly if a new tag version has been added.

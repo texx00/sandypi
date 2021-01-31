@@ -70,6 +70,7 @@ def settings_save(data, is_connect):
     settings_utils.save_settings(data)
     settings = settings_utils.load_settings()
     app.leds_controller.update_settings(settings)
+    app.feeder.update_settings(settings)
     app.semits.show_toast_on_UI("Settings saved")
 
     # updating feeder

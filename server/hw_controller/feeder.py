@@ -89,18 +89,25 @@ class Feeder():
         self.position_request_difference = 10           # every n lines requires the current position with M114
         self._timeout = buffered_timeout.BufferTimeout(15, self._on_timeout)
         self._timeout.start()
+
+        # device specific options
+        self.update_settings(settings_utils.load_settings())
+
+
+    def update_settings(self, settings):
+        self.settings = settings
+        self._use_checksum = self.settings["serial"]["checksum"] == "true"
     
     def close(self):
         self.serial.close()
 
     def connect(self):
         self.logger.info("Connecting to serial device...")
-        settings = settings_utils.load_settings()
         with self.serial_mutex:
             if not self.serial is None:
                 self.serial.close()
             try:
-                self.serial = DeviceSerial(settings['serial']['port'], settings['serial']['baud'], logger_name = __name__) 
+                self.serial = DeviceSerial(self.settings['serial']['port'], self.settings['serial']['baud'], logger_name = __name__) 
                 self._serial_read_thread = Thread(target = self._thsr, daemon=True)
                 self._serial_read_thread.name = "serial_read"
                 self._serial_read_thread.start()
@@ -116,7 +123,7 @@ class Feeder():
         self.reset_line_number()
         self.request_feedrate()
         # send the "on connection" script from the settings
-        self.send_script(settings['scripts']['connected'])
+        self.send_script(self.settings['scripts']['connected'])
 
     def wait_device_ready(self):
         time.sleep(1)
@@ -200,8 +207,7 @@ class Feeder():
     # thread function
     # TODO move this function in a different class
     def _thf(self, element):
-        settings = settings_utils.load_settings()
-        self.send_script(settings['scripts']['before'])
+        self.send_script(self.settings['scripts']['before'])
 
         self.logger.info("Starting new drawing with code {}".format(element))
         with self.serial_mutex:
@@ -228,7 +234,7 @@ class Feeder():
         with self.status_mutex:
             self._stopped = True
         if self.is_running():
-            self.send_script(settings['scripts']['after'])
+            self.send_script(self.settings['scripts']['after'])
             self.stop()
 
     # thread that keep reading the serial port
@@ -334,16 +340,20 @@ class Feeder():
             return {"is_running":self._isrunning, "progress":[self.command_number, self.total_commands_number], "is_paused":self._ispaused, "is_connected":self.is_connected()}
 
     def _generate_line(self, command, no_buffer=False):
-        self.line_number += 1
-        line = "N{} {} ".format(self.line_number, command)
+        line = command
+        if not command.startswith("$"):                 # filter grbl commands
+            self.line_number += 1
+            line = "N{} {} ".format(self.line_number, command)
 
-        # calculate checksum according to the wiki
-        cs = 0
-        for i in line:
-            cs = cs ^ ord(i)
-        cs &= 0xff
-        
-        line +="*{}\n".format(cs)   # add checksum to the line
+        if self._use_checksum:
+            # calculate marlin checksum according to the wiki
+            cs = 0
+            for i in line:
+                cs = cs ^ ord(i)
+            cs &= 0xff
+            
+            line +="*{}\n".format(cs)                   # add checksum to the line
+        else: line +="\n"
 
         # store the line in the buffer
         with self.command_buffer_mutex:
