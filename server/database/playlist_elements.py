@@ -114,6 +114,9 @@ class DrawingElement(GenericPlaylistElement):
             for line in f:
                 if line.startswith(";"):                                                            # skips commented lines
                     continue
+                if ";" in line:                                                                     # remove in line comments
+                    line.split(";")
+                    line = line[0]
                 yield line
 
 

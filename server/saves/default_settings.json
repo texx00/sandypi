@@ -2,7 +2,11 @@
     "serial": {
         "port": "COM3",
         "baud": "115200",
-        "checksum": "true"
+        "firmware": "Marlin",
+        "available_firmwares": [
+            "Marlin",
+            "Grbl"
+        ]
     },
     "device": {
         "width": "450",

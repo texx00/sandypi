@@ -46,6 +46,7 @@ class Settings extends Component{
     render(){
         let port = this.props.settings.serial.port ? this.props.settings.serial.port : "";
         let baud = this.props.settings.serial.baud ? this.props.settings.serial.baud : "";
+        let firmware = this.props.settings.serial.firmware ? this.props.settings.serial.firmware : "";
         // TODO auto generate layout directly from settings? (include a "setting type", values, etc)
         return <Container>
             <Form>
@@ -80,11 +81,16 @@ class Settings extends Component{
                                         </Form.Group>
                                     </Col>
                                     <Col>
-                                        <Form.Group controlId="checksum">
-                                            <Form.Label></Form.Label>
-                                            <Form.Check type="switch" label="Send code checksum"
-                                                checked={this.props.settings.serial.checksum==="true"}
-                                                onChange={(e) => this.props.updateSetting(["serial.checksum", ""+e.target.checked])}/>
+                                        <Form.Group controlId="firmware">
+                                            <Form.Label>Firmware</Form.Label>
+                                            <Form.Control as="select" 
+                                                value={firmware}
+                                                onChange={(e) => this.props.updateSetting(["serial.firmware", e.target.value])}>
+                                                { this.props.settings.serial.available_firmwares.map((firm, index) => {
+                                                    return <option key={index}>{firm}</option>
+                                                })}
+                                            </Form.Control>
+                                            
                                         </Form.Group>
                                     </Col>
                                     <Col>

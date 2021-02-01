@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from server.utils import limited_size_dict, buffered_timeout, settings_utils
 from server.hw_controller.device_serial import DeviceSerial
 from server.hw_controller.gcode_rescalers import Fit
-
+import server.hw_controller.firmware_defaults as firmware
 
 """
 
@@ -87,7 +87,7 @@ class Feeder():
         self.command_buffer_max_length = 8
         self.command_buffer_history = limited_size_dict.LimitedSizeDict(size_limit = self.command_buffer_max_length+10)    # keep saved the last n commands
         self.position_request_difference = 10           # every n lines requires the current position with M114
-        self._timeout = buffered_timeout.BufferTimeout(15, self._on_timeout)
+        self._timeout = buffered_timeout.BufferTimeout(30, self._on_timeout)
         self._timeout.start()
 
         # device specific options
@@ -96,7 +96,8 @@ class Feeder():
 
     def update_settings(self, settings):
         self.settings = settings
-        self._use_checksum = self.settings["serial"]["checksum"] == "true"
+        self._firmware = settings["serial"]["firmware"]
+        self._ACK = firmware.get_ACK(self._firmware)
     
     def close(self):
         self.serial.close()
@@ -265,10 +266,17 @@ class Feeder():
         self._timeout.update()
     
     def _on_timeout(self):
+        # https://github.com/gnea/grbl/issues/666
+        # on grbl can check buffer content
+        # TODO check the buffer content instead of commands for the ack
+        # need to set the bitmask with $10=something
+        # the board will return <Stuff|Bf:rows in the buffer,Stuff>
+
         if (self.command_buffer_mutex.locked and self.line_number == self._timeout_last_line):
             # self.logger.warning("!Buffer timeout. Trying to clean the buffer!")
             # to clean the buffer try to send an M114 message. In this way will trigger the buffer cleaning mechanism
-            line = self._generate_line("M114", no_buffer=True)  # use the no_buffer to clean one position of the buffer after adding the command
+            command = firmware.get_buffer_command(self._firmware)
+            line = self._generate_line(command, no_buffer=True)  # use the no_buffer to clean one position of the buffer after adding the command
             with self.serial_mutex:                
                 self.serial.send(line)
         else:
@@ -300,9 +308,12 @@ class Feeder():
             self.wait_device_ready()
             self.reset_line_number()
 
-        elif "ok" in line:  # when an "ack" is received free one place in the buffer
+        elif firmware.get_ACK(self._firmware) in line:  # when an "ack" is received free one place in the buffer
             self._ack_received()
 
+        # TODO divide parser between firmwares?
+
+        # Marlin resend command if a message is not received correctly
         elif "Resend: " in line:
             line_found = False
             line_number = int(line.replace("Resend: ", "").replace("\r\n", ""))
@@ -329,8 +340,13 @@ class Feeder():
         #elif "_______" in line: # must see the real output from marlin
         #    self.feedrate = .... # must see the real output from marlin
 
+        # Marlin "unknow command"
         elif "echo:Unknown command:" in line:
             self.logger.error("Error: command not found. Can also be a communication error")
+
+        # Grbl
+        elif "error:" in line:
+            self.logger.error("Grbl error: {}".format(line))
         
         self.logger.log(settings_utils.LINE_RECEIVED, line)
         self.handler.on_message_received(line)
@@ -339,13 +355,17 @@ class Feeder():
         with self.serial_mutex:
             return {"is_running":self._isrunning, "progress":[self.command_number, self.total_commands_number], "is_paused":self._ispaused, "is_connected":self.is_connected()}
 
+    # depending on the firmware, generate a correct line to send to the board
+    # args: 
+    #  * command: the gcode command to send
+    #  * no_buffer (def: False): will not save the line in the buffer (used to get an ack to clear the buffer after a timeout if an ack is lost)
     def _generate_line(self, command, no_buffer=False):
         line = command
-        if not command.startswith("$"):                 # filter grbl commands
+        if (not (command.startswith("$") or command.startswith("?"))) or firmware.is_marlin(self._firmware):                 # filter grbl commands
             self.line_number += 1
             line = "N{} {} ".format(self.line_number, command)
 
-        if self._use_checksum:
+        if firmware.is_marlin(self._firmware):
             # calculate marlin checksum according to the wiki
             cs = 0
             for i in line:

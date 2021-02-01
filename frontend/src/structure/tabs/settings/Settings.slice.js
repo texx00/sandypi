@@ -9,7 +9,9 @@ const settingsSlice = createSlice({
             port: "FAKE", 
             baud: 115200,
             available_baudrates: ["2400", "4800", "9600", "19200", "38400", "57600", "115200", "230400", "460800", "921600"], 
-            available_ports: ["FAKE"]
+            available_ports: ["FAKE"],
+            firmware: "Marlin",
+            available_firmwares: ["Marlin", "Grbl"]
         }, 
         device: {
             width: 100, 
