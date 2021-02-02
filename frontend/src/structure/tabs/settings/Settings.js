@@ -8,8 +8,8 @@ import { getSettings } from "./selector.js";
 import { updateAllSettings, updateSetting } from "./Settings.slice.js";
 import { setDeviceSize } from "../manual/ManualControl.slice.js";
 
-import { settings_now } from '../../../sockets/SAC';
-import { settings_save } from '../../../sockets/SAE';
+import { settings_now } from '../../../sockets/sCallbacks';
+import { settings_save } from '../../../sockets/sEmits';
 import { cloneDict } from '../../../utils/dictUtils';
 
 const mapStateToProps = (state) => {

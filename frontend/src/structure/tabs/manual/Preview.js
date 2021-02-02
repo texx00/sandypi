@@ -2,7 +2,7 @@ import "./ManualControl.scss";
 
 import React, { Component } from 'react';
 
-import { device_new_position } from '../../../sockets/SAC';
+import { device_new_position } from '../../../sockets/sCallbacks';
 
 const ANIMATION_FRAMES_MAX = 10;
 const ANIMATION_DURATION = 1000;

@@ -9,7 +9,7 @@ import ConfirmButton from '../../../../components/ConfirmButton';
 import SortableElements from '../../../../components/SortableElements';
 import IconButton from '../../../../components/IconButton';
 
-import { playlist_delete, playlist_queue, playlist_save } from '../../../../sockets/SAE';
+import { playlist_delete, playlist_queue, playlist_save } from '../../../../sockets/sEmits';
 import { listsAreEqual } from '../../../../utils/dictUtils';
 
 import { resetShowSaveBeforeBack, setSaveBeforeBack, tabBack } from '../../Tabs.slice';

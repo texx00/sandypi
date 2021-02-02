@@ -3,7 +3,7 @@ import { Spinner } from 'react-bootstrap';
 
 import Toast from 'react-bootstrap/Toast';
 
-import { connection_status_callback, show_toast } from "../sockets/SAC";
+import { connection_status_callback, show_toast } from "../sockets/sCallbacks";
 import { cloneDict } from '../utils/dictUtils';
 
 class CustomToast extends Component{

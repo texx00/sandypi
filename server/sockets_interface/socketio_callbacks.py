@@ -159,3 +159,10 @@ def queue_stop_drawing():
 def leds_set_color(data):
     color = json.loads(data)
     app.leds_controller.set_color((color["r"], color["g"], color["b"]))
+
+
+# --------------------------------------------------------- MANUAL CONTROL -------------------------------------------------------------------------------
+
+@socketio.on("control_emergency_stop")
+def control_emergency_stop():
+    app.feeder.emergency_stop()

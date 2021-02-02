@@ -6,8 +6,8 @@ import { connect } from 'react-redux';
 import { Section, Subsection } from '../../../components/Section';
 import SortableElements from '../../../components/SortableElements';
 
-import { queue_status } from '../../../sockets/SAC';
-import { queue_get_status, queue_set_order, queue_stop_drawing } from '../../../sockets/SAE';
+import { queue_status } from '../../../sockets/sCallbacks';
+import { queue_get_status, queue_set_order, queue_stop_drawing } from '../../../sockets/sEmits';
 import { listsAreEqual } from '../../../utils/dictUtils';
 import { getElementClass } from '../playlists/SinglePlaylist/Elements';
 import { isViewQueue } from '../selector';

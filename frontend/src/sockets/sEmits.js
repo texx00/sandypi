@@ -1,4 +1,4 @@
-import {socket} from './SAC';
+import {socket} from './sCallbacks';
 
 // sends a gcode command to the feeder
 function send_command(command){
@@ -82,11 +82,20 @@ function queue_set_order(list){
 
 function queue_stop_drawing(){
     socket.emit("queue_stop_drawing");
+    window.show_toast(<div>The drawing is being stopped. <br/>The device will still run until the buffer is empty.</div>)
+}
+
+
+// ---- MANUAL CONTROL ----
+
+function control_emergency_stop(){
+    socket.emit("control_emergency_stop")
 }
 
 
 export {
     send_command,  
+    control_emergency_stop,
     drawing_delete, 
     drawings_request, 
     drawing_queue, 

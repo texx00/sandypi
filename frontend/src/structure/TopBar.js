@@ -9,7 +9,7 @@ import QueuePreview from './tabs/queue/QueuePreview';
 import { showBack } from './tabs/selector';
 import { setTab, tabBack } from './tabs/Tabs.slice';
 import { systemIsLinux } from './tabs/settings/selector';
-import { settings_reboot_system, settings_shutdown_system } from '../sockets/SAE';
+import { settings_reboot_system, settings_shutdown_system } from '../sockets/sEmits';
 
 const mapStateToProps = (state) => {
     return { 

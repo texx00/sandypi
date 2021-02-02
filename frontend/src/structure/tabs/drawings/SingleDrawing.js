@@ -3,7 +3,7 @@ import { Container, Form, Modal } from 'react-bootstrap';
 import { FileEarmarkX, Play, Plus, PlusSquare, X } from 'react-bootstrap-icons';
 import { connect } from 'react-redux';
 
-import { drawing_delete, drawing_queue } from '../../../sockets/SAE';
+import { drawing_delete, drawing_queue } from '../../../sockets/sEmits';
 
 import ConfirmButton from '../../../components/ConfirmButton';
 import IconButton from '../../../components/IconButton';

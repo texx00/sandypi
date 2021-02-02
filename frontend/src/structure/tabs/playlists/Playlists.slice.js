@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-import { playlist_save } from '../../../sockets/SAE';
+import { playlist_save } from '../../../sockets/sEmits';
 import { cloneDict, listsAreEqual } from '../../../utils/dictUtils';
 import { getSinglePlaylist } from './selector';
 

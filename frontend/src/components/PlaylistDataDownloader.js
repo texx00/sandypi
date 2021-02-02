@@ -4,8 +4,8 @@ import { connect } from 'react-redux';
 import { getRefreshPlaylists } from '../structure/tabs/playlists/selector';
 import { setPlaylists, setRefreshPlaylists } from '../structure/tabs/playlists/Playlists.slice';
 
-import { playlists_request } from '../sockets/SAE';
-import { playlists_refresh_response } from '../sockets/SAC';
+import { playlists_request } from '../sockets/sEmits';
+import { playlists_refresh_response } from '../sockets/sCallbacks';
 
 
 const mapStateToProps = (state) => {

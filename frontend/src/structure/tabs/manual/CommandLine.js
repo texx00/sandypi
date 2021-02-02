@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import {Form, Row, Col, Button } from 'react-bootstrap';
 
-import { send_command } from '../../../sockets/SAE';
-import { device_command_line_return, device_new_position} from '../../../sockets/SAC';
+import { send_command } from '../../../sockets/sEmits';
+import { device_command_line_return, device_new_position} from '../../../sockets/sCallbacks';
 import CommandViewer from './CommandViewer';
 
 class CommandLine extends Component{

@@ -3,7 +3,7 @@ import { Container } from 'react-bootstrap';
 import { ChromePicker } from 'react-color';
 
 import { Section } from '../../../components/Section';
-import { leds_set_color } from '../../../sockets/SAE';
+import { leds_set_color } from '../../../sockets/sEmits';
 
 
 class LedsController extends Component{

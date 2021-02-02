@@ -1,7 +1,7 @@
 import { Component } from 'react';
 import { connect } from 'react-redux';
 
-import {socket} from "../sockets/SAC";
+import {socket} from "../sockets/sCallbacks";
 import { shouldCheckUpdate } from './tabs/settings/selector';
 import { updateCheckTime } from './tabs/settings/Settings.slice';
 

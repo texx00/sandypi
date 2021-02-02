@@ -4,8 +4,8 @@ import { connect } from 'react-redux';
 import { getRefreshDrawings } from '../structure/tabs/drawings/selector';
 import { setDrawings, setRefreshDrawing } from '../structure/tabs/drawings/Drawings.slice';
 
-import { drawings_request } from '../sockets/SAE';
-import { drawings_refresh_response} from '../sockets/SAC';
+import { drawings_request } from '../sockets/sEmits';
+import { drawings_refresh_response} from '../sockets/sCallbacks';
 
 const mapStateToProps = (state) => {
     return { must_refresh: getRefreshDrawings(state) }

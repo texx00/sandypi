@@ -8,7 +8,7 @@ import { Section } from '../../../components/Section';
 import CommandLine from './CommandLine';
 import Preview from './Preview';
 
-import { send_command } from '../../../sockets/SAE';
+import { control_emergency_stop, send_command } from '../../../sockets/sEmits';
 import { getDimensions } from './selector.js';
 
 const mapStateToProps = (state) => {
@@ -34,7 +34,7 @@ class ManualControl extends Component{
                                 </Row>
                                 <Row>
                                     <Col className="center">
-                                        <Button className="w-25 mr-3" onClick={()=>{send_command('M112')}} title="Warning: this button will not stop the device during homing">EMERGENCY STOP</Button>
+                                        <Button className="w-25 mr-3" onClick={()=>{control_emergency_stop()}} title="Warning: this button will not stop the device during homing">EMERGENCY STOP</Button>
                                         <Button className="2-25" onClick={()=>{send_command('G28')}}>Home</Button>
                                     </Col>
                                 </Row>

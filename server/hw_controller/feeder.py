@@ -102,6 +102,10 @@ class Feeder():
     def close(self):
         self.serial.close()
 
+    def get_status(self):
+        with self.serial_mutex:
+            return {"is_running":self._isrunning, "progress":[self.command_number, self.total_commands_number], "is_paused":self._ispaused, "is_connected":self.is_connected()}
+
     def connect(self):
         self.logger.info("Connecting to serial device...")
         with self.serial_mutex:
@@ -121,8 +125,19 @@ class Feeder():
         self.wait_device_ready()
 
         # reset line number when connecting
-        self.reset_line_number()
-        self.request_feedrate()
+        self._reset_line_number()
+
+        # grbl status report mask setup
+        # sandypi need to check the buffer to see if the machine has cleaned the buffer
+        # setup grbl to show the buffer status with the $10 command
+        #   Grbl 1.1 https://github.com/gnea/grbl/wiki/Grbl-v1.1-Configuration
+        #   Grbl 0.9 https://github.com/grbl/grbl/wiki/Configuring-Grbl-v0.9
+        # to be compatible with both will send $10=6 (4(for v0.9) + 2(for v1.1))
+        # the status will then be prompted with the "?" command when necessary
+        # the buffer will contain Bf:"usage of the buffer"
+        if firmware.is_grbl(self._firmware):
+            self.send_gcode_command("$10=6")
+
         # send the "on connection" script from the settings
         self.send_script(self.settings['scripts']['connected'])
 
@@ -186,27 +201,109 @@ class Feeder():
                         break
              # waiting command buffer to be clear before calling the "drawing ended" event
             while True:
+                # with grbl can ask a status report to see if the buffer is empty
+                if  firmware.is_grbl(self._firmware):
+                    self.send_gcode_command("?", hide_command=True)             # will send a command to ask for a status report (won't be shown in the command history)
+                    time.sleep(1)                                               # wait just 1 second to get the time to the board to ansfer
+
                 with self.command_buffer_mutex:
+                    # Marlin: wait for the buffer to be empty (rely on the circular buffer. If an ack is lost in the way, the buffer will not clear at the end of the drawing. It will be cleared by the buffer timeout after a while)
                     if len(self.command_buffer) == 0:
                         break
             # resetting line number between drawings
-            self.reset_line_number()
+            self._reset_line_number()
             # calling "drawing ended" event
             self.handler.on_element_ended(tmp)
     
-    # pause the drawing
+    
+    # pauses the drawing
     # can resume with "resume()"
     def pause(self):
         with self.status_mutex:
             self._ispaused = True
     
-    # resume the drawing (only if used with "pause()" and not "stop()")
+    # resumes the drawing (only if used with "pause()" and not "stop()")
     def resume(self):
         with self.status_mutex:
             self._ispaused = False
 
+    # function to prepare the command to be sent.
+    #  * command: command to send
+    #  * hide_command=False (optional): will hide the command from being sent also to the frontend (should be used for SW control commands)
+    def send_gcode_command(self, command, hide_command=False):
+        # clean the command a little
+        command = command.replace("\n", "").replace("\r", "").upper()
+        if command == " " or command == "":
+            return
+        
+        # some commands require to update the feeder status
+        # parse the command if necessary
+        if "M110" in command:
+            cs = command.split(" ")
+            for c in cs:
+                if c[0]=="N":
+                    self.line_number = int(c[1:]) -1
+                    self.command_buffer.clear()
+
+        # check if the command is in the "BUFFERED_COMMANDS" list and stops if the buffer is full
+        if any(code in command for code in BUFFERED_COMMANDS):
+            if "F" in command:
+                feed = self.feed_regex.findall(command)
+                self.feedrate = feed[0][0]
+
+            with self.command_send_mutex:       # wait until get some "ok" command to remove an element from the buffer
+                pass
+
+        # send the command after parsing the content
+        # need to use the mutex here because it is changing also the line number
+        with self.serial_mutex:
+            # check if needs to send a "M114" command (actual position request) but not in the first lines
+            if (self.line_number % self.position_request_difference) == 0 and self.line_number > 5:
+                #self._generate_line("M114")    # does not send the line to trigger the "resend" event and clean the buffer from messages that are already done
+                pass
+
+            line = self._generate_line(command)
+
+            self.serial.send(line)              # send line
+            self.logger.log(settings_utils.LINE_SENT, line.replace("\n", "")) 
+
+            # TODO fix the problem with small geometries may be with the serial port being to slow. For long (straight) segments the problem is not evident. Do not understand why it is happening
+
+            self._update_timeout()              # update the timeout because a new command has been sent
+
+            with self.command_buffer_mutex:
+                if(len(self.command_buffer)>=self.command_buffer_max_length and not self.command_send_mutex.locked()):
+                    self.command_send_mutex.acquire()     # if the buffer is full acquire the lock so that cannot send new lines until the reception of an ack. Notice that this will stop only buffered commands. The other commands will be sent anyway
+    
+            if not hide_command:
+                self.handler.on_new_line(line)      # uses the handler callback for the new line
+
+    
+    # Send a multiline script
+    def send_script(self, script):
+        self.logger.info("Sending script")
+        script = script.split("\n")
+        for s in script:
+            if s != "" and s != " ":
+                self.send_gcode_command(s)
+
+    def serial_ports_list(self):
+        result = self.serial.serial_port_list()
+        return [] if result is None else result
+    
+    def is_connected(self):
+        return self.serial.is_connected()
+
+    # stops immediately the device
+    def emergency_stop(self):
+        self.send_gcode_command(firmware.get_emergency_stop_command())
+        # TODO add self.close() ?
+
+    # ----- PRIVATE METHODS -----
+
+
     # thread function
-    # TODO move this function in a different class
+    # TODO move this function in a different class?
     def _thf(self, element):
         self.send_script(self.settings['scripts']['before'])
 
@@ -257,7 +354,7 @@ class Feeder():
                     line = line.replace("\r", "").split("\n")
                     if len(line) >1:
                         for l in line[0:-1]:
-                            self.parse_device_line(l)
+                            self._parse_device_line(l)
                     line = line[-1]
             
 
@@ -265,16 +362,12 @@ class Feeder():
         self._timeout_last_line = self.line_number
         self._timeout.update()
     
-    def _on_timeout(self):
-        # https://github.com/gnea/grbl/issues/666
-        # on grbl can check buffer content
-        # TODO check the buffer content instead of commands for the ack
-        # need to set the bitmask with $10=something
-        # the board will return <Stuff|Bf:rows in the buffer,Stuff>
 
+    # function called when the buffer has not been updated for some time (controlled by the buffered timeou)
+    def _on_timeout(self):
         if (self.command_buffer_mutex.locked and self.line_number == self._timeout_last_line):
             # self.logger.warning("!Buffer timeout. Trying to clean the buffer!")
-            # to clean the buffer try to send an M114 message. In this way will trigger the buffer cleaning mechanism
+            # to clean the buffer try to send an M114 (marlin) or ? (Grbl) message. In this way will trigger the buffer cleaning mechanism
             command = firmware.get_buffer_command(self._firmware)
             line = self._generate_line(command, no_buffer=True)  # use the no_buffer to clean one position of the buffer after adding the command
             with self.serial_mutex:                
@@ -303,69 +396,92 @@ class Feeder():
                 self.command_send_mutex.release()
 
     # parse a line coming from the device
-    def parse_device_line(self, line):
-        if ("start" in line):
-            self.wait_device_ready()
-            self.reset_line_number()
+    def _parse_device_line(self, line):
+        # setting to avoid sending the message to the frontend in particular situations (i.e. status checking in grbl)
+        # will still print the status in the command line
+        hide_line = False
 
-        elif firmware.get_ACK(self._firmware) in line:  # when an "ack" is received free one place in the buffer
+        if firmware.get_ACK(self._firmware) in line:  # when an "ack" is received free one place in the buffer
             self._ack_received()
 
+        # check marlin specific messages
+        if firmware.is_grbl(self._firmware):
+            # status report
+            if line.startswith("<"):
+                # interested in the "Bf:xx," part where xx is the content of the buffer
+                # select buffer content lines 
+                res = line.split("Bf:")[1]
+                res = res.split(",")[0]
+                if res== "15":  # 15 => buffer is empty
+                    with self.command_buffer_mutex:
+                        self.command_buffer.clear()
+                if not (self.is_running() or self.is_paused()):
+                    hide_line = True
+
+            # errors
+            elif "error:" in line:
+                self.logger.error("Grbl error: {}".format(line))
+                # TODO check/parse error types and give some hint about the problem?
+
+
         # TODO divide parser between firmwares?
+        # TODO set firmware type automatically on connection
+        # TODO add feedrate control with something like a knob on the user interface to make the drawing slower or faster
 
-        # Marlin resend command if a message is not received correctly
-        elif "Resend: " in line:
-            line_found = False
-            line_number = int(line.replace("Resend: ", "").replace("\r\n", ""))
-            items = deepcopy(self.command_buffer_history)
-            for n, c in items.items():
-                n_line_number = int(n.strip("N"))
-                if n_line_number >= line_number:
-                    line_found = True
-                    # checks if the requested line is an M114. In that case do not need to print the error/resend command because its a wanted behaviour
-                    #if line_number == n_line_number and "M114" in c:
-                    #    print_line = False
+        # Marlin messages
+        else:
+            # if the device is reset manually, will restart the numeration
+            if ("start" in line):
+                self.wait_device_ready()
+                self._reset_line_number()
 
-                    # All the lines after the required one must be resent. Cannot break the loop now
-                    with self.serial_mutex:
-                        self.serial.send(c)
-                    break
-            self._ack_received(safe_line_number=line_number-1, append_left_extra=True)
-            # the resend command is sending an ack. should add an entry to the buffer to keep the right lenght (because the line has been sent 2 times)
-            if not line_found: 
-                self.logger.error("No line was found for the number required. Restart numeration.")
-                self.send_gcode_command("M110 N1")
+            # Marlin resend command if a message is not received correctly
+            if "Resend: " in line:
+                line_found = False
+                line_number = int(line.replace("Resend: ", "").replace("\r\n", ""))
+                items = deepcopy(self.command_buffer_history)
+                for n, c in items.items():
+                    n_line_number = int(n.strip("N"))
+                    if n_line_number >= line_number:
+                        line_found = True
+                        # checks if the requested line is an M114. In that case do not need to print the error/resend command because its a wanted behaviour
+                        #if line_number == n_line_number and "M114" in c:
+                        #    print_line = False
 
+                        # All the lines after the required one must be resent. Cannot break the loop now
+                        with self.serial_mutex:
+                            self.serial.send(c)
+                        break
+                self._ack_received(safe_line_number=line_number-1, append_left_extra=True)
+                # the resend command is sending an ack. should add an entry to the buffer to keep the right lenght (because the line has been sent 2 times)
+                if not line_found: 
+                    self.logger.error("No line was found for the number required. Restart numeration.")
+                    self._reset_line_number()
+
+            # Marlin "unknow command"
+            elif "echo:Unknown command:" in line:
+                self.logger.error("Error: command not found. Can also be a communication error")
+        
         # TODO check feedrate response for M220 and set feedrate
         #elif "_______" in line: # must see the real output from marlin
         #    self.feedrate = .... # must see the real output from marlin
 
-        # Marlin "unknow command"
-        elif "echo:Unknown command:" in line:
-            self.logger.error("Error: command not found. Can also be a communication error")
-
-        # Grbl
-        elif "error:" in line:
-            self.logger.error("Grbl error: {}".format(line))
-        
         self.logger.log(settings_utils.LINE_RECEIVED, line)
-        self.handler.on_message_received(line)
+        if not hide_line:
+            self.handler.on_message_received(line)
 
-    def get_status(self):
-        with self.serial_mutex:
-            return {"is_running":self._isrunning, "progress":[self.command_number, self.total_commands_number], "is_paused":self._ispaused, "is_connected":self.is_connected()}
-
-    # depending on the firmware, generate a correct line to send to the board
+    # depending on the firmware, generates a correct line to send to the board
     # args: 
     #  * command: the gcode command to send
     #  * no_buffer (def: False): will not save the line in the buffer (used to get an ack to clear the buffer after a timeout if an ack is lost)
     def _generate_line(self, command, no_buffer=False):
         line = command
-        if (not (command.startswith("$") or command.startswith("?"))) or firmware.is_marlin(self._firmware):                 # filter grbl commands
+
+        # marlin needs line numbers and checksum (grbl doesn't)
+        if firmware.is_marlin(self._firmware):
+            # add line number
             self.line_number += 1
             line = "N{} {} ".format(self.line_number, command)
-
-        if firmware.is_marlin(self._firmware):
             # calculate marlin checksum according to the wiki
             cs = 0
             for i in line:
@@ -373,7 +489,10 @@ class Feeder():
             cs &= 0xff
             
             line +="*{}\n".format(cs)                   # add checksum to the line
+
         else: line +="\n"
+
+        # TODO add a "fast mode" to remove spaces from commands as a possible setting (reduces the number of chars to send thus it should work better)
 
         # store the line in the buffer
         with self.command_buffer_mutex:
@@ -384,71 +503,9 @@ class Feeder():
 
         return line
 
-    def send_gcode_command(self, command):
-        # clean the command a little
-        command = command.replace("\n", "").replace("\r", "").upper()
-        if command == " " or command == "":
-            return
-        
-        # some commands require to update the feeder status
-        # parse the command if necessary
-        if "M110" in command:
-            cs = command.split(" ")
-            for c in cs:
-                if c[0]=="N":
-                    self.line_number = int(c[1:]) -1
-                    self.command_buffer.clear()
-
-        # check if the command is in the "BUFFERED_COMMANDS" list and stops if the buffer is full
-        if any(code in command for code in BUFFERED_COMMANDS):
-            if "F" in command:
-                feed = self.feed_regex.findall(command)
-                self.feedrate = feed[0][0]
-
-            with self.command_send_mutex:       # wait until get some "ok" command to remove an element from the buffer
-                pass
-
-        # send the command after parsing the content
-        # need to use the mutex here because it is changing also the line number
-        with self.serial_mutex:
-            # check if needs to send a "M114" command (actual position request) but not in the first lines
-            if (self.line_number % self.position_request_difference) == 0 and self.line_number > 5:
-                #self._generate_line("M114")    # does not send the line to trigger the "resend" event and clean the buffer from messages that are already done
-                pass
-
-            line = self._generate_line(command)
-
-            self.serial.send(line)              # send line
-            self.logger.log(settings_utils.LINE_SENT, line.replace("\n", "")) 
-
-            # TODO fix the problem with small geometries may be with the serial port being to slow. For long (straight) segments the problem is not evident. Do not understand why it is happening
-
-            self._update_timeout()              # update the timeout because a new command has been sent
-
-            with self.command_buffer_mutex:
-                if(len(self.command_buffer)>=self.command_buffer_max_length and not self.command_send_mutex.locked()):
-                    self.command_send_mutex.acquire()     # if the buffer is full acquire the lock so that cannot send new lines until the reception of an ack. Notice that this will stop only buffered commands. The other commands will be sent anyway
-    
-            self.handler.on_new_line(line)      # uses the handler callback for the new line
-
-    # Send a multiline script
-    def send_script(self, script):
-        self.logger.info("Sending script")
-        script = script.split("\n")
-        for s in script:
-            if s != "" and s != " ":
-                self.send_gcode_command(s)
-
-    def reset_line_number(self, line_number = 2):
-        self.logger.info("Resetting line number")
-        self.send_gcode_command("M110 N{}".format(line_number))
-    
-    def request_feedrate(self):
-        self.send_gcode_command("M220")
-
-    def serial_ports_list(self):
-        result = self.serial.serial_port_list()
-        return [] if result is None else result
-    
-    def is_connected(self):
-        return self.serial.is_connected()
+    def _reset_line_number(self, line_number = 2):
+        # Marlin may require to reset the line numbers
+        if firmware.is_marlin(self._firmware):
+            self.logger.info("Resetting line number")
+            self.send_gcode_command("M110 N{}".format(line_number))
+        # Grbl do not use line numbers
