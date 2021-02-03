@@ -86,7 +86,7 @@ $> source env/bin/activate
 
 Now you can install SandyPi (will take a while):
 ```
-(env)$> sh install.sh
+(env)$> sudo sh install.sh
 ```
 
 ## Running the server
@@ -121,10 +121,10 @@ At the moment, the sw is tested only with Marlin 2.0 and Grbl 1.1
 Should be compatible with other firmwares as well. If not please open an issue.
 
 ## Marlin 2.0 setup
-In the settings select the port and the correct baudrate (usually 115200 or 250000). Marlin needs the command checksum to be enable (enable "send code checksum" in the settings).
+In the settings select the serial port, the correct baudrate (usually 115200 or 250000) and the correct firmware type.
 
 ## Grbl 1.1
-In the settings select the port and the correct baudrate (usually 115200 or 250000). Grbl may not need the command checksum (disable "send code checksum" in the settings).
+In the settings select the serial port, the correct baudrate (usually 115200 or 250000) and the correct firmware type.
 
 
 # Updates
@@ -138,7 +138,7 @@ To update to the last available version of the software in linux you can run the
 ```
 $> source env/bin/activate
 (env) $> git pull
-(env) $> sh install.sh
+(env) $> sudo sh install.sh
 ```
 
 If you are working on Windows you should use instead:
