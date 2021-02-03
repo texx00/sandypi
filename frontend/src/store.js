@@ -14,6 +14,7 @@ function saveToLocalStorage(state) {
     try {
         const serialisedState = JSON.stringify(state);
         localStorage.setItem("persistantState", serialisedState);
+        localStorage.setItem("version", process.env.REACT_APP_VERSION)
     } catch (e) {
         console.warn(e);
     }
@@ -21,6 +22,19 @@ function saveToLocalStorage(state) {
 
 // will create the storage with the values saved in local storage
 function loadFromLocalStorage() {
+    // if is loading a new version from the server, clear the local storage (to avoid compatibility issues between different frontend versions)
+    try{
+        const version = localStorage.getItem("version");
+        if (version !== process.env.REACT_APP_VERSION){
+            console.warn("New version detected. Clearing local storage");
+            localStorage.clear();
+        }
+    } catch (e) {
+        console.warn(e);
+        localStorage.clear();
+    }
+
+    // loads state from local storage if available
     try {
         const serialisedState = localStorage.getItem("persistantState");
         if (serialisedState === null) return undefined;
@@ -29,7 +43,7 @@ function loadFromLocalStorage() {
         console.warn(e);
         return undefined;
     }
-  }
+}
 
 const store = createStore(combineReducers({
         settings: settingsReducer,
