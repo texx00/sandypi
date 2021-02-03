@@ -86,7 +86,7 @@ $> source env/bin/activate
 
 Now you can install SandyPi (will take a while):
 ```
-(env)$> sh install.sh
+(env)$> sudo sh install.sh
 ```
 
 ## Running the server
@@ -138,7 +138,7 @@ To update to the last available version of the software in linux you can run the
 ```
 $> source env/bin/activate
 (env) $> git pull
-(env) $> sh install.sh
+(env) $> sudo sh install.sh
 ```
 
 If you are working on Windows you should use instead:
