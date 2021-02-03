@@ -87,8 +87,8 @@ class Feeder():
         self.command_buffer_max_length = 8
         self.command_buffer_history = limited_size_dict.LimitedSizeDict(size_limit = self.command_buffer_max_length+10)    # keep saved the last n commands
         self.position_request_difference = 10           # every n lines requires the current position with M114
+
         self._timeout = buffered_timeout.BufferTimeout(30, self._on_timeout)
-        self._timeout.start()
 
         # device specific options
         self.update_settings(settings_utils.load_settings())
@@ -98,6 +98,7 @@ class Feeder():
         self.settings = settings
         self._firmware = settings["serial"]["firmware"]
         self._ACK = firmware.get_ACK(self._firmware)
+        self._timeout.set_timeout_period(firmware.get_buffer_timeout(self._firmware))
     
     def close(self):
         self.serial.close()

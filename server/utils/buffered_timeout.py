@@ -13,6 +13,9 @@ class BufferTimeout(Thread):
         self.is_running = False
         self.setDaemon(True)
         self.update()
+    
+    def set_timeout_period(self, val):
+        self.timeout_delta = val
 
     def update(self):
         with self.mutex:
