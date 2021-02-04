@@ -1,3 +1,4 @@
+from server.utils import settings_utils
 from server import app, db
 from server.database.models import UploadedFiles
 from flask import request, jsonify
@@ -9,7 +10,7 @@ import traceback
 import os
 import shutil
 
-ALLOWED_EXTENSIONS = ["gcode", "nc"]
+ALLOWED_EXTENSIONS = ["gcode", "nc", "thr"]
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -21,6 +22,8 @@ def api_upload():
         if 'file' in request.files:
             file = request.files['file']
             if file and file.filename!= '' and allowed_file(file.filename):
+                # TODO check file extension is compatible with the selected device
+                settings = settings_utils.load_settings()
                 # TODO move this into a thread because on the pi0w it is too slow and some drawings are not loaded in time
                 filename = secure_filename(file.filename)
                 new_file = UploadedFiles(filename = filename)
@@ -32,11 +35,11 @@ def api_upload():
                     os.mkdir(folder)
                 except:
                     app.logger.error("The folder for '{}' already exists".format(new_file.id))
-                file.save(os.path.join(folder, str(new_file.id)+".gcode"))
+                file.save(os.path.join(folder, str(new_file.id)+".gcode"))      # TODO use thr here
                 # create the preview image
                 try:
-                    with open(os.path.join(folder, str(new_file.id)+".gcode")) as file:
-                        image = gcode_to_image(file)
+                    with open(os.path.join(folder, str(new_file.id)+".gcode")) as file: # TODO use thr here
+                        image = gcode_to_image(file, type=settings["device"]["type"], device_radius=settings["device"]["radius"])
                         image.save(os.path.join(folder, str(new_file.id)+".jpg"))
                 except:
                     app.logger.error("Error during image creation")

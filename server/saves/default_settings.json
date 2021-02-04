@@ -10,7 +10,14 @@
     },
     "device": {
         "width": "450",
-        "height": "300"
+        "height": "300",
+        "radius": "200",
+        "type": "Cartesian",
+        "available_types": [
+            "Cartesian",
+            "Polar",
+            "Scara"
+        ]
     },
     "scripts": {
         "connected": "G28",

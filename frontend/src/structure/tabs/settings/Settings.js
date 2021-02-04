@@ -104,17 +104,37 @@ class Settings extends Component{
                                 <Form.Row>
                                     <Col>
                                         <Form.Group>
-                                            <Form.Label>Width</Form.Label>
+                                            <Form.Label>Width (cartesian)</Form.Label>
                                             <Form.Control value={this.props.settings.device.width}
                                                 onChange={(e) => this.props.updateSetting(["device.width", e.target.value])}/>
                                         </Form.Group>
                                     </Col>
                                     <Col>
                                         <Form.Group>
-                                            <Form.Label>Height</Form.Label>
+                                            <Form.Label>Height (cartesian)</Form.Label>
                                             <Form.Control value={this.props.settings.device.height}
                                                 onChange={(e) => this.props.updateSetting(["device.height", e.target.value])}/>
                                         </Form.Group>
+                                    </Col>
+                                    <Col>
+                                        <Form.Group>
+                                            <Form.Label>Radius (scara, polar)</Form.Label>
+                                            <Form.Control value={this.props.settings.device.radius}
+                                                onChange={(e) => this.props.updateSetting(["device.radius", e.target.value])}/>
+                                        </Form.Group>
+                                    </Col>
+                                    <Col>
+                                        <Form.Group>
+                                            <Form.Label>Type</Form.Label>
+                                            <Form.Control  as="select" 
+                                                value={this.props.settings.device.type}
+                                                onChange={(e) => this.props.updateSetting(["device.type", e.target.value])}>
+                                                {this.props.settings.device.available_types.map((el, index) => {
+                                                    return <option key={index}>{el}</option>
+                                                })}
+                                            </Form.Control>
+                                        </Form.Group>
+                                        {/* TODO add angle offset value  */}
                                     </Col>
                                 </Form.Row>
                             </Container>

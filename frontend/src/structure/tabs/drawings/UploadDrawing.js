@@ -79,7 +79,7 @@ class UploadDrawingsModal extends Component{
                 <div className={ "w-100" + (this.state.loading ? " d-none" : "")}>
                     <Dropzone
                         onDrop={this.handleFiles.bind(this)} 
-                        accept={".gcode"}
+                        accept={".gcode,.thr"}
                         noKeyboard>
                         {({getRootProps, getInputProps, isDragActive}) => (<div {...getRootProps()} className={"animated-background m-2 p-5 mh-100 d-flex justify-content-center align-items-center" + (isDragActive ? " drag-active" : "")}>
                             <input {...getInputProps()}/>

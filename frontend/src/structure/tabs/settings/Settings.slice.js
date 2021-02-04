@@ -15,7 +15,14 @@ const settingsSlice = createSlice({
         }, 
         device: {
             width: 100, 
-            height:100
+            height:100,
+            radius:100,
+            type:"Cartesian",
+            available_types:[
+                "Cartesian",
+                "Polar",
+                "Scara"
+            ]
         }, 
         scripts: {
             connected: "", 
