@@ -50,6 +50,7 @@ class Feeder():
         self.logger = logging.getLogger(__name__)
         logging.addLevelName(settings_utils.LINE_SENT, "LINE_SENT")
         logging.addLevelName(settings_utils.LINE_RECEIVED, "LINE_RECEIVED")
+        logging.addLevelName(settings_utils.LINE_SERVICE, "LINE_SERVICE")
         # load logging level from environment variables
         load_dotenv()
         level = os.getenv("FEEDER_LEVEL")
@@ -89,6 +90,7 @@ class Feeder():
         self.position_request_difference = 10           # every n lines requires the current position with M114
 
         self._timeout = buffered_timeout.BufferTimeout(30, self._on_timeout)
+        self._timeout.start()
 
         # device specific options
         self.update_settings(settings_utils.load_settings())
@@ -270,7 +272,8 @@ class Feeder():
 
             # TODO fix the problem with small geometries may be with the serial port being to slow. For long (straight) segments the problem is not evident. Do not understand why it is happening
 
-            self._update_timeout()              # update the timeout because a new command has been sent
+            if firmware.is_marlin(self._firmware):  # updating the command only for marlin because grbl check periodically the buffer status with the status report command
+                self._update_timeout()              # update the timeout because a new command has been sent
 
             with self.command_buffer_mutex:
                 if(len(self.command_buffer)>=self.command_buffer_max_length and not self.command_send_mutex.locked()):
@@ -371,6 +374,7 @@ class Feeder():
             # to clean the buffer try to send an M114 (marlin) or ? (Grbl) message. In this way will trigger the buffer cleaning mechanism
             command = firmware.get_buffer_command(self._firmware)
             line = self._generate_line(command, no_buffer=True)  # use the no_buffer to clean one position of the buffer after adding the command
+            self.logger.log(settings_utils.LINE_SERVICE, line)
             with self.serial_mutex:                
                 self.serial.send(line)
         else:
@@ -412,12 +416,19 @@ class Feeder():
                 # interested in the "Bf:xx," part where xx is the content of the buffer
                 # select buffer content lines 
                 res = line.split("Bf:")[1]
-                res = res.split(",")[0]
-                if res== "15":  # 15 => buffer is empty
+                res = int(res.split(",")[0])
+                if res == 15: # 15 => buffer is empty on the device (should include also 14 to make it more flexible?)
                     with self.command_buffer_mutex:
                         self.command_buffer.clear()
-                if not (self.is_running() or self.is_paused()):
+                if res!= 0:  # 0 -> buffer is full
+                    with self.command_buffer_mutex:
+                        if len(self.command_buffer) > 0 and self.is_running():
+                            self.command_buffer.popleft()
+                
+                if (self.is_running() or self.is_paused()):
                     hide_line = True
+                self.logger.log(settings_utils.LINE_SERVICE, line)
+                return
 
             # errors
             elif "error:" in line:

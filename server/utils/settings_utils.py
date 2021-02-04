@@ -8,6 +8,7 @@ from netifaces import interfaces, ifaddresses, AF_INET
 # Logging levels (see the documentation of the logging module for more details)
 LINE_SENT = 6
 LINE_RECEIVED = 5
+LINE_SERVICE = 4
 
 # settings paths
 settings_path = "./server/saves/saved_settings.json"
@@ -56,8 +57,10 @@ def match_dict(mod_dict, ref_dict):
 # print the level of the logger selected
 def print_level(level, logger_name):
     description = ""
-    if level < LINE_RECEIVED:
+    if level < LINE_SERVICE:
         description = "NOT SET"
+    elif level < LINE_RECEIVED:
+        description = "LINE_SERVICE"
     elif level < LINE_SENT:
         description = "LINE_RECEIVED"
     elif level < 10:

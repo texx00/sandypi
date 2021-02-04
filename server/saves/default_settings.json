@@ -23,7 +23,7 @@
     "leds": {
         "width": "30",
         "height": "20",
-        "type": "WS2812B",
+        "type": "Dimmable",
         "available_types": [
             "WS2812B",
             "Dimmable"
