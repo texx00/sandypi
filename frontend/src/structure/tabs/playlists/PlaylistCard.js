@@ -9,8 +9,9 @@ import { setSinglePlaylistId } from './Playlists.slice';
 
 const mapDispatchToProps = (dispatch) => {
     return { showSinglePlaylist: (id) => {
-        dispatch(setSinglePlaylistId(id));
-        dispatch(showSinglePlaylist(id));
+        // using promises to dispatch in the correct order (otherwise the playlist page may not load in the correct order)
+        Promise.resolve(dispatch(setSinglePlaylistId(id))).then(
+            () => dispatch(showSinglePlaylist(id)));
     }};
 }
 
