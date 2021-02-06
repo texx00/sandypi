@@ -30,7 +30,7 @@ class FeederEventManager(FeederEventHandler):
     def on_new_line(self, line):
         # Throttle down the commands sent to the frontend otherwise it will get the frontend stuck on the computation
         # Avoid sendind every message, send them every maximum 0.5s (if they are fast, a set difference should not change much in the drawing preview)
-        if time.time() - self.last_send_time > 0.01 or self.command_index < 16:
+        if time.time() - self.last_send_time > 0.05 or self.command_index < 16:
             # use the command index to track the first commands until the buffer is full
             self.command_index += 1
             # update timer

@@ -71,7 +71,6 @@ class Preview extends Component{
     updateImage(){
         if (this.canvas !== undefined && this.props.isManualControl){
             this.image_ref.current.src = this.canvas.toDataURL();
-            console.log("Updating image");
         }
     }
 
@@ -88,10 +87,10 @@ class Preview extends Component{
         let y = this.pp.y;
         for(const i in l){
             if(l[i].includes("X")){
-                x = l[i].replace(/[^\d.-]/g, '');
+                x = this.roundFloat(parseFloat(l[i].replace(/[^\d.-]/g, '')));
             }
             if(l[i].includes("Y")){
-                y = l[i].replace(/[^\d.-]/g, '');
+                y = this.roundFloat(parseFloat(l[i].replace(/[^\d.-]/g, '')));
             }
         }
 
@@ -111,6 +110,10 @@ class Preview extends Component{
         this.ctx.stroke();
     }
 
+    roundFloat(val){
+        return Math.round(val*1000)/1000;
+    }
+
     convertCartesian(x, y){
         return {
             x: x,
@@ -120,29 +123,29 @@ class Preview extends Component{
 
     convertPolar(x, y){
         return {
-            x: (Math.cos(x*2*Math.PI/this.props.device.angle_conversion_factor)*y + 1)*this.props.device.radius,    // +1 to center with respect to the image (shifts by one radius)
-            y: (Math.sin(x*2*Math.PI/this.props.device.angle_conversion_factor)*y + 1)*this.props.device.radius     // +1 to center with respect to the image (shifts by one radius)
+            x: this.roundFloat((Math.cos(x*2*Math.PI/this.props.device.angle_conversion_factor)*y + 1)*this.props.device.radius),    // +1 to center with respect to the image (shifts by one radius)
+            y: this.roundFloat((Math.sin(x*2*Math.PI/this.props.device.angle_conversion_factor)*y + 1)*this.props.device.radius)     // +1 to center with respect to the image (shifts by one radius)
         }
     }
 
     convertScara(x, y){
         // For more info about the conversion check the server/utils/gcode_converter.py file
-        let theta = (x + y + this.props.device.offset_angle_1*2) * Math.PI/this.props.device.angle_conversion_factor
-        let rho = Math.cos((x - y + this.props.device.offset_angle_2*2) * Math.PI/this.props.device.angle_conversion_factor) * this.props.device.radius
+        let theta = (x + y + this.props.device.offset_angle_1 * 2) * Math.PI/this.props.device.angle_conversion_factor;
+        let rho = Math.cos((x - y + this.props.device.offset_angle_2*2) * Math.PI/this.props.device.angle_conversion_factor) * this.radius;
         return {
-            x: Math.cos(theta) * rho + this.props.device.radius,                                                    // +radius to center with respect to the preview
-            y: Math.sin(theta) * rho + this.props.device.radius
+            x: this.roundFloat(Math.cos(theta) * rho + this.radius),                                                    // +radius to center with respect to the preview
+            y: this.roundFloat(Math.sin(theta) * rho + this.radius)
         }
     }
 
     clearCanvas(){
         if (this.props.device.type==="Scara"){
             let res = this.convertScara(0,0);
-            this.pp.x = res.x + this.props.device.radius;
-            this.pp.y = res.y + this.props.device.radius;
+            this.pp.x = res.x + this.radius;
+            this.pp.y = res.y + this.radius;
         }else if (this.props.device.type==="Polar"){
-            this.pp.x = this.props.device.radius;
-            this.pp.y = this.props.device.radius;
+            this.pp.x = this.radius;
+            this.pp.y = this.radius;
         }
         else{  // Cartesian and Polar
             this.pp.x = 0;
@@ -180,6 +183,7 @@ class Preview extends Component{
         }else{      // For polar and scara should be square with height and width = diameter or 2*radius
             this.width = parseInt(this.props.device.radius)*2;
             this.height = this.width;
+            this.radius = parseInt(this.props.device.radius);
         }
         
         return <div>

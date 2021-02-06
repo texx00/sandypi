@@ -54,7 +54,7 @@ class Emulator():
             except:
                 y = self.last_y
             # calculate time
-            t = math.sqrt((x-self.last_x)**2 + (y-self.last_y)**2) / self.feedrate * 60.0
+            t = max(math.sqrt((x-self.last_x)**2 + (y-self.last_y)**2) / self.feedrate * 60.0, 0.005)   # TODO need to use the max 0.005 because cannot simulate anything on the frontend otherwise... May look for a better solution
             if t == 0.0:
                 self.message_buffer.append(ACK)
                 return

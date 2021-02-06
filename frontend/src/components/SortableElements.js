@@ -72,10 +72,8 @@ class SortableElements extends Component{
 
                     return <ElementCard key={el.id} 
                             handleUnmount={()=>this.removeElement(el.id)}
-                            showCross={this.state.show_child_cross}
-                            onClick={()=>console.log("click2")}>
+                            showCross={this.state.show_child_cross}>
                         <ElementType element={el} 
-                            onClick={()=>console.log("click")}
                             onOptionsChange={(el) => this.props.onElementOptionsChange(el)}
                             hideOptions={this.props.hideOptions}/>
                     </ElementCard>
