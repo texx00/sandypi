@@ -99,31 +99,31 @@ class Settings extends Component{
                                 </Form.Row>
                             </Container>
                         </SectionGroup>
-                        <SectionGroup sectionTitle="Dimensions">
+                        <SectionGroup sectionTitle="Device type">
                             <Container>
                                 <Form.Row>
-                                    <Col>
+                                    <Col sm={4}>
                                         <Form.Group>
                                             <Form.Label>Width (cartesian)</Form.Label>
                                             <Form.Control value={this.props.settings.device.width}
                                                 onChange={(e) => this.props.updateSetting(["device.width", e.target.value])}/>
                                         </Form.Group>
                                     </Col>
-                                    <Col>
+                                    <Col sm={4}>
                                         <Form.Group>
                                             <Form.Label>Height (cartesian)</Form.Label>
                                             <Form.Control value={this.props.settings.device.height}
                                                 onChange={(e) => this.props.updateSetting(["device.height", e.target.value])}/>
                                         </Form.Group>
                                     </Col>
-                                    <Col>
+                                    <Col sm={4}>
                                         <Form.Group>
                                             <Form.Label>Radius (scara, polar)</Form.Label>
                                             <Form.Control value={this.props.settings.device.radius}
                                                 onChange={(e) => this.props.updateSetting(["device.radius", e.target.value])}/>
                                         </Form.Group>
                                     </Col>
-                                    <Col>
+                                    <Col sm={4}>
                                         <Form.Group>
                                             <Form.Label>Type</Form.Label>
                                             <Form.Control  as="select" 
@@ -134,7 +134,27 @@ class Settings extends Component{
                                                 })}
                                             </Form.Control>
                                         </Form.Group>
-                                        {/* TODO add angle offset value  */}
+                                    </Col>
+                                    <Col sm={4}>
+                                        <Form.Group>
+                                            <Form.Label>Angle conversion value (the amount of units to send for a complete turn of a motor) (polar and scara only)</Form.Label>
+                                            <Form.Control value={this.props.settings.device.angle_conversion_factor}
+                                                onChange={(e) => this.props.updateSetting(["device.angle_conversion_factor", e.target.value])}/>
+                                        </Form.Group>
+                                    </Col>
+                                    <Col sm={4}>
+                                        <Form.Group>
+                                            <Form.Label>Angle offset (angular homing position for the preview, 0 on top)(polar and scara)</Form.Label>
+                                            <Form.Control value={this.props.settings.device.offset_angle_1}
+                                                onChange={(e) => this.props.updateSetting(["device.offset_angle_1", e.target.value])}/>
+                                        </Form.Group>
+                                    </Col>
+                                    <Col sm={4}>
+                                        <Form.Group>
+                                            <Form.Label>Homing offset for the second arm (scara only)</Form.Label>
+                                            <Form.Control value={this.props.settings.device.offset_angle_2}
+                                                onChange={(e) => this.props.updateSetting(["device.offset_angle_2", e.target.value])}/>
+                                        </Form.Group>
                                     </Col>
                                 </Form.Row>
                             </Container>

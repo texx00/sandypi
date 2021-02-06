@@ -3,7 +3,7 @@ from server import app, db
 from server.database.models import UploadedFiles
 from flask import request, jsonify
 from werkzeug.utils import secure_filename
-from server.utils.gcode_converter import gcode_to_image
+from server.utils.gcode_converter import ImageFactory
 
 import traceback
 
@@ -29,6 +29,7 @@ def api_upload():
                 new_file = UploadedFiles(filename = filename)
                 db.session.add(new_file)
                 db.session.commit()
+                factory = ImageFactory(settings["device"])
                 # create a folder for each drawing. The folder will contain the .gcode file, the preview and additionally some settings for the drawing
                 folder = app.config["UPLOAD_FOLDER"] +"/" + str(new_file.id) +"/"
                 try:
@@ -39,7 +40,7 @@ def api_upload():
                 # create the preview image
                 try:
                     with open(os.path.join(folder, str(new_file.id)+".gcode")) as file: # TODO use thr here
-                        image = gcode_to_image(file, type=settings["device"]["type"], device_radius=settings["device"]["radius"])
+                        image = factory.gcode_to_image(file)
                         image.save(os.path.join(folder, str(new_file.id)+".jpg"))
                 except:
                     app.logger.error("Error during image creation")
