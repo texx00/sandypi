@@ -22,7 +22,10 @@ const settingsSlice = createSlice({
                 "Cartesian",
                 "Polar",
                 "Scara"
-            ]
+            ],
+            "angle_conversion_factor": 6,
+            "offset_angle_1": -1.5,
+            "offset_angle_2": 1.5
         }, 
         scripts: {
             connected: "", 

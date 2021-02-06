@@ -52,4 +52,8 @@ const listsAreEqual = (dictList1, dictList2) => {
     return JSON.stringify(dictList1) === JSON.stringify(dictList2);
 }
 
-export {mergeDicts, cloneDict, setSubKey, getSubKey, listsAreEqual};
+const dictsAreEqual = (dict1, dict2) => {
+    return listsAreEqual(dict1, dict2);
+}
+
+export { mergeDicts, cloneDict, setSubKey, getSubKey, listsAreEqual, dictsAreEqual };

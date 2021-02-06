@@ -413,21 +413,24 @@ class Feeder():
         if firmware.is_grbl(self._firmware):
             # status report
             if line.startswith("<"):
-                # interested in the "Bf:xx," part where xx is the content of the buffer
-                # select buffer content lines 
-                res = line.split("Bf:")[1]
-                res = int(res.split(",")[0])
-                if res == 15: # 15 => buffer is empty on the device (should include also 14 to make it more flexible?)
-                    with self.command_buffer_mutex:
-                        self.command_buffer.clear()
-                if res!= 0:  # 0 -> buffer is full
-                    with self.command_buffer_mutex:
-                        if len(self.command_buffer) > 0 and self.is_running():
-                            self.command_buffer.popleft()
-                
-                if (self.is_running() or self.is_paused()):
-                    hide_line = True
-                self.logger.log(settings_utils.LINE_SERVICE, line)
+                try:
+                    # interested in the "Bf:xx," part where xx is the content of the buffer
+                    # select buffer content lines 
+                    res = line.split("Bf:")[1]
+                    res = int(res.split(",")[0])
+                    if res == 15: # 15 => buffer is empty on the device (should include also 14 to make it more flexible?)
+                        with self.command_buffer_mutex:
+                            self.command_buffer.clear()
+                    if res!= 0:  # 0 -> buffer is full
+                        with self.command_buffer_mutex:
+                            if len(self.command_buffer) > 0 and self.is_running():
+                                self.command_buffer.popleft()
+                    
+                    if (self.is_running() or self.is_paused()):
+                        hide_line = True
+                    self.logger.log(settings_utils.LINE_SERVICE, line)
+                except: # sometimes may not receive the entire line thus it may throw an error
+                    pass
                 return
 
             # errors
@@ -504,7 +507,7 @@ class Feeder():
 
         else: line +="\n"
 
-        # TODO add a "fast mode" to remove spaces from commands as a possible setting (reduces the number of chars to send thus it should work better)
+        # TODO add a "fast mode" to remove spaces from commands as a possible setting (reduces the number of chars to send thus it should work better). Could also limit the number of decimals in the commands to 2 (should be enough even 1 for cartesian, for scara and polar may need more because they are using a smaller resolution)
 
         # store the line in the buffer
         with self.command_buffer_mutex:

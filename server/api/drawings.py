@@ -22,7 +22,7 @@ def api_upload():
         if 'file' in request.files:
             file = request.files['file']
             if file and file.filename!= '' and allowed_file(file.filename):
-                # TODO check file extension is compatible with the selected device
+                # TODO add support to thr files
                 settings = settings_utils.load_settings()
                 # TODO move this into a thread because on the pi0w it is too slow and some drawings are not loaded in time
                 filename = secure_filename(file.filename)
@@ -36,10 +36,10 @@ def api_upload():
                     os.mkdir(folder)
                 except:
                     app.logger.error("The folder for '{}' already exists".format(new_file.id))
-                file.save(os.path.join(folder, str(new_file.id)+".gcode"))      # TODO use thr here
+                file.save(os.path.join(folder, str(new_file.id)+".gcode"))
                 # create the preview image
                 try:
-                    with open(os.path.join(folder, str(new_file.id)+".gcode")) as file: # TODO use thr here
+                    with open(os.path.join(folder, str(new_file.id)+".gcode")) as file:
                         image = factory.gcode_to_image(file)
                         image.save(os.path.join(folder, str(new_file.id)+".jpg"))
                 except:

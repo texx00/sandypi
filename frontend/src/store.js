@@ -2,7 +2,6 @@ import { createStore } from 'redux';
 import { combineReducers } from '@reduxjs/toolkit';
 
 import settingsReducer from './structure/tabs/settings/Settings.slice';
-import manualControlReducer from './structure/tabs/manual/ManualControl.slice';
 import queueReducer from './structure/tabs/queue/Queue.slice';
 import tabsReducer from './structure/tabs/Tabs.slice';
 import drawingsReducer from './structure/tabs/drawings/Drawings.slice';
@@ -47,7 +46,6 @@ function loadFromLocalStorage() {
 
 const store = createStore(combineReducers({
         settings: settingsReducer,
-        manualControl: manualControlReducer,
         queue: queueReducer,
         tabs: tabsReducer,
         drawings: drawingsReducer,

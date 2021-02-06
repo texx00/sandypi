@@ -1,5 +1,7 @@
 const getSettings = state => { return state.settings };
 
+const getDevice = state => { return state.settings.device };
+
 const systemIsLinux = state => { return state.settings.system.is_linux };
 
 const shouldCheckUpdate = state => { 
@@ -8,4 +10,4 @@ const shouldCheckUpdate = state => {
     else return false;
 };    // check for an update every day once
 
-export { getSettings, systemIsLinux, shouldCheckUpdate };
+export { getSettings, getDevice, systemIsLinux, shouldCheckUpdate };

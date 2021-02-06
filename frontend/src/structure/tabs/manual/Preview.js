@@ -1,19 +1,30 @@
 import "./ManualControl.scss";
 
 import React, { Component } from 'react';
+import { connect } from "react-redux";
 
 import { device_new_position } from '../../../sockets/sCallbacks';
+import { getDevice } from "../settings/selector";
+import { dictsAreEqual } from "../../../utils/dictUtils";
+import { isManualControl } from "../selector";
 
 const ANIMATION_FRAMES_MAX = 10;
 const ANIMATION_DURATION = 1000;
+
+const mapStateToProps = (state) =>{
+    return {
+        device: getDevice(state),
+        isManualControl: isManualControl(state)
+    }
+}
 
 class Preview extends Component{
     constructor(props){
         super(props);
         this.canvas_ref = React.createRef();
         this.image_ref = React.createRef();
-        this.primary_color = "#eeeeee";
-        this.dark_color = "#333333";
+        this.bg_color = "#000000";
+        this.line_color = "#ffffff";
         this.multiplier = 5;    // multiply the pixels to get a better resolution with small tables
         this.is_mounted = false;
         this.force_image_render = false;
@@ -24,6 +35,10 @@ class Preview extends Component{
             x: 0,
             y: 0
         }
+
+        this.width = 100;
+        this.height = 100;
+        setInterval(this.updateImage.bind(this), 1000);         // update the image in an interval callback because updating every command is too heavy
     }
 
     componentDidMount(){
@@ -31,6 +46,9 @@ class Preview extends Component{
             this.is_mounted = true;
             this.canvas = this.canvas_ref.current;
             this.ctx = this.canvas.getContext("2d");
+            this.ctx.strokeStyle = this.line_color;
+            this.ctx.fillStyle = this.bg_color;
+            this.ctx.lineWidth = this.multiplier;
             this.clearCanvas();
             this.forceUpdate();
             device_new_position(this.newLineFromDevice.bind(this));
@@ -45,15 +63,16 @@ class Preview extends Component{
     }
 
     shouldComponentUpdate(nextProps){
-        if (nextProps.width !== this.props.width || nextProps.height !== this.props.width){
+        if (!dictsAreEqual(nextProps.device, this.props.device) || this.props.isManualControl)
             this.force_image_render = true;
-        }
         return true;
     }
     
     updateImage(){
-        if (this.canvas !== undefined)
+        if (this.canvas !== undefined && this.props.isManualControl){
             this.image_ref.current.src = this.canvas.toDataURL();
+            console.log("Updating image");
+        }
     }
 
     limitValue(value, min, max){
@@ -75,30 +94,69 @@ class Preview extends Component{
                 y = l[i].replace(/[^\d.-]/g, '');
             }
         }
-        x = this.limitValue(x, 0, this.props.width);
-        y = this.limitValue(y, 0, this.props.height);
-        this.ctx.lineTo(x * this.multiplier, this.props.height * this.multiplier - y * this.multiplier);
-        this.ctx.stroke();
-        this.ctx.lineWidth = this.multiplier;
+
         this.pp.x = x;
         this.pp.y = y;
-        this.updateImage();
+
+        let res;
+        if (this.props.device.type === "Cartesian")
+            res = this.convertCartesian(x, y)
+        else if (this.props.device.type === "Scara")
+            res = this.convertScara(x, y)
+        else res = this.convertPolar(x, y)
+        
+        x = this.limitValue(res.x, 0, this.width);
+        y = this.limitValue(res.y, 0, this.height);
+        this.ctx.lineTo(x * this.multiplier, (this.height - y) * this.multiplier);
+        this.ctx.stroke();
+    }
+
+    convertCartesian(x, y){
+        return {
+            x: x,
+            y: y
+        }
+    }
+
+    convertPolar(x, y){
+        return {
+            x: (Math.cos(x*2*Math.PI/this.props.device.angle_conversion_factor)*y + 1)*this.props.device.radius,    // +1 to center with respect to the image (shifts by one radius)
+            y: (Math.sin(x*2*Math.PI/this.props.device.angle_conversion_factor)*y + 1)*this.props.device.radius     // +1 to center with respect to the image (shifts by one radius)
+        }
+    }
+
+    convertScara(x, y){
+        // For more info about the conversion check the server/utils/gcode_converter.py file
+        let theta = (x + y + this.props.device.offset_angle_1*2) * Math.PI/this.props.device.angle_conversion_factor
+        let rho = Math.cos((x - y + this.props.device.offset_angle_2*2) * Math.PI/this.props.device.angle_conversion_factor) * this.props.device.radius
+        return {
+            x: Math.cos(theta) * rho + this.props.device.radius,                                                    // +radius to center with respect to the preview
+            y: Math.sin(theta) * rho + this.props.device.radius
+        }
     }
 
     clearCanvas(){
-        this.pp.x = 0;
-        this.pp.y = 0;
+        if (this.props.device.type==="Scara"){
+            let res = this.convertScara(0,0);
+            this.pp.x = res.x + this.props.device.radius;
+            this.pp.y = res.y + this.props.device.radius;
+        }else if (this.props.device.type==="Polar"){
+            this.pp.x = this.props.device.radius;
+            this.pp.y = this.props.device.radius;
+        }
+        else{  // Cartesian and Polar
+            this.pp.x = 0;
+            this.pp.y = 0;
+        }
         this.ctx.beginPath();
-        this.ctx.moveTo(this.pp.x, this.props.height * this.multiplier - this.pp.x);
+        this.ctx.moveTo(this.pp.x, this.height * this.multiplier - this.pp.x);
         this.animation_frames = 0;
         this.animateClear();
     }
 
     animateClear(){
         this.ctx.globalAlpha = 0.7;
-        this.ctx.fillStyle = this.primary_color;
-        this.ctx.fillRect(0,0, this.props.width * this.multiplier, this.props.height * this.multiplier);
-        this.ctx.fillStyle = this.dark_color;
+        this.ctx.fillRect(0,0, this.width * this.multiplier, this.height * this.multiplier);
         this.ctx.globalAlpha = 1;
         this.updateImage();
         if (this.animation_frames++ < ANIMATION_FRAMES_MAX){
@@ -116,8 +174,16 @@ class Preview extends Component{
     }
 
     render(){
+        if (this.props.device.type==="Cartesian"){
+            this.width = parseInt(this.props.device.width);
+            this.height = parseInt(this.props.device.height);
+        }else{      // For polar and scara should be square with height and width = diameter or 2*radius
+            this.width = parseInt(this.props.device.radius)*2;
+            this.height = this.width;
+        }
+        
         return <div>
-            <canvas ref={this.canvas_ref} className="d-none" width={this.props.width * this.multiplier} height={this.props.height * this.multiplier}/>
+            <canvas ref={this.canvas_ref} className="d-none" width={this.width * this.multiplier} height={this.height * this.multiplier}/>
             <img ref={this.image_ref} 
                 key={this.props.imageKey}
                 className="preview-style"
@@ -126,4 +192,4 @@ class Preview extends Component{
     }
 }
 
-export default Preview;
+export default connect(mapStateToProps)(Preview);

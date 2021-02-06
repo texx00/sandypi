@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Container, Row, Col, Button } from 'react-bootstrap';
-import { connect } from 'react-redux';
 
 import "./ManualControl.scss";
 
@@ -9,13 +8,6 @@ import CommandLine from './CommandLine';
 import Preview from './Preview';
 
 import { control_emergency_stop, send_command } from '../../../sockets/sEmits';
-import { getDimensions } from './selector.js';
-
-const mapStateToProps = (state) => {
-    return {
-        dimensions: getDimensions(state)
-    }
-}
 
 class ManualControl extends Component{
 
@@ -29,7 +21,7 @@ class ManualControl extends Component{
                                         <CommandLine/>
                                     </Col>
                                     <Col md>
-                                        <Preview width={this.props.dimensions.width} height={this.props.dimensions.height}/>
+                                        <Preview/>
                                     </Col>
                                 </Row>
                                 <Row>
@@ -45,4 +37,4 @@ class ManualControl extends Component{
     }
 }
 
-export default connect(mapStateToProps)(ManualControl);
+export default ManualControl;

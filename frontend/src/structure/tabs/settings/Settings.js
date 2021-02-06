@@ -6,7 +6,6 @@ import { Section, Subsection, SectionGroup } from '../../../components/Section';
 
 import { getSettings } from "./selector.js";
 import { updateAllSettings, updateSetting } from "./Settings.slice.js";
-import { setDeviceSize } from "../manual/ManualControl.slice.js";
 
 import { settings_now } from '../../../sockets/sCallbacks';
 import { settings_save } from '../../../sockets/sEmits';
@@ -21,8 +20,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
     return {
         updateAllSettings: (settings) => dispatch(updateAllSettings(settings)),
-        updateSetting: (val) => dispatch(updateSetting(val)),
-        setDeviceSize: (props) => dispatch(setDeviceSize({width: props.settings.device.width, height: props.settings.device.height}))
+        updateSetting: (val) => dispatch(updateSetting(val))
     }
 }
 
@@ -31,7 +29,6 @@ class Settings extends Component{
     componentDidMount(){
         settings_now((data) => {
             this.props.updateAllSettings(JSON.parse(data));
-            this.props.setDeviceSize(this.props);
         });
     }
 
@@ -40,7 +37,6 @@ class Settings extends Component{
         delete sets.serial.available_baudrates;
         delete sets.serial.available_ports;
         settings_save(sets, connect);
-        this.props.setDeviceSize(this.props);
     }
 
     render(){

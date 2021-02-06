@@ -71,6 +71,7 @@ class UploadDrawingsModal extends Component{
     }
 
     render(){
+        // TODO add thr files upload if necessary... Need somebody to try it out first
         return <Modal show={this.props.show} onHide={this.handleClose.bind(this)} size="lg" centered>
             <Modal.Header className="center">
                 <Modal.Title>Upload new drawing</Modal.Title>
@@ -79,11 +80,11 @@ class UploadDrawingsModal extends Component{
                 <div className={ "w-100" + (this.state.loading ? " d-none" : "")}>
                     <Dropzone
                         onDrop={this.handleFiles.bind(this)} 
-                        accept={".gcode,.thr"}
+                        accept={".gcode"}       
                         noKeyboard>
                         {({getRootProps, getInputProps, isDragActive}) => (<div {...getRootProps()} className={"animated-background m-2 p-5 mh-100 d-flex justify-content-center align-items-center" + (isDragActive ? " drag-active" : "")}>
                             <input {...getInputProps()}/>
-                            <div className="d-block text-center">Drag and drop the .gcode/.nc file here <br/>or click to open the file explorer
+                            <div className="d-block text-center">Drag and drop the .gcode file here <br/>or click to open the file explorer
                                 </div>
                             </div>)}
                     </Dropzone>
