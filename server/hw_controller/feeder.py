@@ -491,6 +491,21 @@ class Feeder():
     #  * no_buffer (def: False): will not save the line in the buffer (used to get an ack to clear the buffer after a timeout if an ack is lost)
     def _generate_line(self, command, no_buffer=False):
         line = command
+        # TODO add a "fast mode" remove spaces from commands and reduce number of decimals
+        # removing spaces is in conflict with the emulator... Need to update the parser there also
+        if self.settings["device"]["type"] == "Cartesian": 
+            # fast mode test
+            fast_mode = True
+            if fast_mode:
+                line = command.split(" ")
+                new_line = []
+                for l in line:
+                    if l.startswith("X"):
+                        l = "X{:.1f}".format(float(l[1:])).rstrip("0").rstrip(".")
+                    elif l.startswith("Y"):
+                        l = "Y{:.1f}".format(float(l[1:])).rstrip("0").rstrip(".")
+                    new_line.append(l)
+                line = " ".join(new_line)
 
         # marlin needs line numbers and checksum (grbl doesn't)
         if firmware.is_marlin(self._firmware):
@@ -506,8 +521,6 @@ class Feeder():
             line +="*{}\n".format(cs)                   # add checksum to the line
 
         else: line +="\n"
-
-        # TODO add a "fast mode" to remove spaces from commands as a possible setting (reduces the number of chars to send thus it should work better). Could also limit the number of decimals in the commands to 2 (should be enough even 1 for cartesian, for scara and polar may need more because they are using a smaller resolution)
 
         # store the line in the buffer
         with self.command_buffer_mutex:

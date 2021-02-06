@@ -88,9 +88,9 @@ class ImageFactory:
             # selecting values
             for p in params:
                 if p[0]=="X":
-                    com_X = float(p[1:-1])
+                    com_X = float(p[1:])
                 if p[0]=="Y":
-                    com_Y = float(p[1:-1])
+                    com_Y = float(p[1:])
             
             # converting command X and Y to x, y coordinates (default conversion is cartesian)
             x = com_X
