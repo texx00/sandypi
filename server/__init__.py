@@ -10,9 +10,10 @@ from werkzeug.utils import secure_filename
 
 import os
 
-from time import sleep
+from time import sleep, time
 from dotenv import load_dotenv
 import logging
+from threading import Thread
 
 from server.utils import settings_utils, software_updates, migrations
 
@@ -71,7 +72,7 @@ app.semits = SocketioEmits(app,socketio, db)
 
 # Device controller initialization
 app.feeder = Feeder(FeederEventManager(app))
-app.feeder.connect()
+#app.feeder.connect()
 app.qmanager = QueueManager(app, socketio)
 
 app.leds_controller = LedsController(app)
@@ -95,6 +96,16 @@ def versioned_url_for(endpoint, **values):
 @app.route('/')
 def home():
     return send_from_directory(app.static_folder, "index.html")
+
+
+# Starting the feeder after the server is ready to avoid problems with the web page not showing up
+def run_post():
+    sleep(2)
+    app.feeder.connect()
+
+th = Thread(target = run_post)
+th.name = "feeder_starter"
+th.start()
 
 if __name__ == '__main__':
     socketio.run(app)

@@ -123,34 +123,14 @@ class Feeder():
             try:
                 self.serial = DeviceSerial(self.settings['serial']['port'], self.settings['serial']['baud'], logger_name = __name__) 
                 self.serial.set_onreadline_callback(self.on_serial_read)
+                self.logger.info("Connection succesfull")
             except:
                 self.logger.info("Error during device connection")
                 self.logger.info(traceback.print_exc())
                 self.serial = DeviceSerial(logger_name = __name__)
 
-        # wait for the device to be ready
-        self.wait_device_ready()
+        self.device_ready = False   # this line is set to true as soon as the board sends a message
 
-        # reset line number when connecting
-        self._reset_line_number()
-
-        # grbl status report mask setup
-        # sandypi need to check the buffer to see if the machine has cleaned the buffer
-        # setup grbl to show the buffer status with the $10 command
-        #   Grbl 1.1 https://github.com/gnea/grbl/wiki/Grbl-v1.1-Configuration
-        #   Grbl 0.9 https://github.com/grbl/grbl/wiki/Configuring-Grbl-v0.9
-        # to be compatible with both will send $10=6 (4(for v0.9) + 2(for v1.1))
-        # the status will then be prompted with the "?" command when necessary
-        # the buffer will contain Bf:"usage of the buffer"
-        if firmware.is_grbl(self._firmware):
-            self.send_gcode_command("$10=6")
-
-        # send the "on connection" script from the settings
-        self.send_script(self.settings['scripts']['connected'])
-
-    def wait_device_ready(self):
-        time.sleep(1)
-        # without this function the device may be not ready to receive commands
 
     def set_event_handler(self, handler):
         self.handler = handler
@@ -310,6 +290,32 @@ class Feeder():
 
     # ----- PRIVATE METHODS -----
 
+    # prepares the board
+    def _on_device_ready(self):
+        if firmware.is_marlin(self._firmware):
+            self._reset_line_number()
+        
+        # grbl status report mask setup
+        # sandypi need to check the buffer to see if the machine has cleaned the buffer
+        # setup grbl to show the buffer status with the $10 command
+        #   Grbl 1.1 https://github.com/gnea/grbl/wiki/Grbl-v1.1-Configuration
+        #   Grbl 0.9 https://github.com/grbl/grbl/wiki/Configuring-Grbl-v0.9
+        # to be compatible with both will send $10=6 (4(for v0.9) + 2(for v1.1))
+        # the status will then be prompted with the "?" command when necessary
+        # the buffer will contain Bf:"usage of the buffer"
+        if firmware.is_grbl(self._firmware):
+            self.send_gcode_command("$10=6")
+        
+        # send the "on connection" script from the settings
+        self.send_script(self.settings['scripts']['connected'])
+
+    # run the "_on_device_ready" method with a delay
+    def _on_device_ready_delay(self):
+        def delay():
+            time.sleep(5)
+            self._on_device_ready()
+        th = Thread(target = delay)
+        th.start()
 
     # thread function
     # TODO move this function in a different class?
@@ -408,7 +414,9 @@ class Feeder():
         # check marlin specific messages
         if firmware.is_grbl(self._firmware):
             # status report
-            if line.startswith("<"):
+            if "Grbl" in line:
+                self._on_device_ready()
+            elif line.startswith("<"):
                 try:
                     # interested in the "Bf:xx," part where xx is the content of the buffer
                     # select buffer content lines 
@@ -443,8 +451,7 @@ class Feeder():
         else:
             # if the device is reset manually, will restart the numeration
             if ("start" in line):
-                self.wait_device_ready()
-                self._reset_line_number()
+                self._on_device_ready_delay()
 
             # Marlin resend command if a message is not received correctly
             if "Resend: " in line:

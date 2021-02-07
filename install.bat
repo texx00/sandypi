@@ -1,6 +1,11 @@
 echo '----- Installing python dependencies -----'
 python -m pip install -r requirements.txt
 
+echo '----- Updating sw version ----'
+:: Necessary to avoid compatibility issues between old and new settings in the browser local storage
+:: The frontend will compare the two verisions and in case of a mismatch will load the new settings from the server instead of loading the old redux state
+python dev_tools/update_frontend_version_hash.py
+
 echo '----- Installing js dependencies and building frontend app -----'
 call npm install -g yarn
 call yarn --cwd ./frontend install
