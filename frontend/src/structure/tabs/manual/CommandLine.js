@@ -93,12 +93,12 @@ class CommandLine extends Component{
                     </Row>
                     <Row>
                         <Col className="center">
-                        <Form.Check 
-                            label="Show device acks"
-                            id="ack_check"
-                            type="switch"
-                            onChange={(event)=>{this.setState({show_acks: event.target.checked})}}
-                            checked={this.state.show_acks}/>
+                            <Form.Check 
+                                label="Show device acks"
+                                id="ack_check"
+                                type="switch"
+                                onChange={(event)=>{this.setState({show_acks: event.target.checked})}}
+                                checked={this.state.show_acks}/>
                         </Col>
                     </Row>
                 </Form.Group>

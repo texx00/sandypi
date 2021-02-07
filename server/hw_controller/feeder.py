@@ -88,6 +88,7 @@ class Feeder():
         self.command_buffer_max_length = 8
         self.command_buffer_history = limited_size_dict.LimitedSizeDict(size_limit = self.command_buffer_max_length+10)    # keep saved the last n commands
         self.position_request_difference = 10           # every n lines requires the current position with M114
+        self._buffered_line = ""
 
         self._timeout = buffered_timeout.BufferTimeout(30, self._on_timeout)
         self._timeout.start()
@@ -101,6 +102,11 @@ class Feeder():
         self._firmware = settings["serial"]["firmware"]
         self._ACK = firmware.get_ACK(self._firmware)
         self._timeout.set_timeout_period(firmware.get_buffer_timeout(self._firmware))
+        self.is_fast_mode = settings["serial"]["fast_mode"]
+        if self.is_fast_mode:
+            if settings["device"]["type"] == "Cartesian":
+                self.command_resolution = "{:.1f}"      # Cartesian do not need extra resolution because already using mm as units. (TODO maybe with inches can have problems? needs to check)
+            else: self.command_resolution = "{:.3f}"    # Polar and scara use smaller numbers, will need also decimals
     
     def close(self):
         self.serial.close()
@@ -116,9 +122,7 @@ class Feeder():
                 self.serial.close()
             try:
                 self.serial = DeviceSerial(self.settings['serial']['port'], self.settings['serial']['baud'], logger_name = __name__) 
-                self._serial_read_thread = Thread(target = self._thsr, daemon=True)
-                self._serial_read_thread.name = "serial_read"
-                self._serial_read_thread.start()
+                self.serial.set_onreadline_callback(self.on_serial_read)
             except:
                 self.logger.info("Error during device connection")
                 self.logger.info(traceback.print_exc())
@@ -272,15 +276,16 @@ class Feeder():
 
             # TODO fix the problem with small geometries may be with the serial port being to slow. For long (straight) segments the problem is not evident. Do not understand why it is happening
 
-            if firmware.is_marlin(self._firmware):  # updating the command only for marlin because grbl check periodically the buffer status with the status report command
-                self._update_timeout()              # update the timeout because a new command has been sent
+        with self.command_buffer_mutex:
+            if(len(self.command_buffer)>=self.command_buffer_max_length and not self.command_send_mutex.locked()):
+                self.command_send_mutex.acquire()     # if the buffer is full acquire the lock so that cannot send new lines until the reception of an ack. Notice that this will stop only buffered commands. The other commands will be sent anyway
 
-            with self.command_buffer_mutex:
-                if(len(self.command_buffer)>=self.command_buffer_max_length and not self.command_send_mutex.locked()):
-                    self.command_send_mutex.acquire()     # if the buffer is full acquire the lock so that cannot send new lines until the reception of an ack. Notice that this will stop only buffered commands. The other commands will be sent anyway
-    
-            if not hide_command:
-                self.handler.on_new_line(line)      # uses the handler callback for the new line
+        if not hide_command:
+            self.handler.on_new_line(line)      # uses the handler callback for the new line
+            
+        if firmware.is_marlin(self._firmware):  # updating the command only for marlin because grbl check periodically the buffer status with the status report command
+            self._update_timeout()              # update the timeout because a new command has been sent
+
 
     
     # Send a multiline script
@@ -340,26 +345,17 @@ class Feeder():
             self.stop()
 
     # thread that keep reading the serial port
-    def _thsr(self):
-        line = ""
-        l = None
-        while True:
-            with self.serial_mutex:
-                try:
-                    l = self.serial.readline()
-                except Exception as e:
-                    self.logger.error(e)
-                    self.logger.error("Serial connection lost")
-            if not l is None:
-                # readline is not returning the full line but only a buffer 
-                # must break the line on "\n" to correctly parse the result
-                line += l
-                if "\n" in line:
-                    line = line.replace("\r", "").split("\n")
-                    if len(line) >1:
-                        for l in line[0:-1]:
-                            self._parse_device_line(l)
-                    line = line[-1]
+    def on_serial_read(self, l):
+        if not l is None:
+            # readline is not returning the full line but only a buffer 
+            # must break the line on "\n" to correctly parse the result
+            self._buffered_line += l
+            if "\n" in self._buffered_line:
+                self._buffered_line = self._buffered_line.replace("\r", "").split("\n")
+                if len(self._buffered_line) >1:
+                    for l in self._buffered_line[0:-1]: # parse single lines if multiple \n are detected
+                        self._parse_device_line(l)
+                self._buffered_line = self._buffered_line[-1]
             
 
     def _update_timeout(self):
@@ -493,19 +489,17 @@ class Feeder():
         line = command
         # TODO add a "fast mode" remove spaces from commands and reduce number of decimals
         # removing spaces is in conflict with the emulator... Need to update the parser there also
-        if self.settings["device"]["type"] == "Cartesian": 
-            # fast mode test
-            fast_mode = True
-            if fast_mode:
-                line = command.split(" ")
-                new_line = []
-                for l in line:
-                    if l.startswith("X"):
-                        l = "X{:.1f}".format(float(l[1:])).rstrip("0").rstrip(".")
-                    elif l.startswith("Y"):
-                        l = "Y{:.1f}".format(float(l[1:])).rstrip("0").rstrip(".")
-                    new_line.append(l)
-                line = " ".join(new_line)
+        # fast mode test
+        if self.is_fast_mode:
+            line = command.split(" ")
+            new_line = []
+            for l in line:
+                if l.startswith("X"):
+                    l = "X" + self.command_resolution.format(float(l[1:])).rstrip("0").rstrip(".")
+                elif l.startswith("Y"):
+                    l = "Y" + self.command_resolution.format(float(l[1:])).rstrip("0").rstrip(".")
+                new_line.append(l)
+            line = "".join(new_line)
 
         # marlin needs line numbers and checksum (grbl doesn't)
         if firmware.is_marlin(self._firmware):
@@ -520,7 +514,11 @@ class Feeder():
             
             line +="*{}\n".format(cs)                   # add checksum to the line
 
-        else: line +="\n"
+        elif firmware.is_grbl(self._firmware):
+            if line != firmware.GRBL.buffer_command:
+                line += "\n"
+
+        else: line += "\n"
 
         # store the line in the buffer
         with self.command_buffer_mutex:

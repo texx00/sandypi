@@ -6,7 +6,8 @@
         "available_firmwares": [
             "Marlin",
             "Grbl"
-        ]
+        ],
+        "fast_mode": false
     },
     "device": {
         "width": "450",

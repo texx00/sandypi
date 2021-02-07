@@ -16,7 +16,7 @@ GRBL.name = "Grbl"
 GRBL.ACK = "ok"
 GRBL.buffer_command = "?"
 GRBL.emergency_stop = "!"
-GRBL.buffer_timeout = 1
+GRBL.buffer_timeout = 5
 
 def is_grbl(val):
     return val == GRBL.name

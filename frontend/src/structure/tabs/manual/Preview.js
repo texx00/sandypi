@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import { connect } from "react-redux";
 
 import { device_new_position } from '../../../sockets/sCallbacks';
-import { getDevice } from "../settings/selector";
+import { getDevice, getIsFastMode } from "../settings/selector";
 import { dictsAreEqual } from "../../../utils/dictUtils";
 import { isManualControl } from "../selector";
 
@@ -14,7 +14,8 @@ const ANIMATION_DURATION = 1000;
 const mapStateToProps = (state) =>{
     return {
         device: getDevice(state),
-        isManualControl: isManualControl(state)
+        isManualControl: isManualControl(state),
+        isFastMode: getIsFastMode(state)
     }
 }
 
@@ -82,7 +83,26 @@ class Preview extends Component{
     }
 
     drawLine(line){
+        // prepare the line
+        line = line.replace("\n", "");
         let l = line.split(" ");
+        // parsing line for fast mode (will not have spaces thus split(" ") will not work)
+        if (this.props.isFastMode){
+            l = [];
+            let tmp = ""
+            for (let c in line){
+                if (line.charAt(c).match(/[A-Z]/)){
+                    if (tmp.length>0){
+                        l.push(tmp);
+                        tmp = "";
+                    }
+                }
+                tmp += line.charAt(c);
+            }
+            l.push(tmp);
+        }
+        
+        // parse the command
         let x = this.pp.x;
         let y = this.pp.y;
         for(const i in l){

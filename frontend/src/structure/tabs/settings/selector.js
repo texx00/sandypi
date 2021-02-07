@@ -2,6 +2,8 @@ const getSettings = state => { return state.settings };
 
 const getDevice = state => { return state.settings.device };
 
+const getIsFastMode = state => { return state.settings.serial.fast_mode}
+
 const systemIsLinux = state => { return state.settings.system.is_linux };
 
 const shouldCheckUpdate = state => { 
@@ -10,4 +12,4 @@ const shouldCheckUpdate = state => {
     else return false;
 };    // check for an update every day once
 
-export { getSettings, getDevice, systemIsLinux, shouldCheckUpdate };
+export { getSettings, getDevice, getIsFastMode, systemIsLinux, shouldCheckUpdate };

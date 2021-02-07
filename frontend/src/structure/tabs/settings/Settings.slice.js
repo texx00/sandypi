@@ -11,7 +11,8 @@ const settingsSlice = createSlice({
             available_baudrates: ["2400", "4800", "9600", "19200", "38400", "57600", "115200", "230400", "460800", "921600"], 
             available_ports: ["FAKE"],
             firmware: "Marlin",
-            available_firmwares: ["Marlin", "Grbl"]
+            available_firmwares: ["Marlin", "Grbl"],
+            fast_mode: false
         }, 
         device: {
             width: 100, 

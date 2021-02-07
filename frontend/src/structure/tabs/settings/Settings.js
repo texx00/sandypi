@@ -86,7 +86,16 @@ class Settings extends Component{
                                                     return <option key={index}>{firm}</option>
                                                 })}
                                             </Form.Control>
-                                            
+                                        </Form.Group>
+                                    </Col>
+                                    <Col>
+                                        <Form.Group>
+                                            <Form.Check 
+                                                label="Enable fast mode (will send more compact messages over serial)."
+                                                id="fast_mode_check"
+                                                type="switch"
+                                                onChange={(e)=>{this.props.updateSetting(["serial.fast_mode", e.target.checked])}}
+                                                checked={this.props.settings.serial.fast_mode}/>
                                         </Form.Group>
                                     </Col>
                                     <Col>
