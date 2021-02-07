@@ -123,7 +123,7 @@ class Feeder():
             try:
                 self.serial = DeviceSerial(self.settings['serial']['port'], self.settings['serial']['baud'], logger_name = __name__) 
                 self.serial.set_onreadline_callback(self.on_serial_read)
-                self.logger.info("Connection succesfull")
+                self.logger.info("Connection successfull")
             except:
                 self.logger.info("Error during device connection")
                 self.logger.info(traceback.print_exc())
@@ -415,7 +415,7 @@ class Feeder():
         if firmware.is_grbl(self._firmware):
             # status report
             if "Grbl" in line:
-                self._on_device_ready()
+                self._on_device_ready_delay()
             elif line.startswith("<"):
                 try:
                     # interested in the "Bf:xx," part where xx is the content of the buffer
