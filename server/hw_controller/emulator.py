@@ -1,6 +1,9 @@
 import time, re, math
 from collections import deque
 
+from server.utils.settings_utils import load_settings
+import server.hw_controller.firmware_defaults as firmware
+
 emulated_commands_with_delay = ["G0", "G00", "G1", "G01"]
 
 ACK = "ok\n\r"
@@ -16,6 +19,8 @@ class Emulator():
         self.fr = re.compile("[F]([0-9.]+)($|\s)")
         self.last_x = 0.0
         self.last_y = 0.0
+        self.settings = load_settings()
+        self.message_buffer.append(firmware.get_ready_message(self.settings["serial"]["firmware"])+"\n")     # sends back a message to tell the board is ready and can receive commands
 
     def get_x(self, line):
         return float(self.xr.findall(line)[0][0])
@@ -54,11 +59,8 @@ class Emulator():
             except:
                 y = self.last_y
             # calculate time
-            t = max(math.sqrt((x-self.last_x)**2 + (y-self.last_y)**2) / self.feedrate * 60.0, 0.005)   # TODO need to use the max 0.005 because cannot simulate anything on the frontend otherwise... May look for a better solution
-            if t == 0.0:
-                self.message_buffer.append(ACK)
-                return
-
+            t = max(math.sqrt((x-self.last_x)**2 + (y-self.last_y)**2) / self.feedrate * 60.0, 0.1)   # TODO need to use the max 0.005 because cannot simulate anything on the frontend otherwise... May look for a better solution
+            
             # update positions
             self.last_x = x
             self.last_y = y

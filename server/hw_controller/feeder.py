@@ -123,11 +123,14 @@ class Feeder():
             try:
                 self.serial = DeviceSerial(self.settings['serial']['port'], self.settings['serial']['baud'], logger_name = __name__) 
                 self.serial.set_onreadline_callback(self.on_serial_read)
+                self.serial.start_reading()
                 self.logger.info("Connection successfull")
             except:
                 self.logger.info("Error during device connection")
                 self.logger.info(traceback.print_exc())
                 self.serial = DeviceSerial(logger_name = __name__)
+                self.serial.set_onreadline_callback(self.on_serial_read)
+                self.serial.start_reading()
 
         self.device_ready = False   # this line is set to true as soon as the board sends a message
 
@@ -410,13 +413,17 @@ class Feeder():
 
         if firmware.get_ACK(self._firmware) in line:  # when an "ack" is received free one place in the buffer
             self._ack_received()
+        
+        # check if the received line is for the device being ready
+        if firmware.get_ready_message(self._firmware) in line:
+            if self.serial.is_fake:
+                self._on_device_ready()
+            else:
+                self._on_device_ready_delay()   # if the device is ready will allow the communication after a small delay
 
         # check marlin specific messages
         if firmware.is_grbl(self._firmware):
-            # status report
-            if "Grbl" in line:
-                self._on_device_ready_delay()
-            elif line.startswith("<"):
+            if line.startswith("<"):
                 try:
                     # interested in the "Bf:xx," part where xx is the content of the buffer
                     # select buffer content lines 
@@ -449,10 +456,6 @@ class Feeder():
 
         # Marlin messages
         else:
-            # if the device is reset manually, will restart the numeration
-            if ("start" in line):
-                self._on_device_ready_delay()
-
             # Marlin resend command if a message is not received correctly
             if "Resend: " in line:
                 line_found = False

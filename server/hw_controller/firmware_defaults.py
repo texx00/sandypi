@@ -6,6 +6,7 @@ MARLIN.ACK = "ok"
 MARLIN.buffer_command = "M114"
 MARLIN.emergency_stop = "M112"
 MARLIN.buffer_timeout = 30
+MARLIN.ready_message = "start"
 
 def is_marlin(val):
     return val == MARLIN.name
@@ -17,6 +18,7 @@ GRBL.ACK = "ok"
 GRBL.buffer_command = "?"
 GRBL.emergency_stop = "!"
 GRBL.buffer_timeout = 5
+GRBL.ready_message = "Grbl"
 
 def is_grbl(val):
     return val == GRBL.name
@@ -41,3 +43,8 @@ def get_emergency_stop_command(firmware):
     if firmware == MARLIN.name:
         return MARLIN.emergency_stop
     else: return GRBL.emergency_stop
+
+def get_ready_message(firmware):
+    if firmware == MARLIN.name:
+        return MARLIN.ready_message
+    else: return GRBL.ready_message

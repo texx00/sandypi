@@ -67,7 +67,7 @@ class CommandLine extends Component{
         let ch = [...this.state.history];
         ch.push({line: line, device: device});
         // limiting the number of lines in the preview (for performance)
-        while(ch.lenght>20)
+        while(ch.length>100)
             ch.shift();
         this.setState({history: ch});
     }

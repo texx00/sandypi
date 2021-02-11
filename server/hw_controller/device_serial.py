@@ -1,3 +1,4 @@
+from enum import auto
 from threading import Thread, Lock
 import serial.tools.list_ports
 import serial
@@ -12,7 +13,7 @@ import glob
 # If the serial device request is not available it will create a virtual serial device
 
 class DeviceSerial():
-    def __init__(self, serialname = None, baudrate = None, logger_name = None):
+    def __init__(self, serialname = None, baudrate = None, logger_name = None, autostart = False):
         self.logger = logging.getLogger(logger_name) if not logger_name is None else logging.getLogger()
         self.serialname = serialname
         self.baudrate = baudrate
@@ -39,7 +40,7 @@ class DeviceSerial():
             self.logger.error("Serial not available. Are you sure the device is connected and is not in use by other softwares? (Will use the fake serial)")
         
         # empty callback function
-        def useless():
+        def useless(arg):
             pass
 
         # setting up the read thread
@@ -48,6 +49,12 @@ class DeviceSerial():
         self._th.name = "serial_read"
         self._running = False
         self.set_onreadline_callback(useless)
+        if autostart:
+            self.start_reading()
+    
+
+    # starts the reading thread
+    def start_reading(self):
         self._th.start()
 
     # this method is used to set a callback for the "new line available" event
@@ -113,8 +120,7 @@ class DeviceSerial():
                     line = self.serial.readline()
                     self._on_readline(line.decode(encoding='UTF-8'))
         else:
-            return self._emulator.readline()
-        return None
+            self._on_readline(self._emulator.readline())
 
     # thread function
     def _thf(self):
