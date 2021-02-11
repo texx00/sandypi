@@ -52,15 +52,16 @@ class LedsController:
     # Updates the led driver object only if the dimensions are changed
     def update_settings(self, settings):
         self.stop()
-        dims = (settings["leds"]["width"], settings["leds"]["height"])
+        # TODO convert setting to a dotmap?
+        dims = (settings["leds"]["width"]["value"], settings["leds"]["height"]["value"])
         if self.dimensions != dims:
             self.dimensions = dims
             self.driver = LedsDriver(self.dimensions)
             self.leds_type = None
             self.pin = None
-        if (self.leds_type != settings["leds"]["type"]) or (self.pin != settings["leds"]["pin1"]):
-            self.pin = settings["leds"]["pin1"]
-            self.leds_type = settings["leds"]["type"]
+        if (self.leds_type != settings["leds"]["type"]["value"]) or (self.pin != settings["leds"]["pin1"]["value"]):
+            self.pin = settings["leds"]["pin1"]["value"]
+            self.leds_type = settings["leds"]["type"]["value"]
             is_ok = False
             if self.leds_type == "WS2812B":
                 is_ok = self.driver.use_WS2812B(self.pin)

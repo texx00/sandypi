@@ -34,6 +34,7 @@ class TopBar extends Component{
     }
 
     renderSettingsButton(){
+        // TODO update the "is_linux" setting in the default_settings.json file and consequently the implementation here
         if (this.props.is_linux)
             return <Dropdown as={ButtonGroup}>
                 <IconButton className="btn btn-dark mr-0" 

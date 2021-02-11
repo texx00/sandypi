@@ -44,6 +44,9 @@ def update_settings_file_version():
     
 def match_dict(mod_dict, ref_dict):
     if type(ref_dict) is dict:
+        if not type(mod_dict) is dict:
+            return ref_dict           # if the old field was not a dict but a single value must return the new dict because cannot convert a single value into a dict
+        
         new_dict = dict(mod_dict)   # clone object
         for k in ref_dict.keys():
             if not k in new_dict:

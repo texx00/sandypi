@@ -99,12 +99,12 @@ class Feeder():
 
     def update_settings(self, settings):
         self.settings = settings
-        self._firmware = settings["serial"]["firmware"]
+        self._firmware = settings["device"]["firmware"]["value"]
         self._ACK = firmware.get_ACK(self._firmware)
         self._timeout.set_timeout_period(firmware.get_buffer_timeout(self._firmware))
-        self.is_fast_mode = settings["serial"]["fast_mode"]
+        self.is_fast_mode = settings["serial"]["fast_mode"]["value"]
         if self.is_fast_mode:
-            if settings["device"]["type"] == "Cartesian":
+            if settings["device"]["type"]["value"] == "Cartesian":
                 self.command_resolution = "{:.1f}"      # Cartesian do not need extra resolution because already using mm as units. (TODO maybe with inches can have problems? needs to check)
             else: self.command_resolution = "{:.3f}"    # Polar and scara use smaller numbers, will need also decimals
     
@@ -121,7 +121,7 @@ class Feeder():
             if not self.serial is None:
                 self.serial.close()
             try:
-                self.serial = DeviceSerial(self.settings['serial']['port'], self.settings['serial']['baud'], logger_name = __name__) 
+                self.serial = DeviceSerial(self.settings['serial']['port']["value"], self.settings['serial']['baud']["value"], logger_name = __name__) 
                 self.serial.set_onreadline_callback(self.on_serial_read)
                 self.serial.start_reading()
                 self.logger.info("Connection successfull")
@@ -310,7 +310,7 @@ class Feeder():
             self.send_gcode_command("$10=6")
         
         # send the "on connection" script from the settings
-        self.send_script(self.settings['scripts']['connected'])
+        self.send_script(self.settings['scripts']['connected']["value"])
 
     # run the "_on_device_ready" method with a delay
     def _on_device_ready_delay(self):
@@ -323,7 +323,7 @@ class Feeder():
     # thread function
     # TODO move this function in a different class?
     def _thf(self, element):
-        self.send_script(self.settings['scripts']['before'])
+        self.send_script(self.settings['scripts']['before']["value"])
 
         self.logger.info("Starting new drawing with code {}".format(element))
         with self.serial_mutex:
@@ -350,7 +350,7 @@ class Feeder():
         with self.status_mutex:
             self._stopped = True
         if self.is_running():
-            self.send_script(self.settings['scripts']['after'])
+            self.send_script(self.settings['scripts']['after']["value"])
             self.stop()
 
     # thread that keep reading the serial port

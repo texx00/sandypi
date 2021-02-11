@@ -76,7 +76,7 @@ class DeviceSerial():
         else:
             if self.serial.is_open:
                 try:
-                    with self._mutex:
+                    with self._mutex:   # TODO add an out_waiting check before sending next command? try to send byte by byte instead of a full line? (to reduce the risk of sending commands with missing digits or wrong values that may lead to a wrong position value)
                         self._readline()
                         self.serial.write(str(obj).encode())
                 except:
