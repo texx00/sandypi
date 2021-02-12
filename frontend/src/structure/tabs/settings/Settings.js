@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { Container, Form, Col, Button } from 'react-bootstrap';
+import { Container, Form, Col, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { connect } from 'react-redux';
 
 import { Section, Subsection, SectionGroup } from '../../../components/Section';
@@ -37,11 +37,33 @@ class Settings extends Component{
         settings_save(sets, connect);
     }
 
+    checkDependsValue(field, values){
+        if (field!== undefined){
+            let res = this.getSettingValue(field);
+            return values.includes(res);
+        }else return true;
+    }
+
     renderSetting(setting, key){
-        // TODO add check to set option visibility depending on the selected option value if necessary and hints
-        return <Col sm={4} key={key} className="mt-auto">
-                {this.renderInput(setting)}
-            </Col>
+        // check if the option should be rendered depending on the value of another option (like if the device is cartesian will not show width and height)
+        if (this.checkDependsValue(setting.depends_on, setting.depends_values))
+            if (setting.tip !== "" && setting.tip !== undefined)
+                return <Col sm={4} key={key} className="mt-auto">
+                    <OverlayTrigger overlay={
+                        <Tooltip>
+                            {setting.tip}
+                        </Tooltip>}
+                        delay={{ show: 2000, hide: 250 }}>
+                            <div>
+                                {this.renderInput(setting)}
+                            </div>
+                    </OverlayTrigger>
+                </Col>
+            else
+                return <Col sm={4} key={key} className="mt-auto">
+                    {this.renderInput(setting)}
+                </Col>
+        else return "";
     }
 
     renderInput(setting){
