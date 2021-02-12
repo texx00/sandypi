@@ -194,7 +194,7 @@ class Settings extends Component{
                                 </Form.Row>
                             </Container>
                         </SectionGroup>
-                        <SectionGroup sectionTitle="LEDs">
+                        {/*<SectionGroup sectionTitle="LEDs">
                             <Container>
                                 <Form.Row>
                                     <Col>
@@ -232,7 +232,7 @@ class Settings extends Component{
                                     </Col>
                                 </Form.Row>
                             </Container>
-                        </SectionGroup>
+                                            </SectionGroup>*/}
                     </Subsection>
                 </Section>
             </Form>
