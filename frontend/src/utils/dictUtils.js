@@ -16,16 +16,6 @@ const mergeDicts = (og, so) => {
 // clones a dict
 const cloneDict = di => {
     return _.cloneDeep(di);
-    /*
-    let tmp = {};
-    for (let key in di){
-        if ((typeof (di[key]) === 'object' || typeof (di[key]) === 'Proxy')  && !Array.isArray(di[key])) {
-            tmp[key] = cloneDict(di[key]);
-        } else {
-            tmp[key] = di[key];
-        }
-    }
-    return tmp;*/
 }
 
 const setSubKey = (dict, keys, value) => {
@@ -34,17 +24,33 @@ const setSubKey = (dict, keys, value) => {
     
     if (keys.length === 1)
         dict[keys[0]] = value;
-    else dict[keys[0]] = setSubKey(cloneDict(dict[keys[0]]), keys.pop(), value);
+    else{
+        let k = keys.shift();
+        dict[k] = setSubKey(cloneDict(dict[k]), keys, value);
+    }
     return dict;
 }
 
 const getSubKey = (dict, keys) => {
     if (!Array.isArray(keys))
         keys = keys.split(".");
+    let res = "";
     
     if (keys.length === 1)
-        return dict[keys[0]];
-    else return getSubKey(cloneDict(dict[keys[0]]), keys.pop());
+        res = dict[keys[0]];
+    else{ 
+        let k = keys.shift()
+        res = getSubKey(cloneDict(dict[k]), keys);
+    }
+    return res;
+}
+
+const mapValueToName = (dict) =>{
+    let res = cloneDict(dict);
+    for (let r in res){
+        res[r] = res[r].value;
+    }
+    return res;
 }
 
 // compares to dict lists (should work with every kind of list really)
@@ -56,4 +62,4 @@ const dictsAreEqual = (dict1, dict2) => {
     return listsAreEqual(dict1, dict2);
 }
 
-export { mergeDicts, cloneDict, setSubKey, getSubKey, listsAreEqual, dictsAreEqual };
+export { mergeDicts, cloneDict, setSubKey, getSubKey, mapValueToName, listsAreEqual, dictsAreEqual };

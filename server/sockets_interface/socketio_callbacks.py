@@ -86,7 +86,6 @@ def settings_save(data, is_connect):
 @socketio.on("settings_request")
 def settings_request():
     settings = settings_utils.load_settings()
-    settings["serial"]["baud"]["available_values"] = ["2400", "4800", "9600", "19200", "38400", "57600", "115200", "230400", "460800", "921600"]
     settings["serial"]["port"]["available_values"] = app.feeder.serial_ports_list()
     settings["serial"]["port"]["available_values"].append("FAKE")
     app.semits.emit("settings_now", json.dumps(settings))

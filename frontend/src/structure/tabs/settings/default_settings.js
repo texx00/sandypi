@@ -6,14 +6,16 @@ const default_settings = {
 		port: {
 			name: "serial.port",
 			type: "select",
-			value: "COM3",
-			label: "Serial port"
+			value: "FAKE",
+			label: "Serial port",
+			available_values: ['FAKE']
 		},
 		baud: {
 			name: "serial.baud",
 			type: "select",
 			value: "115200",
-			label: "Serial baudrate"
+			label: "Serial baudrate",
+			available_values: ['2400', '4800', '9600', '19200', '38400', '57600', '115200', '230400', '460800', '921600']
 		},
 		fast_mode: {
 			name: "serial.fast_mode",
