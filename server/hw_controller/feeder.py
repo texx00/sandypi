@@ -7,6 +7,7 @@ from copy import deepcopy
 import re
 import logging
 from dotenv import load_dotenv
+from dotmap import DotMap
 
 from server.utils import limited_size_dict, buffered_timeout, settings_utils
 from server.hw_controller.device_serial import DeviceSerial
@@ -77,9 +78,12 @@ class Feeder():
         self.line_number = 0
         self._timeout_last_line = self.line_number
         self.feedrate = 0
+        self.last_commanded_position = DotMap({"x":0, "y":0})
 
         # commands parser
-        self.feed_regex = re.compile("[F]([0-9.]+)($|\s)")
+        self.feed_regex =   re.compile("[F]([0-9.]+)($|\s)")
+        self.x_regex =      re.compile("[X]([0-9.]+)($|\s)")
+        self.y_regex =      re.compile("[Y]([0-9.]+)($|\s)")
 
         # buffer controll attrs
         self.command_buffer = deque()
@@ -189,15 +193,20 @@ class Feeder():
                 with self.status_mutex:
                     if self._stopped:
                         break
-             # waiting command buffer to be clear before calling the "drawing ended" event
-            while True:
-                # with grbl can ask a status report to see if the buffer is empty
-                if  firmware.is_grbl(self._firmware):
-                    self.send_gcode_command("?", hide_command=True)             # will send a command to ask for a status report (won't be shown in the command history)
-                    time.sleep(1)                                               # wait just 1 second to get the time to the board to ansfer
+            
+            # send last position with a rounded value to receive the same result once the M114 is used because marlin is rounding in a different way certain values (the result of M114 is sending only 2 decimals)
+            if firmware.is_marlin(self._firmware):
+                point = (round(float(self.last_commanded_position.x),2), round(float(self.last_commanded_position.y),2))
+                self.send_gcode_command("G1 X{0} Y{1}".format(*point), hide_command=True)
 
+            # waiting command buffer to be clear before calling the "drawing ended" event
+            while True:
+                self.send_gcode_command(firmware.get_buffer_command(self._firmware), hide_command=True) 
+                time.sleep(1)                                               # wait just 1 second to get the time to the board to answer
+                # the "buffer_command" will raise a response from the board that will be handled by the parser to empty the buffer
+
+                # wait until the buffer is empty to know that the job is done
                 with self.command_buffer_mutex:
-                    # Marlin: wait for the buffer to be empty (rely on the circular buffer. If an ack is lost in the way, the buffer will not clear at the end of the drawing. It will be cleared by the buffer timeout after a while)
                     if len(self.command_buffer) == 0:
                         break
             # resetting line number between drawings
@@ -221,6 +230,11 @@ class Feeder():
     #  * command: command to send
     #  * hide_command=False (optional): will hide the command from being sent also to the frontend (should be used for SW control commands)
     def send_gcode_command(self, command, hide_command=False):
+        if "G28" in command:
+            self.last_commanded_position.x = 0
+            self.last_commanded_position.y = 0
+        # TODO add G92 check for the positioning
+
         # clean the command a little
         command = command.replace("\n", "").replace("\r", "").upper()
         if command == " " or command == "":
@@ -238,10 +252,14 @@ class Feeder():
         # check if the command is in the "BUFFERED_COMMANDS" list and stops if the buffer is full
         if any(code in command for code in BUFFERED_COMMANDS):
             if "F" in command:
-                feed = self.feed_regex.findall(command)
-                self.feedrate = feed[0][0]
+                self.feedrate = self.feed_regex.findall(command)[0][0]
+            if "X" in command:
+                self.last_commanded_position.x = self.x_regex.findall(command)[0][0]
+            if "Y" in command:
+                self.last_commanded_position.y = self.y_regex.findall(command)[0][0]
 
-            with self.command_send_mutex:       # wait until get some "ok" command to remove an element from the buffer
+            # wait until the lock for the buffer length is released -> means the board sent the ack for older lines and can send new ones
+            with self.command_send_mutex:       # wait until get some "ok" command to remove extra entries from the buffer
                 pass
 
         # send the command after parsing the content
@@ -366,7 +384,7 @@ class Feeder():
                 if len(self._buffered_line) >1:
                     for l in self._buffered_line[0:-1]: # parse single lines if multiple \n are detected
                         self._parse_device_line(l)
-                self._buffered_line = self._buffered_line[-1]
+                self._buffered_line = str(self._buffered_line[-1])
             
 
     def _update_timeout(self):
@@ -403,9 +421,16 @@ class Feeder():
                             break
                 if append_left_extra:
                     self.command_buffer.appendleft(safe_line_number-1)
+
+        self._check_buffer_mutex_status()
+
+
+    # check if the buffer of the device is full or can accept more commands
+    def _check_buffer_mutex_status(self):
         with self.command_buffer_mutex:
             if self.command_send_mutex.locked() and len(self.command_buffer) < self.command_buffer_max_length:
                 self.command_send_mutex.release()
+        
 
     # parse a line coming from the device
     def _parse_device_line(self, line):
@@ -483,10 +508,29 @@ class Feeder():
             # Marlin "unknow command"
             elif "echo:Unknown command:" in line:
                 self.logger.error("Error: command not found. Can also be a communication error")
+            # M114 response contains the "Count" word
+            # the response looks like: X:115.22 Y:116.38 Z:0.00 E:0.00 Count A:9218 B:9310 Z:0
+            elif "Count" in line:
+                l = line.split(" ")
+                x = float(l[0][2:])     # remove "X:" from the string
+                y = float(l[1][2:])     # remove "Y:" from the string
+                # if the last commanded position coincides with the current position it means the buffer on the device is empty (could happen that the position is the same between different points but the M114 command should not be that frequent to run into this problem.) TODO check if it is good enough or if should implement additional checks like a timeout
+                # need to compare the floor value with 2 decimals (marlin is rounding 0.15 to 0.1 but 0.151 to 0.2)
+                if (round(float(self.last_commanded_position.x),2) == x) and (round(float(self.last_commanded_position.y),2) == y):
+                    if self.is_running():
+                        self._ack_received()
+                    else:
+                        with self.command_buffer_mutex:
+                            self.command_buffer.clear()
+                        self._check_buffer_mutex_status()
+
+                if not self.is_running():
+                    hide_line = True
+                
         
-        # TODO check feedrate response for M220 and set feedrate
-        #elif "_______" in line: # must see the real output from marlin
-        #    self.feedrate = .... # must see the real output from marlin
+            # TODO check feedrate response for M220 and set feedrate
+            #elif "_______" in line: # must see the real output from marlin
+            #    self.feedrate = .... # must see the real output from marlin
 
         self.logger.log(settings_utils.LINE_RECEIVED, line)
         if not hide_line:
