@@ -280,9 +280,10 @@ class Feeder():
                 self.send_gcode_command(s)
 
     def serial_ports_list(self):
+        result = []
         if not self.serial is None:
             result = self.serial.serial_port_list()
-        return [] if result is None else result
+        return result
     
     def is_connected(self):
         return self.serial.is_connected()
@@ -471,10 +472,9 @@ class Feeder():
                         #    print_line = False
 
                         # All the lines after the required one must be resent. Cannot break the loop now
-                        with self.serial_mutex:
-                            self.serial.send(c)
-                        break
-                self._ack_received(safe_line_number=line_number-1, append_left_extra=True)
+                        self.serial.send(c)
+                        self.logger.error("Line not received correctly. Resending: {}".format(c.strip("\n")))
+                        self._ack_received(safe_line_number=line_number-1, append_left_extra=True)
                 # the resend command is sending an ack. should add an entry to the buffer to keep the right lenght (because the line has been sent 2 times)
                 if not line_found: 
                     self.logger.error("No line was found for the number required. Restart numeration.")
