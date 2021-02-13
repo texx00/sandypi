@@ -90,8 +90,7 @@ class Feeder():
         self.command_buffer_mutex = Lock()              # mutex used to modify the command buffer
         self.command_send_mutex = Lock()                # mutex used to pause the thread when the buffer is full
         self.command_buffer_max_length = 8
-        self.command_buffer_history = limited_size_dict.LimitedSizeDict(size_limit = self.command_buffer_max_length+10)    # keep saved the last n commands
-        self.position_request_difference = 10           # every n lines requires the current position with M114
+        self.command_buffer_history = limited_size_dict.LimitedSizeDict(size_limit = self.command_buffer_max_length+25)    # keep saved the last n commands
         self._buffered_line = ""
 
         self._timeout = buffered_timeout.BufferTimeout(30, self._on_timeout)
@@ -265,11 +264,6 @@ class Feeder():
         # send the command after parsing the content
         # need to use the mutex here because it is changing also the line number
         with self.serial_mutex:
-            # check if needs to send a "M114" command (actual position request) but not in the first lines
-            if (self.line_number % self.position_request_difference) == 0 and self.line_number > 5:
-                #self._generate_line("M114")    # does not send the line to trigger the "resend" event and clean the buffer from messages that are already done
-                pass
-
             line = self._generate_line(command)
 
             self.serial.send(line)              # send line
