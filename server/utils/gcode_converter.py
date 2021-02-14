@@ -109,7 +109,7 @@ class ImageFactory:
                 y = sin(theta) * rho
             elif self.is_polar():
                 x = cos((com_X + self.offset_1)*self.pi_conversion) * com_Y * self.device_radius
-                y = sin((com_X + self.offset_2)*self.pi_conversion) * com_Y * self.device_radius
+                y = sin((com_X + self.offset_1)*self.pi_conversion) * com_Y * self.device_radius
 
 
             if x<xmin:

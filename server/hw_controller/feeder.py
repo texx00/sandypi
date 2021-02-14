@@ -81,9 +81,9 @@ class Feeder():
         self.last_commanded_position = DotMap({"x":0, "y":0})
 
         # commands parser
-        self.feed_regex =   re.compile("[F]([0-9.]+)($|\s)")
-        self.x_regex =      re.compile("[X]([0-9.]+)($|\s)")
-        self.y_regex =      re.compile("[Y]([0-9.]+)($|\s)")
+        self.feed_regex =   re.compile("[F]([0-9.-]+)($|\s)")           # looks for a +/- float number after an F, until the first space or the end of the line
+        self.x_regex =      re.compile("[X]([0-9.-]+)($|\s)")           # looks for a +/- float number after an X, until the first space or the end of the line
+        self.y_regex =      re.compile("[Y]([0-9.-]+)($|\s)")           # looks for a +/- float number after an Y, until the first space or the end of the line
 
         # buffer controll attrs
         self.command_buffer = deque()
@@ -144,7 +144,7 @@ class Feeder():
 
     # starts to send gcode to the machine
     def start_element(self, element, force_stop=False):
-        if(not force_stop and self.is_running()):
+        if((not force_stop) and self.is_running()):
             return False        # if a file is already being sent it will not start a new one
         else:
             if self.is_running():
@@ -193,11 +193,6 @@ class Feeder():
                 with self.status_mutex:
                     if self._stopped:
                         break
-            
-            # send last position with a rounded value to receive the same result once the M114 is used because marlin is rounding in a different way certain values (the result of M114 is sending only 2 decimals)
-            if firmware.is_marlin(self._firmware):
-                point = (round(float(self.last_commanded_position.x),2), round(float(self.last_commanded_position.y),2))
-                self.send_gcode_command("G1 X{0} Y{1}".format(*point), hide_command=True)
 
             # waiting command buffer to be clear before calling the "drawing ended" event
             while True:
@@ -463,6 +458,7 @@ class Feeder():
                         with self.command_buffer_mutex:
                             if len(self.command_buffer) > 0 and self.is_running():
                                 self.command_buffer.popleft()
+                    self._check_buffer_mutex_status()
                     
                     if (self.is_running() or self.is_paused()):
                         hide_line = True
@@ -472,6 +468,10 @@ class Feeder():
                 return
 
             # errors
+            elif "error:22" in line:
+                self.stop()
+                with self.command_buffer_mutex:
+                    self.command_buffer.clear()
             elif "error:" in line:
                 self.logger.error("Grbl error: {}".format(line))
                 # TODO check/parse error types and give some hint about the problem?
@@ -515,8 +515,8 @@ class Feeder():
                 x = float(l[0][2:])     # remove "X:" from the string
                 y = float(l[1][2:])     # remove "Y:" from the string
                 # if the last commanded position coincides with the current position it means the buffer on the device is empty (could happen that the position is the same between different points but the M114 command should not be that frequent to run into this problem.) TODO check if it is good enough or if should implement additional checks like a timeout
-                # need to compare the floor value with 2 decimals (marlin is rounding 0.15 to 0.1 but 0.151 to 0.2)
-                if (round(float(self.last_commanded_position.x),2) == x) and (round(float(self.last_commanded_position.y),2) == y):
+                # use a tolerance instead of equality because marlin is using strange rounding for the coordinates
+                if (abs(float(self.last_commanded_position.x)-x)<firmware.MARLIN.position_tolerance) and (abs(float(self.last_commanded_position.y)-y)<firmware.MARLIN.position_tolerance):
                     if self.is_running():
                         self._ack_received()
                     else:

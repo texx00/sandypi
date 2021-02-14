@@ -7,6 +7,7 @@ MARLIN.buffer_command = "M114"
 MARLIN.emergency_stop = "M112"
 MARLIN.buffer_timeout = 30
 MARLIN.ready_message = "start"
+MARLIN.position_tolerance = 0.01
 
 def is_marlin(val):
     return val == MARLIN.name
