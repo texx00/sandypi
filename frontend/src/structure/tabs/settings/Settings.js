@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { Container, Form, Col, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Container, Form, Col, Button } from 'react-bootstrap';
 import { connect } from 'react-redux';
 
 import { Section, Subsection, SectionGroup } from '../../../components/Section';
@@ -9,7 +9,8 @@ import { updateAllSettings, updateSetting } from "./Settings.slice.js";
 
 import { settings_now } from '../../../sockets/sCallbacks';
 import { settings_save } from '../../../sockets/sEmits';
-import { cloneDict, getSubKey } from '../../../utils/dictUtils';
+import { cloneDict } from '../../../utils/dictUtils';
+import SettingField from './SettingField';
 
 const mapStateToProps = (state) => {
     return {
@@ -37,96 +38,18 @@ class Settings extends Component{
         settings_save(sets, connect);
     }
 
-    checkDependsValue(field, values){
-        if (field!== undefined){
-            let res = this.getSettingValue(field);
-            return values.includes(res);
-        }else return true;
-    }
-
-    renderSetting(setting, key){
-        // check if the option should be rendered depending on the value of another option (like if the device is cartesian will not show width and height)
-        if (this.checkDependsValue(setting.depends_on, setting.depends_values))
-            if (setting.tip !== "" && setting.tip !== undefined)
-                return <Col sm={4} key={key} className="mt-auto">
-                    <OverlayTrigger overlay={
-                        <Tooltip>
-                            {setting.tip}
-                        </Tooltip>}
-                        delay={{ show: 2000, hide: 250 }}>
-                            <div>
-                                {this.renderInput(setting)}
-                            </div>
-                    </OverlayTrigger>
-                </Col>
-            else
-                return <Col sm={4} key={key} className="mt-auto">
-                    {this.renderInput(setting)}
-                </Col>
-        else return "";
-    }
-
-    renderInput(setting){
-        if (setting.type === "input"){
-            return <Form.Group>
-                    <Form.Label>{setting.label}</Form.Label>
-                    <Form.Control value={this.getSettingValue(setting.name)}
-                        onChange={(e) => this.props.updateSetting([ setting.name+".value", e.target.value ])}
-                       />
-                </Form.Group>
-        }else if(setting.type === "text"){
-            return <Form.Group>
-                    <Form.Label>{setting.label}</Form.Label>
-                    <Form.Control as="textarea" 
-                        value={this.getSettingValue(setting.name)}
-                        onChange={(e) => this.props.updateSetting([ setting.name+".value", e.target.value ])}/>
-                </Form.Group>
-        }else if(setting.type === "select"){
-            return <Form.Group>
-                    <Form.Group controlId={setting.name}>
-                        <Form.Label>Serial port</Form.Label>
-                        <Form.Control as="select" 
-                            value={this.getSettingValue(setting.name)} 
-                            onChange={(e) => this.props.updateSetting([ setting.name+".value", e.target.value ])}>
-                            { this.getSettingsAvailableValues(setting.name).map((opt, index) => {
-                                return <option key={index}>{opt}</option>}) }
-                        </Form.Control>
-                    </Form.Group>
-                </Form.Group>
-        }else if(setting.type === "check"){
-            return <Form.Group>
-                <Form.Check 
-                    label={setting.label}
-                    id={setting.name.replace(".", "_")}
-                    type="switch"
-                    onChange={(e)=>{this.props.updateSetting([ setting.name+".value", e.target.checked ])}}
-                    checked={this.getSettingValue(setting.name)}/>
-            </Form.Group>
-        }
-    }
-
-    getSettingValue(setting_name){
-        let res = this.getSettingOption(setting_name);
-        return res.value;
-    }
-    
-    getSettingsAvailableValues(setting_name){
-        return (this.getSettingOption(setting_name)).available_values;
-    }
-
-    getSettingOption(setting_name){
-        return getSubKey(this.props.settings, setting_name);
-    }
-
     mapEntries(entries){
         if (entries !== undefined)
             return entries.map((single_setting, key) => { 
-                return this.renderSetting(single_setting[1], key);
+                return <SettingField
+                    single_setting={single_setting[1]}
+                    settings={this.props.settings}
+                    onUpdateSetting={this.props.updateSetting.bind(this)}/>
             });
         else return "";
     }
 
-
+    // render the list of settings divided by sections
     render(){
         let serial_entries =    Object.entries(this.props.settings.serial);
         let device_entries =    Object.entries(this.props.settings.device);

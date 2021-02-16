@@ -280,7 +280,8 @@ class Feeder():
                 self.send_gcode_command(s)
 
     def serial_ports_list(self):
-        result = self.serial.serial_port_list()
+        if not self.serial is None:
+            result = self.serial.serial_port_list()
         return [] if result is None else result
     
     def is_connected(self):
@@ -288,7 +289,7 @@ class Feeder():
 
     # stops immediately the device
     def emergency_stop(self):
-        self.send_gcode_command(firmware.get_emergency_stop_command())
+        self.send_gcode_command(firmware.get_emergency_stop_command(self._firmware))
         # TODO add self.close() ?
 
     # ----- PRIVATE METHODS -----
