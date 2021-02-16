@@ -280,6 +280,7 @@ class Feeder():
                 self.send_gcode_command(s)
 
     def serial_ports_list(self):
+        result = []
         if not self.serial is None:
             result = self.serial.serial_port_list()
         return [] if result is None else result
