@@ -86,13 +86,13 @@ class Settings extends Component{
                                 </Form.Row>
                             </Container>
                         </SectionGroup>
-                        <SectionGroup sectionTitle="LEDs">
+                        {/*<SectionGroup sectionTitle="LEDs">
                             <Container>
                                 <Form.Row>
                                     {this.mapEntries(leds_entries)}
                                 </Form.Row>
                             </Container>
-                        </SectionGroup>
+                                            </SectionGroup>*/}
                     </Subsection>
                 </Section>
             </Form>
