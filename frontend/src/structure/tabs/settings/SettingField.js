@@ -61,7 +61,7 @@ class SettingField extends Component{
         if (field!== undefined){
             let res = this.getSettingOption(field);
             let parent_visible = true;
-            if (res.depends_on != undefined){
+            if (res.depends_on !== undefined){
                 parent_visible = this.checkDependsValue(res.depends_on, res.depends_values);
             }
             return (values.includes(res.value) && parent_visible);

@@ -566,7 +566,9 @@ class Feeder():
             if n is None:   # check if the line number was specified or if must increase the number of the sequential command
                 self.line_number += 1
                 n = self.line_number
-            line = "N{} {} ".format(n, command)
+            if self.is_fast_mode:
+                line = "N{}{}".format(n, line)
+            else: line = "N{} {} ".format(n, line)
             # calculate marlin checksum according to the wiki
             cs = 0
             for i in line:

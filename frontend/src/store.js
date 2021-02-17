@@ -13,7 +13,7 @@ function saveToLocalStorage(state) {
     try {
         const serialisedState = JSON.stringify(state);
         localStorage.setItem("persistantState", serialisedState);
-        localStorage.setItem("version", process.env.REACT_APP_VERSION)
+        localStorage.setItem("version", process.env.REACT_APP_VERSION);
     } catch (e) {
         console.warn(e);
     }

@@ -87,6 +87,7 @@ class Preview extends Component{
         line = line.replace("\n", "");
         let l = line.split(" ");
         // parsing line for fast mode (will not have spaces thus split(" ") will not work)
+        // TODO parse with regex like in the feeder
         if (this.props.isFastMode){
             l = [];
             let tmp = ""

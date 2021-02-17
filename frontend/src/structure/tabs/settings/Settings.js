@@ -92,7 +92,7 @@ class Settings extends Component{
                                     {this.mapEntries(leds_entries)}
                                 </Form.Row>
                             </Container>
-                                            </SectionGroup>*/}
+                        </SectionGroup>*/}
                     </Subsection>
                 </Section>
             </Form>
