@@ -5,9 +5,12 @@ import { Card } from 'react-bootstrap';
 import { connect } from 'react-redux';
 
 import { getImgUrl } from '../../../utils/utils';
+import { drawing_queue } from '../../../sockets/sEmits';
 
 import { showSingleDrawing } from '../Tabs.slice';
+
 import Image from '../../../components/Image';
+import DrawingCardMenu from './DrawingCardMenu';
 
 const mapDispatchToProps = (dispatch) => {
     return { showSingleDrawing: (id) => dispatch(showSingleDrawing(id))}
@@ -18,8 +21,9 @@ class DrawingCard extends Component{
     render(){
         if (this.props.drawing === undefined || this.props.drawing === null)
             return "";
-        return <div>
+        return <DrawingCardMenu onStartDrawing={(id) => drawing_queue(id)} drawing={this.props.drawing}>
             <Card className="p-2 hover-zoom" onClick={() => this.props.showSingleDrawing(this.props.drawing.id)}>
+
                 <div className="border-0 bg-black rounded text-dark clickable center p-0">
                     <Image className="card-img-top rounded"
                         src={getImgUrl(this.props.drawing.id)} 
@@ -31,7 +35,7 @@ class DrawingCard extends Component{
                     </div>
                 </div>
             </Card>
-        </div>
+        </DrawingCardMenu>
     }
 }
 
