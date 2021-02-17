@@ -76,9 +76,12 @@ class DeviceSerial():
         else:
             if self.serial.is_open:
                 try:
-                    with self._mutex:   # TODO add an out_waiting check before sending next command? try to send byte by byte instead of a full line? (to reduce the risk of sending commands with missing digits or wrong values that may lead to a wrong position value)
+                    with self._mutex:
+                        while self.serial.out_waiting:
+                            pass            # TODO should add a sort of timeout
                         self._readline()
                         self.serial.write(str(obj).encode())
+                        # TODO try to send byte by byte instead of a full line? (to reduce the risk of sending commands with missing digits or wrong values that may lead to a wrong position value)
                 except:
                     self.close()
                     self.logger.error("Error while sending a command")
@@ -118,13 +121,16 @@ class DeviceSerial():
             if self.serial.is_open:
                 while self.serial.in_waiting>0:
                     line = self.serial.readline()
-                    self._on_readline(line.decode(encoding='UTF-8'))
+                    return line.decode(encoding="UTF-8")
         else:
-            self._on_readline(self._emulator.readline())
+            return self._emulator.readline()
 
     # thread function
     def _thf(self):
         self._running = True
+        next_line = ""
         while(self.is_running()):
             with self._mutex:
-                self._readline()
+                next_line = self._readline()
+            # cannot use the callback inside the mutex otherwise may run into a deadlock with the mutex if the serial.send is called in the parsing method
+            self._on_readline(next_line)

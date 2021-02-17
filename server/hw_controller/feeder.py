@@ -7,6 +7,7 @@ from copy import deepcopy
 import re
 import logging
 from dotenv import load_dotenv
+from dotmap import DotMap
 
 from server.utils import limited_size_dict, buffered_timeout, settings_utils
 from server.hw_controller.device_serial import DeviceSerial
@@ -77,17 +78,19 @@ class Feeder():
         self.line_number = 0
         self._timeout_last_line = self.line_number
         self.feedrate = 0
+        self.last_commanded_position = DotMap({"x":0, "y":0})
 
         # commands parser
-        self.feed_regex = re.compile("[F]([0-9.]+)($|\s)")
+        self.feed_regex =   re.compile("[F]([0-9.-]+)($|\s)")           # looks for a +/- float number after an F, until the first space or the end of the line
+        self.x_regex =      re.compile("[X]([0-9.-]+)($|\s)")           # looks for a +/- float number after an X, until the first space or the end of the line
+        self.y_regex =      re.compile("[Y]([0-9.-]+)($|\s)")           # looks for a +/- float number after an Y, until the first space or the end of the line
 
         # buffer controll attrs
         self.command_buffer = deque()
         self.command_buffer_mutex = Lock()              # mutex used to modify the command buffer
         self.command_send_mutex = Lock()                # mutex used to pause the thread when the buffer is full
         self.command_buffer_max_length = 8
-        self.command_buffer_history = limited_size_dict.LimitedSizeDict(size_limit = self.command_buffer_max_length+10)    # keep saved the last n commands
-        self.position_request_difference = 10           # every n lines requires the current position with M114
+        self.command_buffer_history = limited_size_dict.LimitedSizeDict(size_limit = self.command_buffer_max_length+40)    # keep saved the last n commands
         self._buffered_line = ""
 
         self._timeout = buffered_timeout.BufferTimeout(30, self._on_timeout)
@@ -140,7 +143,7 @@ class Feeder():
 
     # starts to send gcode to the machine
     def start_element(self, element, force_stop=False):
-        if(not force_stop and self.is_running()):
+        if((not force_stop) and self.is_running()):
             return False        # if a file is already being sent it will not start a new one
         else:
             if self.is_running():
@@ -189,15 +192,15 @@ class Feeder():
                 with self.status_mutex:
                     if self._stopped:
                         break
-             # waiting command buffer to be clear before calling the "drawing ended" event
-            while True:
-                # with grbl can ask a status report to see if the buffer is empty
-                if  firmware.is_grbl(self._firmware):
-                    self.send_gcode_command("?", hide_command=True)             # will send a command to ask for a status report (won't be shown in the command history)
-                    time.sleep(1)                                               # wait just 1 second to get the time to the board to ansfer
 
+            # waiting command buffer to be clear before calling the "drawing ended" event
+            while True:
+                self.send_gcode_command(firmware.get_buffer_command(self._firmware), hide_command=True) 
+                time.sleep(3)                                               # wait 3 second to get the time to the board to answer. If the time here is reduced too much will fill the buffer history with buffer_commands and may loose the needed line in a resend command for marlin
+                # the "buffer_command" will raise a response from the board that will be handled by the parser to empty the buffer
+
+                # wait until the buffer is empty to know that the job is done
                 with self.command_buffer_mutex:
-                    # Marlin: wait for the buffer to be empty (rely on the circular buffer. If an ack is lost in the way, the buffer will not clear at the end of the drawing. It will be cleared by the buffer timeout after a while)
                     if len(self.command_buffer) == 0:
                         break
             # resetting line number between drawings
@@ -221,6 +224,11 @@ class Feeder():
     #  * command: command to send
     #  * hide_command=False (optional): will hide the command from being sent also to the frontend (should be used for SW control commands)
     def send_gcode_command(self, command, hide_command=False):
+        if "G28" in command:
+            self.last_commanded_position.x = 0
+            self.last_commanded_position.y = 0
+        # TODO add G92 check for the positioning
+
         # clean the command a little
         command = command.replace("\n", "").replace("\r", "").upper()
         if command == " " or command == "":
@@ -238,20 +246,19 @@ class Feeder():
         # check if the command is in the "BUFFERED_COMMANDS" list and stops if the buffer is full
         if any(code in command for code in BUFFERED_COMMANDS):
             if "F" in command:
-                feed = self.feed_regex.findall(command)
-                self.feedrate = feed[0][0]
+                self.feedrate = self.feed_regex.findall(command)[0][0]
+            if "X" in command:
+                self.last_commanded_position.x = self.x_regex.findall(command)[0][0]
+            if "Y" in command:
+                self.last_commanded_position.y = self.y_regex.findall(command)[0][0]
 
-            with self.command_send_mutex:       # wait until get some "ok" command to remove an element from the buffer
+            # wait until the lock for the buffer length is released -> means the board sent the ack for older lines and can send new ones
+            with self.command_send_mutex:       # wait until get some "ok" command to remove extra entries from the buffer
                 pass
 
         # send the command after parsing the content
         # need to use the mutex here because it is changing also the line number
         with self.serial_mutex:
-            # check if needs to send a "M114" command (actual position request) but not in the first lines
-            if (self.line_number % self.position_request_difference) == 0 and self.line_number > 5:
-                #self._generate_line("M114")    # does not send the line to trigger the "resend" event and clean the buffer from messages that are already done
-                pass
-
             line = self._generate_line(command)
 
             self.serial.send(line)              # send line
@@ -283,7 +290,7 @@ class Feeder():
         result = []
         if not self.serial is None:
             result = self.serial.serial_port_list()
-        return [] if result is None else result
+        return result
     
     def is_connected(self):
         return self.serial.is_connected()
@@ -366,7 +373,7 @@ class Feeder():
                 if len(self._buffered_line) >1:
                     for l in self._buffered_line[0:-1]: # parse single lines if multiple \n are detected
                         self._parse_device_line(l)
-                self._buffered_line = self._buffered_line[-1]
+                self._buffered_line = str(self._buffered_line[-1])
             
 
     def _update_timeout(self):
@@ -403,9 +410,16 @@ class Feeder():
                             break
                 if append_left_extra:
                     self.command_buffer.appendleft(safe_line_number-1)
+
+        self._check_buffer_mutex_status()
+
+
+    # check if the buffer of the device is full or can accept more commands
+    def _check_buffer_mutex_status(self):
         with self.command_buffer_mutex:
             if self.command_send_mutex.locked() and len(self.command_buffer) < self.command_buffer_max_length:
                 self.command_send_mutex.release()
+        
 
     # parse a line coming from the device
     def _parse_device_line(self, line):
@@ -438,6 +452,7 @@ class Feeder():
                         with self.command_buffer_mutex:
                             if len(self.command_buffer) > 0 and self.is_running():
                                 self.command_buffer.popleft()
+                    self._check_buffer_mutex_status()
                     
                     if (self.is_running() or self.is_paused()):
                         hide_line = True
@@ -447,6 +462,10 @@ class Feeder():
                 return
 
             # errors
+            elif "error:22" in line:
+                self.stop()
+                with self.command_buffer_mutex:
+                    self.command_buffer.clear()
             elif "error:" in line:
                 self.logger.error("Grbl error: {}".format(line))
                 # TODO check/parse error types and give some hint about the problem?
@@ -459,22 +478,30 @@ class Feeder():
         # Marlin messages
         else:
             # Marlin resend command if a message is not received correctly
+            # Quick note: if the buffer_command is sent too often will fill the buffer with "M114" and if a line is request will not be able to send it back
+            # TODO Should add some sort of filter that if the requested line number is older than the requested ones can send from that number to the first an empty command or the buffer_command
+            # Otherwise should not put a buffer_command in the buffer and if a line with the requested number should send the buffer_command
             if "Resend: " in line:
                 line_found = False
                 line_number = int(line.replace("Resend: ", "").replace("\r\n", ""))
                 items = deepcopy(self.command_buffer_history)
+                missing_lines = True
+                first_available_line = None
                 for n, c in items.items():
                     n_line_number = int(n.strip("N"))
-                    if n_line_number >= line_number:
+                    if n_line_number == line_number:
                         line_found = True
-                        # checks if the requested line is an M114. In that case do not need to print the error/resend command because its a wanted behaviour
-                        #if line_number == n_line_number and "M114" in c:
-                        #    print_line = False
-
+                    if n_line_number >= line_number:
+                        if first_available_line is None:
+                            first_available_line = line_number
                         # All the lines after the required one must be resent. Cannot break the loop now
-                        with self.serial_mutex:
-                            self.serial.send(c)
-                        break
+                        self.serial.send(c)
+                        self.logger.error("Line not received correctly. Resending: {}".format(c.strip("\n")))
+
+                if (not line_found) and not(first_available_line is None):
+                    for i in range(line_number, first_available_line):
+                        self.serial.send(self._generate_line(firmware.MARLIN.buffer_command, no_buffer=True, n=i))
+
                 self._ack_received(safe_line_number=line_number-1, append_left_extra=True)
                 # the resend command is sending an ack. should add an entry to the buffer to keep the right lenght (because the line has been sent 2 times)
                 if not line_found: 
@@ -484,10 +511,30 @@ class Feeder():
             # Marlin "unknow command"
             elif "echo:Unknown command:" in line:
                 self.logger.error("Error: command not found. Can also be a communication error")
+            # M114 response contains the "Count" word
+            # the response looks like: X:115.22 Y:116.38 Z:0.00 E:0.00 Count A:9218 B:9310 Z:0
+            # still, M114 will receive the last position in the look-ahead planner thus the drawing will end first on the interface and then in the real device
+            elif "Count" in line:
+                l = line.split(" ")
+                x = float(l[0][2:])     # remove "X:" from the string
+                y = float(l[1][2:])     # remove "Y:" from the string
+                # if the last commanded position coincides with the current position it means the buffer on the device is empty (could happen that the position is the same between different points but the M114 command should not be that frequent to run into this problem.) TODO check if it is good enough or if should implement additional checks like a timeout
+                # use a tolerance instead of equality because marlin is using strange rounding for the coordinates
+                if (abs(float(self.last_commanded_position.x)-x)<firmware.MARLIN.position_tolerance) and (abs(float(self.last_commanded_position.y)-y)<firmware.MARLIN.position_tolerance):
+                    if self.is_running():
+                        self._ack_received()
+                    else:
+                        with self.command_buffer_mutex:
+                            self.command_buffer.clear()
+                        self._check_buffer_mutex_status()
+
+                if not self.is_running():
+                    hide_line = True
+                
         
-        # TODO check feedrate response for M220 and set feedrate
-        #elif "_______" in line: # must see the real output from marlin
-        #    self.feedrate = .... # must see the real output from marlin
+            # TODO check feedrate response for M220 and set feedrate
+            #elif "_______" in line: # must see the real output from marlin
+            #    self.feedrate = .... # must see the real output from marlin
 
         self.logger.log(settings_utils.LINE_RECEIVED, line)
         if not hide_line:
@@ -497,7 +544,7 @@ class Feeder():
     # args: 
     #  * command: the gcode command to send
     #  * no_buffer (def: False): will not save the line in the buffer (used to get an ack to clear the buffer after a timeout if an ack is lost)
-    def _generate_line(self, command, no_buffer=False):
+    def _generate_line(self, command, no_buffer=False, n=None):
         line = command
         # TODO add a "fast mode" remove spaces from commands and reduce number of decimals
         # removing spaces is in conflict with the emulator... Need to update the parser there also
@@ -516,8 +563,10 @@ class Feeder():
         # marlin needs line numbers and checksum (grbl doesn't)
         if firmware.is_marlin(self._firmware):
             # add line number
-            self.line_number += 1
-            line = "N{} {} ".format(self.line_number, command)
+            if n is None:   # check if the line number was specified or if must increase the number of the sequential command
+                self.line_number += 1
+                n = self.line_number
+            line = "N{} {} ".format(n, command)
             # calculate marlin checksum according to the wiki
             cs = 0
             for i in line:
