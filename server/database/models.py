@@ -1,10 +1,10 @@
 from datetime import datetime
-import os
 import json
 
+from sqlalchemy.orm.strategy_options import load_only
+from sqlalchemy.sql import func
+
 from server import db
-from server.database.playlist_elements_tables import create_playlist_table, delete_playlist_table, get_playlist_table_class
-from server.database.playlist_elements import GenericPlaylistElement
 
 
 # Gcode files table
@@ -18,6 +18,16 @@ class UploadedFiles(db.Model):
 
     def __repr__(self):
         return '<User %r>' % self.filename
+    
+    @classmethod
+    def get_random_drawing(cls):
+        return db.session.query(UploadedFiles).order_by(func.random()).first()
+        #return db.session.query(UploadedFiles).options(load_only('id')).offset(func.floor(func.random()*db.session.query(func.count(UploadedFiles.id)))).limit(1).all()
+
+
+# move these imports here to avoid circular import in the GenericPlaylistElement
+from server.database.playlist_elements_tables import create_playlist_table, delete_playlist_table, get_playlist_table_class
+from server.database.playlist_elements import GenericPlaylistElement
 
 # Playlist table
 # Keep track of all the playlists

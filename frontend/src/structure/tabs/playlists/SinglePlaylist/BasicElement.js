@@ -96,7 +96,7 @@ class BasicElement extends Component{
                 res = <Form.Control as="select"
                     value={this.state[op.field]}
                     onChange={(evt) => this.onOptionChange(evt.target.value, op)}>
-                        {op.options.map((val, idx) => { return <option key={idx}>{val}</option>})}
+                        {op.options.map((val, idx) => { return <option value={val.value}key={idx}>{val.label}</option>})}
                     </Form.Control>
                 break;
             case "date":

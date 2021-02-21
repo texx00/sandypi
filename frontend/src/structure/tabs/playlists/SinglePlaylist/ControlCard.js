@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import { Col, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
-import { Alarm, Gear, Plus, Upload } from 'react-bootstrap-icons';
+import { Alarm, Gear, Plus, Shuffle, Upload } from 'react-bootstrap-icons';
 
 import SquareContainer from '../../../../components/SquareContainer';
 
 import UploadDrawingsModal from '../../drawings/UploadDrawing';
-import { create_element_drawing, create_element_gcode, create_element_timing } from '../elementsFactory';
+import { create_element_drawing, create_element_gcode, create_element_shuffle, create_element_timing } from '../elementsFactory';
 
 class ControlCard extends Component{
     constructor(props){
@@ -15,9 +15,10 @@ class ControlCard extends Component{
             show_modal: false
         }
         this.elements = [
-            { type: "drawing", icon: <Upload/>, tip: "Upload a new drawing",            factory: create_element_drawing },
-            { type: "command", icon: <Gear/>,   tip: "Add gcode commands",              factory: create_element_gcode },
-            { type: "timing",  icon: <Alarm/>,  tip: "Add a delay between drawings",    factory: create_element_timing}
+            { type: "drawing", icon: <Upload/>,     tip: "Upload a new drawing",            factory: create_element_drawing },
+            { type: "command", icon: <Gear/>,       tip: "Add gcode commands",              factory: create_element_gcode },
+            { type: "timing",  icon: <Alarm/>,      tip: "Add a delay between drawings",    factory: create_element_timing },
+            { type: "shuffle", icon: <Shuffle/>,    tip: "Add a random element",            factory: create_element_shuffle }
         ]
     }
 
@@ -29,6 +30,7 @@ class ControlCard extends Component{
                 return;
             case "command":
             case "timing":
+            case "shuffle":
                 this.props.onElementsAdded([element_factory()]);
                 break;
             default:

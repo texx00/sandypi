@@ -28,4 +28,11 @@ function create_element_timing(){
     }
 }
 
-export { create_element_drawing, create_element_gcode, create_element_timing };
+function create_element_shuffle(){
+    return {
+        element_type: "shuffle",
+        playlist: 0
+    }
+}
+
+export { create_element_drawing, create_element_gcode, create_element_timing, create_element_shuffle };

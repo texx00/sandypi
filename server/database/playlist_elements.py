@@ -1,8 +1,13 @@
 import json
 import os
 from pathlib import Path
+from random import random
+import math
+
+from sqlalchemy.orm import load_only
+from server.database.models import UploadedFiles
 from time import time, sleep
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 
 from server.database.playlist_elements_tables import PlaylistElements
 from server import db
@@ -48,7 +53,12 @@ class GenericPlaylistElement():
                 setattr(self, k, values[k])
             else:
                 raise ValueError
-    
+
+    # if this method return None if will not run the element in the playlist
+    # can override if should not run the current element but something else
+    def before_start(self, queue_manager):
+        return self
+
     # add options that must be saved in a dedicated column insted of saving them inside the generic options of the element (like the element_type)
     def add_column_field(self, option):
         self._pop_options.append(option)
@@ -186,7 +196,7 @@ class TimeElement(GenericPlaylistElement):
             else: 
                 sleep(final_time-time())
                 yield None
-
+    # TODO fix queue view
 
 """
     Plays an element in the playlist with a random order
@@ -194,6 +204,16 @@ class TimeElement(GenericPlaylistElement):
 class ShuffleElement(GenericPlaylistElement):
     element_type = "shuffle"
 
+    def __init__(self, playlist=None, **kwargs):
+        super(ShuffleElement, self).__init__(element_type=ShuffleElement.element_type, **kwargs)
+        self.playlist = playlist
+
+    def before_start(self, app):
+        if self.playlist == None or self.playlist == "0":
+            # select random drawing
+            return DrawingElement(drawing_id = UploadedFiles.get_random_drawing().id)
+        # TODO shuffle drawing from the playlist
+        return None
 
 """
     Start another playlist

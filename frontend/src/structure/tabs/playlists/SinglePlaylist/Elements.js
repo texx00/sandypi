@@ -1,5 +1,5 @@
 import { Col, Form, Row } from "react-bootstrap";
-import { Alarm } from "react-bootstrap-icons";
+import { Alarm, Shuffle } from "react-bootstrap-icons";
 
 import { getImgUrl } from "../../../../utils/utils";
 
@@ -116,6 +116,24 @@ class TimingElement extends BasicElement{
     }
 }
 
+class ShuffleElement extends BasicElement{
+    getModalOptions(){
+        return [{type: "select", options: [{value: 0, label: "All the drawings"}, {value: 1, label: "This playlist"}], field: "playlist", value: this.props.element.playlist, label: "Select where to select the drawing from"}]
+    }
+
+    renderElement(){
+        return <SquareContainer>
+            <div>
+                <Row><Col><Shuffle/> Random drawing</Col></Row>
+            </div>
+        </SquareContainer>
+    }
+
+    renderPreview(){
+        return <Shuffle className="text-primary"/>
+    }
+}
+
 
 function getElementClass(element){
     if (element === undefined)
@@ -126,10 +144,12 @@ function getElementClass(element){
         case "drawing":
             return DrawingElement;
         case "timing":
-            return TimingElement
+            return TimingElement;
+        case "shuffle":
+            return ShuffleElement;
         default:
             return BasicElement;
     }
 }
 
-export {DrawingElement, CommandElement, TimingElement, getElementClass};
+export {DrawingElement, CommandElement, TimingElement, ShuffleElement, getElementClass};
