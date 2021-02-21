@@ -1,9 +1,12 @@
 import json
 import os
 from pathlib import Path
+from time import time, sleep
+from datetime import date, datetime, timedelta
 
 from server.database.playlist_elements_tables import PlaylistElements
 from server import db
+from server.utils.settings_utils import LINE_RECEIVED
 
 """
     Base class for a playlist element
@@ -34,7 +37,7 @@ class GenericPlaylistElement():
     def __str__(self):
         return json.dumps(self.get_dict())
     
-    def execute(self):
+    def execute(self, logger):
         raise StopIteration("You must implement an iterator in every element class")
 
     def _set_from_dict(self, values):
@@ -108,7 +111,7 @@ class DrawingElement(GenericPlaylistElement):
         except:
             raise ValueError("The drawing id must be an integer")
         
-    def execute(self):
+    def execute(self, logger):
         filename = os.path.join(str(Path(__file__).parent.parent.absolute()), "static/Drawings/{0}/{0}.gcode".format(self.drawing_id))
         with open(filename) as f:
             for line in f:
@@ -130,13 +133,11 @@ class CommandElement(GenericPlaylistElement):
         super().__init__(element_type=CommandElement.element_type, **kwargs)
         self.command = command
 
-    def execute(self):
+    def execute(self, logger):
         commands = self.command.replace("\r", "").split("\n")
         for c in commands:
             yield c
 
-
-# TODO implement also the other element types (execute method but also the frontend options)
 
 """
     Identifies a timing element (delay between drawings, next drawing at specific time of the day, repetitions, etc)
@@ -144,19 +145,78 @@ class CommandElement(GenericPlaylistElement):
 class TimeElement(GenericPlaylistElement):
     element_type = "timing"
 
-    def __init__(self, delay=None, expiry_date=None, **kwargs):
+    # delay: wait the specified amount of seconds
+    # expiry_date: allows to specify a date and an hour after which the drawing will continue
+    # alarm_time: can specify a time in the day at which can go on with the playlist (like 5 a.m. to get a new drawing in the morning without having it drawing the entire night)
+    def __init__(self, delay=None, expiry_date=None, alarm_time=None, **kwargs):
         super(TimeElement, self).__init__(element_type=TimeElement.element_type, **kwargs)
-        non_none = sum(i is not None for i in [delay, expiry_date])
-        if non_none != 1:
-            if non_none == 0:
-                raise ValueError("At least one value must be specify: delay or expiry_date")
-            else:
-                raise ValueError("Only one of the arguments can be specified at a time")
-        self.delay = delay
-        self.expiry_date = expiry_date
+        non_none = sum(((i is not None) and (i!="")) for i in [delay, expiry_date, alarm_time])
+        if non_none > 1:
+            raise ValueError("Only one of the arguments can be specified at a time")
+        self.delay = delay if delay != "" else None
+        self.expiry_date = expiry_date if expiry_date != "" else None
+        self.alarm_time = alarm_time if alarm_time != "" else None
+    
+    def execute(self, logger):
+        final_time = time()
+        if not self.alarm_time is None:                                                                 # compare the actual hh:mm:ss to the alarm to see if it must run today or tomorrow
+            now = datetime.now()
+            midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)                           # get midnight and add the alarm time
+            alarm_time = datetime.strptime(self.alarm_time, "%H:%M:%S")
+            alarm = midnight + timedelta(hours = alarm_time.hour, minutes = alarm_time.minute, seconds = alarm_time.second)
+            if alarm == now:
+                return
+            elif alarm < now:
+                alarm += timedelta(hours=24)                                                            # if the alarm is expired for today adds 24h
+            final_time = datetime.timestamp(alarm)
+        if not self.expiry_date is None:
+            final_time = datetime.timestamp(datetime.strptime(self.expiry_date, "%Y-%m-%d %H:%M:%S.%f"))
+        elif not self.delay is None:
+            final_time += float(self.delay)                                                             # store current time and applies the delay
+        else:                                                                                           # should not be the case because the check is done already in the constructore
+            return         
+                
+        while True:
+            if time() >= final_time:                                                                    # If the delay expires can break the while to start the next element
+                break
+            elif time() < final_time-1:
+                logger.log(LINE_RECEIVED, "Waiting {:.1f} more seconds".format(final_time-time()))
+                sleep(1)
+                yield None
+            else: 
+                sleep(final_time-time())
+                yield None
+
 
 """
-    Identifies a particular behaviour for the ball between drawings (like: move to the closest border, start from the center)
+    Plays an element in the playlist with a random order
+"""
+class ShuffleElement(GenericPlaylistElement):
+    element_type = "shuffle"
+
+
+"""
+    Start another playlist
+"""
+class StartPlaylistElement(GenericPlaylistElement):
+    element_type = "start_playlist"
+
+
+"""
+    Controls the led lights
+"""
+class LightsControl(GenericPlaylistElement):
+    element_type = ""
+
+    
+    def __init__(self, **kwargs):
+        super().__init__(element_type=LightsControl.element_type, **kwargs)
+
+
+# TODO implement also the other element types (execute method but also the frontend options)
+
+"""
+    Identifies a particular behaviour for the ball between drawings (like: move to the closest border, start from the center) (should put this as a drawing option?)
 """
 class PositioningElement(GenericPlaylistElement):
     element_type = "positioning"
@@ -164,7 +224,7 @@ class PositioningElement(GenericPlaylistElement):
         super().__init__(element_type=PositioningElement.element_type, **kwargs)
 
 """
-    Identifies a "clear all" pattern
+    Identifies a "clear all" pattern (really necessary?)
 """
 class ClearElement(GenericPlaylistElement):
     element_type = "clear"
@@ -173,4 +233,4 @@ class ClearElement(GenericPlaylistElement):
         super().__init__(element_type=ClearElement.element_type, **kwargs)
 
 
-_child_types = [DrawingElement, TimeElement, CommandElement, PositioningElement, ClearElement]
+_child_types = [DrawingElement, TimeElement, CommandElement, ShuffleElement, StartPlaylistElement, PositioningElement, ClearElement, LightsControl]

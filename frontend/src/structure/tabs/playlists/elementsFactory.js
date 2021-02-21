@@ -19,4 +19,13 @@ function create_element_gcode(){
     }
 }
 
-export { create_element_drawing, create_element_gcode };
+function create_element_timing(){
+    return {
+        element_type: "timing",
+        delay: "",
+        expiry_date: "",
+        alarm_time: ""
+    }
+}
+
+export { create_element_drawing, create_element_gcode, create_element_timing };

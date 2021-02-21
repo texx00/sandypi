@@ -345,7 +345,10 @@ class Feeder():
 
         filter = Fit(dims)
         
-        for k, line in enumerate(element.execute()):        # execute the element (iterate over the commands or do what the element is designed for)
+        for k, line in enumerate(element.execute(self.logger)):     # execute the element (iterate over the commands or do what the element is designed for)
+            if line is None:                                        # if the line is none there is no command to send, will continue with the next element execution (for example, within the delay element it will sleep 1s at a time and return None until the timeout passed. TODO Not really an efficient way, may change it in the future)
+                continue
+
             line = line.upper()
             if not self.is_running():
                 break

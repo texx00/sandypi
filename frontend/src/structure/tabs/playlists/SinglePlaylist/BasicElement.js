@@ -4,6 +4,7 @@ import { Trash, FileCheck } from 'react-bootstrap-icons';
 
 import IconButton from '../../../../components/IconButton';
 import SquareContainer from '../../../../components/SquareContainer';
+import FormDatetime from '../../../../components/FormDatetime';
 
 class BasicElement extends Component{
     constructor(props){
@@ -74,6 +75,58 @@ class BasicElement extends Component{
         this.setState({...this.state, ...dict});
     }
 
+    // it the "customModalOptions" method is defined in the child will use that instead of creating the standard options
+    renderModalOptions(){
+        if (this.customModalOptions !== undefined)
+            return this.customModalOptions();
+        else return this.getModalOptions().map((op, idx)=>{
+            return this.renderSingleOption(op, idx);
+        });
+    }
+
+    renderSingleOption(op, idx){
+        let res;
+        switch(op.type){
+            case "textarea":
+                res = <Form.Control as="textarea"
+                    value={this.state[op.field]} 
+                    onChange={(evt) => this.onOptionChange(evt.target.value, op)}/>
+                break;
+            case "select":
+                res = <Form.Control as="select"
+                    value={this.state[op.field]}
+                    onChange={(evt) => this.onOptionChange(evt.target.value, op)}>
+                        {op.options.map((val, idx) => { return <option key={idx}>{val}</option>})}
+                    </Form.Control>
+                break;
+            case "date":
+                res = <Form.Control type="date"
+                    value={this.state[op.field]} 
+                    onChange={(evt) => this.onOptionChange(evt.target.value, op)}/>
+                break;
+            case "time":
+                res = <Form.Control type="time"
+                    value={this.state[op.field]} 
+                    onChange={(evt) => this.onOptionChange(evt.target.value, op)}/>
+                break;
+            case "datetime":
+                res = <FormDatetime 
+                    value={this.state[op.field]}
+                    onChange={(val) => this.onOptionChange(val, op)}/>
+                break;
+            default:
+                res = <Form.Control value={this.state[op.field]}
+                    onChange={(evt) => this.onOptionChange(evt.target.value, op)}/>
+        }
+
+        return <Col key={idx}>
+            <Form.Group>
+                <Form.Label>{op.label}</Form.Label>
+                {res}
+            </Form.Group>
+        </Col>
+    }
+
     // renders the modal
     renderModal(){
         if (!this.getModalOptions()) return "";       // check option to show or not the modal
@@ -86,33 +139,7 @@ class BasicElement extends Component{
             <Modal.Body>
                 <Form>
                     <Row>
-                        {this.getModalOptions().map((op, idx)=>{
-                            let res;
-                            switch(op.type){
-                                case "textarea":
-                                    res = <Form.Control as="textarea"
-                                        value={this.state[op.field]} 
-                                        onChange={(evt) => this.onOptionChange(evt.target.value, op)}/>
-                                    break;
-                                case "select":
-                                    res = <Form.Control as="select"
-                                        value={this.state[op.field]}
-                                        onChange={(evt) => this.onOptionChange(evt.target.value, op)}>
-                                            {op.options.map((val, idx) => { return <option key={idx}>{val}</option>})}
-                                        </Form.Control>
-                                    break;
-                                default:
-                                    res = <Form.Control value={this.state[op.field]}
-                                        onChange={(evt) => this.onOptionChange(evt.target.value, op)}/>
-                            }
-
-                            return <Col key={idx}>
-                                <Form.Group>
-                                    <Form.Label>{op.label}</Form.Label>
-                                    {res}
-                                </Form.Group>
-                            </Col>
-                        })}
+                        {this.renderModalOptions()}
                     </Row>
                 </Form>
             </Modal.Body>
@@ -162,10 +189,15 @@ class BasicElement extends Component{
 
     // renders modal with element options and then the card content
     render(){
-        return <div>
-            {this.renderModal()}
-            {this.renderTip()}
-        </div>;
+        // if an element has a preview for the queue that must be different (like an icon instead of text) can use the renderPreview method to return a different render value
+        if (this.renderPreview !== undefined && this.props.showPreview !== undefined)
+            return <div>
+                    {this.renderPreview()}
+            </div>
+        else return <div>
+                {this.renderModal()}
+                {this.renderTip()}
+            </div>;
     }
 }
 
