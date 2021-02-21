@@ -204,12 +204,13 @@ class TimeElement(GenericPlaylistElement):
 class ShuffleElement(GenericPlaylistElement):
     element_type = "shuffle"
 
-    def __init__(self, playlist=None, **kwargs):
+    def __init__(self, shuffle_type=None, playlist=None, **kwargs):
         super(ShuffleElement, self).__init__(element_type=ShuffleElement.element_type, **kwargs)
         self.playlist = playlist
+        self.shuffle_type = shuffle_type
 
     def before_start(self, app):
-        if self.playlist == None or self.playlist == "0":
+        if self.shuffle_type == None or self.shuffle_type == "0":
             # select random drawing
             return DrawingElement(drawing_id = UploadedFiles.get_random_drawing().id)
         # TODO shuffle drawing from the playlist

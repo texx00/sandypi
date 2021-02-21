@@ -31,7 +31,7 @@ class ControlCard extends Component{
             case "command":
             case "timing":
             case "shuffle":
-                this.props.onElementsAdded([element_factory()]);
+                this.props.onElementsAdded([element_factory(this.props.playlistId)]);
                 break;
             default:
                 window.show_toast("The type is not supported");

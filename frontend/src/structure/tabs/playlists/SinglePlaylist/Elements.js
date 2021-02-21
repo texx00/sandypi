@@ -118,7 +118,10 @@ class TimingElement extends BasicElement{
 
 class ShuffleElement extends BasicElement{
     getModalOptions(){
-        return [{type: "select", options: [{value: 0, label: "All the drawings"}, {value: 1, label: "This playlist"}], field: "playlist", value: this.props.element.playlist, label: "Select where to select the drawing from"}]
+        return [
+            {type: "select", options: [{value: 0, label: "All the drawings"}, {value: 1, label: "This playlist"}], field: "shuffle_type", value: this.props.element.shuffle_type, label: "Select where to select the drawing from"},
+            {field: "playlist", value: this.props.element.playlist, hidden: true}
+        ]
     }
 
     renderElement(){

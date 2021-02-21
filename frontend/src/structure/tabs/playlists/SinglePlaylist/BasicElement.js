@@ -79,7 +79,7 @@ class BasicElement extends Component{
     renderModalOptions(){
         if (this.customModalOptions !== undefined)
             return this.customModalOptions();
-        else return this.getModalOptions().map((op, idx)=>{
+        else return this.getModalOptions().filter(op => {return !op.hidden}).map((op, idx)=>{    // maps only non-hidden options
             return this.renderSingleOption(op, idx);
         });
     }

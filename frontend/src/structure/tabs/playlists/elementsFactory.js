@@ -28,10 +28,10 @@ function create_element_timing(){
     }
 }
 
-function create_element_shuffle(){
+function create_element_shuffle(playlistId){
     return {
         element_type: "shuffle",
-        playlist: 0
+        playlist: playlistId
     }
 }
 
