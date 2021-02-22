@@ -17,6 +17,10 @@ This is a normal behaviour on the first run because it is necessary to select th
 
 Open your browser, put ip:5000 and open the settings page (button on the top right corner) and select the serial port and baudrate.
 
+## The server starts but cannot connect to it from the browser
+
+Check if npm is installed correctly with the command `npm -v`. If it is not, install it and then run again the `install.bat/sh` script
+
 ## After the update the browser is stuck on a gray/white page
 
 When updating from one version to another, for the moment, it may happen that the software get stuck on old data.

@@ -69,7 +69,7 @@ def playlist_refresh():
 def settings_save(data, is_connect):
     settings_utils.save_settings(data)
     settings = settings_utils.load_settings()
-    app.leds_controller.update_settings(settings)
+    #app.leds_controller.update_settings(settings)  # TODO update leds controller settings
     app.feeder.update_settings(settings)
     app.semits.show_toast_on_UI("Settings saved")
 
@@ -158,7 +158,7 @@ def queue_stop_drawing():
 @socketio.on("leds_set_color")
 def leds_set_color(data):
     color = json.loads(data)
-    app.leds_controller.set_color((color["r"], color["g"], color["b"]))
+    #app.leds_controller.set_color((color["r"], color["g"], color["b"])) # TODO uncomment when ready
 
 
 # --------------------------------------------------------- MANUAL CONTROL -------------------------------------------------------------------------------
