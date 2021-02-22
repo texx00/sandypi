@@ -20,7 +20,7 @@ class Emulator():
         self.last_x = 0.0
         self.last_y = 0.0
         self.settings = load_settings()
-        self.message_buffer.append(firmware.get_ready_message(self.settings["serial"]["firmware"])+"\n")     # sends back a message to tell the board is ready and can receive commands
+        self.message_buffer.append(firmware.get_ready_message(self.settings["device"]["firmware"]["value"])+"\n")     # sends back a message to tell the board is ready and can receive commands
 
     def get_x(self, line):
         return float(self.xr.findall(line)[0][0])

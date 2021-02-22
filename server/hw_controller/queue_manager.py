@@ -90,8 +90,6 @@ class QueueManager():
                 self.start_element(self.q.queue.popleft())
                 self.app.logger.info("Starting next code")
                 return True
-            else: 
-                self.app.feeder.stop()
             self._element = None
             return False
         except Exception as e:

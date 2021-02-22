@@ -54,6 +54,7 @@ class SingleDrawing extends Component{
             if (this.props.isQueueEmpty){
                 start_drawing_label = "Start drawing";
             }
+            // TODO add possibility to edit the gcode file and render again the drawing
             return <Container>
                 <div className="mb-3 w-100 center">
                     <h1 className="d-inline-block ml-3">{this.props.drawing.filename}</h1>

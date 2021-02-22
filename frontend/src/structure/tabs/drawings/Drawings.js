@@ -54,12 +54,6 @@ class Drawings extends Component{
                 sectionButton="Upload new drawing"
                 buttonIcon={FileEarmarkPlus}
                 sectionButtonHandler={()=>this.setState({show_upload: true})}>
-        
-            <div className={(this.state.loaded ? " d-none" : "")}>
-                <div className="w-100 pt-5 center">
-                    <h1>Loading...</h1>
-                </div>
-            </div>
             
             <Row>
                 {this.renderDrawings(this.props.drawings)}

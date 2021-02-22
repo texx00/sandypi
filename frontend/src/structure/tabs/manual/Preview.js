@@ -87,6 +87,7 @@ class Preview extends Component{
         line = line.replace("\n", "");
         let l = line.split(" ");
         // parsing line for fast mode (will not have spaces thus split(" ") will not work)
+        // TODO parse with regex like in the feeder
         if (this.props.isFastMode){
             l = [];
             let tmp = ""
@@ -205,6 +206,7 @@ class Preview extends Component{
             this.height = this.width;
             this.radius = parseInt(this.props.device.radius);
         }
+        // TODO add right click event on the preview with a "move here" command
         
         return <div>
             <canvas ref={this.canvas_ref} className="d-none" width={this.width * this.multiplier} height={this.height * this.multiplier}/>

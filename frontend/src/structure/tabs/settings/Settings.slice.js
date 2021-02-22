@@ -1,50 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 import { cloneDict, setSubKey } from '../../../utils/dictUtils';
+import default_settings from './default_settings';
 
 const settingsSlice = createSlice({
     name: "settings",
-    initialState: {
-        serial: {
-            port: "FAKE", 
-            baud: 115200,
-            available_baudrates: ["2400", "4800", "9600", "19200", "38400", "57600", "115200", "230400", "460800", "921600"], 
-            available_ports: ["FAKE"],
-            firmware: "Marlin",
-            available_firmwares: ["Marlin", "Grbl"],
-            fast_mode: false
-        }, 
-        device: {
-            width: 100, 
-            height:100,
-            radius:100,
-            type:"Cartesian",
-            available_types:[
-                "Cartesian",
-                "Polar",
-                "Scara"
-            ],
-            "angle_conversion_factor": 6,
-            "offset_angle_1": -1.5,
-            "offset_angle_2": 1.5
-        }, 
-        scripts: {
-            connected: "", 
-            before: "", 
-            after: ""
-        },
-        system: {
-            is_linux: false,
-            last_update_check_time: 0
-        },
-        leds: {
-            width: 0,
-            height: 0,
-            type: "WS2812B",
-            available_types: ["WS2812B"],
-            pin1: 18
-        }
-    },
+    initialState: default_settings,
     reducers: {
         updateAllSettings(state, action){
             let res = action.payload;

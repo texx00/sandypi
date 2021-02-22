@@ -36,6 +36,13 @@ def update_settings_file_version():
         shutil.copyfile(defaults_path, settings_path)
     else:
         old_settings = load_settings()
+
+        # compatibility check for older versions of the settings
+        # older format of the settings is not compatible with the newer one, thus it must delete the settings. TODO Should remove this line after a while (I will give 3 months thus until 05/2021)... The first versions will not be installed on many devices
+        if not type(old_settings["serial"]["port"]) is dict: 
+            shutil.copyfile(defaults_path, settings_path)
+        
+        
         def_settings = ""
         with open(defaults_path) as f:
             def_settings = json.load(f)
@@ -44,6 +51,9 @@ def update_settings_file_version():
     
 def match_dict(mod_dict, ref_dict):
     if type(ref_dict) is dict:
+        if not type(mod_dict) is dict:
+            return ref_dict           # if the old field was not a dict but a single value must return the new dict because cannot convert a single value into a dict
+        
         new_dict = dict(mod_dict)   # clone object
         for k in ref_dict.keys():
             if not k in new_dict:
