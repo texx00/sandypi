@@ -29,7 +29,7 @@ def api_upload():
                 new_file = UploadedFiles(filename = filename)
                 db.session.add(new_file)
                 db.session.commit()
-                factory = ImageFactory(settings["device"])
+                factory = ImageFactory(settings_utils.get_only_values(settings["device"]))
                 # create a folder for each drawing. The folder will contain the .gcode file, the preview and additionally some settings for the drawing
                 folder = app.config["UPLOAD_FOLDER"] +"/" + str(new_file.id) +"/"
                 try:

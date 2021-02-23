@@ -64,6 +64,18 @@ def match_dict(mod_dict, ref_dict):
     else:
         return mod_dict
 
+def get_only_values(ref_dict):
+    res = {}
+    if not type(ref_dict) is dict:
+        return ref_dict
+    for i in ref_dict:
+        if type(ref_dict[i]) is dict:
+            if "value" in ref_dict[i]:
+                res[i] = ref_dict[i]["value"]
+            else:
+                res[i] = get_only_values(ref_dict[i])
+    return res
+
 # print the level of the logger selected
 def print_level(level, logger_name):
     description = ""
@@ -116,3 +128,6 @@ if __name__ == "__main__":
 
     update_settings_file_version()
     print(get_ip4_addresses())
+
+    d = {"a":500, "b":{"asf":3, "value":10}, "c":{"d":{"fds":29, "value":32}}}
+    print(get_only_values(d))
