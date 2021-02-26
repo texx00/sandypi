@@ -4,21 +4,21 @@ A python program to feed your automatic zen table with a fresh design everyday
 
 ## The idea
 
-Zen tables are beautiful but I don't like to see always the same design on the sand: I wanted to have a fresh design waiting me every morning at coffee time.
+Zen tables are beautiful but I don't like to see always the same drawing on the sand: I would like to have a fresh design waiting for me every morning at coffee time.
 
-The program can run on a raspberry pi connected to your zen table and change the design over night.
-You can control the drawings via the web interface from your device connected to the network (smartphone, tablet or computer independently thanks to the web interface).
+The program can run on a Raspberry Pi connected to your zen table and change the drawing overnight.
+You can control the drawings through the web interface from your device connected to the network (smartphone, tablet or computer independently thanks to the web interface).
 
-Upload your designs, create ordered playlists or let the software randomly decide your next design.
+Upload your designs, create ordered playlists or let the software randomly choose your next design.
 
-The final aim of the project is to create something like a social network to share your designs and to collect designs from others to get everyday (or even at everytime :)) a new fresh design on your table.
+The final aim of the project is to create something similar to a social network to share your drawings and to collect designs from others to get everyday a fresh design on your table.
 
 ## The project
 
-The aim of the project is to create something focused on the sandtables. For sure, other solution exist (like octoprint) but their aim is for 3D printers thus the experience on a sandtable can be optimized.
+The aim of the project is to create something focused on the sandtables. For sure, other solution exist (like octoprint) but their aim is for 3D printers thus the experience is not optimized for this application.
 The project is really immature and barely usable at the moment, see it as a preview of what it can become.
 
-The project is opensource under MIT license and thus anyone can help (there is so much to do).
+The project is opensource under MIT license and thus anyone can help (there is so much to do!).
 
 # Some screenshots
 
@@ -60,7 +60,7 @@ Now you can install SandyPi (will take a while):
 Make sure on your system git, npm, pip and virtualenv are already available:
 
 ```
-$> sudo apg-get install git python3-pip npm
+$> sudo apt-get install git python3-pip npm
 $> sudo pip3 install virtualenv
 ```
 
@@ -109,6 +109,8 @@ To stop the server starting automatically use `$> python start.py -a=off`
 Once the service is running it is possible to connect through a browser by typing the device ip address and connecting to the port 5000 like `192.168.1.15:5000`
 If you are running on the local device you can also use `127.0.0.1:5000`
 
+Follow the [guide](/docs/first_setup.md) for your first setup or for [more info about the usage](/docs/usage.md)
+
 # Installation troubleshooting
 
 If you find problems during the installation check the [troubleshooting](/docs/troubleshooting.md) page
@@ -117,8 +119,10 @@ If you find problems during the installation check the [troubleshooting](/docs/t
 ___
 
 # Boards and firmwares
-At the moment, the sw is tested only with Marlin 2.0 and Grbl 1.1
+At the moment, the software is tested only with Marlin 2.0 and Grbl 1.1
 Should be compatible with other firmwares as well. If not please open an issue.
+
+The software has been built succesfully on Windows and Raspbian OS (running on Raspberry pi 3 B+ or 4). Raspberry pi zero is not supported yet.
 
 ## Marlin 2.0 setup
 In the settings select the serial port, the correct baudrate (usually 115200 or 250000) and the correct firmware type.
@@ -130,7 +134,7 @@ In the settings select the serial port, the correct baudrate (usually 115200 or 
 # Updates
 
 The software will prompt weekly if a new tag version has been added.
-The tagged version should be stable.
+The tagged version should be more or less stable.
 Mid-tags commits may not be stable (for this reason the software will not notify these updates).
 
 To update to the last available version of the software in linux you can run the following commands:
@@ -151,6 +155,11 @@ $> source env/bin/activate
 
 If you have problems after the update check the [troubleshooting](/docs/troubleshooting.md) guide.
 
+_____
+*NOTE:* the software is still in **ALPHA** which means lots of features may not work as expected. Updates may fix some but may also introduce more bugs. If you find any please open an issue. One the fundaments of the software are ready a stable branch will be released with more stable updates.
+____
+
+
 # Development and testing
 
 Any help in the app development is accepted.
@@ -162,7 +171,7 @@ In this case, during the installation it is necessary to run `(env) $> install.b
 # Current status
 
 The project is really primitive and need a lot of work.
-For the moment it is possible to connect to a device parsing GCODE (tests have been done on ramps 1.4 running Marlin), load some gcode files, create playlists, run a single program, run a playlist.
+For the moment it is possible to connect to a device parsing GCODE, load some gcode files, create playlists, run a single program, run a playlist.
 
 Here is a brief list of features that are already available or may be implemented in the future:
 * [x] Web interface to be accessible from different devices
@@ -184,10 +193,8 @@ In a far far away future:
 Todos:
 * [ ] Create logo
 * [ ] Run the server not on a production server
-* [x] Upload of multiple files at once
-* [ ] Show the realtime gcode simulation with time estimate (on a live page?)
+* [ ] Show the realtime gcode simulation with time estimate
 * [ ] Possibility to modify the settings of the single file and save them in the gcode as comments?
-* [ ] Create a playlist for "cleanup" drawings with some defaults
 * [ ] A lot more stuff... Just ask to know what you can help with
 
 ## Versions

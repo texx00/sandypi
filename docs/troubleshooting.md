@@ -32,3 +32,13 @@ or
  * in the browser console (google -> how to open "browser name" javascript console) run the command `localStorage.clear()`
 
 Then reload the page
+
+## Still no solution?
+
+If the previous suggestions didn't help you open an issue.
+Please specify:
+* operating system
+* server device (PC, Raspberry version, ...)
+* firmware (Marlin, Grbl, ...)
+* The issue
+* add a copy of the terminal result you get during the installation and when after running the software in orded to analyze better the problem
