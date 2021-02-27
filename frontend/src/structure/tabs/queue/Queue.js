@@ -81,7 +81,6 @@ class Queue extends Component{
     }
 
     renderList(){
-        // TODO fix issue with the list that when is modified will delete every element in the queue
         if (this.state.elements !== undefined)
             if (this.state.elements.length > 0){
                 return <Subsection sectionTitle="Coming next..."

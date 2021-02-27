@@ -1,17 +1,19 @@
-import sqlite3
 import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.sql.schema import Table
+from sqlalchemy.sql import func
 from server import db
 
 # creates base class with common methods
 class PlaylistElements(object):
+
+    # returns the list of elements inside a playlist
     @classmethod
     def get_playlist_elements(cls):
         if cls == PlaylistElements:
             raise NotImplementedError("Must use a table class to query the elements")
         return cls.query.all()
 
+    # clear all the elements inside a table
     @classmethod
     def clear_elements(cls):
         if cls == PlaylistElements:
@@ -19,6 +21,11 @@ class PlaylistElements(object):
         res = db.session.query(cls).delete()
         db.session.commit()
         return res
+    
+    # get random drawing element from the playlist (for the shuffle element)
+    @classmethod
+    def get_random_drawing_element(cls):
+        return cls.query.filter(cls.drawing_id.isnot(None)).order_by(func.random()).first()
 
 # creates sqlalchemy base class with the addition of the custom class
 Base = declarative_base(cls = PlaylistElements)

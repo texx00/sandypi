@@ -9,7 +9,7 @@ from server.database.models import UploadedFiles
 from time import time, sleep
 from datetime import datetime, timedelta
 
-from server.database.playlist_elements_tables import PlaylistElements
+from server.database.playlist_elements_tables import PlaylistElements, get_playlist_table_class
 from server import db
 from server.utils.settings_utils import LINE_RECEIVED
 
@@ -204,16 +204,20 @@ class TimeElement(GenericPlaylistElement):
 class ShuffleElement(GenericPlaylistElement):
     element_type = "shuffle"
 
-    def __init__(self, shuffle_type=None, playlist=None, **kwargs):
+    def __init__(self, shuffle_type=None, playlist_id=None, **kwargs):
         super(ShuffleElement, self).__init__(element_type=ShuffleElement.element_type, **kwargs)
-        self.playlist = playlist
+        self.playlist_id = int(playlist_id) if playlist_id is not None else 0
         self.shuffle_type = shuffle_type
 
     def before_start(self, app):
         if self.shuffle_type == None or self.shuffle_type == "0":
             # select random drawing
             return DrawingElement(drawing_id = UploadedFiles.get_random_drawing().id)
-        # TODO shuffle drawing from the playlist
+        elif self.playlist_id != 0:
+            # select a random drawing from the current playlist
+            res = get_playlist_table_class(self.playlist_id).get_random_drawing_element()
+            # convert the db element to the drawing element format
+            return GenericPlaylistElement.create_element_from_db(res)
         return None
 
 """

@@ -31,7 +31,8 @@ function create_element_timing(){
 function create_element_shuffle(playlistId){
     return {
         element_type: "shuffle",
-        playlist: playlistId
+        shuffle_type: "0",
+        playlist_id: playlistId
     }
 }
 

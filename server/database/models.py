@@ -1,7 +1,6 @@
 from datetime import datetime
 import json
 
-from sqlalchemy.orm.strategy_options import load_only
 from sqlalchemy.sql import func
 
 from server import db

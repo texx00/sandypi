@@ -118,16 +118,18 @@ class TimingElement extends BasicElement{
 
 class ShuffleElement extends BasicElement{
     getModalOptions(){
+        console.log(this.props.element)
         return [
             {type: "select", options: [{value: 0, label: "All the drawings"}, {value: 1, label: "This playlist"}], field: "shuffle_type", value: this.props.element.shuffle_type, label: "Select where to select the drawing from"},
-            {field: "playlist", value: this.props.element.playlist, hidden: true}
+            {field: "playlist_id", value: this.props.element.playlist_id, hidden: true}
         ]
     }
 
     renderElement(){
         return <SquareContainer>
             <div>
-                <Row><Col><Shuffle/> Random drawing</Col></Row>
+                <Row><Col className="text-primary pb-3"><Shuffle/> Random drawing</Col></Row>
+                <Row><Col>{this.props.element.shuffle_type==="0" ? "From the entire library" : "From the playlist"}</Col></Row>
             </div>
         </SquareContainer>
     }
