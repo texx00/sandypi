@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import { Col, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
-import { Alarm, Gear, Plus, Shuffle, Upload } from 'react-bootstrap-icons';
+import { Alarm, CollectionPlay, Gear, Plus, Shuffle, Upload } from 'react-bootstrap-icons';
 
 import SquareContainer from '../../../../components/SquareContainer';
 
 import UploadDrawingsModal from '../../drawings/UploadDrawing';
-import { create_element_drawing, create_element_gcode, create_element_shuffle, create_element_timing } from '../elementsFactory';
+import { create_element_drawing, create_element_gcode, create_element_playlist_start, create_element_shuffle, create_element_timing } from '../elementsFactory';
 
 class ControlCard extends Component{
     constructor(props){
@@ -14,16 +14,19 @@ class ControlCard extends Component{
             show_upload: false,
             show_modal: false
         }
+        // add new elements here and also in the createElement method switch case
         this.elements = [
             { type: "drawing", icon: <Upload/>,     tip: "Upload a new drawing",            factory: create_element_drawing },
             { type: "command", icon: <Gear/>,       tip: "Add gcode commands",              factory: create_element_gcode },
             { type: "timing",  icon: <Alarm/>,      tip: "Add a delay between drawings",    factory: create_element_timing },
-            { type: "shuffle", icon: <Shuffle/>,    tip: "Add a random element",            factory: create_element_shuffle }
+            { type: "shuffle", icon: <Shuffle/>,    tip: "Add a random element",            factory: create_element_shuffle },
+            { type: "start_playlist", icon: <CollectionPlay/>, tip: "Start a new playlist", factory: create_element_playlist_start }
         ]
     }
 
     createElement(type, element_factory){
         // TODO check why it is taking so long to create/add an element
+        // TODO if cannot find why it is so slow, can add a "loading" icon
         switch(type){
             case "drawing":
                 this.setState({...this.state, show_modal: false, show_upload: true});
@@ -31,6 +34,7 @@ class ControlCard extends Component{
             case "command":
             case "timing":
             case "shuffle":
+            case "start_playlist":
                 this.props.onElementsAdded([element_factory(this.props.playlistId)]);
                 break;
             default:
@@ -66,7 +70,7 @@ class ControlCard extends Component{
                                         <Tooltip>
                                             {el.tip}
                                         </Tooltip>}
-                                        delay={{ show: 3000, hide: 250 }}>
+                                        delay={{ show: 1000, hide: 250 }}>
                                         <div className="playlist-control-create clickable p-3 rounded" 
                                             onClick={()=> this.createElement(el.type, el.factory)}>
                                             {el.icon}

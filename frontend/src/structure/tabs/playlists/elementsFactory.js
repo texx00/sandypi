@@ -19,6 +19,7 @@ function create_element_gcode(){
     }
 }
 
+// Element that adds a delay between other elements
 function create_element_timing(){
     return {
         element_type: "timing",
@@ -29,6 +30,7 @@ function create_element_timing(){
     }
 }
 
+// Element to start a random drawing
 function create_element_shuffle(playlistId){
     return {
         element_type: "shuffle",
@@ -37,4 +39,12 @@ function create_element_shuffle(playlistId){
     }
 }
 
-export { create_element_drawing, create_element_gcode, create_element_timing, create_element_shuffle };
+// Element to start another playlist
+function create_element_playlist_start(playlistId){
+    return {
+        element_type: "start_playlist",
+        playlist_id: playlistId
+    }
+}
+
+export { create_element_drawing, create_element_gcode, create_element_timing, create_element_shuffle, create_element_playlist_start };

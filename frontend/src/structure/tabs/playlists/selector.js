@@ -59,8 +59,19 @@ const getRefreshPlaylists = state => {
 const getSinglePlaylistId = state => {
     return state.playlists.playlist_id;
 }
+
+const getPlaylistName = (state, id) => {
+    for (let p in state.playlists.playlists){
+        p = state.playlists.playlists[p];
+        if (p.id === id){
+            console.log(p)
+            return p.name;
+        }
+    }
+}
+
 const isPlaylistDeleted = state => {
     return state.playlists.playlist_deleted;
 }
 
-export { getMandatoryRefresh, getSinglePlaylist, getPlaylists, getPlaylistsLimited, getPlaylistsList, getPlaylistResync, getRefreshPlaylists, isPlaylistDeleted };
+export { getMandatoryRefresh, getSinglePlaylist, getPlaylists, getPlaylistsLimited, getPlaylistsList, getPlaylistResync, getRefreshPlaylists, getPlaylistName, isPlaylistDeleted };

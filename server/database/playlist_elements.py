@@ -1,8 +1,6 @@
 import json
 import os
 from pathlib import Path
-from random import random
-import math
 
 from sqlalchemy.orm import load_only
 from server.database.models import UploadedFiles
@@ -25,6 +23,8 @@ from server.utils.settings_utils import LINE_RECEIVED
         The feeder will stop only one the StopIteration exception is raised
     
     See examples to understand better
+
+    NOTE: must implement the element also in the frontend (follow the instructions at the beginning of the "Elements.js" file)
 """
 class GenericPlaylistElement():
     element_type = None
@@ -196,7 +196,6 @@ class TimeElement(GenericPlaylistElement):
             else: 
                 sleep(final_time-time())
                 yield None
-    # TODO fix queue view
 
 """
     Plays an element in the playlist with a random order
@@ -226,6 +225,15 @@ class ShuffleElement(GenericPlaylistElement):
 class StartPlaylistElement(GenericPlaylistElement):
     element_type = "start_playlist"
 
+    def __init__(self, playlist_id=None, **kwargs):
+        super(StartPlaylistElement, self).__init__(element_type=StartPlaylistElement.element_type, **kwargs)
+        self.playlist_id = int(playlist_id) if playlist_id is not None else 0
+    
+    def before_start(self, app):
+        # needs to import here to avoid circular import issue
+        from server.sockets_interface.socketio_callbacks import playlist_queue
+        playlist_queue(self.playlist_id)
+        return None
 
 """
     Controls the led lights
