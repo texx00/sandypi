@@ -345,10 +345,14 @@ class Feeder():
 
         filter = Fit(dims)
         
-        for k, line in enumerate(element.execute()):        # execute the element (iterate over the commands or do what the element is designed for)
-            line = line.upper()
+        for k, line in enumerate(element.execute(self.logger)):     # execute the element (iterate over the commands or do what the element is designed for)
             if not self.is_running():
                 break
+            
+            if line is None:                                        # if the line is none there is no command to send, will continue with the next element execution (for example, within the delay element it will sleep 1s at a time and return None until the timeout passed. TODO Not really an efficient way, may change it in the future)
+                continue
+
+            line = line.upper()
             while self.is_paused():
                 time.sleep(0.1)
                 # TODO parse line to scale/add padding to the drawing according to the drawing settings (in order to keep the original .gcode file)

@@ -1,5 +1,6 @@
 from queue import Queue
 import json
+from server.database.playlist_elements import ShuffleElement
 
 class QueueManager():
     def __init__(self, app, socketio):
@@ -87,8 +88,9 @@ class QueueManager():
                 return False
         try:
             if self.queue_length() > 0:
-                self.start_element(self.q.queue.popleft())
-                self.app.logger.info("Starting next code")
+                element = self.q.queue.popleft()
+                self.start_element(element)
+                self.app.logger.info("Starting next element: {}".format(element.type))
                 return True
             self._element = None
             return False
@@ -98,8 +100,11 @@ class QueueManager():
 
     # This method send a "start" command to the bot with the element
     def start_element(self, element):
-        self.app.logger.info("Sending gcode start command")
-        self.app.feeder.start_element(element, force_stop = True)
+        element = element.before_start(self.app)
+        if not element is None:
+            self.app.logger.info("Sending gcode start command")
+            self.app.feeder.start_element(element, force_stop = True)
+        else: self.start_next()
 
     def send_queue_status(self):
         elements = list(map(lambda x: str(x), self.q.queue)) if len(self.q.queue) > 0 else []                       # converts elements to json

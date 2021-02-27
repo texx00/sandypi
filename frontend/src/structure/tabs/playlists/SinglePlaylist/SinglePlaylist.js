@@ -107,8 +107,11 @@ class SinglePlaylist extends Component{
                     onListRefreshed={()=>this.setState({...this.state, refreshList: false})}
                     onElementOptionsChange={this.handleElementUpdate.bind(this)}>
                         <ControlCard key={-1} 
-                            playlistId={this.props.playlistId}
-                            onElementsAdded={(ids) => this.props.addElements({playlistId: this.props.playlist.id, elements: ids})}/>
+                            playlistId={this.props.playlist.id}
+                            onElementsAdded={(ids) => {
+                                this.save();
+                                this.props.addElements({playlistId: this.props.playlist.id, elements: ids});
+                            }}/>
                     </SortableElements>
         } else return <Row>
             <Col>No element</Col>

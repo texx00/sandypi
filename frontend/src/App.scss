@@ -147,6 +147,28 @@ button.react-multiple-carousel__arrow:hover{
     background-color: $primary;
 }
 
+/* Context menues */
+
+.react-contextmenu{
+    background-color: $white;
+    color: $dark;
+    z-index: 1000;
+    opacity: 1;
+    @extend .p-1;
+    @extend .rounded;
+}
+.react-contextmenu-item{
+    background-color: $white;
+    color: $dark;
+    @extend .p-2;
+    @extend .rounded;
+    @extend .clickable;
+}
+
+.react-contextmenu-item--active, .react-contextmenu-item--selected{
+    background-color: $light;
+}
+
 /* special styles */
 .fade-top{
     margin-bottom: -1px;

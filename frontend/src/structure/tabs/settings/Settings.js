@@ -42,6 +42,7 @@ class Settings extends Component{
         if (entries !== undefined)
             return entries.map((single_setting, key) => { 
                 return <SettingField
+                    key={key}
                     single_setting={single_setting[1]}
                     settings={this.props.settings}
                     onUpdateSetting={this.props.updateSetting.bind(this)}/>
