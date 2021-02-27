@@ -22,6 +22,7 @@ function create_element_gcode(){
 function create_element_timing(){
     return {
         element_type: "timing",
+        type: "delay",
         delay: "",
         expiry_date: "",
         alarm_time: ""

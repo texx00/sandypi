@@ -52,12 +52,10 @@ class TimingElement extends BasicElement{
 
     getModalOptions(){
         let type = "delay";
-        if (this.state !== undefined){
+        console.log(this.props.element)
+        if (this.state !== undefined)
             type = this.state.type;
-        }else if (this.props.element.expiry_date !== "")
-            type="expiry_date"
-        else if (this.props.element.alarm_time !== "")
-            type = "alarm_time";
+        else type = this.props.element.type;
 
         let helper = [{field: "type",         value: type}];
 
@@ -73,20 +71,21 @@ class TimingElement extends BasicElement{
         let select = <Form.Group>
                 <Form.Label>Timing type</Form.Label>
                 <Form.Control as="select"
-                value={this.state.type}
-                onChange={(evt) => this.onOptionChange(evt.target.value, {field: "type"})}>
-                    <option key={1} value={"delay"}>Delay</option>
-                    <option key={2} value={"expiry_date"}>Expiry date</option>
-                    <option key={3} value={"alarm_time"}>Alarm time</option>
+                    value={this.state.type}
+                    onChange={(evt) => this.onOptionChange(evt.target.value, {field: "type"})}>
+                        <option key={1} value={"delay"}>Delay</option>
+                        <option key={2} value={"expiry_date"}>Expiry date</option>
+                        <option key={3} value={"alarm_time"}>Alarm time</option>
                 </Form.Control>
             </Form.Group>
         let res = "";
+        console.log(this.state)
         if (this.state.type === "delay")
-            res = <Row>{this.renderSingleOption({field: "delay", label: "Insert the delay value in seconds"},2)}</Row>
+            res = <Row>{this.renderSingleOption({field: "delay", value: this.state.delay, label: "Insert the delay value in seconds"},2)}</Row>
         else if (this.state.type === "expiry_date")
-            res = <Row>{this.renderSingleOption({field: "expiry_date", type: "datetime"},2)}</Row>
+            res = <Row>{this.renderSingleOption({field: "expiry_date", value: this.state.expiry_date, type: "datetime"},2)}</Row>
         else if (this.state.type === "alarm_time")
-            res = <Row>{this.renderSingleOption({field: "alarm_time", type: "time", label: "Select at what time to start the next drawing"},2)}</Row>
+            res = <Row>{this.renderSingleOption({field: "alarm_time", value: this.state.alarm_time, type: "time", label: "Select at what time to start the next drawing"},2)}</Row>
         return <Col>
                 <Row>
                     <Col key={1}>{select}</Col>
@@ -118,7 +117,6 @@ class TimingElement extends BasicElement{
 
 class ShuffleElement extends BasicElement{
     getModalOptions(){
-        console.log(this.props.element)
         return [
             {type: "select", options: [{value: 0, label: "All the drawings"}, {value: 1, label: "This playlist"}], field: "shuffle_type", value: this.props.element.shuffle_type, label: "Select where to select the drawing from"},
             {field: "playlist_id", value: this.props.element.playlist_id, hidden: true}

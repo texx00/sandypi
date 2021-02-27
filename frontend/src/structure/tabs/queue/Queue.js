@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Container } from 'react-bootstrap';
+import { Button, Col, Container, Row } from 'react-bootstrap';
 import { Stop, Trash } from 'react-bootstrap-icons';
 import { connect } from 'react-redux';
 
@@ -116,10 +116,12 @@ class Queue extends Component{
                         sectionButton="Stop drawing"
                         buttonIcon={Stop}
                         sectionButtonHandler={this.stopDrawing.bind(this)}>
-                    <div className="center mb-5 w-100">
-                        <ElementType element={this.props.currentElement}
-                            hideOptions={"true"}/>
-                    </div>
+                    <Row className={"center"}>
+                        <Col sm={6} className="mb-5 position-relative">
+                            <ElementType element={this.props.currentElement}
+                                hideOptions={"true"}/>
+                        </Col>
+                    </Row>
                 </Section>
                 {this.renderList()}
             </Container>
