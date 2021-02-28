@@ -89,6 +89,8 @@ Now you can install SandyPi (will take a while):
 (env)$> sudo sh install.sh
 ```
 
+This step may be long (even over 1h).
+
 ## Running the server
 
 To run the server use:
@@ -122,7 +124,9 @@ ___
 At the moment, the software is tested only with Marlin 2.0 and Grbl 1.1
 Should be compatible with other firmwares as well. If not please open an issue.
 
-The software has been built succesfully on Windows and Raspbian OS (running on Raspberry pi 3 B+ or 4). Raspberry pi zero is not supported yet.
+The software has been built succesfully on Windows and Raspbian OS (running on Raspberry pi 3 B+ or 4).
+
+Raspberry Pi Zero W can be used but it is necessary to follow [this guide](/docs/pizero_installation.md)
 
 ## Marlin 2.0 setup
 In the settings select the serial port, the correct baudrate (usually 115200 or 250000) and the correct firmware type.
