@@ -13,7 +13,7 @@
             "type": "select",
             "value": "115200",
             "label": "Serial baudrate",
-            "available_values": ["2400", "4800", "9600", "19200", "38400", "57600", "115200", "230400", "460800", "921600"],
+            "available_values": ["2400", "4800", "9600", "19200", "38400", "57600", "115200", "230400", "250000", "460800", "921600"],
             "tip": "Select the correct serial baudrate"
         },
         "fast_mode": {
