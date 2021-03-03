@@ -23,7 +23,6 @@ const playlistsSlice = createSlice({
                 let p = {...pl};
                 if (pl.id === playlistId){
                     p.elements = [...p.elements, ...elements];
-                    console.log("Saving playlist")
                     playlist_save(p);                 // saves playlist also on the server (only one playlist at a time, there will be no problem with mutliple save calls)
                 }
                 return p;
@@ -72,7 +71,7 @@ const playlistsSlice = createSlice({
             }; 
         },
         setSinglePlaylistId: (state, action) => {
-            return { ...state, playlist_id: action.payload };
+            return { ...state, playlist_id: action.payload, mandatory_refresh: true };
         },
         setResyncPlaylist: (state, action) => {
             return { ...state, playlist_resync: action.payload, mandatory_refresh: false };
@@ -82,8 +81,7 @@ const playlistsSlice = createSlice({
             let res = state.playlists.map((pl) => {
                 return pl.id === playlist.id ? playlist : pl;
             });
-            playlist_save(playlist);
-            return { ...state, playlists: res, playlist_deleted: false, refresh_request_id: playlist.id };
+            return { ...state, playlists: res, playlist_deleted: false, refresh_request_id: playlist.id};
         }
     }
 });

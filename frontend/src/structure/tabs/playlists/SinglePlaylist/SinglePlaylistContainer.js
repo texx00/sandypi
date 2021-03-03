@@ -37,8 +37,8 @@ class SinglePlaylistContainer extends Component{
     }
 
     refreshPlaylist(){
-        this.props.resetResync();
-        this.setState({...this.state, playlist: this.props.playlist, refreshedList: true});
+        console.log("inside refresh")
+        this.setState({...this.state, playlist: this.props.playlist, refreshedList: true}, () => {this.props.resetResync();});
     }
 
     componentDidUpdate(){
@@ -57,8 +57,9 @@ class SinglePlaylistContainer extends Component{
             this.refreshPlaylist();
         }
 
-        if (this.props.isMandatoryRefresh)
+        if (this.props.isMandatoryRefresh){
             this.refreshPlaylist();
+        }
     }
 
     onListRefreshed(){

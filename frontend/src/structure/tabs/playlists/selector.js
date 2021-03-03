@@ -64,7 +64,6 @@ const getPlaylistName = (state, id) => {
     for (let p in state.playlists.playlists){
         p = state.playlists.playlists[p];
         if (p.id === id){
-            console.log(p)
             return p.name;
         }
     }

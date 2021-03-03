@@ -38,6 +38,14 @@ function playlists_refresh_response(cb){
     socket.on("playlists_refresh_response", (val) => cb(val));
 }
 
+function playlists_refresh_single_response(cb){
+    socket.on("playlists_refresh_single_response", (val) => cb(val));
+}
+
+function playlist_create_id(cb){
+    socket.on("playlist_create_id", (id) => cb(id));
+}
+
 // ---- Queue ----
 
 function queue_status(cb){
@@ -76,4 +84,16 @@ function show_toast(cb){
 }
 
 
-export {socket, connection_status_callback, drawings_refresh_response, playlists_refresh_response, queue_status, device_command_line_return, device_new_position, device_leds, settings_now, show_toast};
+export {
+    socket, 
+    connection_status_callback, 
+    drawings_refresh_response, 
+    playlists_refresh_response, 
+    playlists_refresh_single_response,
+    playlist_create_id,
+    queue_status, 
+    device_command_line_return, 
+    device_new_position, 
+    device_leds, 
+    settings_now, 
+    show_toast};

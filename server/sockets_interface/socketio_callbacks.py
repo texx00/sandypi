@@ -45,7 +45,8 @@ def playlist_save(playlist):
     pl.name = playlist['name']
     pl.add_element(playlist['elements'])
     pl.save()
-    playlist_refresh()
+    playlist_refresh_single(pl.id)
+
 
 # adds a playlist to the drawings queue
 @socketio.on("playlist_queue")
@@ -55,12 +56,24 @@ def playlist_queue(code):
     for i in elements:
         app.qmanager.queue_element(i, show_toast = False)
 
+
+@socketio.on("playlist_create")
+def playlist_create():
+    pl = Playlists.create_playlist()
+    pl.save()
+    app.semits.emit("playlists_create_id", pl.id)
+
+
 @socketio.on("playlists_refresh")
 def playlist_refresh():
     playlists = db.session.query(Playlists).order_by(Playlists.edit_date.desc()).all()
-    pls = list(map(lambda el: el.to_json(), playlists))
     app.semits.emit("playlists_refresh_response", list(map(lambda el: el.to_json(), playlists)))
 
+
+@socketio.on("playlist_refresh_single")
+def playlist_refresh_single(playlist_id):
+    playlist = db.session.query(Playlists).filter(Playlists.id == playlist_id).first()
+    app.semits.emit("playlists_refresh_single_response", playlist.to_json())
 
 # --------------------------------------------------------- SETTINGS CALLBACKS -------------------------------------------------------------------------------
 
