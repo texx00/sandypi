@@ -1,8 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 import { playlist_save } from '../../../sockets/sEmits';
-import { cloneDict, listsAreEqual } from '../../../utils/dictUtils';
-import { getSinglePlaylist } from './selector';
 
 const playlistsSlice = createSlice({
     name: "playlists",
@@ -10,10 +8,7 @@ const playlistsSlice = createSlice({
         mandatory_refresh: false,
         playlists: [],
         playlist_id: 0,
-        playlist_resync: false,
-        playlist_deleted: false,
-        refresh_request_id: -1,
-        refresh_request: true
+        playlist_deleted: false
     },
     reducers: {
         addToPlaylist: (state, action) => {
@@ -27,7 +22,7 @@ const playlistsSlice = createSlice({
                 }
                 return p;
             });
-            return {...state, playlists: pls, refresh_request_id: playlistId};
+            return {...state, playlists: pls};
         },
         deletePlaylist: (state, action) => {
             return { ...state, playlists: state.playlists.filter((item) => {
@@ -37,51 +32,32 @@ const playlistsSlice = createSlice({
         resetPlaylistDeletedFlag: (state, action) => {
             return {...state, playlist_deleted: false };
         },
-        setRefreshPlaylists: (state, action) => {
-            return {...state, refresh_request: action.payload };
+        resetMandatoryRefresh: (state, action) => {
+            return {...state, mandatory_refresh: false};
         },
         setPlaylists: (state, action) => {
-            let sync = false;
             let playlist_deleted = true;                // to check if the playlist has been deleted from someone else
             let pls = action.payload.map((pl)=>{
-                pl.elements = JSON.parse(pl.elements);
                 if (pl.id === state.playlist_id){
-                    let pl_clone = cloneDict(getSinglePlaylist({playlists: state}));
-                    if (!listsAreEqual(pl_clone, pl) && pl.id !== state.refresh_request_id){
-                        sync = true;                    // check if any change to the playlist in use has been done on another device
-                    }
                     playlist_deleted = false;
                 }
                 return pl;
             });
-            if (state.playlist_id === 0){               // if the playlist is a new playlist should not go back if the others are updated
-                playlist_deleted = false;
-            }
-            let must_refresh = false;
-            if (state.refresh_request_id !== -1){       // if the refresh request id is different than -1 means that we saved the playlist and we want to refresh it
-                must_refresh= true;
-            }
             return { 
                 ...state, 
                 playlists: pls, 
-                playlist_resync: sync, 
-                playlist_deleted: playlist_deleted, 
-                refresh_request_id: -1, 
-                mandatory_refresh: must_refresh 
+                playlist_deleted: playlist_deleted
             }; 
         },
         setSinglePlaylistId: (state, action) => {
             return { ...state, playlist_id: action.payload, mandatory_refresh: true };
-        },
-        setResyncPlaylist: (state, action) => {
-            return { ...state, playlist_resync: action.payload, mandatory_refresh: false };
         },
         updateSinglePlaylist: (state, action) => {
             let playlist = action.payload;
             let res = state.playlists.map((pl) => {
                 return pl.id === playlist.id ? playlist : pl;
             });
-            return { ...state, playlists: res, playlist_deleted: false, refresh_request_id: playlist.id};
+            return { ...state, playlists: res, playlist_deleted: false, mandatory_refresh: playlist.id === state.playlist_id};
         }
     }
 });
@@ -91,10 +67,9 @@ export const {
     deletePlaylist,
     updateSinglePlaylist,
     resetPlaylistDeletedFlag,
+    resetMandatoryRefresh,
     setPlaylists,
-    setRefreshPlaylists,
     setSinglePlaylistId,
-    setResyncPlaylist,
 } = playlistsSlice.actions;
 
 export default playlistsSlice.reducer;

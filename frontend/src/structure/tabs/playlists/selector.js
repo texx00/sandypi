@@ -48,14 +48,6 @@ const getPlaylistsList = state => {
     });
 }
 
-const getPlaylistResync = state => {
-    return state.playlists.playlist_resync;
-}
-
-const getRefreshPlaylists = state => {
-    return state.playlists.refresh_request;
-}
-
 const getSinglePlaylistId = state => {
     return state.playlists.playlist_id;
 }
@@ -69,8 +61,12 @@ const getPlaylistName = (state, id) => {
     }
 }
 
-const isPlaylistDeleted = state => {
+const playlistHasBeenDeleted = state => {
     return state.playlists.playlist_deleted;
 }
 
-export { getMandatoryRefresh, getSinglePlaylist, getPlaylists, getPlaylistsLimited, getPlaylistsList, getPlaylistResync, getRefreshPlaylists, getPlaylistName, isPlaylistDeleted };
+const singlePlaylistMustRefresh = state => {
+    return state.playlists.mandatory_refresh;
+}
+
+export { getMandatoryRefresh, getSinglePlaylist, getPlaylists, getPlaylistsLimited, getPlaylistsList, singlePlaylistMustRefresh, getPlaylistName, playlistHasBeenDeleted };

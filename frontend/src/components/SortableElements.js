@@ -4,6 +4,7 @@ import { Col } from 'react-bootstrap';
 
 import { getElementClass } from '../structure/tabs/playlists/SinglePlaylist/Elements';
 import { X } from 'react-bootstrap-icons';
+import { listsAreEqual } from '../utils/dictUtils';
 
 class SortableElements extends Component{
     constructor(props){
@@ -16,9 +17,8 @@ class SortableElements extends Component{
     }
 
     componentDidUpdate(){
-        if (this.props.refreshList){
+        if (!listsAreEqual(this.props.list, this.state.list)){
             this.setState({...this.state, list: this.props.list});
-            this.props.onListRefreshed();
         }
     }
 

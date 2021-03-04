@@ -25,8 +25,6 @@ class ControlCard extends Component{
     }
 
     createElement(type, element_factory){
-        // TODO check why it is taking so long to create/add an element
-        // TODO if cannot find why it is so slow, can add a "loading" icon
         switch(type){
             case "drawing":
                 this.setState({...this.state, show_modal: false, show_upload: true});

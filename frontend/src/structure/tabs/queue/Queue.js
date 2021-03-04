@@ -38,8 +38,7 @@ class Queue extends Component{
     constructor(props){
         super(props);
         this.state = {
-            elements: [], 
-            refreshList: false
+            elements: []
         }
     }
 
@@ -90,8 +89,6 @@ class Queue extends Component{
                     <SortableElements
                         list={this.state.elements}
                         onUpdate={this.handleSortableUpdate.bind(this)}
-                        refreshList={this.state.refreshList}
-                        onListRefreshed={()=>this.setState({...this.state, refreshList: false})}
                         hideOptions={true}>
                     </SortableElements>
                 </Subsection>

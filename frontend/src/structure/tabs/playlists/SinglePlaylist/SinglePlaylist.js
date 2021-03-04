@@ -2,7 +2,7 @@ import './SinglePlaylist.scss';
 
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Container, Row, Col, Modal } from 'react-bootstrap';
+import { Container, Row, Col } from 'react-bootstrap';
 import { Play, X } from 'react-bootstrap-icons';
 
 import ConfirmButton from '../../../../components/ConfirmButton';
@@ -12,17 +12,27 @@ import IconButton from '../../../../components/IconButton';
 import { playlist_delete, playlist_queue, playlist_save } from '../../../../sockets/sEmits';
 import { listsAreEqual } from '../../../../utils/dictUtils';
 
-import { resetShowSaveBeforeBack, tabBack } from '../../Tabs.slice';
-import { addToPlaylist, deletePlaylist, updateSinglePlaylist } from '../Playlists.slice';
+import { tabBack } from '../../Tabs.slice';
+import { addToPlaylist, deletePlaylist, resetPlaylistDeletedFlag, resetMandatoryRefresh, updateSinglePlaylist } from '../Playlists.slice';
 import ControlCard from './ControlCard';
+import { getSinglePlaylist, playlistHasBeenDeleted, singlePlaylistMustRefresh } from '../selector';
+
+const mapStateToProps = (state) => {
+    return {
+        playlist: getSinglePlaylist(state),
+        mandatoryRefresh: singlePlaylistMustRefresh(state),
+        playlistDeleted: playlistHasBeenDeleted(state)
+    }
+}
 
 const mapDispatchToProps = (dispatch) => {
     return {
         handleTabBack: () => dispatch(tabBack()),
         deletePlaylist: (id) => dispatch(deletePlaylist(id)),
         updateSinglePlaylist: (pl) => dispatch(updateSinglePlaylist(pl)),
-        resetShowSaveBeforeBack: () => dispatch(resetShowSaveBeforeBack()),
-        addElements: (elements) => dispatch(addToPlaylist(elements))
+        addElements: (elements) => dispatch(addToPlaylist(elements)),
+        resetMandatoryRefresh: () => dispatch(resetMandatoryRefresh()),
+        resetPlaylistDeletedFlag: () => dispatch(resetPlaylistDeletedFlag())
     }
 }
 
@@ -31,21 +41,27 @@ class SinglePlaylist extends Component{
         super(props);
         this.control_card = {element_type: "control_card"}
         this.state = {
-            elements: this.addControlCard(this.props.playlist.elements),
-            refreshList: false
+            elements: this.addControlCard(this.props.playlist.elements)
         }
         this.nameRef = React.createRef();
     }
 
     addControlCard(elements){
-        if (elements !== undefined)
-            return [...elements, this.control_card]
-        else return [this.control_card]
+        if (elements !== undefined){
+            elements = this.getFilteredELements(elements);
+            return [...elements, this.control_card];
+        } else return [this.control_card];
+    }
+
+    getFilteredELements(elements){
+        if (Array.isArray(elements))
+            if (elements.length>0)
+                return elements.filter((el) => {return el.element_type!=="control_card"});
+        return [];
     }
 
     save(){
-        let orderedEls = this.state.elements.filter((el) => {return el.element_type!=="control_card"});     // remove control card from the end
-        console.log(orderedEls)
+        let orderedEls = this.getFilteredELements(this.state.elements);     // remove control card from the end
         let playlist = {
             name: this.nameRef.current.innerHTML,
             elements: orderedEls,
@@ -60,39 +76,31 @@ class SinglePlaylist extends Component{
 
     handleSortableUpdate(list){
         if (!listsAreEqual(list, this.state.elements)){                                                     // updates only if the new and old lists are different
-            this.setState({...this.state, elements: list, refreshList: true}, this.save.bind(this));        // binding the save function to be used after the state has been set
+            this.setState({...this.state, elements: this.addControlCard(list)}, this.save.bind(this));        // binding the save function to be used after the state has been set
         }
     }
 
     componentDidUpdate(){
         if(this.props.shouldUpdateList){
-            this.setState({...this.state, elements: this.addControlCard(this.props.playlist.elements), refreshList: true});
-            this.props.onListRefreshed();
+            this.setState({...this.state, elements: this.addControlCard(this.props.playlist.elements)});
         }
     }
 
     handleElementUpdate(element){
-        console.log("Handle element")
-        console.log(element)
         let res = this.state.elements.map((el) => {return el.id === element.id ? element : el });
-        console.log(res)
         this.handleSortableUpdate(res);
     }
 
     renderElements(){
-        if (this.state.elements !== null && 
-            this.state.elements !== undefined){
+        if (this.state.elements !== null && this.state.elements !== undefined){
             return <SortableElements
                     list={this.state.elements}
                     onUpdate={this.handleSortableUpdate.bind(this)}
-                    refreshList={this.state.refreshList}
-                    onListRefreshed={()=>this.setState({...this.state, refreshList: false})}
                     onElementOptionsChange={this.handleElementUpdate.bind(this)}>
                         <ControlCard key={-1} 
                             playlistId={this.props.playlist.id}
-                            onElementsAdded={(ids) => {
-                                this.save();
-                                this.props.addElements({playlistId: this.props.playlist.id, elements: ids});
+                            onElementsAdded={(elements) => {
+                                this.setState({...this.state, elements: this.addControlCard([...this.state.elements, ...elements])}, this.save.bind(this));
                             }}/>
                     </SortableElements>
         } else return <Row>
@@ -101,7 +109,7 @@ class SinglePlaylist extends Component{
     }
 
     renderStartButton(){
-        if (this.props.playlist.id === 0 || this.state.elements.length === 0){
+        if (this.state.elements.length === 0){
             return ""
         }else return <IconButton 
                 icon={Play} 
@@ -111,29 +119,36 @@ class SinglePlaylist extends Component{
     }
 
     renderDeleteButton(){
-        if (this.props.playlist.id === 0)
-            return ""
-        else
-            return <ConfirmButton className="btn" 
-                    icon={X}
-                    onClick={()=> {
-                        playlist_delete(this.props.playlist.id);
-                        this.props.handleTabBack();
-                        this.props.deletePlaylist(this.props.playlist.id);
-                    }}>
-                    Delete playlist
-                </ConfirmButton>
+        return <ConfirmButton className="btn" 
+            icon={X}
+            onClick={()=> {
+                playlist_delete(this.props.playlist.id);
+                this.props.handleTabBack();
+                this.props.deletePlaylist(this.props.playlist.id);
+            }}>
+            Delete playlist
+        </ConfirmButton>
     }
 
+    // TODO add "enter to confirm" event to save the values of the fields in the elements options modals and also the name change
     render(){
+        if (this.props.mandatoryRefresh){
+            // TODO add a counter to see if a more recent update was requested so that will update the playlist only at the end, when the result is updated to the last changes (issues due to the delay between saving and the information is sent back)
+            this.setState({...this.state, elements: this.addControlCard(this.props.playlist.elements)});
+            this.props.resetMandatoryRefresh()
+        }
+
+        if (this.props.playlistHasBeenDeleted){
+            this.props.handleTabBack();
+        }
+
         return <Container>
             <div>
                 <h1 className="d-inline-block mr-3 text-primary">Playlist name: </h1>
                 <h1 className="d-inline-block rounded p-1 editable-title" 
                     onBlur={()=> {
-                        if (this.state.playlist !== undefined)
-                            if (this.state.playlist.name !== this.nameRef.current.innerHTML) 
-                                this.save();
+                        if (this.props.playlist.name !== this.nameRef.current.innerHTML) 
+                            this.save();
                         }}
                     onFocus={()=>{
                         // select automatically the full text of the playlist name on focus
@@ -155,33 +170,8 @@ class SinglePlaylist extends Component{
                 {this.renderDeleteButton()}
             </Row>
             {this.renderElements()}
-
-            
-            <Modal show={this.props.showResyncModal}
-                aria-labelledby="contained-modal-title-vcenter"
-                onHide={()=> this.props.onRefreshList()}
-                centered>
-                <Modal.Header className="center">
-                    <Modal.Title>
-                        The playlist has some changes
-                    </Modal.Title>
-                </Modal.Header>
-                <Modal.Body className="p-5 center">
-                    The playlist has been modified in another window. What do you want to do?
-                </Modal.Body>
-                <Modal.Footer className="center">
-                    <IconButton onClick={() => this.props.onRefreshList()}>
-                        Load the new version
-                    </IconButton>
-                    <IconButton onClick={()=>{
-                            this.save();
-                        }}>
-                        Save the local changes and overwrite
-                    </IconButton>
-                </Modal.Footer>
-            </Modal>
         </Container>
     }
 }
 
-export default connect(null, mapDispatchToProps)(SinglePlaylist);
+export default connect(mapStateToProps, mapDispatchToProps)(SinglePlaylist);

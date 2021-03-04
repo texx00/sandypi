@@ -15,7 +15,7 @@ import SingleDrawing from './tabs/drawings/SingleDrawing';
 import { getTab } from './tabs/selector';
 import DrawingDataDownloader from '../components/DrawingDataDownloader';
 import PlaylistDataDownloader from '../components/PlaylistDataDownloader';
-import SinglePlaylistContainer from './tabs/playlists/SinglePlaylist/SinglePlaylistContainer';
+import SinglePlaylist from './tabs/playlists/SinglePlaylist/SinglePlaylist';
 import LedsController from './tabs/leds/Leds';
 
 const mapStateToProps = (state) => {
@@ -54,7 +54,7 @@ class Content extends Component{
                     <SingleDrawing />
                 </Tab>
                 <Tab eventKey="playlist" title="Playlist">
-                    <SinglePlaylistContainer />
+                    <SinglePlaylist />
                 </Tab>
                 <Tab eventKey="leds" title="LEDs">
                     <LedsController />

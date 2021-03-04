@@ -1,25 +1,16 @@
 import { Component } from 'react';
 import { connect } from 'react-redux';
 
-import { getRefreshPlaylists } from '../structure/tabs/playlists/selector';
-import { setPlaylists, setRefreshPlaylists, setSinglePlaylistId, updateSinglePlaylist } from '../structure/tabs/playlists/Playlists.slice';
+import { setPlaylists, setSinglePlaylistId, updateSinglePlaylist } from '../structure/tabs/playlists/Playlists.slice';
 import { showSinglePlaylist } from '../structure/tabs/Tabs.slice';
 
 import { playlists_request } from '../sockets/sEmits';
 import { playlists_refresh_response, playlists_refresh_single_response, playlist_create_id } from '../sockets/sCallbacks';
 
-
-const mapStateToProps = (state) => {
-    return { must_refresh: getRefreshPlaylists(state) }
-}
-
 const mapDispatchToProps = (dispatch) => {
     return {
         setPlaylists: (playlists) => dispatch(setPlaylists(playlists)),
-        setRefreshFalse: () => dispatch(setRefreshPlaylists(false)),
-        refreshSinglePlaylist: (res) => {
-            Promise.resolve(dispatch(updateSinglePlaylist(res))).then(() => dispatch(setSinglePlaylistId(res.id)));
-        },
+        refreshSinglePlaylist: (res) => dispatch(updateSinglePlaylist(res)),
         showSinglePlaylist: (id) => {
             // using promises to dispatch in the correct order (otherwise the playlist page may not load in the correct order)
             Promise.resolve(dispatch(setSinglePlaylistId(id))).then(
@@ -55,12 +46,8 @@ class PlaylistDataDownloader extends Component{
     }
 
     render(){
-        if (this.props.must_refresh){
-            this.props.setRefreshFalse();
-            this.requestPlaylists();
-        }
         return null;
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(PlaylistDataDownloader);
+export default connect(null, mapDispatchToProps)(PlaylistDataDownloader);
