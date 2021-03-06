@@ -27,6 +27,7 @@ function loadFromLocalStorage() {
         if (version !== process.env.REACT_APP_VERSION){
             console.warn("New version detected. Clearing local storage");
             localStorage.clear();
+            window.location.reload();
         }
     } catch (e) {
         console.warn(e);
