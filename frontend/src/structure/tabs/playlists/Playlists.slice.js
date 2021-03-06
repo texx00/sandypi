@@ -54,9 +54,17 @@ const playlistsSlice = createSlice({
         },
         updateSinglePlaylist: (state, action) => {
             let playlist = action.payload;
+            let version = 0;
             let res = state.playlists.map((pl) => {
-                return pl.id === playlist.id ? playlist : pl;
+                if (pl.id === playlist.id){
+                    version = pl.version;
+                    return playlist;
+                }else{
+                    return pl;
+                }
             });
+            if (playlist.version <= version)
+                return state;
             return { ...state, playlists: res, playlist_deleted: false, mandatory_refresh: playlist.id === state.playlist_id};
         }
     }

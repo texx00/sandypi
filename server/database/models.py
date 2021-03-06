@@ -35,10 +35,11 @@ class Playlists(db.Model):
     name = db.Column(db.String(80), unique=False, nullable=False, default="New playlist")
     creation_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow) # Creation timestamp
     edit_date = db.Column(db.DateTime, default=datetime.utcnow)                 # Last time the playlist was edited (to update: datetime.datetime.utcnow())
-    active = db.Column(db.Boolean, default=False)                               # If the software should use this playlist or not when checking for rules
+    version = db.Column(db.Integer, default=0)                  # Incremental version number: +1 every time the playlist is saved
            
     def save(self):
         self.edit_date = datetime.utcnow()
+        self.version += 1
         db.session.commit()
 
     def add_element(self, elements):
@@ -72,7 +73,8 @@ class Playlists(db.Model):
         return json.dumps({
             "name": self.name,
             "elements": self.get_elements_json(),
-            "id": self.id
+            "id": self.id,
+            "version": self.version
         })
 
     # returns the database table class for the elements of that playlist
@@ -109,7 +111,7 @@ class Playlists(db.Model):
 
 # The app is using Flask-migrate
 # When a modification is applied to the db structure (new table, table structure modification like column name change, new column etc.)
-# must use the "flask db migrate" command (with the active environment)
+# must use the "flask db migrate" command (with the active environment) (can also use "flask db migrate -m 'Migrate changes message'" to add a description for the migration operation)
 # The command will create a new version for the db and will apply the changes automatically when the latest version of the repo is loaded
 # with "flask db upgrade" (this command is called automatically during "python setup.py install/develop")
 # When testing may get multiple revisions for the same commit. Can merge multiple revisions with "flask db merge <revisions>"

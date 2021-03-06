@@ -10,7 +10,7 @@ import SortableElements from '../../../../components/SortableElements';
 import IconButton from '../../../../components/IconButton';
 
 import { playlist_delete, playlist_queue, playlist_save } from '../../../../sockets/sEmits';
-import { listsAreEqual } from '../../../../utils/dictUtils';
+import { cloneDict, listsAreEqual } from '../../../../utils/dictUtils';
 
 import { tabBack } from '../../Tabs.slice';
 import { addToPlaylist, deletePlaylist, resetPlaylistDeletedFlag, resetMandatoryRefresh, updateSinglePlaylist } from '../Playlists.slice';
@@ -66,17 +66,18 @@ class SinglePlaylist extends Component{
             name: this.nameRef.current.innerHTML,
             elements: orderedEls,
             id: this.props.playlist.id
-        };
+        };                                          
+        playlist_save(playlist);
         if (this.props.playlist.id !== 0){
+            playlist.version = this.props.playlist.version + 1;                                 
             this.props.updateSinglePlaylist(playlist);
         }
-        playlist_save(playlist);
         console.log("Saving playlist");
     }
 
     handleSortableUpdate(list){
-        if (!listsAreEqual(list, this.state.elements)){                                                     // updates only if the new and old lists are different
-            this.setState({...this.state, elements: this.addControlCard(list)}, this.save.bind(this));        // binding the save function to be used after the state has been set
+        if (!listsAreEqual(list, this.state.elements)){                                                         // updates only if the new and old lists are different
+            this.setState({...this.state, elements: this.addControlCard(list)}, this.save.bind(this));          // binding the save function to be used after the state has been set
         }
     }
 
@@ -133,7 +134,6 @@ class SinglePlaylist extends Component{
     // TODO add "enter to confirm" event to save the values of the fields in the elements options modals and also the name change
     render(){
         if (this.props.mandatoryRefresh){
-            // TODO add a counter to see if a more recent update was requested so that will update the playlist only at the end, when the result is updated to the last changes (issues due to the delay between saving and the information is sent back)
             this.setState({...this.state, elements: this.addControlCard(this.props.playlist.elements)});
             this.props.resetMandatoryRefresh()
         }
