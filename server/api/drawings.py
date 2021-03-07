@@ -1,3 +1,4 @@
+from server.sockets_interface.socketio_callbacks import drawings_refresh
 from server.utils import settings_utils
 from server import app, db
 from server.database.models import UploadedFiles
@@ -49,5 +50,7 @@ def api_upload():
                     # TODO create a better placeholder? or add a routine to fix missing images?
 
                 app.logger.info("File added")
+                # refreshing list of drawings for all the clients
+                drawings_refresh()
                 return jsonify(new_file.id)
     return jsonify(-1)

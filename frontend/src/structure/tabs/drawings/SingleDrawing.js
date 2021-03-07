@@ -8,7 +8,7 @@ import { drawing_delete, drawing_queue } from '../../../sockets/sEmits';
 import ConfirmButton from '../../../components/ConfirmButton';
 import IconButton from '../../../components/IconButton';
 
-import { create_element_drawing } from '../playlists/elementsFactory';
+import { createElementDrawing } from '../playlists/elementsFactory';
 import { getImgUrl } from '../../../utils/utils';
 
 import { getQueueEmpty } from '../queue/selector';
@@ -47,6 +47,16 @@ class SingleDrawing extends Component{
         };
         this.selectRef = React.createRef();
     }
+
+    renderAddToPlaylistButton(){
+        if (this.props.playlists.length > 0){
+            return <IconButton className="btn"
+                icon={PlusSquare}
+                onClick={() => this.setState({...this.state, showPlaylists: true})}>
+                Add to playlist
+            </IconButton>
+        }else return "";
+    }
     
     render(){
         if (this.props.drawing.id !== undefined){
@@ -67,11 +77,7 @@ class SingleDrawing extends Component{
                     }}>
                         {start_drawing_label}
                     </IconButton>
-                    <IconButton className="btn"
-                        icon={PlusSquare}
-                        onClick={() => this.setState({...this.state, showPlaylists: true})}>
-                        Add to playlist
-                    </IconButton>
+                    {this.renderAddToPlaylistButton()}
                     <ConfirmButton className="btn" 
                         icon={FileEarmarkX}
                         onClick={()=> {
@@ -109,7 +115,7 @@ class SingleDrawing extends Component{
                         <IconButton icon={X} onClick={() => this.setState({...this.state, showPlaylists: false})}>Undo</IconButton>
                         <IconButton icon={Plus} 
                             onClick={() => {this.props.addToPlaylist({
-                                    elements: [create_element_drawing(this.props.drawing)],
+                                    elements: [createElementDrawing(this.props.drawing)],
                                     playlistId: parseInt(this.selectRef.current.value)
                                 });
                                 this.setState({...this.state, showPlaylists: false});

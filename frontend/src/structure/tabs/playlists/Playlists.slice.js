@@ -18,8 +18,10 @@ const playlistsSlice = createSlice({
             let pls = state.playlists.map((pl) => {
                 pl = {...pl};
                 if (pl.id === playlistId){
+                    let max_id = 1;
+                    if (Array.isArray(pl.elements))
                     // looking for the highest element id to add a higher value to the elements that are being added (this avoid the creation of a new element when the element with id is sent back from the server)
-                    let max_id = Math.max(pl.elements.map(el => {return el.id}), 1) + 1;
+                        max_id = Math.max(pl.elements.map(el => {return el.id}), 1) + 1;
                     for (let e in elements){
                         elements[e].id = max_id++;
                     }

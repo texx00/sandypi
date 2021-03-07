@@ -1,4 +1,4 @@
-import { Col, Form, Row } from "react-bootstrap";
+import { Button, Col, Form, FormGroup, Row } from "react-bootstrap";
 import { Alarm, CollectionPlay, Shuffle } from "react-bootstrap-icons";
 
 import store from "../../../../store";
@@ -6,9 +6,11 @@ import { getImgUrl } from "../../../../utils/utils";
 
 import Image from "../../../../components/Image";
 import SquareContainer from "../../../../components/SquareContainer";
-
 import BasicElement from "./BasicElement";
+
 import { getPlaylistName, getPlaylists } from "../selector";
+import { getDrawings } from "../../drawings/selector";
+import { showSingleDrawing } from "../../Tabs.slice";
 
 /*
  * When adding a new element should: 
@@ -16,14 +18,66 @@ import { getPlaylistName, getPlaylists } from "../selector";
  *  - add the element to the switch case in the "getElementClass" function at the end of this file
  *  - add the factory to the "ControlCard.js" file
  *  - add the corresponding element in the "playlist_elements.py" file
+ * snake_case variables are necessary to make it compatible with the element sent to the server (using snake_case). Other js variables should be in camelCase
  */
 
 
 class DrawingElement extends BasicElement{
+    tip = "Click to select the drawing";
+    label = "Select a drawing"
+    description = <div>Select a drawing from the full list of uploaded files. It is also possible to filter them by name.</div>
+
+    getModalOptions(){
+        return [];
+    }
+
+    selectDrawingId(id){
+        this.props.onOptionsChange({...this.props.element, drawing_id: id});
+        this.setState({...this.state, showModal: false});
+    }
+
+    customModalOptions(){
+        let drawings = getDrawings(store.getState());
+        // filter by name
+        if ((this.state.filterNameValue !== undefined) && (this.state.filterNameValue !== ""))
+            drawings = drawings.filter((el) => {return el.filename.toLowerCase().includes(this.state.filterNameValue.toLowerCase())});
+
+        return <div className="p-4">
+            <Row>
+                <Col>
+                    <Button onClick={() => {
+                            this.setState({...this.state, showModal: false}, () => store.dispatch(showSingleDrawing(this.props.element.drawing_id)));
+                        }} 
+                        className="w-100">Open the current drawing in single view</Button>
+                </Col>
+            </Row>
+            <FormGroup as={Row} className={"mt-3"}>
+                <Form.Label column sm={4}>Filter drawings by name</Form.Label>
+                <Col>
+                    <Form.Control value={this.state.filterNameValue} onChange={(evt) => this.setState({...this.state, filterNameValue: evt.target.value})}/>
+                </Col>
+            </FormGroup>
+            <Row>
+                {drawings.map((el, idx) => {
+                    return <Col sm={4} className="p-2" key={idx}>
+                        <div className="position-relative">
+                            <Image className="w-100 rounded hover-light" 
+                                src = {getImgUrl(el.id)} 
+                                alt={"Drawing " + el.id}/>
+                            <div className="image-overlay-light rounded clickable"
+                                onClick={() => this.selectDrawingId(el.id)}>
+                            </div>
+                        </div>
+                    </Col>
+                })}
+            </Row>
+        </div>
+    }
+
     renderElement(){
         return <Image className="w-100 rounded" 
             src = {getImgUrl(this.props.element.drawing_id)} 
-            alt={"Drawing "+this.props.element.drawing_id}/>
+            alt={"Drawing " + this.props.element.drawing_id}/>
     }
 }
 
@@ -116,17 +170,17 @@ class TimingElement extends BasicElement{
     }
 
     renderElement(){
-        let print_time = ""
+        let printTime = ""
         if (this.props.element.delay !== "")
-            print_time = "Delay: " + this.props.element.delay + "s";
+            printTime = "Delay: " + this.props.element.delay + "s";
         else if (this.props.element.expiry_date)
-            print_time = "Expires on: \n" + this.props.element.expiry_date;
+            printTime = "Expires on: \n" + this.props.element.expiry_date;
         else if (this.props.element.alarm_time)
-            print_time = "Alarm at: " + this.props.element.alarm_time;
+            printTime = "Alarm at: " + this.props.element.alarm_time;
         return <SquareContainer>
             <div>
                 <Row><Col className="text-primary pb-3"><Alarm/>  Timing element</Col></Row>
-                <Row><Col>{print_time.split("\n").map((l,idx) => {return <p key={idx}>{l}</p>})}</Col></Row>
+                <Row><Col>{printTime.split("\n").map((l,idx) => {return <p key={idx}>{l}</p>})}</Col></Row>
             </div>
         </SquareContainer>
     }

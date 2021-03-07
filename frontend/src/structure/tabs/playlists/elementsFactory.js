@@ -4,15 +4,15 @@
 
 
  // Standard drawing element
-function create_element_drawing(drawing){
+function createElementDrawing(drawing){
     return {
         element_type: "drawing", 
-        drawing_id: drawing.id
+        drawing_id: drawing.id !== undefined ? drawing.id : 0
     }
 }
 
 // Element that run some gcode commands
-function create_element_gcode(){
+function createElementGcode(){
     return {
         element_type: "command",
         command: ""
@@ -20,7 +20,7 @@ function create_element_gcode(){
 }
 
 // Element that adds a delay between other elements
-function create_element_timing(){
+function createElementTiming(){
     return {
         element_type: "timing",
         type: "delay",
@@ -31,7 +31,7 @@ function create_element_timing(){
 }
 
 // Element to start a random drawing
-function create_element_shuffle(playlistId){
+function createElementShuffle(playlistId){
     return {
         element_type: "shuffle",
         shuffle_type: "0",
@@ -40,11 +40,11 @@ function create_element_shuffle(playlistId){
 }
 
 // Element to start another playlist
-function create_element_playlist_start(playlistId){
+function createElementPlaylistStart(playlistId){
     return {
         element_type: "start_playlist",
         playlist_id: playlistId
     }
 }
 
-export { create_element_drawing, create_element_gcode, create_element_timing, create_element_shuffle, create_element_playlist_start };
+export { createElementDrawing, createElementGcode, createElementTiming, createElementShuffle, createElementPlaylistStart };
