@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Col, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Col, Container, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { Alarm, Archive, CollectionPlay, Gear, Plus, Shuffle, Upload } from 'react-bootstrap-icons';
 
 import SquareContainer from '../../../../components/SquareContainer';
@@ -16,12 +16,12 @@ class ControlCard extends Component{
         }
         // add new elements here and also in the createElement method switch case
         this.elements = [
-            { type: "drawing_upload", icon: <Upload/>,          tip: "Upload a new drawing",            factory: createElementDrawing },
-            { type: "drawing", icon: <Archive/>,                tip: "Select from uploaded drawings",   factory: createElementDrawing },
-            { type: "command", icon: <Gear/>,                   tip: "Add gcode commands",              factory: createElementGcode },
-            { type: "timing",  icon: <Alarm/>,                  tip: "Add a delay between drawings",    factory: createElementTiming },
-            { type: "shuffle", icon: <Shuffle/>,                tip: "Add a random element",            factory: createElementShuffle },
-            { type: "start_playlist", icon: <CollectionPlay/>,  tip: "Start a new playlist",     factory: createElementPlaylistStart }
+            { type: "drawing_upload", icon: <Upload/>,          tip: "Upload a new drawing",                    label: "Upload drawing",    factory: createElementDrawing },
+            { type: "drawing", icon: <Archive/>,                tip: "Select drawing from the uploaded files",  label: "Select drawing",    factory: createElementDrawing },
+            { type: "command", icon: <Gear/>,                   tip: "Run gcode commands",                      label: "Add gcode command", factory: createElementGcode },
+            { type: "timing",  icon: <Alarm/>,                  tip: "Add a delay between drawings",            label: "Time control",      factory: createElementTiming },
+            { type: "shuffle", icon: <Shuffle/>,                tip: "Play random drawing",                     label: "Random drawing",    factory: createElementShuffle },
+            { type: "start_playlist", icon: <CollectionPlay/>,  tip: "Start a new playlist",                    label: "Start a playlist",  factory: createElementPlaylistStart }
         ]
     }
 
@@ -65,15 +65,16 @@ class ControlCard extends Component{
                     <Modal.Body>
                         <Row>
                             {this.elements.map((el, idx) => {
-                                return <Col key={idx} className="center">
+                                return <Col key={idx} className="center w-100 mb-3" sm={4}>
                                     <OverlayTrigger overlay={
                                         <Tooltip>
                                             {el.tip}
                                         </Tooltip>}
                                         delay={{ show: 1000, hide: 250 }}>
-                                        <div className="playlist-control-create clickable p-3 rounded" 
+                                        <div className="playlist-control-create clickable p-3 rounded w-100 d-block" 
                                             onClick={()=> this.createElement(el.type, el.factory)}>
-                                            {el.icon}
+                                            <Row><Col className="w-100 center">{el.label}</Col></Row>
+                                            <Row className="icon-large center"><Col>{el.icon}</Col></Row>
                                         </div>
                                     </OverlayTrigger>
                                 </Col>

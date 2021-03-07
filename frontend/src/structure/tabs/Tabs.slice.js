@@ -22,7 +22,6 @@ const tabsSlice = createSlice({
             return {...state, tab: action.payload};
         },
         showSingleDrawing(state, action){
-            console.log(action)
             const back_tab = state.tab;
             return {...state, tab: "drawing", drawing_code: action.payload, back_tab: back_tab}
         },

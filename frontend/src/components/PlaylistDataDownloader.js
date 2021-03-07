@@ -20,7 +20,6 @@ const mapDispatchToProps = (dispatch) => {
         setPlaylists: (playlists) => dispatch(setPlaylists(playlists)),
         refreshSinglePlaylist: (res) => dispatch(updateSinglePlaylist(res)),
         loadNewPlaylist: (pl, showPlaylist) => {
-            console.log(pl)
             dispatch(updateSinglePlaylist(pl));
             if (showPlaylist)
                 dispatch(setSinglePlaylistId(pl.id)); 
