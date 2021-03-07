@@ -175,31 +175,28 @@ In this case, during the installation it is necessary to run `(env) $> install.b
 # Current status
 
 The project is really primitive and need a lot of work.
-For the moment it is possible to connect to a device parsing GCODE, load some gcode files, create playlists, run a single program, run a playlist.
-
-Here is a brief list of features that are already available or may be implemented in the future:
-* [x] Web interface to be accessible from different devices
-* [x] Upload locally your design
+Here is a brief list of what the software is capable of and what will be implemented for sure in the future:
+* [x] Web interface to be accessible from different devices over the network
+* [x] Connection to the hardware controller through serial
+* [x] Simple installation script to simplify the installation
+* [x] Run the application on a single page with full js frontend and python (flask) backend
+* [x] Upload locally your designs (with a preview as well) to keep them all in the same place
 * [x] Create playlists and manage the designs
-* [x] Feed the table when you want
-* [ ] Feed the table periodically
-* [ ] Guests that can control the table
-* [ ] Raspberry as hotspot to which connect with a qrcode
-* [ ] Lights/led control
-* [ ] Make it nice
-* [ ] Create groups of drawings to be drawn one after the other to create complex designs
-* [ ] Create a tool to merge different drawings into one file
-* [ ] Run the application on a single page with full js frontend
-
-In a far far away future:
-* [ ] Create a social network to share designs and update your personal playlists
-
-Todos:
+* [x] Run a drawing whenever you want
+* [x] Run gcode commands manually
+* [x] Feed the table periodically
+* [ ] Shuffle mode to play shuffled drawings continuosly
+* [ ] Simple lights/led control
+* [ ] Update the software with a single button
 * [ ] Create logo
 * [ ] Run the server not on a production server
 * [ ] Show the realtime gcode simulation with time estimate
-* [ ] Possibility to modify the settings of the single file and save them in the gcode as comments?
+* [ ] Advanced lights controls: syncronization between lights ant ball
+* [ ] Sandify "integration" (like upload a drawing directly from sandify or modify an uploaded drawing)?
 * [ ] A lot more stuff... Just ask to know what you can help with
+
+In a far far away future:
+* [ ] Create a social network to share designs and update your personal playlists
 
 ## Versions
 Check the latest version infos [here](docs/versions.md)
