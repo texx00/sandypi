@@ -9,7 +9,8 @@ const playlistsSlice = createSlice({
         playlists: [],
         playlistId: 0,
         playlistDeleted: false,
-        showNewPlaylist: false
+        showNewPlaylist: false,
+        playlistAddedNewElement: false
     },
     reducers: {
         addToPlaylist: (state, action) => {
@@ -27,12 +28,12 @@ const playlistsSlice = createSlice({
                     }
                     pl.elements = [...pl.elements];
                     pl.elements = [...pl.elements, ...elements];
-                    pl.version++;                       // increases version
+                    pl.version++;                      // increases version
                     playlistSave(pl);                  // saves playlist also on the server (only one playlist at a time, there will be no problem with multiple save calls)
                 }
                 return pl;
             });
-            return {...state, playlists: pls, mandatoryRefresh: true};
+            return {...state, playlists: pls, mandatoryRefresh: true, playlistAddedNewElement: true };
         },
         deletePlaylist: (state, action) => {
             return { ...state, playlists: state.playlists.filter((item) => {
@@ -79,14 +80,14 @@ const playlistsSlice = createSlice({
             });
 
             // check if the version is older than the one available (if there were some fast changes the socket connection may send an old version of the playlist before receiving the last updated version)
-            if ((playlist.version < version) && !isNew)
+            if ((playlist.version < version) && !isNew && !state.playlistAddedNewElement)
                 return state;
             // if the playlist is new should add it to the list
             if (isNew)
                 res.push(playlist)
             // check if it is necessary to refresh the playlist view
-            let mustRefresh = (playlist.id === state.playlistId) && (playlist.version > version);
-            return { ...state, playlists: res, playlistDeleted: false, mandatoryRefresh: mustRefresh};
+            let mustRefresh = (playlist.id === state.playlistId) && ((playlist.version > version) || state.playlistAddedNewElement);
+            return { ...state, playlists: res, playlistDeleted: false, mandatoryRefresh: mustRefresh, playlistAddedNewElement: false};
         },
         setShowNewPlaylist(state, action){
             return { ...state, showNewPlaylist: action.payload }
