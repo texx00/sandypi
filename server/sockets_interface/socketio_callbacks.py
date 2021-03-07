@@ -57,11 +57,12 @@ def playlist_queue(code):
         app.qmanager.queue_element(i, show_toast = False)
 
 
-@socketio.on("playlist_create")
-def playlist_create():
+@socketio.on("playlist_create_new")
+def playlist_create_new():
     pl = Playlists.create_playlist()
+    pl.name = "New playlist"
     pl.save()
-    app.semits.emit("playlists_create_id", pl.id)
+    app.semits.emit("playlist_create_id", pl.to_json())
 
 
 @socketio.on("playlists_refresh")

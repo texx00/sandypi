@@ -1,5 +1,6 @@
-import { createStore } from 'redux';
+import { applyMiddleware, compose, createStore } from 'redux';
 import { combineReducers } from '@reduxjs/toolkit';
+import thunk from 'redux-thunk';
 
 import settingsReducer from './structure/tabs/settings/Settings.slice';
 import queueReducer from './structure/tabs/queue/Queue.slice';
@@ -45,15 +46,22 @@ function loadFromLocalStorage() {
     }
 }
 
-const store = createStore(combineReducers({
-        settings: settingsReducer,
-        queue: queueReducer,
-        tabs: tabsReducer,
-        drawings: drawingsReducer,
-        playlists: playlistReducer
-    }),
+const reducer = combineReducers({
+    settings: settingsReducer,
+    queue: queueReducer,
+    tabs: tabsReducer,
+    drawings: drawingsReducer,
+    playlists: playlistReducer
+});
+
+
+// can dispatch multiple actions thanks to the "thunk" library
+// without this library, could not use multiple dispatch action in the same function inside the "mapDispatchToProp" dict
+
+const store = createStore(
+    reducer,
     loadFromLocalStorage(),
-    window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()        // redux setup for chrome dev extension https://github.com/zalmoxisus/redux-devtools-extension
+    compose(applyMiddleware(thunk), window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())// redux setup for chrome dev extension https://github.com/zalmoxisus/redux-devtools-extension
 );
 
 store.subscribe(() => saveToLocalStorage(store.getState()));

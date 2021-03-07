@@ -69,4 +69,8 @@ const singlePlaylistMustRefresh = state => {
     return state.playlists.mandatory_refresh;
 }
 
-export { getMandatoryRefresh, getSinglePlaylist, getPlaylists, getPlaylistsLimited, getPlaylistsList, singlePlaylistMustRefresh, getPlaylistName, playlistHasBeenDeleted };
+const isShowNewPlaylist = state => {
+    return state.playlists.show_new_playlist;
+}
+
+export { getMandatoryRefresh, getSinglePlaylist, getPlaylists, getPlaylistsLimited, getPlaylistsList, singlePlaylistMustRefresh, getPlaylistName, playlistHasBeenDeleted, isShowNewPlaylist };

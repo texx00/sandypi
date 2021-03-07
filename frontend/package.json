@@ -23,6 +23,7 @@
     "react-scripts": "^4.0.0",
     "react-scroll-horizontal": "^1.6.6",
     "react-sortablejs": "^6.0.0",
+    "react-thunk": "^1.0.0",
     "react-transition-group": "^4.4.1",
     "redux": "^4.0.5",
     "socket.io-client": "^2.3.1",

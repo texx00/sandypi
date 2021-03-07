@@ -15,8 +15,9 @@ import PlaylistCard from './playlists/PlaylistCard';
 import { getDrawingsLimited } from './drawings/selector';
 import { getPlaylistsLimited } from './playlists/selector';
 import { setRefreshDrawing } from './drawings/Drawings.slice';
-import { setTab, showSinglePlaylist } from './Tabs.slice';
-import { setSinglePlaylistId } from './playlists/Playlists.slice';
+import { setTab } from './Tabs.slice';
+import { playlist_create_new } from '../../sockets/sEmits';
+import { setShowNewPlaylist } from './playlists/Playlists.slice';
 
 const mapStateToProps = (state) => {
     return { 
@@ -28,11 +29,8 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
     return {
         setRefreshDrawing: () => dispatch(setRefreshDrawing(true)),
-        createNewPlaylist: () => {
-                dispatch(setSinglePlaylistId(0))
-                dispatch(showSinglePlaylist(0))
-            ;},
-        handleTab: (name) => dispatch(setTab(name))
+        handleTab: (name) => dispatch(setTab(name)),
+        setShowNewPlaylist: () => dispatch(setShowNewPlaylist(true))
     }
 }
 
@@ -117,7 +115,10 @@ class Home extends Component{
                     <Section sectionTitle="Playlists"
                         sectionButton="Create new playlist"
                         buttonIcon={PlusSquare}
-                        sectionButtonHandler={()=> this.props.createNewPlaylist()}
+                        sectionButtonHandler={()=> {
+                            this.props.setShowNewPlaylist();
+                            playlist_create_new();
+                        }}
                         titleButtonHandler={()=>this.props.handleTab("playlists")}
                         ssr>
                             {this.renderPlaylists(this.props.playlists)}

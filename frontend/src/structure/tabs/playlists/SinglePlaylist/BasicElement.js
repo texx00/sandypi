@@ -16,6 +16,8 @@ class BasicElement extends Component{
     tip = "";
     // Modal title when opening the element options
     label = "";
+    // Modal description (to help the user with some instructions about the options available)
+    description = "";
 
     // This method must be overridden the child component. It renders the card content
     renderElement(){
@@ -110,12 +112,13 @@ class BasicElement extends Component{
                     onChange={(evt) => this.onOptionChange(evt.target.value, op)}/>
                 break;
             case "datetime":
-                res = <FormDatetime 
+                res = <FormDatetime
                     value={this.state[op.field]}
                     onChange={(val) => this.onOptionChange(val, op)}/>
                 break;
             default:
-                res = <Form.Control value={this.state[op.field]}
+                res = <Form.Control
+                    value={this.state[op.field]}
                     onChange={(evt) => this.onOptionChange(evt.target.value, op)}/>
         }
 
@@ -125,6 +128,20 @@ class BasicElement extends Component{
                 {res}
             </Form.Group>
         </Col>
+    }
+
+    // renders the description of the element options
+    renderDescription(){
+        if (this.description !== undefined && this.description !== ""){
+            return <div>
+                <Row>
+                    <Col>
+                        {this.description}
+                    </Col>
+                </Row>
+                <hr className="pb-3"/>
+            </div>
+        }else return "";
     }
 
     // renders the modal
@@ -137,6 +154,7 @@ class BasicElement extends Component{
                 onHide={()=>this.setState({...this.state, showModal: false})}>
             <Modal.Header className="center">{this.label}</Modal.Header>
             <Modal.Body>
+                {this.renderDescription()}
                 <Form>
                     <Row>
                         {this.renderModalOptions()}
@@ -192,7 +210,7 @@ class BasicElement extends Component{
         // if an element has a preview for the queue that must be different (like an icon instead of text) can use the renderPreview method to return a different render value
         if (this.renderPreview !== undefined && this.props.showPreview !== undefined)
             return <div>
-                    {this.renderPreview()}
+                {this.renderPreview()}
             </div>
         else return <div>
                 {this.renderModal()}

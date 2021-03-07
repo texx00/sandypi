@@ -68,6 +68,7 @@ button{
     background-color: $primary;
     transition: 0.2s;
 }
+
 .hover-primary:hover{
     background-color: $primary;
     transition: background-color 0.2s;
@@ -121,6 +122,11 @@ button:hover, .btn-dark:hover{
 .icon{
     @extend .mr-2;
     @extend .align-self-center;
+}
+
+hr{
+    height: 4px;
+    border-color: $primary;
 }
 
 /* Bootstrap overrides */

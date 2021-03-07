@@ -10,7 +10,7 @@ import SortableElements from '../../../../components/SortableElements';
 import IconButton from '../../../../components/IconButton';
 
 import { playlist_delete, playlist_queue, playlist_save } from '../../../../sockets/sEmits';
-import { cloneDict, listsAreEqual } from '../../../../utils/dictUtils';
+import { listsAreEqual } from '../../../../utils/dictUtils';
 
 import { tabBack } from '../../Tabs.slice';
 import { addToPlaylist, deletePlaylist, resetPlaylistDeletedFlag, resetMandatoryRefresh, updateSinglePlaylist } from '../Playlists.slice';
@@ -27,7 +27,11 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleTabBack: () => dispatch(tabBack()),
+        handleTabBack: () => {
+            // can use multiple actions thanks to the thunk library
+            dispatch(tabBack());
+            dispatch(resetPlaylistDeletedFlag());
+        },
         deletePlaylist: (id) => dispatch(deletePlaylist(id)),
         updateSinglePlaylist: (pl) => dispatch(updateSinglePlaylist(pl)),
         addElements: (elements) => dispatch(addToPlaylist(elements)),
@@ -82,9 +86,6 @@ class SinglePlaylist extends Component{
     }
 
     componentDidUpdate(){
-        if(this.props.shouldUpdateList){
-            this.setState({...this.state, elements: this.addControlCard(this.props.playlist.elements)});
-        }
     }
 
     handleElementUpdate(element){
@@ -98,7 +99,8 @@ class SinglePlaylist extends Component{
                     list={this.state.elements}
                     onUpdate={this.handleSortableUpdate.bind(this)}
                     onElementOptionsChange={this.handleElementUpdate.bind(this)}>
-                        <ControlCard key={-1} 
+                        <ControlCard
+                            key={-1}
                             playlistId={this.props.playlist.id}
                             onElementsAdded={(elements) => {
                                 this.setState({...this.state, elements: this.addControlCard([...this.state.elements, ...elements])}, this.save.bind(this));
@@ -157,6 +159,13 @@ class SinglePlaylist extends Component{
                         let sel = window.getSelection();
                         sel.removeAllRanges();
                         sel.addRange(range);
+                        }}
+                    onKeyPress={(evt)=>{
+                        // save the name of the playlist when the enter button is pressed
+                        if (evt.code === "Enter"){
+                            this.nameRef.current.blur();
+                            evt.preventDefault();
+                        }
                     }}
                     ref={this.nameRef}
                     title="Click to edit"

@@ -3,18 +3,30 @@ import { connect } from 'react-redux';
 
 import { setPlaylists, setSinglePlaylistId, updateSinglePlaylist } from '../structure/tabs/playlists/Playlists.slice';
 import { showSinglePlaylist } from '../structure/tabs/Tabs.slice';
+import { isShowNewPlaylist } from '../structure/tabs/playlists/selector';
 
 import { playlists_request } from '../sockets/sEmits';
 import { playlists_refresh_response, playlists_refresh_single_response, playlist_create_id } from '../sockets/sCallbacks';
+
+
+const mapStateToProps = (state) => {
+    return {
+        showNewPlaylist: isShowNewPlaylist(state)
+    }
+}
 
 const mapDispatchToProps = (dispatch) => {
     return {
         setPlaylists: (playlists) => dispatch(setPlaylists(playlists)),
         refreshSinglePlaylist: (res) => dispatch(updateSinglePlaylist(res)),
-        showSinglePlaylist: (id) => {
-            // using promises to dispatch in the correct order (otherwise the playlist page may not load in the correct order)
-            Promise.resolve(dispatch(setSinglePlaylistId(id))).then(
-                () => dispatch(showSinglePlaylist(id)));}
+        loadNewPlaylist: (pl, showPlaylist) => {
+            console.log(pl)
+            dispatch(updateSinglePlaylist(pl));
+            if (showPlaylist)
+                dispatch(setSinglePlaylistId(pl.id)); 
+            if (showPlaylist)
+                dispatch(showSinglePlaylist(pl.id));
+        }
     }
 }
 
@@ -41,8 +53,9 @@ class PlaylistDataDownloader extends Component{
         this.props.refreshSinglePlaylist(playlist);
     }
 
-    onPLaylistIdCreated(id){
-        this.showSinglePlaylist(id);
+    onPLaylistIdCreated(playlist){
+        playlist = JSON.parse(playlist);
+        this.props.loadNewPlaylist(playlist, this.props.showNewPlaylist);
     }
 
     render(){
@@ -50,4 +63,4 @@ class PlaylistDataDownloader extends Component{
     }
 }
 
-export default connect(null, mapDispatchToProps)(PlaylistDataDownloader);
+export default connect(mapStateToProps, mapDispatchToProps)(PlaylistDataDownloader);

@@ -30,6 +30,10 @@ class DrawingElement extends BasicElement{
 class CommandElement extends BasicElement{
     tip = "Click to edit the command";
     label = "Edit custom command";
+    description = <div>
+        <p>This elements runs custom commands. Enter the commands in the text area.</p>
+        <p>It is possible to add multiple commands by separating them on multiple lines.</p>
+    </div>
     MAX_ROW_NUMBER = 4;
 
     getModalOptions(){
@@ -59,6 +63,15 @@ class CommandElement extends BasicElement{
 class TimingElement extends BasicElement{
     tip = "Click to change the delay or the alarm time"
     label = "Timing element";
+    description = <div>
+        <p>This element introduces pauses and delays between drawings.</p>
+        <p>It is possible to choose between the following types:</p>
+        <ul>
+            <li>Delay: adds a pause between the previous and the next drawing of the set integer value (in seconds)</li>
+            <li>Expiry date: you can select a date and a time. The next drawing will start only after that date</li>
+            <li>Alarm time: the device will stop and wait until the next alarm time of the day before drawing the next pattern</li>
+        </ul>
+    </div>
 
     getModalOptions(){
         let type = "delay";
@@ -96,7 +109,7 @@ class TimingElement extends BasicElement{
             res = <Row>{this.renderSingleOption({field: "alarm_time", value: this.state.alarm_time, type: "time", label: "Select at what time to start the next drawing"},2)}</Row>
         return <Col>
                 <Row>
-                    <Col key={1}>{select}</Col>
+                    <Col>{select}</Col>
                 </Row>
                 {res}
             </Col>
@@ -113,7 +126,7 @@ class TimingElement extends BasicElement{
         return <SquareContainer>
             <div>
                 <Row><Col className="text-primary pb-3"><Alarm/>  Timing element</Col></Row>
-                <Row><Col>{print_time.split("\n").map(l => {return <p>{l}</p>})}</Col></Row>
+                <Row><Col>{print_time.split("\n").map((l,idx) => {return <p key={idx}>{l}</p>})}</Col></Row>
             </div>
         </SquareContainer>
     }
@@ -124,12 +137,21 @@ class TimingElement extends BasicElement{
 }
 
 class ShuffleElement extends BasicElement{
-    tip = "Click to select from where to select the random drawing"
+    tip = "Click to select from where to select a random drawing";
     label = "Shuffle element";
+    description = <div>
+        <p>This element is substituted by a random drawing.</p>
+        <p>The drawing can be selected from:
+            <ul>
+                <li>The entire list of drawings</li>
+                <li>Only the drawings of the current playlist</li>
+            </ul>
+        </p>
+    </div>
 
     getModalOptions(){
         return [
-            {type: "select", options: [{value: 0, label: "All the drawings"}, {value: 1, label: "This playlist"}], field: "shuffle_type", value: this.props.element.shuffle_type, label: "Select where to select the drawing from"},
+            {type: "select", options: [{value: 0, label: "All the uploaded drawings"}, {value: 1, label: "This playlist only"}], field: "shuffle_type", value: this.props.element.shuffle_type, label: "Select where to select the drawing from"},
             {field: "playlist_id", value: this.props.element.playlist_id, hidden: true}
         ]
     }
@@ -151,6 +173,9 @@ class ShuffleElement extends BasicElement{
 class StartPlaylistElement extends BasicElement{
     tip = "Click to select a playlist"
     label = "Start a playlist element";
+    description = <div>
+        <p>This element allows to start another playlist. Can also be used to start the same playlist to create a loop.</p>
+    </div>
 
     getModalOptions(){
         let vals = getPlaylists(store.getState()).map((pl) => {return {value: pl.id, label:pl.name};});
@@ -158,7 +183,7 @@ class StartPlaylistElement extends BasicElement{
             type:      "select", 
             options:    vals, 
             field:      "playlist_id", value: this.props.playlist_id, 
-            label:      "Select playlist to start"
+            label:      "Select the playlist to start"
         }]
     }
 

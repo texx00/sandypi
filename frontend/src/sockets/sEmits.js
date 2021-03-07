@@ -67,6 +67,11 @@ function playlist_save(pl){
     socket.emit("playlist_save", JSON.stringify(pl));
 }
 
+function playlist_create_new(){
+    window.show_toast("Creating new playlist...");
+    socket.emit("playlist_create_new");
+}
+
 
 // ---- QUEUE ----
 
@@ -104,6 +109,7 @@ export {
     playlist_delete,
     playlist_queue,
     playlist_save, 
+    playlist_create_new,
     queue_get_status,
     queue_set_order,
     queue_stop_drawing,

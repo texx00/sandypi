@@ -8,7 +8,8 @@ const playlistsSlice = createSlice({
         mandatory_refresh: false,
         playlists: [],
         playlist_id: 0,
-        playlist_deleted: false
+        playlist_deleted: false,
+        show_new_playlist: false
     },
     reducers: {
         addToPlaylist: (state, action) => {
@@ -22,7 +23,7 @@ const playlistsSlice = createSlice({
                 }
                 return p;
             });
-            return {...state, playlists: pls};
+            return {...state, playlists: pls, mandatory_refresh: true};
         },
         deletePlaylist: (state, action) => {
             return { ...state, playlists: state.playlists.filter((item) => {
@@ -41,31 +42,45 @@ const playlistsSlice = createSlice({
                 if (pl.id === state.playlist_id){
                     playlist_deleted = false;
                 }
+                pl.elements = JSON.parse(pl.elements);
                 return pl;
             });
             return { 
                 ...state, 
                 playlists: pls, 
-                playlist_deleted: playlist_deleted
+                playlist_deleted: playlist_deleted, 
+                mandatory_refresh: true
             }; 
         },
         setSinglePlaylistId: (state, action) => {
-            return { ...state, playlist_id: action.payload, mandatory_refresh: true };
+            return { ...state, playlist_id: action.payload, mandatory_refresh: true, show_new_playlist: false };
         },
         updateSinglePlaylist: (state, action) => {
             let playlist = action.payload;
             let version = 0;
+            let isNew = true;
             let res = state.playlists.map((pl) => {
                 if (pl.id === playlist.id){
                     version = pl.version;
+                    isNew = false;
                     return playlist;
                 }else{
                     return pl;
                 }
             });
-            if (playlist.version <= version)
+
+            // check if the version is older than the one available (if there were some fast changes the socket connection may send an old version of the playlist before receiving the last updated version)
+            if ((playlist.version < version) && !isNew)
                 return state;
-            return { ...state, playlists: res, playlist_deleted: false, mandatory_refresh: playlist.id === state.playlist_id};
+            // if the playlist is new should add it to the list
+            if (isNew)
+                res.push(playlist)
+            // check if it is necessary to refresh the playlist view
+            let must_refresh = (playlist.id === state.playlist_id) && (playlist.version > version);
+            return { ...state, playlists: res, playlist_deleted: false, mandatory_refresh: must_refresh};
+        },
+        setShowNewPlaylist(state, action){
+            return { ...state, show_new_playlist: action.payload }
         }
     }
 });
@@ -78,6 +93,7 @@ export const {
     resetMandatoryRefresh,
     setPlaylists,
     setSinglePlaylistId,
+    setShowNewPlaylist
 } = playlistsSlice.actions;
 
 export default playlistsSlice.reducer;

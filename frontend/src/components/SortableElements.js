@@ -65,14 +65,16 @@ class SortableElements extends Component{
                 return true;
             }}>
                 {this.state.list.map((el)=>{                // generate list of elements to show in the list
-                    if (el.element_type === "control_card")  
-                        return this.props.children;         // return the child as the control card 
-                    
+                    if (el.element_type === "control_card"){
+                        let c = React.cloneElement(this.props.children, {key:0});
+                        return c;                           // return the child as the control card  
+                    }
+
                     let ElementType = getElementClass(el);
 
                     return <ElementCard key={el.id} 
-                            handleUnmount={()=>this.removeElement(el.id)}
-                            showCross={this.state.show_child_cross}>
+                        handleUnmount={()=>this.removeElement(el.id)}
+                        showCross={this.state.show_child_cross}>
                         <ElementType element={el} 
                             onOptionsChange={(el) => this.props.onElementOptionsChange(el)}
                             hideOptions={this.props.hideOptions}/>
@@ -110,8 +112,8 @@ class ElementCard extends React.Component{
         return <Col sm={4} className={"mb-3"+ (this.state.active ? "" : " disappear")} 
             title="Drag me around to sort the list"
             onTransitionEnd={this.onTransitionEnd.bind(this)}>
-            <div className="pb100 position-absolute rounded"></div>
-            <div className="card hover-zoom bg-black rounded clickable" 
+            <div key={1} className="pb100 position-absolute rounded"></div>
+            <div key={2} className="card hover-zoom bg-black rounded clickable" 
                 onMouseEnter={this.show_cross.bind(this)} 
                 onMouseLeave={this.hide_cross.bind(this)}>
                 {React.cloneElement( this.props.children, { onClick: this.hide_cross.bind(this) })}     {/* adding an "onclick" method to hide the cross when the child is clicked and the modal is open */}

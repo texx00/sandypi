@@ -4,9 +4,9 @@ import { PlusSquare } from 'react-bootstrap-icons';
 import { connect } from 'react-redux';
 
 import { Section } from '../../../components/Section';
-import { showSinglePlaylist } from '../Tabs.slice';
+import { playlist_create_new } from '../../../sockets/sEmits';
 import PlaylistCard from './PlaylistCard';
-import { setSinglePlaylistId } from './Playlists.slice';
+import { setShowNewPlaylist } from './Playlists.slice';
 import { getPlaylists } from './selector';
 
 const mapStateToProps = (state) => {
@@ -17,23 +17,21 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        createNewPlaylist: () => {
-            dispatch(setSinglePlaylistId(0));
-            dispatch(showSinglePlaylist(0));
-        }
+        setShowNewPlaylist: () => dispatch(setShowNewPlaylist(true))
     }
 }
 
 class Playlists extends Component{
 
     createPlaylistHandler(){
-        this.props.createNewPlaylist();
+        this.props.setShowNewPlaylist();
+        playlist_create_new();
     }
 
     renderPlaylists(){
         if (this.props.playlists.length > 0){
             return this.props.playlists.map((item, index)=>{
-                return <Col  
+                return <Col sm={4}
                     key={index}>
                     <PlaylistCard 
                         playlist={item}/>
