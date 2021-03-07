@@ -14,7 +14,6 @@ function saveToLocalStorage(state) {
     try {
         const serialisedState = JSON.stringify(state);
         localStorage.setItem("persistantState", serialisedState);
-        localStorage.setItem("version", process.env.REACT_APP_VERSION);
     } catch (e) {
         console.warn(e);
     }
@@ -28,6 +27,7 @@ function loadFromLocalStorage() {
         if (version !== process.env.REACT_APP_VERSION){
             console.warn("New version detected. Clearing local storage");
             localStorage.clear();
+            localStorage.setItem("version", process.env.REACT_APP_VERSION);
             window.location.reload();
         }
     } catch (e) {
@@ -58,10 +58,17 @@ const reducer = combineReducers({
 // can dispatch multiple actions thanks to the "thunk" library
 // without this library, could not use multiple dispatch action in the same function inside the "mapDispatchToProp" dict
 
+
+let devTools = window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__();
+if (!devTools) {
+    devTools = a => a;
+}
+
+
 const store = createStore(
     reducer,
     loadFromLocalStorage(),
-    compose(applyMiddleware(thunk), window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())// redux setup for chrome dev extension https://github.com/zalmoxisus/redux-devtools-extension
+    compose(applyMiddleware(thunk), devTools)// redux setup for chrome dev extension https://github.com/zalmoxisus/redux-devtools-extension
 );
 
 store.subscribe(() => saveToLocalStorage(store.getState()));
