@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import {Form, Row, Col, Button } from 'react-bootstrap';
 
-import { send_command } from '../../../sockets/sEmits';
-import { device_command_line_return, device_new_position} from '../../../sockets/sCallbacks';
+import { sendCommand } from '../../../sockets/sEmits';
+import { deviceCommandLineReturn, deviceNewPosition} from '../../../sockets/sCallbacks';
 import CommandViewer from './CommandViewer';
 
 class CommandLine extends Component{
@@ -10,23 +10,23 @@ class CommandLine extends Component{
         super(props);
         this.state = {
             history: [], 
-            show_acks: false
+            showAcks: false
         };
-        this.command_history_counter = 0;
-        this.command_history = [];
-        this.input_ref = React.createRef();
+        this.commandHistoryCounter = 0;
+        this.commandHistory = [];
+        this.inputRef = React.createRef();
     }
 
     componentDidMount(){
-        device_command_line_return(this.addLine.bind(this));
-        device_new_position(this.addLine.bind(this));
+        deviceCommandLineReturn(this.addLine.bind(this));
+        deviceNewPosition(this.addLine.bind(this));
     }
     
     submitCommand(event = null){
-        send_command(this.getInputValue());
+        sendCommand(this.getInputValue());
         this.addLine(this.getInputValue(), false);
-        this.command_history.push(this.getInputValue());
-        this.command_history_counter = 0;
+        this.commandHistory.push(this.getInputValue());
+        this.commandHistoryCounter = 0;
         this.setInputValue("");
         if (event){
             event.preventDefault();         // to prevent the submit on enter in the input form
@@ -34,30 +34,30 @@ class CommandLine extends Component{
     }
 
     setInputValue(value){
-        this.input_ref.current.value = value;
+        this.inputRef.current.value = value;
     }
 
     getInputValue(){
-        return this.input_ref.current.value;
+        return this.inputRef.current.value;
     }
 
     keyUpHandler(event){
-        if (!this.command_history.length){
+        if (!this.commandHistory.length){
             return;
         }
         if (event.keyCode === 38) {      // Arrow up 
-            if(this.command_history_counter > 0){
-                this.command_history_counter--;
+            if(this.commandHistoryCounter > 0){
+                this.commandHistoryCounter--;
             }
         } else if (event.keyCode === 40) {      // Arrow down
-            if(this.command_history_counter < this.command_history.length){
-                this.command_history_counter++;
+            if(this.commandHistoryCounter < this.commandHistory.length){
+                this.commandHistoryCounter++;
             }
         }else{
             return;
         }
-        if (this.command_history[this.command_history_counter]){
-            this.setInputValue(this.command_history[this.command_history_counter]);
+        if (this.commandHistory[this.commandHistoryCounter]){
+            this.setInputValue(this.commandHistory[this.commandHistoryCounter]);
         }else{
             this.setInputValue("");
         }
@@ -74,7 +74,7 @@ class CommandLine extends Component{
 
     render(){
         return <div className="h-100 p-relative d-flex flex-column command-viewer">
-            <CommandViewer showAcks={this.state.show_acks}>
+            <CommandViewer showAcks={this.state.showAcks}>
                 {this.state.history}
             </CommandViewer>
             <Form onSubmit={this.submitCommand.bind(this)}>
@@ -85,7 +85,7 @@ class CommandLine extends Component{
                                 placeholder="Write a command"
                                 className="mt-3"
                                 onKeyUp={this.keyUpHandler.bind(this)}
-                                ref={this.input_ref}/>
+                                ref={this.inputRef}/>
                         </Col>
                         <Col sm={4}>
                             <Button onClick={this.submitCommand.bind(this)}>Send command</Button>
@@ -97,8 +97,8 @@ class CommandLine extends Component{
                                 label="Show device acks"
                                 id="ack_check"
                                 type="switch"
-                                onChange={(event)=>{this.setState({show_acks: event.target.checked})}}
-                                checked={this.state.show_acks}/>
+                                onChange={(event)=>{this.setState({showAcks: event.target.checked})}}
+                                checked={this.state.showAcks}/>
                         </Col>
                     </Row>
                 </Form.Group>

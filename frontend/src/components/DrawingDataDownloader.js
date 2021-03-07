@@ -4,11 +4,11 @@ import { connect } from 'react-redux';
 import { getRefreshDrawings } from '../structure/tabs/drawings/selector';
 import { setDrawings, setRefreshDrawing } from '../structure/tabs/drawings/Drawings.slice';
 
-import { drawings_request } from '../sockets/sEmits';
-import { drawings_refresh_response} from '../sockets/sCallbacks';
+import { drawingsRequest } from '../sockets/sEmits';
+import { drawingsRefreshResponse} from '../sockets/sCallbacks';
 
 const mapStateToProps = (state) => {
-    return { must_refresh: getRefreshDrawings(state) }
+    return { mustRefresh: getRefreshDrawings(state) }
 }
 
 const mapDispatchToProps = (dispatch) => {
@@ -21,12 +21,12 @@ const mapDispatchToProps = (dispatch) => {
 class DrawingDataDownloader extends Component{
 
     componentDidMount(){
-        drawings_refresh_response(this.onDataReceived.bind(this));
+        drawingsRefreshResponse(this.onDataReceived.bind(this));
         this.requestDrawings();
     }
     
     requestDrawings(){
-        drawings_request();
+        drawingsRequest();
     }
 
     onDataReceived(res){
@@ -34,7 +34,7 @@ class DrawingDataDownloader extends Component{
     }
 
     render(){
-        if (this.props.must_refresh){
+        if (this.props.mustRefresh){
             this.props.setRefreshFalse();
             this.requestDrawings();
         }

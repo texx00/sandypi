@@ -7,7 +7,7 @@ import { Section } from '../../../components/Section';
 import CommandLine from './CommandLine';
 import Preview from './Preview';
 
-import { control_emergency_stop, send_command } from '../../../sockets/sEmits';
+import { controlEmergencyStop, sendCommand } from '../../../sockets/sEmits';
 
 class ManualControl extends Component{
 
@@ -26,8 +26,8 @@ class ManualControl extends Component{
                                 </Row>
                                 <Row>
                                     <Col className="center">
-                                        <Button className="w-25 mr-3" onClick={()=>{control_emergency_stop()}} title="Warning: this button will not stop the device during homing">EMERGENCY STOP</Button>
-                                        <Button className="2-25" onClick={()=>{send_command('G28')}}>Home</Button>
+                                        <Button className="w-25 mr-3" onClick={()=>{controlEmergencyStop()}} title="Warning: this button will not stop the device during homing">EMERGENCY STOP</Button>
+                                        <Button className="2-25" onClick={()=>{sendCommand('G28')}}>Home</Button>
                                     </Col>
                                 </Row>
                             </Section>

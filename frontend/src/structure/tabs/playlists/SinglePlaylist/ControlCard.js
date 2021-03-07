@@ -25,7 +25,7 @@ class ControlCard extends Component{
         ]
     }
 
-    createElement(type, element_factory){
+    createElement(type, elementFactory){
         switch(type){
             case "drawing_upload":
                 this.setState({...this.state, showModal: false, showUpload: true});
@@ -35,10 +35,10 @@ class ControlCard extends Component{
             case "timing":
             case "shuffle":
             case "start_playlist":
-                this.props.onElementsAdded([element_factory(this.props.playlistId)]);
+                this.props.onElementsAdded([elementFactory(this.props.playlistId)]);
                 break;
             default:
-                window.show_toast("The type is not supported");
+                window.showToast("The type is not supported");
                 break;
         }
         this.setState({...this.state, showModal: false});

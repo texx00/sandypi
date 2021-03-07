@@ -4,7 +4,7 @@ import { PlusSquare } from 'react-bootstrap-icons';
 import { connect } from 'react-redux';
 
 import { Section } from '../../../components/Section';
-import { playlist_create_new } from '../../../sockets/sEmits';
+import { playlistCreateNew } from '../../../sockets/sEmits';
 import PlaylistCard from './PlaylistCard';
 import { setShowNewPlaylist } from './Playlists.slice';
 import { getPlaylists } from './selector';
@@ -25,7 +25,7 @@ class Playlists extends Component{
 
     createPlaylistHandler(){
         this.props.setShowNewPlaylist();
-        playlist_create_new();
+        playlistCreateNew();
     }
 
     renderPlaylists(){

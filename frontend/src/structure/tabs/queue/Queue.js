@@ -6,8 +6,8 @@ import { connect } from 'react-redux';
 import { Section, Subsection } from '../../../components/Section';
 import SortableElements from '../../../components/SortableElements';
 
-import { queue_status } from '../../../sockets/sCallbacks';
-import { queue_get_status, queue_set_order, queue_stop_drawing } from '../../../sockets/sEmits';
+import { queueStatus } from '../../../sockets/sCallbacks';
+import { queueGetStatus, queueSetOrder, queueStopDrawing } from '../../../sockets/sEmits';
 import { listsAreEqual } from '../../../utils/dictUtils';
 import { getElementClass } from '../playlists/SinglePlaylist/Elements';
 import { isViewQueue } from '../selector';
@@ -52,8 +52,8 @@ class Queue extends Component{
     }
 
     componentDidMount(){
-        queue_status(this.parseQueue.bind(this));
-        queue_get_status();
+        queueStatus(this.parseQueue.bind(this));
+        queueGetStatus();
     }
 
     parseQueue(data){
@@ -66,7 +66,7 @@ class Queue extends Component{
         if (!listsAreEqual(list, this.state.elements)){
             this.setState({...this.state, elements: list});
             this.props.setQueueElements(list);
-            queue_set_order(list);
+            queueSetOrder(list);
         }
     }
 
@@ -76,7 +76,7 @@ class Queue extends Component{
     }
 
     stopDrawing(){
-        queue_stop_drawing();
+        queueStopDrawing();
     }
 
     renderList(){

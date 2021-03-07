@@ -3,7 +3,7 @@ import "./ManualControl.scss";
 import React, { Component } from 'react';
 import { connect } from "react-redux";
 
-import { device_new_position } from '../../../sockets/sCallbacks';
+import { deviceNewPosition } from '../../../sockets/sCallbacks';
 import { getDevice, getIsFastMode } from "../settings/selector";
 import { dictsAreEqual } from "../../../utils/dictUtils";
 import { isManualControl } from "../selector";
@@ -22,14 +22,14 @@ const mapStateToProps = (state) =>{
 class Preview extends Component{
     constructor(props){
         super(props);
-        this.canvas_ref = React.createRef();
-        this.image_ref = React.createRef();
-        this.bg_color = "#000000";
-        this.line_color = "#ffffff";
+        this.canvasRef = React.createRef();
+        this.imageRef = React.createRef();
+        this.bgColor = "#000000";
+        this.lineColor = "#ffffff";
         this.multiplier = 5;    // multiply the pixels to get a better resolution with small tables
-        this.is_mounted = false;
-        this.force_image_render = false;
-        this.animation_frames = 0;
+        this.isPreviewMounted = false;
+        this.forceImageRender = false;
+        this.animationFrames = 0;
 
         // previous commanded point
         this.pp = {
@@ -43,35 +43,35 @@ class Preview extends Component{
     }
 
     componentDidMount(){
-        if (!this.is_mounted){
-            this.is_mounted = true;
-            this.canvas = this.canvas_ref.current;
+        if (!this.isPreviewMounted){
+            this.isPreviewMounted = true;
+            this.canvas = this.canvasRef.current;
             this.ctx = this.canvas.getContext("2d");
-            this.ctx.strokeStyle = this.line_color;
-            this.ctx.fillStyle = this.bg_color;
+            this.ctx.strokeStyle = this.lineColor;
+            this.ctx.fillStyle = this.bgColor;
             this.ctx.lineWidth = this.multiplier;
             this.clearCanvas();
             this.forceUpdate();
-            device_new_position(this.newLineFromDevice.bind(this));
+            deviceNewPosition(this.newLineFromDevice.bind(this));
         }
     }
     
     componentDidUpdate(){
-        if (this.force_image_render){
-            this.force_image_render = false;
+        if (this.forceImageRender){
+            this.forceImageRender = false;
             this.updateImage();
         }
     }
 
     shouldComponentUpdate(nextProps){
         if (!dictsAreEqual(nextProps.device, this.props.device) || this.props.isManualControl)
-            this.force_image_render = true;
+            this.forceImageRender = true;
         return true;
     }
     
     updateImage(){
         if (this.canvas !== undefined && this.props.isManualControl){
-            this.image_ref.current.src = this.canvas.toDataURL();
+            this.imageRef.current.src = this.canvas.toDataURL();
         }
     }
 
@@ -174,7 +174,7 @@ class Preview extends Component{
         }
         this.ctx.beginPath();
         this.ctx.moveTo(this.pp.x, this.height * this.multiplier - this.pp.x);
-        this.animation_frames = 0;
+        this.animationFrames = 0;
         this.animateClear();
     }
 
@@ -183,7 +183,7 @@ class Preview extends Component{
         this.ctx.fillRect(0,0, this.width * this.multiplier, this.height * this.multiplier);
         this.ctx.globalAlpha = 1;
         this.updateImage();
-        if (this.animation_frames++ < ANIMATION_FRAMES_MAX){
+        if (this.animationFrames++ < ANIMATION_FRAMES_MAX){
             setTimeout(this.animateClear.bind(this), ANIMATION_DURATION/ANIMATION_FRAMES_MAX);
         }
     }
@@ -209,8 +209,8 @@ class Preview extends Component{
         // TODO add right click event on the preview with a "move here" command
         
         return <div>
-            <canvas ref={this.canvas_ref} className="d-none" width={this.width * this.multiplier} height={this.height * this.multiplier}/>
-            <img ref={this.image_ref} 
+            <canvas ref={this.canvasRef} className="d-none" width={this.width * this.multiplier} height={this.height * this.multiplier}/>
+            <img ref={this.imageRef} 
                 key={this.props.imageKey}
                 className="preview-style"
                 alt="Preview"/>

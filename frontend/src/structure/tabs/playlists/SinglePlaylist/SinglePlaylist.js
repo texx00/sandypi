@@ -9,7 +9,7 @@ import ConfirmButton from '../../../../components/ConfirmButton';
 import SortableElements from '../../../../components/SortableElements';
 import IconButton from '../../../../components/IconButton';
 
-import { playlist_delete, playlist_queue, playlist_save } from '../../../../sockets/sEmits';
+import { playlistDelete, playlistQueue, playlistSave } from '../../../../sockets/sEmits';
 import { listsAreEqual } from '../../../../utils/dictUtils';
 
 import { tabBack } from '../../Tabs.slice';
@@ -43,7 +43,7 @@ const mapDispatchToProps = (dispatch) => {
 class SinglePlaylist extends Component{
     constructor(props){
         super(props);
-        this.control_card = {element_type: "control_card"}
+        this.controlCard = {element_type: "control_card"}
         this.state = {
             elements: this.addControlCard(this.props.playlist.elements)
         }
@@ -53,8 +53,8 @@ class SinglePlaylist extends Component{
     addControlCard(elements){
         if (elements !== undefined){
             elements = this.getFilteredELements(elements);
-            return [...elements, this.control_card];
-        } else return [this.control_card];
+            return [...elements, this.controlCard];
+        } else return [this.controlCard];
     }
 
     getFilteredELements(elements){
@@ -71,7 +71,7 @@ class SinglePlaylist extends Component{
             elements: orderedEls,
             id: this.props.playlist.id
         };                                          
-        playlist_save(playlist);
+        playlistSave(playlist);
         if (this.props.playlist.id !== 0){
             playlist.version = this.props.playlist.version + 1;                                 
             this.props.updateSinglePlaylist(playlist);
@@ -116,7 +116,7 @@ class SinglePlaylist extends Component{
             return ""
         }else return <IconButton 
                 icon={Play} 
-                onClick={()=>playlist_queue(this.props.playlist.id)}>
+                onClick={()=>playlistQueue(this.props.playlist.id)}>
                 Start playlist
             </IconButton>
     }
@@ -125,7 +125,7 @@ class SinglePlaylist extends Component{
         return <ConfirmButton className="btn" 
             icon={X}
             onClick={()=> {
-                playlist_delete(this.props.playlist.id);
+                playlistDelete(this.props.playlist.id);
                 this.props.handleTabBack();
                 this.props.deletePlaylist(this.props.playlist.id);
             }}>

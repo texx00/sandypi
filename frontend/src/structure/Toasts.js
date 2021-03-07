@@ -3,7 +3,7 @@ import { Spinner } from 'react-bootstrap';
 
 import Toast from 'react-bootstrap/Toast';
 
-import { connection_status_callback, show_toast } from "../sockets/sCallbacks";
+import { connectionStatusCallback, showToast } from "../sockets/sCallbacks";
 import { cloneDict } from '../utils/dictUtils';
 
 class CustomToast extends Component{
@@ -27,29 +27,29 @@ class Toasts extends Component{
         super(props);
         this.state = {
             toasts: [], 
-            show_connection: false
+            showConnection: false
         };
         this.key = 1;           // 0 for the connection status toast
 
         // bind the add toast function to the static functions
-        // can add a toast message from everywhere with "window.show_toast(message [, duration]);"
-        window.show_toast = this.addToast.bind(this);
+        // can add a toast message from everywhere with "window.showToast(message [, duration]);"
+        window.showToast = this.addToast.bind(this);
     }
     
     componentDidMount(){
-        show_toast((message)=>{this.addToast(message)});
-        connection_status_callback(this.show_connection_status.bind(this));
+        showToast((message)=>{this.addToast(message)});
+        connectionStatusCallback(this.showConnectionStatus.bind(this));
     }
 
-    show_connection_status(status){
-        this.setState({...this.state, show_connection: !status});
+    showConnectionStatus(status){
+        this.setState({...this.state, showConnection: !status});
     }
 
     addToast(message, duration=3000){
-        let new_state = this.state;
-        new_state.toasts.push(<CustomToast key={this.key} message={message} duration={duration}/>);
+        let newState = this.state;
+        newState.toasts.push(<CustomToast key={this.key} message={message} duration={duration}/>);
         this.key++;
-        this.setState(new_state);
+        this.setState(newState);
     }
 
     render(){
@@ -59,7 +59,7 @@ class Toasts extends Component{
                     <Spinner animation='border' size="sm" className="mr-2"/>
                     Connection lost. Check if the server is up.
                 </div>} 
-            show={this.state.show_connection} 
+            show={this.state.showConnection} 
             autohide={false}/>);
         return <div className="toast_container_position">
             {toasts}

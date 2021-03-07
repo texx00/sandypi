@@ -23,7 +23,7 @@ class BasicElement extends Component{
     renderElement(){
         return <SquareContainer className="center align-item-center">
             <div>
-                <Spinner animation="border" className={this.props.no_margin==="true" ? "" : "m-5"}/>
+                <Spinner animation="border" className={this.props.noMargin==="true" ? "" : "m-5"}/>
             </div>
         </SquareContainer>
     }

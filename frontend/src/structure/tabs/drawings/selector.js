@@ -1,5 +1,5 @@
 const getRefreshDrawings = state => {
-    return state.drawings.must_refresh;
+    return state.drawings.mustRefresh;
 }
 
 const getDrawings = state => { 
@@ -19,7 +19,7 @@ const getSingleDrawing = state => {
     const dr = state.drawings.drawings;
     for (let el in dr){
         if (dr[el] !== undefined && dr[el] !== null) 
-            if (dr[el].id === state.tabs.drawing_code)
+            if (dr[el].id === state.tabs.drawingCode)
                 ret = dr[el];
     }
     return ret;

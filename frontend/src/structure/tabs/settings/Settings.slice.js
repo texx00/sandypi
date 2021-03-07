@@ -1,11 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 import { cloneDict, setSubKey } from '../../../utils/dictUtils';
-import default_settings from './default_settings';
+import defaultSettings from './defaultSettings';
 
 const settingsSlice = createSlice({
     name: "settings",
-    initialState: default_settings,
+    initialState: defaultSettings,
     reducers: {
         updateAllSettings(state, action){
             let res = action.payload;

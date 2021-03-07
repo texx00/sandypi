@@ -16,7 +16,7 @@ import { getDrawingsLimited } from './drawings/selector';
 import { getPlaylistsLimited } from './playlists/selector';
 import { setRefreshDrawing } from './drawings/Drawings.slice';
 import { setTab } from './Tabs.slice';
-import { playlist_create_new } from '../../sockets/sEmits';
+import { playlistCreateNew } from '../../sockets/sEmits';
 import { setShowNewPlaylist } from './playlists/Playlists.slice';
 
 const mapStateToProps = (state) => {
@@ -37,7 +37,7 @@ const mapDispatchToProps = (dispatch) => {
 class Home extends Component{
     constructor(props){
         super(props);
-        this.carousel_responsive = {
+        this.carouselResponsive = {
             largeDesktop: {
               breakpoint: { max: 4000, min: 3000 },
               items: 5
@@ -55,11 +55,13 @@ class Home extends Component{
               items: 1
             }
         };
-        this.state = {show_upload: false, show_create_playlist: false}
+        this.state = {
+            showUpload: false
+        }
     }
 
     handleFileUploaded(){
-        window.show_toast("Updating drawing previews...");
+        window.showToast("Updating drawing previews...");
         this.props.setRefreshDrawing();
     }
 
@@ -84,7 +86,7 @@ class Home extends Component{
                     playlist={item} 
                     key={index}/>});
                     
-            result = <Carousel responsive={this.carousel_responsive}>
+            result = <Carousel responsive={this.carouselResponsive}>
                 {result}
             </Carousel>
         }else{
@@ -102,9 +104,9 @@ class Home extends Component{
                     <Section sectionTitle="Drawings"
                         sectionButton="Upload new drawing"
                         buttonIcon={FileEarmarkPlus}
-                        sectionButtonHandler={()=>this.setState({show_upload: true})}
+                        sectionButtonHandler={()=>this.setState({showUpload: true})}
                         titleButtonHandler={()=>this.props.handleTab("drawings")}>
-                            <Carousel responsive={this.carousel_responsive} ssr>
+                            <Carousel responsive={this.carouselResponsive} ssr>
                                 {this.renderDrawings(this.props.drawings)}
                             </Carousel>
                     </Section>
@@ -117,7 +119,7 @@ class Home extends Component{
                         buttonIcon={PlusSquare}
                         sectionButtonHandler={()=> {
                             this.props.setShowNewPlaylist();
-                            playlist_create_new();
+                            playlistCreateNew();
                         }}
                         titleButtonHandler={()=>this.props.handleTab("playlists")}
                         ssr>
@@ -126,8 +128,8 @@ class Home extends Component{
                 </Col>
             </Row>
             <UploadDrawingsModal 
-                show={this.state.show_upload}
-                handleClose={()=>{this.setState({show_upload: false})}}
+                show={this.state.showUpload}
+                handleClose={()=>{this.setState({showUpload: false})}}
                 handleFileUploaded={this.handleFileUploaded.bind(this)}/>
         </Container>
     }

@@ -7,7 +7,7 @@ function createEmptyPlaylist(){
 }
 
 const getMandatoryRefresh = state => {
-    return state.playlists.mandatory_refresh;
+    return state.playlists.mandatoryRefresh;
 }
 
 const getSinglePlaylist = state => {
@@ -19,7 +19,7 @@ const getSinglePlaylist = state => {
     const pl = getPlaylists(state);
     for (let el in pl){
         if (pl[el] !== undefined && pl[el] !== null) 
-            if (pl[el].id === state.playlists.playlist_id)
+            if (pl[el].id === state.playlists.playlistId)
                 ret = pl[el];
     }
     if (ret.elements === undefined)
@@ -49,7 +49,7 @@ const getPlaylistsList = state => {
 }
 
 const getSinglePlaylistId = state => {
-    return state.playlists.playlist_id;
+    return state.playlists.playlistId;
 }
 
 const getPlaylistName = (state, id) => {
@@ -62,15 +62,15 @@ const getPlaylistName = (state, id) => {
 }
 
 const playlistHasBeenDeleted = state => {
-    return state.playlists.playlist_deleted;
+    return state.playlists.playlistDeleted;
 }
 
 const singlePlaylistMustRefresh = state => {
-    return state.playlists.mandatory_refresh;
+    return state.playlists.mandatoryRefresh;
 }
 
 const isShowNewPlaylist = state => {
-    return state.playlists.show_new_playlist;
+    return state.playlists.showNewPlaylist;
 }
 
 export { getMandatoryRefresh, getSinglePlaylist, getPlaylists, getPlaylistsLimited, getPlaylistsList, singlePlaylistMustRefresh, getPlaylistName, playlistHasBeenDeleted, isShowNewPlaylist };

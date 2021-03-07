@@ -5,8 +5,8 @@ import { setPlaylists, setSinglePlaylistId, updateSinglePlaylist } from '../stru
 import { showSinglePlaylist } from '../structure/tabs/Tabs.slice';
 import { isShowNewPlaylist } from '../structure/tabs/playlists/selector';
 
-import { playlists_request } from '../sockets/sEmits';
-import { playlists_refresh_response, playlists_refresh_single_response, playlist_create_id } from '../sockets/sCallbacks';
+import { playlistsRequest } from '../sockets/sEmits';
+import { playlistsRefreshResponse, playlistsRefreshSingleResponse, playlistCreateId } from '../sockets/sCallbacks';
 
 
 const mapStateToProps = (state) => {
@@ -32,14 +32,14 @@ const mapDispatchToProps = (dispatch) => {
 class PlaylistDataDownloader extends Component{
 
     componentDidMount(){
-        playlists_refresh_response(this.onPlaylistsRefresh.bind(this));
-        playlists_refresh_single_response(this.onSinglePlaylistRefresh.bind(this));
-        playlist_create_id(this.onPLaylistIdCreated.bind(this));
+        playlistsRefreshResponse(this.onPlaylistsRefresh.bind(this));
+        playlistsRefreshSingleResponse(this.onSinglePlaylistRefresh.bind(this));
+        playlistCreateId(this.onPLaylistIdCreated.bind(this));
         this.requestPlaylists();
     }
     
     requestPlaylists(){
-        playlists_request();
+        playlistsRequest();
     }
 
     onPlaylistsRefresh(res){

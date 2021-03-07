@@ -6,7 +6,7 @@ import { shouldCheckUpdate } from './tabs/settings/selector';
 import { updateCheckTime } from './tabs/settings/Settings.slice';
 
 const mapStateToProps = (state) => {
-    return { should_check_update: shouldCheckUpdate(state) }
+    return { shouldCheckUpdate: shouldCheckUpdate(state) }
 }
 
 const mapDispatchToProps = (dispatch) => {
@@ -21,16 +21,16 @@ class SWUpdates extends Component{
 
     componentDidMount(){
         
-        if ((!this.checked) && this.props.should_check_update){
-            this.check_software_updates()
+        if ((!this.checked) && this.props.shouldCheckUpdate){
+            this.checkSoftwareUpdates()
             this.checked = true;
         }
     }
     
-    check_software_updates(){
+    checkSoftwareUpdates(){
         console.log("Checking for updates");
         socket.on("software_updates_response", (response) =>{
-            window.show_toast(response, 10000);
+            window.showToast(response, 10000);
             this.props.updateCheckTime();
         });
         socket.emit("software_updates_check");
