@@ -103,7 +103,7 @@ class SinglePlaylist extends Component{
                             key={-1}
                             playlistId={this.props.playlist.id}
                             onElementsAdded={(elements) => {
-                                this.setState({...this.state, elements: this.addControlCard([...this.state.elements, ...elements])}, this.save.bind(this));
+                                this.props.addElements({elements: elements, playlistId: this.props.playlist.id}, this.save.bind(this));
                             }}/>
                     </SortableElements>
         } else return <Row>

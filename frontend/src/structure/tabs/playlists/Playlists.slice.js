@@ -13,15 +13,22 @@ const playlistsSlice = createSlice({
     },
     reducers: {
         addToPlaylist: (state, action) => {
-            const elements = action.payload.elements;
+            let elements = action.payload.elements;
             const playlistId = action.payload.playlistId;
             let pls = state.playlists.map((pl) => {
-                let p = {...pl};
+                pl = {...pl};
                 if (pl.id === playlistId){
-                    p.elements = [...p.elements, ...elements];
-                    playlist_save(p);                 // saves playlist also on the server (only one playlist at a time, there will be no problem with mutliple save calls)
+                    // looking for the highest element id to add a higher value to the elements that are being added (this avoid the creation of a new element when the element with id is sent back from the server)
+                    let max_id = Math.max(pl.elements.map(el => {return el.id}), 1) + 1;
+                    for (let e in elements){
+                        elements[e].id = max_id++;
+                    }
+                    pl.elements = [...pl.elements];
+                    pl.elements = [...pl.elements, ...elements];
+                    pl.version++;                       // increases version
+                    playlist_save(pl);                  // saves playlist also on the server (only one playlist at a time, there will be no problem with multiple save calls)
                 }
-                return p;
+                return pl;
             });
             return {...state, playlists: pls, mandatory_refresh: true};
         },

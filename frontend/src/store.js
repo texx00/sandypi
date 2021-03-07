@@ -59,8 +59,9 @@ const reducer = combineReducers({
 // without this library, could not use multiple dispatch action in the same function inside the "mapDispatchToProp" dict
 
 
-let devTools = window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__();
-if (!devTools) {
+// Needs this check to differentiate between browsers running the dev extension and browser that are not running it (otherwise the compose method will raise an exception if no function is passed)
+let devTools = window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__();  // redux setup for chrome dev extension https://github.com/zalmoxisus/redux-devtools-extension
+if (!devTools) {    // https://github.com/reduxjs/redux/issues/2359
     devTools = a => a;
 }
 
@@ -68,7 +69,10 @@ if (!devTools) {
 const store = createStore(
     reducer,
     loadFromLocalStorage(),
-    compose(applyMiddleware(thunk), devTools)// redux setup for chrome dev extension https://github.com/zalmoxisus/redux-devtools-extension
+    compose(
+        applyMiddleware(thunk), 
+        devTools
+    )
 );
 
 store.subscribe(() => saveToLocalStorage(store.getState()));
