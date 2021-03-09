@@ -1,18 +1,20 @@
 import React, { Component } from 'react';
-import { Col, Container, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Col, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { Alarm, Archive, CollectionPlay, Gear, Plus, Shuffle, Upload } from 'react-bootstrap-icons';
 
 import SquareContainer from '../../../../components/SquareContainer';
 
 import UploadDrawingsModal from '../../drawings/UploadDrawing';
 import { createElementDrawing, createElementGcode, createElementPlaylistStart, createElementShuffle, createElementTiming } from '../elementsFactory';
+import { getElementClass } from './Elements';
 
 class ControlCard extends Component{
     constructor(props){
         super(props);
         this.state = {
             showUpload: false,
-            showModal: false
+            showModal: false,
+            newElementForPreview: undefined
         }
         // add new elements here and also in the createElement method switch case
         this.elements = [
@@ -35,13 +37,33 @@ class ControlCard extends Component{
             case "timing":
             case "shuffle":
             case "start_playlist":
-                this.props.onElementsAdded([elementFactory(this.props.playlistId)]);
-                break;
+                this.showNewElementPreview(elementFactory(this.props.playlistId));
+                return;
             default:
                 window.showToast("The type is not supported");
                 break;
         }
         this.setState({...this.state, showModal: false});
+    }
+
+    showNewElementPreview(element){
+        this.setState({...this.state, newElementForPreview: element, showModal: false});
+    }
+
+    // cannot add an element directly to the list and open the settings: the problem is that when the playlist is refreshed after the first save (when the element is added), react will automatically close the modal because it will be a new component.
+    // like this will open a temporary element, change the settings and the save the final element directly
+    renderPreviewNewElement(){
+        if (this.state.newElementForPreview !== undefined){
+            let ElementClass = getElementClass(this.state.newElementForPreview);
+            return <ElementClass 
+                showModal={"true"}
+                element={this.state.newElementForPreview}
+                onOptionsChange={(el) => {
+                    this.props.onElementsAdded([el]);
+                    this.setState({...this.state, newElementForPreview: undefined});
+                }}/>
+        }
+            
     }
 
     render(){
@@ -83,6 +105,8 @@ class ControlCard extends Component{
                     </Modal.Body>
                 </Modal>
 
+                <div className="d-none">{this.renderPreviewNewElement()}</div>  {/* this element will open up as a modal only. It will open up before adding the element to the playlist. Necessary to change the options directly when creating a new element */}
+
                 <UploadDrawingsModal key={2}
                     playlist={this.props.playlistId}
                     show={this.state.showUpload}
@@ -90,7 +114,7 @@ class ControlCard extends Component{
                     handleFileUploaded={(ids) => {
                         let els = ids.map((id)=>{
                             return createElementDrawing({id: id});
-                        })
+                        });
                         this.props.onElementsAdded(els);
                     }}/>
             </Col>

@@ -9,7 +9,10 @@ import FormDatetime from '../../../../components/FormDatetime';
 class BasicElement extends Component{
     constructor(props){
         super(props);
-        this.state = { showModal: false, ...this.mapOptionsToState()};
+        let showModalDefault = false;
+        if (this.props.showModal !== undefined)
+            showModalDefault = this.props.showModal;
+        this.state = { showModal: showModalDefault, ...this.mapOptionsToState()};
     }
 
     // Tip to be shown when overing the card for some time. If empty will not show the tip
@@ -147,7 +150,7 @@ class BasicElement extends Component{
     // renders the modal
     renderModal(){
         if (!this.getModalOptions()) return "";       // check option to show or not the modal
-
+        
         return <Modal show={this.state.showModal} 
                 size="lg" 
                 centered
