@@ -6,7 +6,7 @@ import IconButton from '../../../../components/IconButton';
 import SquareContainer from '../../../../components/SquareContainer';
 import FormDatetime from '../../../../components/FormDatetime';
 
-class BasicElement extends Component{
+class GenericElement extends Component{
     constructor(props){
         super(props);
         let showModalDefault = false;
@@ -222,4 +222,4 @@ class BasicElement extends Component{
     }
 }
 
-export default BasicElement;
+export default GenericElement;

@@ -160,9 +160,6 @@ class TimeElement(GenericPlaylistElement):
     # alarm_time: can specify a time in the day at which can go on with the playlist (like 5 a.m. to get a new drawing in the morning without having it drawing the entire night)
     def __init__(self, delay=None, expiry_date=None, alarm_time=None, **kwargs):
         super(TimeElement, self).__init__(element_type=TimeElement.element_type, **kwargs)
-        non_none = sum(((i is not None) and (i!="")) for i in [delay, expiry_date, alarm_time])
-        if non_none > 1:
-            raise ValueError("Only one of the arguments can be specified at a time")
         self.delay = delay if delay != "" else None
         self.expiry_date = expiry_date if expiry_date != "" else None
         self.alarm_time = alarm_time if alarm_time != "" else None
