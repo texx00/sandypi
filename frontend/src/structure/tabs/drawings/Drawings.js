@@ -7,6 +7,7 @@ import { Section } from '../../../components/Section';
 
 import UploadDrawingsModal from './UploadDrawing';
 import DrawingCard from './DrawingCard';
+import DrawingsPlayShortcut from './DrawingsPlayShortcut';
 
 import { setRefreshDrawing } from './Drawings.slice';
 import { getDrawings } from './selector';
@@ -55,15 +56,17 @@ class Drawings extends Component{
                 buttonIcon={FileEarmarkPlus}
                 sectionButtonHandler={()=>this.setState({showUpload: true})}>
             
-            <Row>
-                {this.renderDrawings(this.props.drawings)}
-            </Row>
+                <DrawingsPlayShortcut />
 
-            <UploadDrawingsModal key={2}
-                show={this.state.showUpload}
-                handleClose={()=>{this.setState({showUpload: false})}}
-                handleFileUploaded={this.handleFileUploaded.bind(this)}/>
-            </Section>
+                <Row>
+                    {this.renderDrawings(this.props.drawings)}
+                </Row>
+
+                <UploadDrawingsModal key={2}
+                    show={this.state.showUpload}
+                    handleClose={()=>{this.setState({showUpload: false})}}
+                    handleFileUploaded={this.handleFileUploaded.bind(this)}/>
+                </Section>
         </Container>
     }
 }

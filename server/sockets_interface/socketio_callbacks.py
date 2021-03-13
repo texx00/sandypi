@@ -157,14 +157,37 @@ def queue_get_status():
 
 @socketio.on("queue_set_order")
 def queue_set_order(elements):
-    app.qmanager.set_new_order(map(lambda e: GenericPlaylistElement.create_element_from_dict(e), json.loads(elements)))
+    if elements == "":
+        app.qmanager.clear_queue()
+    else:
+        app.qmanager.set_new_order(map(lambda e: GenericPlaylistElement.create_element_from_dict(e), json.loads(elements)))
 
-@socketio.on("queue_stop_drawing")
-def queue_stop_drawing():
+# stops only the current element
+@socketio.on("queue_stop_current")
+def queue_stop_current():
     app.semits.show_toast_on_UI("Stopping drawing...") 
-    app.qmanager.stop_drawing()
+    app.qmanager.stop()
     if not app.qmanager.is_drawing():   # if the drawing was the last in the queue must send the updated status
         app.qmanager.send_queue_status()
+
+# clears the queue and stops the current element
+@socketio.on("queue_stop_all")
+def queue_stop_all():
+    queue_stop_continuous()
+    queue_stop_current()
+
+@socketio.on("queue_stop_continuous")
+def queue_stop_continuous():
+    app.qmanager.stop_continuous()
+    queue_set_order("")
+
+@socketio.on("queue_start_drawings")
+def queue_start_drawings(shuffle):
+    app.qmanager.start_continuous_drawing(shuffle)
+
+@socketio.on("queue_set_interval")
+def queue_set_interval(interval):
+    app.qmanager.set_continuous_interval(interval)
 
 # --------------------------------------------------------- LEDS CALLBACKS -------------------------------------------------------------------------------
 

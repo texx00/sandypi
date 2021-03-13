@@ -85,9 +85,30 @@ function queueSetOrder(list){
     socket.emit("queue_set_order", JSON.stringify(list));
 }
 
-function queueStopDrawing(){
-    socket.emit("queue_stop_drawing");
-    window.showToast(<div>The drawing is being stopped. <br/>The device will still run until the buffer is empty.</div>)
+function queueStopCurrent(){
+    socket.emit("queue_stop_current");
+    window.showToast(<div>The current drawing is being stopped. <br/>The device will still run until the buffer is empty.</div>)
+}
+
+function queueStopAll(){
+    socket.emit("queue_stop_all");
+    window.showToast(<div>Stopping the device...</div>)
+}
+
+function queueStopContinuous(){
+    socket.emit("queue_stop_continuous")
+}
+
+function queueStartDrawings(shuffle=false){
+    socket.emit("queue_start_drawings", shuffle);
+}
+
+function queueStartShuffleDrawings(){
+    queueStartDrawings(true);
+}
+
+function queueSetInterval(interval){
+    socket.emit("queue_set_interval", interval);
 }
 
 
@@ -112,7 +133,12 @@ export {
     playlistCreateNew,
     queueGetStatus,
     queueSetOrder,
-    queueStopDrawing,
+    queueStopCurrent,
+    queueStopAll,
+    queueStopContinuous,
+    queueStartDrawings,
+    queueStartShuffleDrawings,
+    queueSetInterval,
     settingsSave,
     settingsShutdownSystem,
     settingsRebootSystem

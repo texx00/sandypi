@@ -2,6 +2,8 @@
 
 @import "~bootstrap/scss/bootstrap";
 
+@import "./components/CustomRangeInput.scss";
+
 
 /** ----------------------------------------------------- **/
 /** ---------------  Custom base styles  ---------------- **/
@@ -156,6 +158,10 @@ hr{
     @extend .m-3;
     position: relative;
     z-index: 2000;
+}
+
+.form-control-range{
+    background-color: $primary;
 }
 
 /* Carousel mutli overrides */

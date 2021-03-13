@@ -7,7 +7,7 @@ import { Section, Subsection } from '../../../components/Section';
 import SortableElements from '../../../components/SortableElements';
 
 import { queueStatus } from '../../../sockets/sCallbacks';
-import { queueGetStatus, queueSetOrder, queueStopDrawing } from '../../../sockets/sEmits';
+import { queueGetStatus, queueSetOrder, queueStopCurrent } from '../../../sockets/sEmits';
 import { listsAreEqual } from '../../../utils/dictUtils';
 import { getElementClass } from '../playlists/SinglePlaylist/Elements';
 import { isViewQueue } from '../selector';
@@ -76,7 +76,7 @@ class Queue extends Component{
     }
 
     stopDrawing(){
-        queueStopDrawing();
+        queueStopCurrent();
     }
 
     renderList(){

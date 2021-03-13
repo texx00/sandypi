@@ -18,6 +18,7 @@ import { setRefreshDrawing } from './drawings/Drawings.slice';
 import { setTab } from './Tabs.slice';
 import { playlistCreateNew } from '../../sockets/sEmits';
 import { setShowNewPlaylist } from './playlists/Playlists.slice';
+import DrawingsPlayShortcut from './drawings/DrawingsPlayShortcut';
 
 const mapStateToProps = (state) => {
     return { 
@@ -106,6 +107,7 @@ class Home extends Component{
                         buttonIcon={FileEarmarkPlus}
                         sectionButtonHandler={()=>this.setState({showUpload: true})}
                         titleButtonHandler={()=>this.props.handleTab("drawings")}>
+                            <DrawingsPlayShortcut />
                             <Carousel responsive={this.carouselResponsive} ssr>
                                 {this.renderDrawings(this.props.drawings)}
                             </Carousel>

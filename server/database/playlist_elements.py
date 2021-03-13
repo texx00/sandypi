@@ -158,15 +158,16 @@ class TimeElement(GenericPlaylistElement):
     # delay: wait the specified amount of seconds
     # expiry_date: allows to specify a date and an hour after which the drawing will continue
     # alarm_time: can specify a time in the day at which can go on with the playlist (like 5 a.m. to get a new drawing in the morning without having it drawing the entire night)
-    def __init__(self, delay=None, expiry_date=None, alarm_time=None, **kwargs):
+    def __init__(self, delay=None, expiry_date=None, alarm_time=None, type="", **kwargs):
         super(TimeElement, self).__init__(element_type=TimeElement.element_type, **kwargs)
         self.delay = delay if delay != "" else None
         self.expiry_date = expiry_date if expiry_date != "" else None
         self.alarm_time = alarm_time if alarm_time != "" else None
+        self.type = type
     
     def execute(self, logger):
         final_time = time()
-        if not self.alarm_time is None:                                                                 # compare the actual hh:mm:ss to the alarm to see if it must run today or tomorrow
+        if self.type == "alarm_type":                                                                 # compare the actual hh:mm:ss to the alarm to see if it must run today or tomorrow
             now = datetime.now()
             midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)                           # get midnight and add the alarm time
             alarm_time = datetime.strptime(self.alarm_time, "%H:%M:%S")
@@ -176,9 +177,9 @@ class TimeElement(GenericPlaylistElement):
             elif alarm < now:
                 alarm += timedelta(hours=24)                                                            # if the alarm is expired for today adds 24h
             final_time = datetime.timestamp(alarm)
-        if not self.expiry_date is None:
+        if self.type == "expiry_date":
             final_time = datetime.timestamp(datetime.strptime(self.expiry_date, "%Y-%m-%d %H:%M:%S.%f"))
-        elif not self.delay is None:
+        elif self.type == "delay":
             final_time += float(self.delay)                                                             # store current time and applies the delay
         else:                                                                                           # should not be the case because the check is done already in the constructore
             return         

@@ -17,6 +17,10 @@ class UploadedFiles(db.Model):
 
     def __repr__(self):
         return '<User %r>' % self.filename
+
+    @classmethod
+    def get_full_drawings_list(cls):
+        return db.session.query(UploadedFiles).order_by(UploadedFiles.edit_date.desc()).all()
     
     @classmethod
     def get_random_drawing(cls):
