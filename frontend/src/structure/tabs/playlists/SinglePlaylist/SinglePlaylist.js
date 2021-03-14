@@ -16,6 +16,7 @@ import { tabBack } from '../../Tabs.slice';
 import { addToPlaylist, deletePlaylist, resetPlaylistDeletedFlag, resetMandatoryRefresh, updateSinglePlaylist } from '../Playlists.slice';
 import ControlCard from './ControlCard';
 import { getSinglePlaylist, playlistHasBeenDeleted, singlePlaylistMustRefresh } from '../selector';
+import PlayContinuous from '../../../../components/PlayContinuous';
 
 const mapStateToProps = (state) => {
     return {
@@ -111,14 +112,10 @@ class SinglePlaylist extends Component{
         </Row>
     }
 
-    renderStartButton(){
+    renderStartButtons(){
         if (this.state.elements.length === 0){
             return ""
-        }else return <IconButton 
-                icon={Play} 
-                onClick={()=>playlistQueue(this.props.playlist.id)}>
-                Start playlist
-            </IconButton>
+        }else return <PlayContinuous playlistId={this.props.playlist.id}/>
     }
 
     renderDeleteButton(){
@@ -174,11 +171,11 @@ class SinglePlaylist extends Component{
                     {this.props.playlist.name}
                 </h1>
             </div>
-            <Row>
-                {this.renderStartButton()}
+            {this.renderStartButtons()}
+            {this.renderElements()}
+            <Row className="center mt-5">
                 {this.renderDeleteButton()}
             </Row>
-            {this.renderElements()}
         </Container>
     }
 }

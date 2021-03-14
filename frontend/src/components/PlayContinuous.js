@@ -3,11 +3,11 @@ import { connect } from 'react-redux';
 import { Col, Form, Row } from 'react-bootstrap';
 import { PlayFill, Shuffle, StopFill } from 'react-bootstrap-icons';
 
-import IconButton from '../../../components/IconButton';
+import IconButton from './IconButton';
 
-import { getQueueEmpty, getQueueIntervalValue } from '../queue/selector';
+import { getQueueEmpty, getQueueIntervalValue } from '../structure/tabs/queue/selector';
 
-import { queueStopAll, queueStartDrawings, queueStartShuffleDrawings, queueStopContinuous, queueSetInterval } from '../../../sockets/sEmits';
+import { queueStartDrawings, queueStartShuffleDrawings, queueStopContinuous, queueSetInterval, playlistQueue } from '../sockets/sEmits';
 
 const DEFAULT_MAX_VALUE = 86400.0;    // 60*60*24 seconds in a day
 
@@ -18,8 +18,7 @@ const mapStateToProps = (state) => {
     }
 }
 
-class DrawingsPlayShortcut extends Component{
-
+class PlayContinuous extends Component{
     constructor(props){
         super(props);
         this.initialPropsIntervalValue = this.props.intervalValue;
@@ -48,17 +47,19 @@ class DrawingsPlayShortcut extends Component{
             return <Col sm={4} className="pl-4 pr-4 pt-4">
                 <IconButton icon={StopFill}
                     className="w-100 center btn-dark p-2"
-                    onClick={queueStopContinuous}>Stop continuous queue</IconButton>
+                    onClick={queueStopContinuous}>Stop queue</IconButton>
             </Col>
         else return <Col sm={4} className="pl-4 pr-4">
             <Row>
                 <IconButton icon={PlayFill} 
-                    onClick={() => queueStartDrawings()} 
-                    className="w-100 center btn-dark p-2">Play drawings</IconButton>
+                    onClick={() => {
+                        queueStartDrawings(this.props.playlistId);
+                    }} 
+                    className="w-100 center btn-dark p-2">Play</IconButton>
             </Row>
             <Row>
                 <IconButton icon={Shuffle} 
-                    onClick={() => queueStartShuffleDrawings()} 
+                    onClick={() => queueStartShuffleDrawings(this.props.playlistId)} 
                     className="w-100 center btn-dark p-2">Shuffle play</IconButton>
             </Row>
         </Col>
@@ -136,4 +137,4 @@ class DrawingsPlayShortcut extends Component{
     }
 }
 
-export default connect(mapStateToProps)(DrawingsPlayShortcut);
+export default connect(mapStateToProps)(PlayContinuous);

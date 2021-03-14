@@ -182,8 +182,9 @@ def queue_stop_continuous():
     queue_set_order("")
 
 @socketio.on("queue_start_drawings")
-def queue_start_drawings(shuffle):
-    app.qmanager.start_continuous_drawing(shuffle)
+def queue_start_drawings(res):
+    res = json.loads(res)
+    app.qmanager.start_continuous_drawing(res["shuffle"], res["playlist"])
 
 @socketio.on("queue_set_interval")
 def queue_set_interval(interval):

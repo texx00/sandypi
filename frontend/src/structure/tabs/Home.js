@@ -7,18 +7,19 @@ import 'react-multi-carousel/lib/styles.css';
 
 import { Section } from '../../components/Section';
 import PlaceholderCard from '../../components/PlaceholderCard';
+import PlayContinuous from '../../components/PlayContinuous';
 
 import UploadDrawingsModal from './drawings/UploadDrawing';
 import DrawingCard from './drawings/DrawingCard';
 import PlaylistCard from './playlists/PlaylistCard';
 
+import { playlistCreateNew } from '../../sockets/sEmits';
+
 import { getDrawingsLimited } from './drawings/selector';
 import { getPlaylistsLimited } from './playlists/selector';
 import { setRefreshDrawing } from './drawings/Drawings.slice';
 import { setTab } from './Tabs.slice';
-import { playlistCreateNew } from '../../sockets/sEmits';
 import { setShowNewPlaylist } from './playlists/Playlists.slice';
-import DrawingsPlayShortcut from './drawings/DrawingsPlayShortcut';
 
 const mapStateToProps = (state) => {
     return { 
@@ -107,7 +108,7 @@ class Home extends Component{
                         buttonIcon={FileEarmarkPlus}
                         sectionButtonHandler={()=>this.setState({showUpload: true})}
                         titleButtonHandler={()=>this.props.handleTab("drawings")}>
-                            <DrawingsPlayShortcut />
+                            <PlayContinuous />
                             <Carousel responsive={this.carouselResponsive} ssr>
                                 {this.renderDrawings(this.props.drawings)}
                             </Carousel>

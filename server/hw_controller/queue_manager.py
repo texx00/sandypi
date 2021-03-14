@@ -103,10 +103,14 @@ class QueueManager():
                 return True
             elif not self.continuous_generator is None:
                 els = self.continuous_generator.generate_next_elements()
-                for e in els:
-                    self.queue_element(e)
+                if els is None:
+                    self.continuous_generator = None
+                else:
+                    for e in els:
+                        self.queue_element(e)
             return False
         except Exception as e:
+            self.app.logger.error(e)
             self.app.logger.error("An error occured while starting a new drawing from the queue:\n{}".format(str(e)))
             self.start_next()
 
@@ -134,6 +138,6 @@ class QueueManager():
         else:
             self.app.semits.show_toast_on_UI("Will finish the current drawing and then stop")
 
-    def start_continuous_drawing(self, shuffle=False):
-        self.continuous_generator = ContinuousQueueGenerator(shuffle, interval=self.continuous_interval)
+    def start_continuous_drawing(self, shuffle=False, playlist=0):
+        self.continuous_generator = ContinuousQueueGenerator(shuffle=shuffle, interval=self.continuous_interval, playlist=playlist)
         self.start_next()

@@ -4,10 +4,10 @@ import { FileEarmarkPlus } from 'react-bootstrap-icons';
 import { connect } from 'react-redux';
 
 import { Section } from '../../../components/Section';
+import PlayContinuous from '../../../components/PlayContinuous';
 
 import UploadDrawingsModal from './UploadDrawing';
 import DrawingCard from './DrawingCard';
-import DrawingsPlayShortcut from './DrawingsPlayShortcut';
 
 import { setRefreshDrawing } from './Drawings.slice';
 import { getDrawings } from './selector';
@@ -56,7 +56,7 @@ class Drawings extends Component{
                 buttonIcon={FileEarmarkPlus}
                 sectionButtonHandler={()=>this.setState({showUpload: true})}>
             
-                <DrawingsPlayShortcut />
+                <PlayContinuous />
 
                 <Row>
                     {this.renderDrawings(this.props.drawings)}

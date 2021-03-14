@@ -99,12 +99,12 @@ function queueStopContinuous(){
     socket.emit("queue_stop_continuous")
 }
 
-function queueStartDrawings(shuffle=false){
-    socket.emit("queue_start_drawings", shuffle);
+function queueStartDrawings(playlistId=0,shuffle=false, ){
+    socket.emit("queue_start_drawings", JSON.stringify({shuffle: shuffle, playlist: playlistId}));
 }
 
-function queueStartShuffleDrawings(){
-    queueStartDrawings(true);
+function queueStartShuffleDrawings(playlistId=0){
+    queueStartDrawings(playlistId, true);
 }
 
 function queueSetInterval(interval){
