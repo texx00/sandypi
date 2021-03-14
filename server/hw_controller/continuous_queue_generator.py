@@ -43,6 +43,7 @@ class ContinuousQueueGenerator:
     def generate_next_elements(self):
         try:
             if self.just_started or self.interval == 0:
+                self.just_started = False
                 return [self.generate_drawing_element()]
             else: 
                 return [self.generate_timing_element(), self.generate_drawing_element()]
