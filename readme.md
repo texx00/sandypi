@@ -185,15 +185,17 @@ Here is a brief list of what the software is capable of and what will be impleme
 * [x] Run a drawing whenever you want
 * [x] Run gcode commands manually
 * [x] Feed the table periodically
-* [ ] Shuffle mode to play shuffled drawings continuosly
+* [x] Shuffle mode to play shuffled drawings continuosly
 * [ ] Simple lights/led control
 * [ ] Update the software with a single button
 * [ ] Create logo
 * [ ] Run the server not on a production server
 * [ ] Show the realtime gcode simulation with time estimate
-* [ ] Advanced lights controls: syncronization between lights ant ball
+* [ ] Advanced lights controls: syncronization between lights and ball
 * [ ] Sandify "integration" (like upload a drawing directly from sandify or modify an uploaded drawing)?
-* [ ] A lot more stuff... Just ask to know what you can help with
+* [ ] Add translations?
+* [ ] Possibility to control multiple tables?
+* [ ] A lot more stuff... Just ask to know what you can help with or have a look at the [todo file](todos.md) for more detailed goals
 
 In a far far away future:
 * [ ] Create a social network to share designs and update your personal playlists
