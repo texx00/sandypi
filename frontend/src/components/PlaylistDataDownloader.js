@@ -1,44 +1,63 @@
 import { Component } from 'react';
 import { connect } from 'react-redux';
 
-import { getRefreshPlaylists } from '../structure/tabs/playlists/selector';
-import { setPlaylists, setRefreshPlaylists } from '../structure/tabs/playlists/Playlists.slice';
+import { setPlaylists, setSinglePlaylistId, updateSinglePlaylist } from '../structure/tabs/playlists/Playlists.slice';
+import { showSinglePlaylist } from '../structure/tabs/Tabs.slice';
+import { isShowNewPlaylist } from '../structure/tabs/playlists/selector';
 
-import { playlists_request } from '../sockets/sEmits';
-import { playlists_refresh_response } from '../sockets/sCallbacks';
+import { playlistsRequest } from '../sockets/sEmits';
+import { playlistsRefreshResponse, playlistsRefreshSingleResponse, playlistCreateId } from '../sockets/sCallbacks';
 
 
 const mapStateToProps = (state) => {
-    return { must_refresh: getRefreshPlaylists(state) }
+    return {
+        showNewPlaylist: isShowNewPlaylist(state)
+    }
 }
 
 const mapDispatchToProps = (dispatch) => {
     return {
         setPlaylists: (playlists) => dispatch(setPlaylists(playlists)),
-        setRefreshFalse: () => dispatch(setRefreshPlaylists(false))
+        refreshSinglePlaylist: (res) => dispatch(updateSinglePlaylist(res)),
+        loadNewPlaylist: (pl, showPlaylist) => {
+            dispatch(updateSinglePlaylist(pl));
+            if (showPlaylist)
+                dispatch(setSinglePlaylistId(pl.id)); 
+            if (showPlaylist)
+                dispatch(showSinglePlaylist(pl.id));
+        }
     }
 }
 
 class PlaylistDataDownloader extends Component{
 
     componentDidMount(){
-        playlists_refresh_response(this.onDataReceived.bind(this));
+        playlistsRefreshResponse(this.onPlaylistsRefresh.bind(this));
+        playlistsRefreshSingleResponse(this.onSinglePlaylistRefresh.bind(this));
+        playlistCreateId(this.onPLaylistIdCreated.bind(this));
         this.requestPlaylists();
     }
     
     requestPlaylists(){
-        playlists_request();
+        playlistsRequest();
     }
 
-    onDataReceived(res){
+    onPlaylistsRefresh(res){
         this.props.setPlaylists(res.map((el)=>{return JSON.parse(el)}));
     }
 
+    onSinglePlaylistRefresh(res){
+        let playlist = JSON.parse(res);
+        playlist.elements = JSON.parse(playlist.elements);
+        this.props.refreshSinglePlaylist(playlist);
+    }
+
+    onPLaylistIdCreated(playlist){
+        playlist = JSON.parse(playlist);
+        this.props.loadNewPlaylist(playlist, this.props.showNewPlaylist);
+    }
+
     render(){
-        if (this.props.must_refresh){
-            this.props.setRefreshFalse();
-            this.requestPlaylists();
-        }
         return null;
     }
 }

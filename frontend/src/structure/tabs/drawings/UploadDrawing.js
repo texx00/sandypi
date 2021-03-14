@@ -19,7 +19,7 @@ class UploadDrawingsModal extends Component{
             loading: false
         };
         this.files = undefined;
-        this.is_loading = false;
+        this.isLoading = false;
     }
 
     static defaultProps = {
@@ -28,8 +28,8 @@ class UploadDrawingsModal extends Component{
     }
 
     componentDidUpdate(){
-        if (this.state.loading && !this.is_loading){
-            this.is_loading = true;
+        if (this.state.loading && !this.isLoading){
+            this.isLoading = true;
             let promises = this.files.map(f => {
                 let data = new FormData();
                 data.append("file", f);
@@ -39,9 +39,9 @@ class UploadDrawingsModal extends Component{
                     body: data
                 }).then((response => {
                     if (response.status === 200){
-                        window.show_toast("Drawing \""+f.name+"\" uploaded successfully");
+                        window.showToast("Drawing \""+f.name+"\" uploaded successfully");
                     }else{
-                        window.show_toast("There was a problem when uploading \""+f.name+"\"");
+                        window.showToast("There was a problem when uploading \""+f.name+"\"");
                     }
                     return response.json();
                 })).then((data => {
@@ -60,7 +60,7 @@ class UploadDrawingsModal extends Component{
     }
 
     handleClose(){
-        this.is_loading = false;
+        this.isLoading = false;
         this.setState({...this.state, loading: false});
         this.props.handleClose();
     }

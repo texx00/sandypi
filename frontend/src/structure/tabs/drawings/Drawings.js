@@ -4,6 +4,7 @@ import { FileEarmarkPlus } from 'react-bootstrap-icons';
 import { connect } from 'react-redux';
 
 import { Section } from '../../../components/Section';
+import PlayContinuous from '../../../components/PlayContinuous';
 
 import UploadDrawingsModal from './UploadDrawing';
 import DrawingCard from './DrawingCard';
@@ -22,7 +23,7 @@ const mapDispatchToProps = (dispatch) => {
 class Drawings extends Component{
     constructor(props){
         super(props);
-        this.state = {show_upload: false, loaded: false}
+        this.state = {showUpload: false, loaded: false}
     }
 
     componentDidMount(){
@@ -53,17 +54,19 @@ class Drawings extends Component{
             <Section sectionTitle="Drawings"
                 sectionButton="Upload new drawing"
                 buttonIcon={FileEarmarkPlus}
-                sectionButtonHandler={()=>this.setState({show_upload: true})}>
+                sectionButtonHandler={()=>this.setState({showUpload: true})}>
             
-            <Row>
-                {this.renderDrawings(this.props.drawings)}
-            </Row>
+                <PlayContinuous />
 
-            <UploadDrawingsModal key={2}
-                show={this.state.show_upload}
-                handleClose={()=>{this.setState({show_upload: false})}}
-                handleFileUploaded={this.handleFileUploaded.bind(this)}/>
-            </Section>
+                <Row>
+                    {this.renderDrawings(this.props.drawings)}
+                </Row>
+
+                <UploadDrawingsModal key={2}
+                    show={this.state.showUpload}
+                    handleClose={()=>{this.setState({showUpload: false})}}
+                    handleFileUploaded={this.handleFileUploaded.bind(this)}/>
+                </Section>
         </Container>
     }
 }

@@ -5,7 +5,8 @@ const queueSlice = createSlice({
     initialState: {
         isQueueEmpty: true,
         elements: [],
-        drawingId: 0
+        currentElement: undefined,
+        intervalValue: 200
     },
     reducers: {
         setQueueElements(state, action){
@@ -21,7 +22,8 @@ const queueSlice = createSlice({
             return {
                 isQueueEmpty: queueEmpty,
                 elements: res.elements,
-                currentElement: res.current_element
+                currentElement: res.current_element,
+                intervalValue: res.intervalValue
             }
         },
         setQueueNotEmpty(state, action){

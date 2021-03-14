@@ -1,6 +1,10 @@
+from enum import auto
 from queue import Queue
 import json
-from server.database.playlist_elements import ShuffleElement
+from server.sockets_interface.socketio_callbacks import queue_start_drawings
+from server.utils import settings_utils
+from server.hw_controller.continuous_queue_generator import ContinuousQueueGenerator
+from server.database.playlist_elements import TimeElement
 
 class QueueManager():
     def __init__(self, app, socketio):
@@ -8,6 +12,8 @@ class QueueManager():
         self._element = None
         self.app = app
         self.socketio = socketio
+        self.continuous_generator = None
+        self.continuous_interval = 300  # TODO load interval from the saved settings
         self.q = Queue()
     
     def is_drawing(self):
@@ -27,8 +33,14 @@ class QueueManager():
         self._element = element
         self.set_is_drawing(True)
 
+    def set_continuous_interval(self, interval_value):
+        self.continuous_interval = interval_value
+        # TODO save the value in the settings
+        if not self.continuous_generator is None:
+            self.continuous_generator.set_interval(interval_value)
+
     # stop the current drawing and start the next
-    def stop_drawing(self):
+    def stop(self):
         self.app.feeder.stop()
 
     # add an element to the queue
@@ -87,14 +99,22 @@ class QueueManager():
             if not force_stop:
                 return False
         try:
+            self._element = None
             if self.queue_length() > 0:
                 element = self.q.queue.popleft()
                 self.start_element(element)
                 self.app.logger.info("Starting next element: {}".format(element.type))
                 return True
-            self._element = None
+            elif not self.continuous_generator is None:
+                els = self.continuous_generator.generate_next_elements()
+                if els is None:
+                    self.continuous_generator = None
+                else:
+                    for e in els:
+                        self.queue_element(e)
             return False
         except Exception as e:
+            self.app.logger.error(e)
             self.app.logger.error("An error occured while starting a new drawing from the queue:\n{}".format(str(e)))
             self.start_next()
 
@@ -110,6 +130,29 @@ class QueueManager():
         elements = list(map(lambda x: str(x), self.q.queue)) if len(self.q.queue) > 0 else []                       # converts elements to json
         res = {
             "current_element": str(self._element),
-            "elements": elements
+            "elements": elements,
+            "intervalValue": self.continuous_interval
         }
         self.app.semits.emit("queue_status", json.dumps(res))
+    
+    def stop_continuous(self):
+        self.continuous_generator = None
+        if type(self._element) is TimeElement:
+            self.stop()
+        else:
+            self.app.semits.show_toast_on_UI("Will finish the current drawing and then stop")
+
+    def start_continuous_drawing(self, shuffle=False, playlist=0):
+        self.continuous_generator = ContinuousQueueGenerator(shuffle=shuffle, interval=self.continuous_interval, playlist=playlist)
+        self.start_next()
+
+    def check_autostart(self):
+        autostart = settings_utils.get_only_values(settings_utils.load_settings()["autostart"])
+        try:
+            autostart["interval"] = int(autostart["interval"])
+        except:
+            autostart["interval"] = 0
+        
+        if autostart["on_ready"]:
+            self.set_continuous_interval(autostart["interval"])
+            self.start_continuous_drawing(autostart["shuffle"])

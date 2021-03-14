@@ -7,16 +7,19 @@ import 'react-multi-carousel/lib/styles.css';
 
 import { Section } from '../../components/Section';
 import PlaceholderCard from '../../components/PlaceholderCard';
+import PlayContinuous from '../../components/PlayContinuous';
 
 import UploadDrawingsModal from './drawings/UploadDrawing';
 import DrawingCard from './drawings/DrawingCard';
 import PlaylistCard from './playlists/PlaylistCard';
 
+import { playlistCreateNew } from '../../sockets/sEmits';
+
 import { getDrawingsLimited } from './drawings/selector';
 import { getPlaylistsLimited } from './playlists/selector';
 import { setRefreshDrawing } from './drawings/Drawings.slice';
-import { setTab, showSinglePlaylist } from './Tabs.slice';
-import { setSinglePlaylistId } from './playlists/Playlists.slice';
+import { setTab } from './Tabs.slice';
+import { setShowNewPlaylist } from './playlists/Playlists.slice';
 
 const mapStateToProps = (state) => {
     return { 
@@ -28,18 +31,15 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
     return {
         setRefreshDrawing: () => dispatch(setRefreshDrawing(true)),
-        createNewPlaylist: () => {
-                dispatch(setSinglePlaylistId(0))
-                dispatch(showSinglePlaylist(0))
-            ;},
-        handleTab: (name) => dispatch(setTab(name))
+        handleTab: (name) => dispatch(setTab(name)),
+        setShowNewPlaylist: () => dispatch(setShowNewPlaylist(true))
     }
 }
 
 class Home extends Component{
     constructor(props){
         super(props);
-        this.carousel_responsive = {
+        this.carouselResponsive = {
             largeDesktop: {
               breakpoint: { max: 4000, min: 3000 },
               items: 5
@@ -57,11 +57,13 @@ class Home extends Component{
               items: 1
             }
         };
-        this.state = {show_upload: false, show_create_playlist: false}
+        this.state = {
+            showUpload: false
+        }
     }
 
     handleFileUploaded(){
-        window.show_toast("Updating drawing previews...");
+        window.showToast("Updating drawing previews...");
         this.props.setRefreshDrawing();
     }
 
@@ -86,7 +88,7 @@ class Home extends Component{
                     playlist={item} 
                     key={index}/>});
                     
-            result = <Carousel responsive={this.carousel_responsive}>
+            result = <Carousel responsive={this.carouselResponsive}>
                 {result}
             </Carousel>
         }else{
@@ -104,9 +106,10 @@ class Home extends Component{
                     <Section sectionTitle="Drawings"
                         sectionButton="Upload new drawing"
                         buttonIcon={FileEarmarkPlus}
-                        sectionButtonHandler={()=>this.setState({show_upload: true})}
+                        sectionButtonHandler={()=>this.setState({showUpload: true})}
                         titleButtonHandler={()=>this.props.handleTab("drawings")}>
-                            <Carousel responsive={this.carousel_responsive} ssr>
+                            <PlayContinuous />
+                            <Carousel responsive={this.carouselResponsive} ssr>
                                 {this.renderDrawings(this.props.drawings)}
                             </Carousel>
                     </Section>
@@ -117,7 +120,10 @@ class Home extends Component{
                     <Section sectionTitle="Playlists"
                         sectionButton="Create new playlist"
                         buttonIcon={PlusSquare}
-                        sectionButtonHandler={()=> this.props.createNewPlaylist()}
+                        sectionButtonHandler={()=> {
+                            this.props.setShowNewPlaylist();
+                            playlistCreateNew();
+                        }}
                         titleButtonHandler={()=>this.props.handleTab("playlists")}
                         ssr>
                             {this.renderPlaylists(this.props.playlists)}
@@ -125,8 +131,8 @@ class Home extends Component{
                 </Col>
             </Row>
             <UploadDrawingsModal 
-                show={this.state.show_upload}
-                handleClose={()=>{this.setState({show_upload: false})}}
+                show={this.state.showUpload}
+                handleClose={()=>{this.setState({showUpload: false})}}
                 handleFileUploaded={this.handleFileUploaded.bind(this)}/>
         </Container>
     }

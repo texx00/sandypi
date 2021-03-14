@@ -3,12 +3,12 @@ import { Container, Form, Modal } from 'react-bootstrap';
 import { FileEarmarkX, Play, Plus, PlusSquare, X } from 'react-bootstrap-icons';
 import { connect } from 'react-redux';
 
-import { drawing_delete, drawing_queue } from '../../../sockets/sEmits';
+import { drawingDelete, drawingQueue } from '../../../sockets/sEmits';
 
 import ConfirmButton from '../../../components/ConfirmButton';
 import IconButton from '../../../components/IconButton';
 
-import { create_element_drawing } from '../playlists/elementsFactory';
+import { createElementDrawing } from '../playlists/elementsFactory';
 import { getImgUrl } from '../../../utils/utils';
 
 import { getQueueEmpty } from '../queue/selector';
@@ -47,12 +47,22 @@ class SingleDrawing extends Component{
         };
         this.selectRef = React.createRef();
     }
+
+    renderAddToPlaylistButton(){
+        if (this.props.playlists.length > 0){
+            return <IconButton className="btn"
+                icon={PlusSquare}
+                onClick={() => this.setState({...this.state, showPlaylists: true})}>
+                Add to playlist
+            </IconButton>
+        }else return "";
+    }
     
     render(){
         if (this.props.drawing.id !== undefined){
-            let start_drawing_label = "Queue drawing";
+            let startDrawingLabel = "Queue drawing";
             if (this.props.isQueueEmpty){
-                start_drawing_label = "Start drawing";
+                startDrawingLabel = "Start drawing";
             }
             // TODO add possibility to edit the gcode file and render again the drawing
             return <Container>
@@ -63,19 +73,15 @@ class SingleDrawing extends Component{
                     <IconButton className="btn" 
                         icon={Play}
                         onClick={()=>{
-                            drawing_queue(this.props.drawing.id);
+                            drawingQueue(this.props.drawing.id);
                     }}>
-                        {start_drawing_label}
+                        {startDrawingLabel}
                     </IconButton>
-                    <IconButton className="btn"
-                        icon={PlusSquare}
-                        onClick={() => this.setState({...this.state, showPlaylists: true})}>
-                        Add to playlist
-                    </IconButton>
+                    {this.renderAddToPlaylistButton()}
                     <ConfirmButton className="btn" 
                         icon={FileEarmarkX}
                         onClick={()=> {
-                            drawing_delete(this.props.drawing.id);
+                            drawingDelete(this.props.drawing.id);
                             this.props.deleteDrawing(this.props.drawing.id);
                             this.props.handleTabBack();
                     }}>
@@ -109,11 +115,11 @@ class SingleDrawing extends Component{
                         <IconButton icon={X} onClick={() => this.setState({...this.state, showPlaylists: false})}>Undo</IconButton>
                         <IconButton icon={Plus} 
                             onClick={() => {this.props.addToPlaylist({
-                                    elements: [create_element_drawing(this.props.drawing)],
+                                    elements: [createElementDrawing(this.props.drawing)],
                                     playlistId: parseInt(this.selectRef.current.value)
                                 });
                                 this.setState({...this.state, showPlaylists: false});
-                                window.show_toast("Drawing added to the playlist");
+                                window.showToast("Drawing added to the playlist");
                             }}>
                                 Add to selected playlist
                         </IconButton>

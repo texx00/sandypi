@@ -4,21 +4,21 @@ import { Col } from 'react-bootstrap';
 
 import { getElementClass } from '../structure/tabs/playlists/SinglePlaylist/Elements';
 import { X } from 'react-bootstrap-icons';
+import { listsAreEqual } from '../utils/dictUtils';
 
 class SortableElements extends Component{
     constructor(props){
         super(props);
         this.state = {
             list: this.props.list,
-            show_child_cross: true
+            showChildCross: true
         };
         this.lastList = this.props.list;
     }
 
     componentDidUpdate(){
-        if (this.props.refreshList){
+        if (!listsAreEqual(this.props.list, this.state.list)){
             this.setState({...this.state, list: this.props.list});
-            this.props.onListRefreshed();
         }
     }
 
@@ -52,10 +52,10 @@ class SortableElements extends Component{
                 this.prepareUpdate(newList);
             }}
             onStart={(evt) => {                             // when starts to drag it removes the "delete element" button and disable it until the object is released
-                this.setState({show_child_cross: false});
+                this.setState({showChildCross: false});
             }}
             onEnd={(evt) => {                               // when the element is released reactivate the "delete element" activation
-                this.setState({show_child_cross: true});
+                this.setState({showChildCross: true});
             }}
             onMove={(evt1, evt2) => {
                 // when the element is dragged over the control card disable movements
@@ -65,14 +65,16 @@ class SortableElements extends Component{
                 return true;
             }}>
                 {this.state.list.map((el)=>{                // generate list of elements to show in the list
-                    if (el.element_type === "control_card")  
-                        return this.props.children;         // return the child as the control card 
-                    
+                    if (el.element_type === "control_card"){
+                        let c = React.cloneElement(this.props.children, {key:0});
+                        return c;                           // return the child as the control card  
+                    }
+
                     let ElementType = getElementClass(el);
 
                     return <ElementCard key={el.id} 
-                            handleUnmount={()=>this.removeElement(el.id)}
-                            showCross={this.state.show_child_cross}>
+                        handleUnmount={()=>this.removeElement(el.id)}
+                        showCross={this.state.showChildCross}>
                         <ElementType element={el} 
                             onOptionsChange={(el) => this.props.onElementOptionsChange(el)}
                             hideOptions={this.props.hideOptions}/>
@@ -87,17 +89,16 @@ class ElementCard extends React.Component{
         super(props);
         this.state = {
             active: true,
-            show_cross: false
+            showCross: false
         }
-        this.element_ref = React.createRef();
     }
     
-    show_cross(val){
-        this.setState({...this.state, show_cross: true});
+    showCross(val){
+        this.setState({...this.state, showCross: true});
     }
 
-    hide_cross(val){
-        this.setState({...this.state, show_cross: false});
+    hideCross(val){
+        this.setState({...this.state, showCross: false});
     }
 
     onTransitionEnd(){
@@ -110,13 +111,13 @@ class ElementCard extends React.Component{
         return <Col sm={4} className={"mb-3"+ (this.state.active ? "" : " disappear")} 
             title="Drag me around to sort the list"
             onTransitionEnd={this.onTransitionEnd.bind(this)}>
-            <div className="pb100 position-absolute rounded"></div>
-            <div className="card hover-zoom bg-black rounded clickable" 
-                onMouseEnter={this.show_cross.bind(this)} 
-                onMouseLeave={this.hide_cross.bind(this)}>
-                {React.cloneElement( this.props.children, { onClick: this.hide_cross.bind(this) })}     {/* adding an "onclick" method to hide the cross when the child is clicked and the modal is open */}
+            <div key={1} className="pb100 position-absolute rounded"></div>
+            <div key={2} className="card hover-zoom bg-black rounded clickable" 
+                onMouseEnter={this.showCross.bind(this)} 
+                onMouseLeave={this.hideCross.bind(this)}>
+                {React.cloneElement( this.props.children, { onClick: this.hideCross.bind(this) })}     {/* adding an "onclick" method to hide the cross when the child is clicked and the modal is open */}
                 <div className="card-img-overlay show-cross">
-                    <div className={"justify-content-md-center btn-cross nodrag rounded" + (this.state.show_cross && this.props.showCross ? " show" : "")}
+                    <div className={"justify-content-md-center btn-cross nodrag rounded" + (this.state.showCross && this.props.showCross ? " show" : "")}
                         onClick={() => {this.setState({active: false})}} 
                         title="Remove this drawing from the list"><X/></div>
                 </div>

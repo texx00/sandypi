@@ -1,7 +1,7 @@
 // This file is auto generated from the default settings file. 
 // To generate a new version from the existing default values use the script: ./dev_tools/build_default_settings.py
 
-const default_settings = {
+const defaultSettings = {
 	serial: {
 		port: {
 			name: "serial.port",
@@ -154,4 +154,4 @@ const default_settings = {
 	}
 }
 
-export default default_settings;
+export default defaultSettings;

@@ -45,7 +45,8 @@ def playlist_save(playlist):
     pl.name = playlist['name']
     pl.add_element(playlist['elements'])
     pl.save()
-    playlist_refresh()
+    playlist_refresh_single(pl.id)
+
 
 # adds a playlist to the drawings queue
 @socketio.on("playlist_queue")
@@ -55,12 +56,25 @@ def playlist_queue(code):
     for i in elements:
         app.qmanager.queue_element(i, show_toast = False)
 
+
+@socketio.on("playlist_create_new")
+def playlist_create_new():
+    pl = Playlists.create_playlist()
+    pl.name = "New playlist"
+    pl.save()
+    app.semits.emit("playlist_create_id", pl.to_json())
+
+
 @socketio.on("playlists_refresh")
 def playlist_refresh():
     playlists = db.session.query(Playlists).order_by(Playlists.edit_date.desc()).all()
-    pls = list(map(lambda el: el.to_json(), playlists))
     app.semits.emit("playlists_refresh_response", list(map(lambda el: el.to_json(), playlists)))
 
+
+@socketio.on("playlist_refresh_single")
+def playlist_refresh_single(playlist_id):
+    playlist = db.session.query(Playlists).filter(Playlists.id == playlist_id).first()
+    app.semits.emit("playlists_refresh_single_response", playlist.to_json())
 
 # --------------------------------------------------------- SETTINGS CALLBACKS -------------------------------------------------------------------------------
 
@@ -143,14 +157,38 @@ def queue_get_status():
 
 @socketio.on("queue_set_order")
 def queue_set_order(elements):
-    app.qmanager.set_new_order(map(lambda e: GenericPlaylistElement.create_element_from_dict(e), json.loads(elements)))
+    if elements == "":
+        app.qmanager.clear_queue()
+    else:
+        app.qmanager.set_new_order(map(lambda e: GenericPlaylistElement.create_element_from_dict(e), json.loads(elements)))
 
-@socketio.on("queue_stop_drawing")
-def queue_stop_drawing():
+# stops only the current element
+@socketio.on("queue_stop_current")
+def queue_stop_current():
     app.semits.show_toast_on_UI("Stopping drawing...") 
-    app.qmanager.stop_drawing()
+    app.qmanager.stop()
     if not app.qmanager.is_drawing():   # if the drawing was the last in the queue must send the updated status
         app.qmanager.send_queue_status()
+
+# clears the queue and stops the current element
+@socketio.on("queue_stop_all")
+def queue_stop_all():
+    queue_stop_continuous()
+    queue_stop_current()
+
+@socketio.on("queue_stop_continuous")
+def queue_stop_continuous():
+    app.qmanager.stop_continuous()
+    queue_set_order("")
+
+@socketio.on("queue_start_drawings")
+def queue_start_drawings(res):
+    res = json.loads(res)
+    app.qmanager.start_continuous_drawing(res["shuffle"], res["playlist"])
+
+@socketio.on("queue_set_interval")
+def queue_set_interval(interval):
+    app.qmanager.set_continuous_interval(interval)
 
 # --------------------------------------------------------- LEDS CALLBACKS -------------------------------------------------------------------------------
 

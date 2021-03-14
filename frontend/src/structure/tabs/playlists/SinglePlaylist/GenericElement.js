@@ -6,22 +6,27 @@ import IconButton from '../../../../components/IconButton';
 import SquareContainer from '../../../../components/SquareContainer';
 import FormDatetime from '../../../../components/FormDatetime';
 
-class BasicElement extends Component{
+class GenericElement extends Component{
     constructor(props){
         super(props);
-        this.state = { showModal: false, ...this.mapOptionsToState()};
+        let showModalDefault = false;
+        if (this.props.showModal !== undefined)
+            showModalDefault = this.props.showModal;
+        this.state = { showModal: showModalDefault, ...this.mapOptionsToState()};
     }
 
     // Tip to be shown when overing the card for some time. If empty will not show the tip
     tip = "";
     // Modal title when opening the element options
     label = "";
+    // Modal description (to help the user with some instructions about the options available)
+    description = "";
 
     // This method must be overridden the child component. It renders the card content
     renderElement(){
         return <SquareContainer className="center align-item-center">
             <div>
-                <Spinner animation="border" className={this.props.no_margin==="true" ? "" : "m-5"}/>
+                <Spinner animation="border" className={this.props.noMargin==="true" ? "" : "m-5"}/>
             </div>
         </SquareContainer>
     }
@@ -110,12 +115,13 @@ class BasicElement extends Component{
                     onChange={(evt) => this.onOptionChange(evt.target.value, op)}/>
                 break;
             case "datetime":
-                res = <FormDatetime 
+                res = <FormDatetime
                     value={this.state[op.field]}
                     onChange={(val) => this.onOptionChange(val, op)}/>
                 break;
             default:
-                res = <Form.Control value={this.state[op.field]}
+                res = <Form.Control
+                    value={this.state[op.field]}
                     onChange={(evt) => this.onOptionChange(evt.target.value, op)}/>
         }
 
@@ -127,16 +133,31 @@ class BasicElement extends Component{
         </Col>
     }
 
+    // renders the description of the element options
+    renderDescription(){
+        if (this.description !== undefined && this.description !== ""){
+            return <div>
+                <Row>
+                    <Col>
+                        {this.description}
+                    </Col>
+                </Row>
+                <hr className="pb-3"/>
+            </div>
+        }else return "";
+    }
+
     // renders the modal
     renderModal(){
         if (!this.getModalOptions()) return "";       // check option to show or not the modal
-
+        
         return <Modal show={this.state.showModal} 
                 size="lg" 
                 centered
                 onHide={()=>this.setState({...this.state, showModal: false})}>
             <Modal.Header className="center">{this.label}</Modal.Header>
             <Modal.Body>
+                {this.renderDescription()}
                 <Form>
                     <Row>
                         {this.renderModalOptions()}
@@ -192,7 +213,7 @@ class BasicElement extends Component{
         // if an element has a preview for the queue that must be different (like an icon instead of text) can use the renderPreview method to return a different render value
         if (this.renderPreview !== undefined && this.props.showPreview !== undefined)
             return <div>
-                    {this.renderPreview()}
+                {this.renderPreview()}
             </div>
         else return <div>
                 {this.renderModal()}
@@ -201,4 +222,4 @@ class BasicElement extends Component{
     }
 }
 
-export default BasicElement;
+export default GenericElement;

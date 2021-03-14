@@ -5,4 +5,6 @@ const getQueueElements = state => {return state.queue.elements};
 
 const getQueueCurrent = state => {return state.queue.currentElement};
 
-export {getQueueEmpty, getQueueElements, getQueueCurrent};
+const getQueueIntervalValue = state => {return state.queue.intervalValue};
+
+export {getQueueEmpty, getQueueElements, getQueueCurrent, getQueueIntervalValue};

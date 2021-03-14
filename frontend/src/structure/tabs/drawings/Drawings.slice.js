@@ -5,7 +5,7 @@ const drawingsSlice = createSlice({
     name: "drawings",
     initialState: {
         drawings: [],
-        must_refresh: true
+        mustRefresh: true
     },
     reducers: {
         // action.payload must be the id of the drawing to delete
@@ -18,7 +18,7 @@ const drawingsSlice = createSlice({
         },
         // action.payload must be true (must refresh) or false (set automatically after refreshing)
         setRefreshDrawing(state, action){
-            return { must_refresh: action.payload };
+            return { mustRefresh: action.payload };
         },
         // action.payload must be the complete list of drawings
         setDrawings(state, action){

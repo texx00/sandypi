@@ -1,22 +1,22 @@
 import {socket} from './sCallbacks';
 
 // sends a gcode command to the feeder
-function send_command(command){
+function sendCommand(command){
     socket.emit("send_gcode_command", command);
 }
 
 
 // ---- SETTINGS ----- 
 // emit a socket with the updated settigns
-function settings_save(settings, connect=false){
+function settingsSave(settings, connect=false){
     socket.emit("settings_save", settings, connect);
 }
 
-function settings_shutdown_system(){
+function settingsShutdownSystem(){
     socket.emit("settings_shutdown_system");
 }
 
-function settings_reboot_system(){
+function settingsRebootSystem(){
     socket.emit("settings_reboot_system");
 }
 
@@ -24,90 +24,122 @@ function settings_reboot_system(){
 // ---- DRAWINGS ----
 
 // emit a socket to delete a drawing
-function drawing_delete(code){
+function drawingDelete(code){
     socket.emit("drawing_delete", code);
 }
 
 // emit a socket to request an updated list of drawings
-function drawings_request(){
+function drawingsRequest(){
     socket.emit("drawings_refresh")
 }
 
 // emit a socket to add a drawing to the queue
-function drawing_queue(code){
+function drawingQueue(code){
     socket.emit("drawing_queue", code);
 }
 
 
 // ---- LEDS ----
 
-function leds_set_color(color){
+function ledsSetColor(color){
     socket.emit("leds_set_color", JSON.stringify(color));
 }
 
 
 // ---- PLAYLISTS ----
 // emit a socket to request an updated list of playlists
-function playlists_request(){
+function playlistsRequest(){
     socket.emit("playlists_refresh");
 }
 
 // delete a playlist
-function playlist_delete(id){
+function playlistDelete(id){
     socket.emit("playlist_delete", id);
 }
 
 // add selected playlist to the queue
-function playlist_queue(id){
+function playlistQueue(id){
     socket.emit("playlist_queue", id);
 }
 
 //emit a socket to create a new playlist
-function playlist_save(pl){
+function playlistSave(pl){
     socket.emit("playlist_save", JSON.stringify(pl));
+}
+
+function playlistCreateNew(){
+    window.showToast("Creating new playlist...");
+    socket.emit("playlist_create_new");
 }
 
 
 // ---- QUEUE ----
 
 // ask for an updated queue
-function queue_get_status(){
+function queueGetStatus(){
     socket.emit("queue_get_status");
 }
 
 // set a new order for the queue
-function queue_set_order(list){
+function queueSetOrder(list){
     socket.emit("queue_set_order", JSON.stringify(list));
 }
 
-function queue_stop_drawing(){
-    socket.emit("queue_stop_drawing");
-    window.show_toast(<div>The drawing is being stopped. <br/>The device will still run until the buffer is empty.</div>)
+function queueStopCurrent(){
+    socket.emit("queue_stop_current");
+    window.showToast(<div>The current drawing is being stopped. <br/>The device will still run until the buffer is empty.</div>)
+}
+
+function queueStopAll(){
+    socket.emit("queue_stop_all");
+    window.showToast(<div>Stopping the device...</div>)
+}
+
+function queueStopContinuous(){
+    socket.emit("queue_stop_continuous")
+}
+
+function queueStartDrawings(playlistId=0,shuffle=false, ){
+    socket.emit("queue_start_drawings", JSON.stringify({shuffle: shuffle, playlist: playlistId}));
+}
+
+function queueStartShuffleDrawings(playlistId=0){
+    queueStartDrawings(playlistId, true);
+}
+
+function queueSetInterval(interval){
+    socket.emit("queue_set_interval", interval);
 }
 
 
 // ---- MANUAL CONTROL ----
 
-function control_emergency_stop(){
+function controlEmergencyStop(){
     socket.emit("control_emergency_stop")
 }
 
 
 export {
-    send_command,  
-    control_emergency_stop,
-    drawing_delete, 
-    drawings_request, 
-    drawing_queue, 
-    leds_set_color,
-    playlists_request, 
-    playlist_delete,
-    playlist_queue,
-    playlist_save, 
-    queue_get_status,
-    queue_set_order,
-    queue_stop_drawing,
-    settings_save,
-    settings_shutdown_system,
-    settings_reboot_system
+    sendCommand,  
+    controlEmergencyStop,
+    drawingDelete, 
+    drawingsRequest, 
+    drawingQueue, 
+    ledsSetColor,
+    playlistsRequest, 
+    playlistDelete,
+    playlistQueue,
+    playlistSave, 
+    playlistCreateNew,
+    queueGetStatus,
+    queueSetOrder,
+    queueStopCurrent,
+    queueStopAll,
+    queueStopContinuous,
+    queueStartDrawings,
+    queueStartShuffleDrawings,
+    queueSetInterval,
+    settingsSave,
+    settingsShutdownSystem,
+    settingsRebootSystem
 };

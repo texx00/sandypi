@@ -1,34 +1,39 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-import { playlist_save } from '../../../sockets/sEmits';
-import { cloneDict, listsAreEqual } from '../../../utils/dictUtils';
-import { getSinglePlaylist } from './selector';
+import { playlistSave } from '../../../sockets/sEmits';
 
 const playlistsSlice = createSlice({
     name: "playlists",
     initialState: {
-        mandatory_refresh: false,
+        mandatoryRefresh: false,
         playlists: [],
-        playlist_id: 0,
-        playlist_resync: false,
-        playlist_deleted: false,
-        refresh_request_id: -1,
-        refresh_request: true
+        playlistId: 0,
+        playlistDeleted: false,
+        showNewPlaylist: false,
+        playlistAddedNewElement: false
     },
     reducers: {
         addToPlaylist: (state, action) => {
-            const elements = action.payload.elements;
+            let elements = action.payload.elements;
             const playlistId = action.payload.playlistId;
             let pls = state.playlists.map((pl) => {
-                let p = {...pl};
+                pl = {...pl};
                 if (pl.id === playlistId){
-                    p.elements = [...p.elements, ...elements];
-                    console.log("Saving playlist")
-                    playlist_save(p);                 // saves playlist also on the server (only one playlist at a time, there will be no problem with mutliple save calls)
+                    let maxId = 1;
+                    if (Array.isArray(pl.elements))
+                    // looking for the highest element id to add a higher value to the elements that are being added (this avoid the creation of a new element when the element with id is sent back from the server)
+                        maxId = Math.max(pl.elements.map(el => {return el.id}), 1) + 1;
+                    for (let e in elements){
+                        elements[e].id = maxId++;
+                    }
+                    pl.elements = [...pl.elements];
+                    pl.elements = [...pl.elements, ...elements];
+                    pl.version++;                      // increases version
+                    playlistSave(pl);                  // saves playlist also on the server (only one playlist at a time, there will be no problem with multiple save calls)
                 }
-                return p;
+                return pl;
             });
-            return {...state, playlists: pls, refresh_request_id: playlistId};
+            return {...state, playlists: pls, mandatoryRefresh: true, playlistAddedNewElement: true };
         },
         deletePlaylist: (state, action) => {
             return { ...state, playlists: state.playlists.filter((item) => {
@@ -36,54 +41,56 @@ const playlistsSlice = createSlice({
             })}
         },
         resetPlaylistDeletedFlag: (state, action) => {
-            return {...state, playlist_deleted: false };
+            return {...state, playlistDeleted: false };
         },
-        setRefreshPlaylists: (state, action) => {
-            return {...state, refresh_request: action.payload };
+        resetMandatoryRefresh: (state, action) => {
+            return {...state, mandatoryRefresh: false};
         },
         setPlaylists: (state, action) => {
-            let sync = false;
-            let playlist_deleted = true;                // to check if the playlist has been deleted from someone else
+            let playlistDeleted = true;                // to check if the playlist has been deleted from someone else
             let pls = action.payload.map((pl)=>{
-                pl.elements = JSON.parse(pl.elements);
-                if (pl.id === state.playlist_id){
-                    let pl_clone = cloneDict(getSinglePlaylist({playlists: state}));
-                    if (!listsAreEqual(pl_clone, pl) && pl.id !== state.refresh_request_id){
-                        sync = true;                    // check if any change to the playlist in use has been done on another device
-                    }
-                    playlist_deleted = false;
+                if (pl.id === state.playlistId){
+                    playlistDeleted = false;
                 }
+                pl.elements = JSON.parse(pl.elements);
                 return pl;
             });
-            if (state.playlist_id === 0){               // if the playlist is a new playlist should not go back if the others are updated
-                playlist_deleted = false;
-            }
-            let must_refresh = false;
-            if (state.refresh_request_id !== -1){       // if the refresh request id is different than -1 means that we saved the playlist and we want to refresh it
-                must_refresh= true;
-            }
             return { 
                 ...state, 
                 playlists: pls, 
-                playlist_resync: sync, 
-                playlist_deleted: playlist_deleted, 
-                refresh_request_id: -1, 
-                mandatory_refresh: must_refresh 
+                playlistDeleted: playlistDeleted, 
+                mandatoryRefresh: true
             }; 
         },
         setSinglePlaylistId: (state, action) => {
-            return { ...state, playlist_id: action.payload };
-        },
-        setResyncPlaylist: (state, action) => {
-            return { ...state, playlist_resync: action.payload, mandatory_refresh: false };
+            return { ...state, playlistId: action.payload, mandatoryRefresh: true, showNewPlaylist: false };
         },
         updateSinglePlaylist: (state, action) => {
             let playlist = action.payload;
+            let version = 0;
+            let isNew = true;
             let res = state.playlists.map((pl) => {
-                return pl.id === playlist.id ? playlist : pl;
+                if (pl.id === playlist.id){
+                    version = pl.version;
+                    isNew = false;
+                    return playlist;
+                }else{
+                    return pl;
+                }
             });
-            playlist_save(playlist);
-            return { ...state, playlists: res, playlist_deleted: false, refresh_request_id: playlist.id };
+
+            // check if the version is older than the one available (if there were some fast changes the socket connection may send an old version of the playlist before receiving the last updated version)
+            if ((playlist.version < version) && !isNew && !state.playlistAddedNewElement)
+                return state;
+            // if the playlist is new should add it to the list
+            if (isNew)
+                res.push(playlist)
+            // check if it is necessary to refresh the playlist view
+            let mustRefresh = (playlist.id === state.playlistId) && ((playlist.version > version) || state.playlistAddedNewElement);
+            return { ...state, playlists: res, playlistDeleted: false, mandatoryRefresh: mustRefresh, playlistAddedNewElement: false};
+        },
+        setShowNewPlaylist(state, action){
+            return { ...state, showNewPlaylist: action.payload }
         }
     }
 });
@@ -93,10 +100,10 @@ export const {
     deletePlaylist,
     updateSinglePlaylist,
     resetPlaylistDeletedFlag,
+    resetMandatoryRefresh,
     setPlaylists,
-    setRefreshPlaylists,
     setSinglePlaylistId,
-    setResyncPlaylist,
+    setShowNewPlaylist
 } = playlistsSlice.actions;
 
 export default playlistsSlice.reducer;

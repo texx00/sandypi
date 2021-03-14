@@ -7,8 +7,8 @@ import { Section, Subsection, SectionGroup } from '../../../components/Section';
 import { getSettings } from "./selector.js";
 import { updateAllSettings, updateSetting } from "./Settings.slice.js";
 
-import { settings_now } from '../../../sockets/sCallbacks';
-import { settings_save } from '../../../sockets/sEmits';
+import { settingsNow } from '../../../sockets/sCallbacks';
+import { settingsSave } from '../../../sockets/sEmits';
 import { cloneDict } from '../../../utils/dictUtils';
 import SettingField from './SettingField';
 
@@ -28,22 +28,22 @@ const mapDispatchToProps = (dispatch) => {
 class Settings extends Component{
 
     componentDidMount(){
-        settings_now((data) => {
+        settingsNow((data) => {
             this.props.updateAllSettings(JSON.parse(data));
         });
     }
 
     saveForm(connect=false){
         let sets = cloneDict(this.props.settings); // cloning the dict before deleting data
-        settings_save(sets, connect);
+        settingsSave(sets, connect);
     }
 
     mapEntries(entries){
         if (entries !== undefined)
-            return entries.map((single_setting, key) => { 
+            return entries.map((singleSetting, key) => { 
                 return <SettingField
                     key={key}
-                    single_setting={single_setting[1]}
+                    singleSetting={singleSetting[1]}
                     settings={this.props.settings}
                     onUpdateSetting={this.props.updateSetting.bind(this)}/>
             });
@@ -52,10 +52,11 @@ class Settings extends Component{
 
     // render the list of settings divided by sections
     render(){
-        let serial_entries =    Object.entries(this.props.settings.serial);
-        let device_entries =    Object.entries(this.props.settings.device);
-        let script_entries =    Object.entries(this.props.settings.scripts);
-        let leds_entries =      Object.entries(this.props.settings.leds);
+        let serialEntries =    Object.entries(this.props.settings.serial);
+        let deviceEntries =    Object.entries(this.props.settings.device);
+        let scriptEntries =    Object.entries(this.props.settings.scripts);
+        let autostartEntries = Object.entries(this.props.settings.autostart);
+        let ledsEntries =      Object.entries(this.props.settings.leds);
 
         return <Container>
             <Form>
@@ -66,7 +67,7 @@ class Settings extends Component{
                         <SectionGroup sectionTitle="Serial port settings">
                             <Container>
                                 <Form.Row>
-                                    {this.mapEntries(serial_entries)}
+                                    {this.mapEntries(serialEntries)}
                                     <Col>
                                         <Button className="w-100 h-100" onClick={() => this.saveForm(true)}>Save and connect</Button>
                                     </Col>
@@ -76,21 +77,28 @@ class Settings extends Component{
                         <SectionGroup sectionTitle="Device type">
                             <Container>
                                 <Form.Row>
-                                    {this.mapEntries(device_entries)}
+                                    {this.mapEntries(deviceEntries)}
                                 </Form.Row>
                             </Container>
                         </SectionGroup>
                         <SectionGroup sectionTitle="Scripts">
                             <Container>
                                 <Form.Row>
-                                    {this.mapEntries(script_entries)}
+                                    {this.mapEntries(scriptEntries)}
+                                </Form.Row>
+                            </Container>
+                        </SectionGroup>
+                        <SectionGroup sectionTitle="Autostart options">
+                            <Container>
+                                <Form.Row>
+                                    {this.mapEntries(autostartEntries)}
                                 </Form.Row>
                             </Container>
                         </SectionGroup>
                         {/*<SectionGroup sectionTitle="LEDs">
                             <Container>
                                 <Form.Row>
-                                    {this.mapEntries(leds_entries)}
+                                    {this.mapEntries(ledsEntries)}
                                 </Form.Row>
                             </Container>
                         </SectionGroup>*/}

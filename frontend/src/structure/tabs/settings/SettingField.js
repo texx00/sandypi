@@ -5,17 +5,17 @@ import { getSubKey } from '../../../utils/dictUtils';
 
 class SettingField extends Component{
 
-    getSettingValue(setting_name){
-        let res = this.getSettingOption(setting_name);
+    getSettingValue(settingName){
+        let res = this.getSettingOption(settingName);
         return res.value;
     }
     
-    getSettingsAvailableValues(setting_name){
-        return (this.getSettingOption(setting_name)).available_values;
+    getSettingsAvailableValues(settingName){
+        return (this.getSettingOption(settingName)).available_values;
     }
 
-    getSettingOption(setting_name){
-        return getSubKey(this.props.settings, setting_name);
+    getSettingOption(settingName){
+        return getSubKey(this.props.settings, settingName);
     }
     
     renderInput(setting){
@@ -60,16 +60,16 @@ class SettingField extends Component{
     checkDependsValue(field, values){
         if (field!== undefined){
             let res = this.getSettingOption(field);
-            let parent_visible = true;
+            let parentVisible = true;
             if (res.depends_on !== undefined){
-                parent_visible = this.checkDependsValue(res.depends_on, res.depends_values);
+                parentVisible = this.checkDependsValue(res.depends_on, res.depends_values);
             }
-            return (values.includes(res.value) && parent_visible);
+            return (values.includes(res.value) && parentVisible);
         }else return true;
     }
 
     render(){
-        let setting = this.props.single_setting;
+        let setting = this.props.singleSetting;
         // check if the option should be rendered depending on the value of another option (like if the device is cartesian will not show width and height)
         if (this.checkDependsValue(setting.depends_on, setting.depends_values))
             if (setting.tip !== "" && setting.tip !== undefined)
