@@ -20,3 +20,5 @@ Here is a brief list of "TODOs". More are available also in the code itself. Whe
 * add an leds control element for the playlists
 * create some automatic tests (both python and js) to validate the software before merging
 * make a better preview for the full drawing (preview with respect to the table used)
+* create a category of "clear" drawings to use between other drawings.
+* add the clear drawing element to the playlists and to the automatic start
