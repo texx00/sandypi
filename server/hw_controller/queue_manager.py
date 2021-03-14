@@ -1,15 +1,19 @@
+from enum import auto
 from queue import Queue
 import json
+from server.sockets_interface.socketio_callbacks import queue_start_drawings
+from server.utils import settings_utils
 from server.hw_controller.continuous_queue_generator import ContinuousQueueGenerator
-from server.database.playlist_elements import ShuffleElement, TimeElement
+from server.database.playlist_elements import TimeElement
 
 class QueueManager():
     def __init__(self, app, socketio):
-        self.continuous_interval = 300  # TODO load interval from the saved settings
         self._isdrawing = False
         self._element = None
         self.app = app
         self.socketio = socketio
+        self.continuous_generator = None
+        self.continuous_interval = 300  # TODO load interval from the saved settings
         self.q = Queue()
     
     def is_drawing(self):
@@ -141,3 +145,14 @@ class QueueManager():
     def start_continuous_drawing(self, shuffle=False, playlist=0):
         self.continuous_generator = ContinuousQueueGenerator(shuffle=shuffle, interval=self.continuous_interval, playlist=playlist)
         self.start_next()
+
+    def check_autostart(self):
+        autostart = settings_utils.get_only_values(settings_utils.load_settings()["autostart"])
+        try:
+            autostart["interval"] = int(autostart["interval"])
+        except:
+            autostart["interval"] = 0
+        
+        if autostart["on_ready"]:
+            self.set_continuous_interval(autostart["interval"])
+            self.start_continuous_drawing(autostart["shuffle"])

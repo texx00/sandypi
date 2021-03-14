@@ -37,3 +37,6 @@ class FeederEventManager(FeederEventHandler):
             self.last_send_time = time.time()
             # Send the line to the server
             self.app.semits.update_hw_preview(line)
+
+    def on_device_ready(self):
+        self.app.qmanager.check_autostart()

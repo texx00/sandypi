@@ -55,6 +55,7 @@ class Settings extends Component{
         let serialEntries =    Object.entries(this.props.settings.serial);
         let deviceEntries =    Object.entries(this.props.settings.device);
         let scriptEntries =    Object.entries(this.props.settings.scripts);
+        let autostartEntries = Object.entries(this.props.settings.autostart);
         let ledsEntries =      Object.entries(this.props.settings.leds);
 
         return <Container>
@@ -84,6 +85,13 @@ class Settings extends Component{
                             <Container>
                                 <Form.Row>
                                     {this.mapEntries(scriptEntries)}
+                                </Form.Row>
+                            </Container>
+                        </SectionGroup>
+                        <SectionGroup sectionTitle="Autostart options">
+                            <Container>
+                                <Form.Row>
+                                    {this.mapEntries(autostartEntries)}
                                 </Form.Row>
                             </Container>
                         </SectionGroup>

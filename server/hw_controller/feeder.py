@@ -39,6 +39,9 @@ class FeederEventHandler():
     def on_new_line(self, line):
         pass
 
+    def on_device_ready(self):
+        pass
+
 
 
 # List of commands that are buffered by the controller
@@ -320,6 +323,9 @@ class Feeder():
         
         # send the "on connection" script from the settings
         self.send_script(self.settings['scripts']['connected']["value"])
+
+        # device ready event
+        self.handler.on_device_ready()
 
     # run the "_on_device_ready" method with a delay
     def _on_device_ready_delay(self):
