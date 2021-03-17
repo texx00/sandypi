@@ -113,6 +113,10 @@ If you are running on the local device you can also use `127.0.0.1:5000`
 
 Follow the [guide](/docs/first_setup.md) for your first setup or for [more info about the usage](/docs/usage.md)
 
+## Autodetect drawings
+
+The software will automatically load (`.gcode`) files positioned in the `server/autodetect` folder.
+
 # Installation troubleshooting
 
 If you find problems during the installation check the [troubleshooting](/docs/troubleshooting.md) page
