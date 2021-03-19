@@ -19,7 +19,7 @@ MarkupSafe==1.1.1
 mccabe==0.6.1
 netifaces==0.10.9
 packaging==20.8
-Pillow==8.1.0
+Pillow==8.1.1
 pip==20.3.3
 pylint==2.6.0
 pyparsing==2.4.7
