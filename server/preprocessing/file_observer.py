@@ -4,6 +4,7 @@ from watchdog.events import PatternMatchingEventHandler
 import logging
 import os
 import fnmatch
+from time import sleep
 
 from server.preprocessing.drawing_creator import preprocess_drawing
 from server.sockets_interface.socketio_callbacks import drawings_refresh
@@ -56,6 +57,7 @@ class GcodeEventHandler(PatternMatchingEventHandler):
             with open(filename, "r") as f:
                 short_filename = f.name.split("\\")[1]
                 id = preprocess_drawing(short_filename, f)
+            sleep(1)
             os.remove(filename)
             self._logger.info("Autodetected drawing loaded with id: {}".format(id))
             # refreshing list of drawings for all the clients

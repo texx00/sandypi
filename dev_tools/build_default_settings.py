@@ -23,11 +23,11 @@ def write_dict(output_stream, val, tabs = 1):
 
 with open("./server/saves/default_settings.json", "r") as defaults:
     values = json.load(defaults)
-    with open("./frontend/src/structure/tabs/settings/default_settings.js", "w") as output:
+    with open("./frontend/src/structure/tabs/settings/defaultSettings.js", "w") as output:
         output.write("// This file is auto generated from the default settings file. \n// To generate a new version from the existing default values use the script: ./dev_tools/build_default_settings.py\n\n")
 
-        output.write("const default_settings = ")
+        output.write("const defaultSettings = ")
         
         write_dict(output, values)
 
-        output.write("\n\nexport default default_settings;")
+        output.write("\n\nexport default defaultSettings;")

@@ -16,7 +16,7 @@ const defaultSettings = {
 			type: "select",
 			value: "115200",
 			label: "Serial baudrate",
-			available_values: ['2400', '4800', '9600', '19200', '38400', '57600', '115200', '230400', '460800', '921600'],
+			available_values: ['2400', '4800', '9600', '19200', '38400', '57600', '115200', '230400', '250000', '460800', '921600'],
 			tip: "Select the correct serial baudrate"
 		},
 		fast_mode: {
@@ -124,6 +124,29 @@ const defaultSettings = {
 	},
 	system: {
 		is_linux: false
+	},
+	autostart: {
+		on_ready: {
+			name: "autostart.on_ready",
+			type: "check",
+			value: false,
+			label: "Start drawing on power up",
+			tip: "Enable this option to start drawing automatically from the full list of drawings every time the device is turned on"
+		},
+		shuffle: {
+			name: "autostart.shuffle",
+			type: "check",
+			value: true,
+			label: "Shuffle drawings on autostart",
+			tip: "When the autostart is enabled, will play the drawings shuffled"
+		},
+		interval: {
+			name: "autostart.interval",
+			type: "input",
+			value: 0,
+			label: "Interval between drawings [s]",
+			tip: "Write the number of seconds to let the table pause between drawings"
+		}
 	},
 	leds: {
 		width: {
