@@ -1,5 +1,15 @@
 # Software versions and added features
 
+## v0.3-alpha
+* Major improvements to the playlists
+  * Stability and performance increased
+  * Usability improved
+  * Added more playlist elements to increment the flexibility
+* Added play/shuffle play control in drawings and playlist
+* Added "autostart drawing on boot" possibility from the settings
+* Added a folder in which it is possible to load files that will be automatically uploaded (server/autodetect)
+* Other minor fixes and improvements
+
 ## v0.2.1-alpha
 * Some changes in the playlists and added a new "element" mechanics for the playlist:
   * The playlist can contain elements: at the moment only the drawing and the custom_command elements are available... Soon will introduce more
