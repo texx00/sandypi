@@ -116,6 +116,7 @@ Follow the [guide](/docs/first_setup.md) for your first setup or for [more info 
 ## Autodetect drawings
 
 The software will automatically load (`.gcode`) files positioned in the `server/autodetect` folder.
+The file will be automatically deleted from the folder once loaded.
 
 # Installation troubleshooting
 
