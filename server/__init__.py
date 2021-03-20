@@ -63,6 +63,7 @@ from server.sockets_interface.socketio_emits import SocketioEmits
 from server.hw_controller.queue_manager import QueueManager
 from server.hw_controller.feeder import Feeder
 from server.hw_controller.feeder_event_manager import FeederEventManager
+from server.preprocessing.file_observer import GcodeObserverManager
 
 # Commenting out leds part. TODO finish the leds part
 # Needs to uncomment also in the socket callbacks: in settings_save and in leds_set_color
@@ -109,6 +110,10 @@ def run_post():
 th = Thread(target = run_post)
 th.name = "feeder_starter"
 th.start()
+
+# File observer setup
+# initializes the .gcode file observer on the autostart folder
+app.observer = GcodeObserverManager("./server/autodetect")
 
 if __name__ == '__main__':
     socketio.run(app)
