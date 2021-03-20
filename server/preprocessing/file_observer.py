@@ -31,8 +31,7 @@ class GcodeObserverManager:
         files = fnmatch.filter(os.listdir(self._path), "*.gcode")
         self._logger.info("Found some files to load in the autodetect folder")
         for name in files:
-            self._handler.init_drawing(self._path+"\\"+name)
-
+            self._handler.init_drawing(os.path.join(self._path, name))
 
 
 class GcodeEventHandler(PatternMatchingEventHandler):
@@ -55,7 +54,7 @@ class GcodeEventHandler(PatternMatchingEventHandler):
         try:
             id = ""
             with open(filename, "r") as f:
-                short_filename = f.name.split("\\")[1]
+                short_filename = os.path.basename(f.name)
                 id = preprocess_drawing(short_filename, f)
             sleep(1)
             os.remove(filename)
