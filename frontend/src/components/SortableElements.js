@@ -45,7 +45,7 @@ class SortableElements extends Component{
             ghostClass="sortable-ghost"
             chosenClass="sortable-chosen"
             filter=".nodrag"
-            className="row mt-5"                            // need to put this manually to set a correct grid layout
+            className="row mt-5 mobile-overflow"                            // need to put this manually to set a correct grid layout
             list={this.state.list}
             setList={(newList) => {
                 this.setState({list: newList});

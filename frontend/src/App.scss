@@ -164,6 +164,16 @@ hr{
     background-color: $primary;
 }
 
+@media (max-width: 575.98px) {
+    /* this manual margin is necessary in the sortable list because otherwise for small devices it is impossible to scroll the page.
+       Like this will add some space on the sides to be able to scroll the page */
+    .mobile-overflow{
+        padding-right: 30px;
+        padding-left: 30px;
+    }
+
+}
+
 /* Carousel mutli overrides */
 button.react-multiple-carousel__arrow{
     background-color: $light;
