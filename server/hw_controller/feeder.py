@@ -6,10 +6,12 @@ from collections import deque
 from copy import deepcopy
 import re
 import logging
+from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
 from dotmap import DotMap
 
 from server.utils import limited_size_dict, buffered_timeout, settings_utils
+from server.utils.logging_utils import formatter
 from server.hw_controller.device_serial import DeviceSerial
 from server.hw_controller.gcode_rescalers import Fit
 import server.hw_controller.firmware_defaults as firmware
@@ -50,21 +52,41 @@ BUFFERED_COMMANDS = ("G0", "G00", "G1", "G01", "G2", "G02", "G3", "G03", "G28")
 
 class Feeder():
     def __init__(self, handler = None, **kargvs):
+
         # logger setup
         self.logger = logging.getLogger(__name__)
+        self.logger.handlers = []           # remove all handlers
+        self.logger.propagate = False       # set it to files to avoid passing it to the parent logger
+        # add custom logging levels
         logging.addLevelName(settings_utils.LINE_SENT, "LINE_SENT")
         logging.addLevelName(settings_utils.LINE_RECEIVED, "LINE_RECEIVED")
         logging.addLevelName(settings_utils.LINE_SERVICE, "LINE_SERVICE")
-        # load logging level from environment variables
+        self.logger.setLevel(settings_utils.LINE_SENT)             # set to logger lowest level
+
+        # create file logging handler
+        file_handler = RotatingFileHandler("server/logs/feeder.log", maxBytes=200000, backupCount=5)
+        file_handler.setLevel(settings_utils.LINE_SENT)
+        file_handler.setFormatter(formatter)
+        self.logger.addHandler(file_handler)
+
+        # load sterr logging level from environment variables
         load_dotenv()
         level = os.getenv("FEEDER_LEVEL")
         if not level is None:
             level = int(level)
         else:
             level = 0
-        self.logger.setLevel(level)
+
+        # create stream handler
+        stream_handler = logging.StreamHandler()
+        stream_handler.setLevel(level)
+        stream_handler.setFormatter(formatter)
+        self.logger.addHandler(stream_handler)
 
         settings_utils.print_level(level, __name__.split(".")[-1])
+
+
+        # variables setup
 
         self._isrunning = False
         self._stopped = False

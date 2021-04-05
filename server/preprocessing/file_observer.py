@@ -10,12 +10,15 @@ from server.preprocessing.drawing_creator import preprocess_drawing
 from server.sockets_interface.socketio_callbacks import drawings_refresh
 
 class GcodeObserverManager:
-    def __init__(self, path="."):
-        logger_name = __name__
+    def __init__(self, path=".", logger=None):
+        if logger is None:
+            logger_name = __name__
+            self._logger = logging.getLogger(logger_name)
+        else: 
+            self._logger = logger
         self._path = path
-        self._logger = logging.getLogger(logger_name)
         self._observer = Observer()
-        self._handler = GcodeEventHandler(logger_name)
+        self._handler = GcodeEventHandler(self._logger)
         self._observer.schedule(self._handler, path=path)
         self.start()
         self.check_current_files()
@@ -29,16 +32,16 @@ class GcodeObserverManager:
 
     def check_current_files(self):
         files = fnmatch.filter(os.listdir(self._path), "*.gcode")
-        self._logger.info("Found some files to load in the autodetect folder")
+        if len(files)>0:
+            self._logger.info("Found some files to load in the autodetect folder")
         for name in files:
             self._handler.init_drawing(os.path.join(self._path, name))
 
 
 class GcodeEventHandler(PatternMatchingEventHandler):
-    def __init__(self, logger_name):
+    def __init__(self, logger):
         super().__init__(patterns=["*.gcode"])
-        self._logger = logging.getLogger(logger_name)
-        self._logger.setLevel(logging.INFO)
+        self._logger = logger
 
     def on_created(self, evt):
         self.handle_event(evt)

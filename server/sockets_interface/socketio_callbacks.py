@@ -45,6 +45,7 @@ def playlist_save(playlist):
     pl.name = playlist['name']
     pl.add_element(playlist['elements'])
     pl.save()
+    app.logger.info("Playlist saved")
     playlist_refresh_single(pl.id)
 
 
