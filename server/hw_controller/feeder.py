@@ -1,3 +1,4 @@
+from server.database.playlist_elements import TimeElement
 from threading import Thread, Lock
 import os
 import time
@@ -141,7 +142,13 @@ class Feeder():
 
     def get_status(self):
         with self.serial_mutex:
-            return {"is_running":self._isrunning, "progress":[self.command_number, self.total_commands_number], "is_paused":self._ispaused, "is_connected":self.is_connected()}
+            # progress should be done on the path length
+            return {
+                "is_running": self._isrunning, 
+                "progress": [self.command_number, self.total_commands_number], 
+                "is_paused": self._ispaused, 
+                "is_connected": self.is_connected()
+            }
 
     def connect(self):
         self.logger.info("Connecting to serial device...")
@@ -200,6 +207,12 @@ class Feeder():
     def get_element(self):
         with self.status_mutex:
             return self._current_element
+
+    def update_current_time_element(self, new_interval):
+        with self.status_mutex:
+            if type(self._current_element) is TimeElement:
+                if self._current_element.type == "delay":
+                    self._current_element.update_delay(new_interval)
     
     # stops the drawing
     # blocking function: waits until the thread is stopped
@@ -363,8 +376,6 @@ class Feeder():
         self.send_script(self.settings['scripts']['before']["value"])
 
         self.logger.info("Starting new drawing with code {}".format(element))
-        with self.serial_mutex:
-            element = self._current_element
         
         # TODO retrieve saved information for the gcode filter
         dims = {"table_x":100, "table_y":100, "drawing_max_x":100, "drawing_max_y":100, "drawing_min_x":0, "drawing_min_y":0}
@@ -373,7 +384,7 @@ class Feeder():
 
         filter = Fit(dims)
         
-        for k, line in enumerate(element.execute(self.logger)):     # execute the element (iterate over the commands or do what the element is designed for)
+        for k, line in enumerate(self.get_element().execute(self.logger)):     # execute the element (iterate over the commands or do what the element is designed for)
             if not self.is_running():
                 break
             

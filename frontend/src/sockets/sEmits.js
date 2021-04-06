@@ -85,30 +85,38 @@ function queueSetOrder(list){
     socket.emit("queue_set_order", JSON.stringify(list));
 }
 
+// stops only the current drawing and go on with the next one
 function queueStopCurrent(){
     socket.emit("queue_stop_current");
     window.showToast(<div>The current drawing is being stopped. <br/>The device will still run until the buffer is empty.</div>)
 }
 
+// clears the queue and stop the device
 function queueStopAll(){
     socket.emit("queue_stop_all");
-    window.showToast(<div>Stopping the device...</div>)
+    window.showToast(<div>Stopping the device...</div>);
 }
 
+// clears only the queue
+function queueStopQueue(){
+    socket.emit("queue_stop_queue");
+    window.showToast(<div>Clearing the queue...</div>);
+}
+
+// stops the continous play (will finish the current drawing)
 function queueStopContinuous(){
-    socket.emit("queue_stop_continuous")
+    socket.emit("queue_stop_continuous");
+    window.showToast(<div>Will finish the current drawing and then stop</div>);
 }
 
-function queueStartDrawings(playlistId=0,shuffle=false, ){
-    socket.emit("queue_start_drawings", JSON.stringify({shuffle: shuffle, playlist: playlistId}));
+// starts drawing from 
+function queueStartContinuous(playlistId=0, shuffle=false, interval=0){
+    socket.emit("queue_start_continuous", JSON.stringify({shuffle: shuffle, playlist: playlistId, interval: interval}));
 }
 
-function queueStartShuffleDrawings(playlistId=0){
-    queueStartDrawings(playlistId, true);
-}
-
-function queueSetInterval(interval){
-    socket.emit("queue_set_interval", interval);
+// update the continous play settings
+function queueUpdateContinuous(status){
+    socket.emit("queue_update_continuous", JSON.stringify(status));
 }
 
 
@@ -135,10 +143,10 @@ export {
     queueSetOrder,
     queueStopCurrent,
     queueStopAll,
+    queueStopQueue,
     queueStopContinuous,
-    queueStartDrawings,
-    queueStartShuffleDrawings,
-    queueSetInterval,
+    queueStartContinuous,
+    queueUpdateContinuous,
     settingsSave,
     settingsShutdownSystem,
     settingsRebootSystem

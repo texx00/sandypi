@@ -3,13 +3,12 @@ from server.database.models import Playlists, UploadedFiles
 from server.database.playlist_elements import DrawingElement, ShuffleElement, TimeElement
 
 class ContinuousQueueGenerator:
-    def __init__(self, shuffle=False, interval=300, playlist=0):
+    def __init__(self, shuffle=False, interval=0, playlist=0):
         self.shuffle = shuffle
         self.set_interval(interval)
         self.just_started = True
         self.playlist = playlist
-        # if should not shuffle starts from the first drawing on
-        # caches the list of drawings to avoid problems with newly created items
+        # if should not shuffle starts from the first drawing in the list
         if not self.shuffle:
             if self.playlist == 0:
                 drawings = UploadedFiles.get_full_drawings_list()
@@ -22,9 +21,12 @@ class ContinuousQueueGenerator:
                 
         self._uploaded_files_generator = self._create_uploaded_files_generator()
     
-    # if is running a playlist may be better to set the interval for each single playlist
+    # set the interval
     def set_interval(self, interval):
         self.interval = interval
+    
+    def set_shuffle(self, shuffle):
+        self.shuffle = shuffle
     
     # return an element to put as a delay between drawings
     def generate_timing_element(self):
@@ -40,7 +42,7 @@ class ContinuousQueueGenerator:
             return next(self._uploaded_files_generator) # get next element from uploaded files
 
     # generate the next element(s) for the queue
-    def generate_next_elements(self):
+    def generate_next_elements(self, _depth=0):
         try:
             if self.just_started or self.interval == 0:
                 self.just_started = False
@@ -48,10 +50,13 @@ class ContinuousQueueGenerator:
             else: 
                 return [self.generate_timing_element(), self.generate_drawing_element()]
         except StopIteration:
-            # when the list to run is empty returns None
-            return None
+            if _depth==0:   # check the depth to get only one recursion
+                # when the list to run is empty restart
+                self._uploaded_files_generator = self._create_uploaded_files_generator()
+                return self.generate_next_elements(self, _depth=1)
+            else: return None
+            
 
-        # TODO should return all the elements for a playlist to fill the queue properly
         # TODO May change the queue behaviour in the next updates to show the playlist instead of single elements 
 
     # private function to iterate over the list of cached drawings (only if is not shuffling)

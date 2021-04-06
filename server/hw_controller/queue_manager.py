@@ -1,7 +1,6 @@
-from enum import auto
 from queue import Queue
 import json
-from server.sockets_interface.socketio_callbacks import queue_start_drawings
+from server.sockets_interface.socketio_callbacks import queue_start_continous
 from server.utils import settings_utils
 from server.hw_controller.continuous_queue_generator import ContinuousQueueGenerator
 from server.database.playlist_elements import TimeElement
@@ -13,7 +12,7 @@ class QueueManager():
         self.app = app
         self.socketio = socketio
         self.continuous_generator = None
-        self.continuous_interval = 300  # TODO load interval from the saved settings
+        self.continuous_interval = 0
         self.q = Queue()
     
     def is_drawing(self):
@@ -29,15 +28,9 @@ class QueueManager():
         return self._element
     
     def set_element(self, element):
-        self.app.logger.info("Code: {}".format(element))
+        self.app.logger.info("Now running: {}".format(element))
         self._element = element
         self.set_is_drawing(True)
-
-    def set_continuous_interval(self, interval_value):
-        self.continuous_interval = interval_value
-        # TODO save the value in the settings
-        if not self.continuous_generator is None:
-            self.continuous_generator.set_interval(interval_value)
 
     # stop the current drawing and start the next
     def stop(self):
@@ -48,7 +41,7 @@ class QueueManager():
         if self.q.empty() and not self.is_drawing():
             self.start_element(element)
             return
-        self.app.logger.info("Adding {} to the queue".format(element.drawing_id))
+        self.app.logger.info("Adding {} to the queue".format(element))
         self.q.put(element)
         if show_toast:
             self.app.semits.show_toast_on_UI("Element added to the queue")
@@ -87,10 +80,16 @@ class QueueManager():
     def queue_length(self):
         return self.q.qsize()
     
-    def update_status(self):
-        pass
-        # in this method should ask the updated status to the feeder (like if is drawing, queue and if necessary other stuff)
-
+    def update_interval(self, interval):
+        if self.continuous_interval != interval:
+            self.continuous_interval = interval
+            self.continuous_generator.set_interval(interval)
+            if self.is_drawing:
+                # check if is in continous mode and is running a timing element
+                if (type(self._element) is TimeElement) and (not self.continuous_generator is None):
+                    self.app.feeder.update_current_time_element(interval)
+                    self.send_queue_status()
+    
     # start the next drawing of the queue
     # by default will start it only if not already printing something
     # with "force_stop = True" will stop the actual drawing and start the next
@@ -103,7 +102,7 @@ class QueueManager():
             if self.queue_length() > 0:
                 element = self.q.queue.popleft()
                 self.start_element(element)
-                self.app.logger.info("Starting next element: {}".format(element.type))
+                self.app.logger.info("Starting next element: {}".format(element))
                 return True
             elif not self.continuous_generator is None:
                 els = self.continuous_generator.generate_next_elements()
@@ -114,7 +113,7 @@ class QueueManager():
                         self.queue_element(e)
             return False
         except Exception as e:
-            self.app.logger.error(e)
+            self.app.logger.exception(e)
             self.app.logger.error("An error occured while starting a new drawing from the queue:\n{}".format(str(e)))
             self.start_next()
 
@@ -130,8 +129,7 @@ class QueueManager():
         elements = list(map(lambda x: str(x), self.q.queue)) if len(self.q.queue) > 0 else []                       # converts elements to json
         res = {
             "current_element": str(self._element),
-            "elements": elements,
-            "intervalValue": self.continuous_interval
+            "elements": elements
         }
         self.app.semits.emit("queue_status", json.dumps(res))
     
@@ -139,12 +137,16 @@ class QueueManager():
         self.continuous_generator = None
         if type(self._element) is TimeElement:
             self.stop()
-        else:
-            self.app.semits.show_toast_on_UI("Will finish the current drawing and then stop")
 
-    def start_continuous_drawing(self, shuffle=False, playlist=0):
+    def start_continuous_drawing(self, shuffle=False, playlist=0, interval=0):
+        self.continuous_interval = interval
         self.continuous_generator = ContinuousQueueGenerator(shuffle=shuffle, interval=self.continuous_interval, playlist=playlist)
         self.start_next()
+    
+    def set_continuous_status(self, status):
+        if not self.continuous_generator is None:
+            self.update_interval(status["interval"])
+            self.continuous_generator.set_shuffle(status["shuffle"])
 
     def check_autostart(self):
         autostart = settings_utils.get_only_values(settings_utils.load_settings()["autostart"])

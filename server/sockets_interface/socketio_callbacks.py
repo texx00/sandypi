@@ -177,19 +177,24 @@ def queue_stop_all():
     queue_stop_continuous()
     queue_stop_current()
 
+@socketio.on("queue_stop_queue")
+def queue_stop_queue():
+    queue_set_order("")
+
 @socketio.on("queue_stop_continuous")
 def queue_stop_continuous():
     app.qmanager.stop_continuous()
-    queue_set_order("")
+    queue_stop_queue()
 
-@socketio.on("queue_start_drawings")
-def queue_start_drawings(res):
-    res = json.loads(res)
-    app.qmanager.start_continuous_drawing(res["shuffle"], res["playlist"])
+@socketio.on("queue_start_continuous")
+def queue_start_continous(data):
+    res = json.loads(data)
+    app.qmanager.start_continuous_drawing(res["shuffle"], res["playlist"], res["interval"])
 
-@socketio.on("queue_set_interval")
-def queue_set_interval(interval):
-    app.qmanager.set_continuous_interval(interval)
+@socketio.on("queue_update_continuous")
+def queue_update_continous(data):
+    res = json.loads(data)
+    app.qmanager.set_continuous_status(res)
 
 # --------------------------------------------------------- LEDS CALLBACKS -------------------------------------------------------------------------------
 

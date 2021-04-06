@@ -164,9 +164,10 @@ class TimeElement(GenericPlaylistElement):
         self.expiry_date = expiry_date if expiry_date != "" else None
         self.alarm_time = alarm_time if alarm_time != "" else None
         self.type = type
+        self._final_time = 0
     
     def execute(self, logger):
-        final_time = time()
+        self._final_time = time()
         if self.type == "alarm_type":                                                                 # compare the actual hh:mm:ss to the alarm to see if it must run today or tomorrow
             now = datetime.now()
             midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)                           # get midnight and add the alarm time
@@ -176,24 +177,31 @@ class TimeElement(GenericPlaylistElement):
                 return
             elif alarm < now:
                 alarm += timedelta(hours=24)                                                            # if the alarm is expired for today adds 24h
-            final_time = datetime.timestamp(alarm)
+            self._final_time = datetime.timestamp(alarm)
         if self.type == "expiry_date":
-            final_time = datetime.timestamp(datetime.strptime(self.expiry_date, "%Y-%m-%d %H:%M:%S.%f"))
+            self._final_time = datetime.timestamp(datetime.strptime(self.expiry_date, "%Y-%m-%d %H:%M:%S.%f"))
         elif self.type == "delay":
-            final_time += float(self.delay)                                                             # store current time and applies the delay
+            self._final_time += float(self.delay)                                                             # store current time and applies the delay
         else:                                                                                           # should not be the case because the check is done already in the constructore
             return         
-                
+        
+
         while True:
-            if time() >= final_time:                                                                    # If the delay expires can break the while to start the next element
+            if time() >= self._final_time:                                                                    # If the delay expires can break the while to start the next element
                 break
-            elif time() < final_time-1:
-                logger.log(LINE_RECEIVED, "Waiting {:.1f} more seconds".format(final_time-time()))
+            elif time() < self._final_time-1:
+                logger.log(LINE_RECEIVED, "Waiting {:.1f} more seconds".format(self._final_time-time()))
                 sleep(1)
                 yield None
             else: 
-                sleep(final_time-time())
+                sleep(self._final_time-time())
                 yield None
+    
+    # updates the delay value
+    # used when in continuous mode
+    def update_delay(self, interval):
+        self._final_time += (float(interval - self.delay))
+        self.delay = interval
 
 """
     Plays an element in the playlist with a random order
