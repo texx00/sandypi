@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { Button, Col, Container, Row } from 'react-bootstrap';
-import { Stop, Trash } from 'react-bootstrap-icons';
+import { Forward, Stop, Trash } from 'react-bootstrap-icons';
 import { connect } from 'react-redux';
+import IconButton from '../../../components/IconButton';
 
 import { Section, Subsection } from '../../../components/Section';
 import SortableElements from '../../../components/SortableElements';
@@ -58,6 +59,7 @@ class Queue extends Component{
 
     parseQueue(data){
         let res = JSON.parse(data);
+        console.log(res);
         res.elements = res.elements.map((el) => { return JSON.parse(el) });
         this.props.setQueueStatus(res);
     }
@@ -79,19 +81,36 @@ class Queue extends Component{
         queueStopCurrent();
     }
 
+    renderPauseRestart(){
+        // TODO add a pause and restart button
+        return "";
+    }
+
+    renderClearQueue(){
+        if (this.state.elements !== undefined)
+            if (this.state.elements.length > 0){
+                return [
+                    <Row>
+                        <IconButton className={"w-100 center"} icon={Forward}>Start next drawing</IconButton>
+                    </Row>,
+                    <Row>
+                        <IconButton className={"w-100 center"} icon={Trash}>Clear queue</IconButton>
+                    </Row>
+                ]
+            }
+        return "";
+    }
+
     renderList(){
         if (this.state.elements !== undefined)
             if (this.state.elements.length > 0){
-                return <Subsection sectionTitle="Coming next..."
-                        sectionButton="Clear queue"
-                        buttonIcon={Trash}
-                        sectionButtonHandler={this.clearQueue.bind(this)}>
-                    <SortableElements
-                        list={this.state.elements}
-                        onUpdate={this.handleSortableUpdate.bind(this)}
-                        hideOptions={true}>
-                    </SortableElements>
-                </Subsection>
+                return <Subsection sectionTitle="Coming next:" className="mb-5">
+                        <SortableElements
+                            list={this.state.elements}
+                            onUpdate={this.handleSortableUpdate.bind(this)}
+                            hideOptions={true}>
+                        </SortableElements>
+                    </Subsection>
             }
         return "";
     }
@@ -109,14 +128,19 @@ class Queue extends Component{
         }else{
             let ElementType = getElementClass(this.props.currentElement);
             return <Container>
-                <Section sectionTitle="Now drawing"
-                        sectionButton="Stop drawing"
-                        buttonIcon={Stop}
-                        sectionButtonHandler={this.stopDrawing.bind(this)}>
+                <Section sectionTitle="Now drawing">
                     <Row className={"center"}>
                         <Col sm={6} className="mb-5 position-relative">
                             <ElementType element={this.props.currentElement}
                                 hideOptions={"true"}/>
+                        </Col>
+                        <Col sm={1}/>
+                        <Col sm={4} className="pr-5 pl-5">
+                            <Row>
+                                <IconButton className={"w-100 center"} icon={Stop}>Stop</IconButton>
+                            </Row>
+                            {this.renderPauseRestart()}
+                            {this.renderClearQueue()}
                         </Col>
                     </Row>
                 </Section>

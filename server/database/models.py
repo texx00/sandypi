@@ -1,11 +1,12 @@
 from datetime import datetime
-from enum import unique
 import json
 
 from sqlalchemy.sql import func
 
 from server import db
 
+# Incremental ids table
+# Keep track of the highest id value for the other tables if it is necessary to have a monotonic id
 class IdsSequences(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     id_name = db.Column(db.String(20), unique=True, nullable=False)
@@ -43,7 +44,7 @@ class UploadedFiles(db.Model):
     dimensions_info = db.Column(db.String(150), unique=False)                   # additional dimensions information as json string object
 
     def __repr__(self):
-        return '<User %r>' % self.filename
+        return '<Uploaded file %r>' % self.filename
 
     @classmethod
     def get_full_drawings_list(cls):
@@ -52,8 +53,10 @@ class UploadedFiles(db.Model):
     @classmethod
     def get_random_drawing(cls):
         return db.session.query(UploadedFiles).order_by(func.random()).first()
-        #return db.session.query(UploadedFiles).options(load_only('id')).offset(func.floor(func.random()*db.session.query(func.count(UploadedFiles.id)))).limit(1).all()
 
+    @classmethod
+    def get_drawing(cls, id):
+        return db.session.query(UploadedFiles).filter(UploadedFiles.id==id).first()
 
 # move these imports here to avoid circular import in the GenericPlaylistElement
 from server.database.playlist_elements_tables import create_playlist_table, delete_playlist_table, get_playlist_table_class

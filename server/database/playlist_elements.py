@@ -1,114 +1,29 @@
-import json
 import os
 from pathlib import Path
-
-from sqlalchemy.orm import load_only
-from server.database.models import UploadedFiles
+from dotmap import DotMap
+import re
 from time import time, sleep
 from datetime import datetime, timedelta
+from math import sqrt
 
-from server.database.playlist_elements_tables import PlaylistElements, get_playlist_table_class
-from server import db
+from server.database.models import UploadedFiles
+from server.database.playlist_elements_tables import get_playlist_table_class
 from server.utils.settings_utils import LINE_RECEIVED
+from server.database.generic_playlist_element import GenericPlaylistElement
 
-"""
-    Base class for a playlist element
-    When creating a new element type, should extend this base class
-    The base class manages automatically to save the element correctly in the database if necessary
+""" 
+    ---------------------------------------------------------------------------
 
-    Can override the init method but must pass **kwargs to the super().__init__ method
-    execute method:
-        The child element MUST implement the execute method as a generator in order to provide the commands to the feeder (can also iterate only once, but the method must be extended)
-        The execute method should yield the Gcode command to execute. If None is returned instead, the feeder will skip the iteration. 
-        The feeder will stop only one the StopIteration exception is raised
-    
-    See examples to understand better
+    The elements must derive from the GenericPlaylistElement class.
+    Check "generic_playlist_element.py" for more detailed instructions.
+    New elements must be added to the _child_types list at the end of this file
 
-    NOTE: must implement the element also in the frontend (follow the instructions at the beginning of the "Elements.js" file)
-"""
-class GenericPlaylistElement():
-    element_type = None
-    
-    def __init__(self, element_type, **kwargs):
-        self.element_type = element_type
-        self._pop_options = []                                                                      # list of fields that are column in the database and must be removed from the standard options (string column)
-        self.add_column_field("element_type")                                                       # need to pop the element_type from the final dict because this option is a column of the table
-        for v in kwargs:
-            setattr(self, v, kwargs[v])
-    
-    def get_dict(self):
-        return GenericPlaylistElement.clean_dict(self.__dict__)
-
-    def __str__(self):
-        return json.dumps(self.get_dict())
-    
-    def execute(self, logger):
-        raise StopIteration("You must implement an iterator in every element class")
-
-    def _set_from_dict(self, values):
-        for k in values:
-            if hasattr("set_{}".format(k)):
-                pass
-            elif hasattr(k):
-                setattr(self, k, values[k])
-            else:
-                raise ValueError
-
-    # if this method return None if will not run the element in the playlist
-    # can override if should not run the current element but something else
-    def before_start(self, queue_manager):
-        return self
-
-    # add options that must be saved in a dedicated column insted of saving them inside the generic options of the element (like the element_type)
-    def add_column_field(self, option):
-        self._pop_options.append(option)
-    
-    def save(self, element_table):
-        options = self.get_dict()
-        # filter other pop options
-        kwargs = []
-        for op in self._pop_options:
-            kwargs.append(options.pop(op))
-        kwargs = zip(self._pop_options, kwargs)
-        kwargs = dict(kwargs)
-        options = json.dumps(options)
-        db.session.add(element_table(element_options = options, **kwargs))
-
-    @classmethod
-    def clean_dict(cls, val):
-        return {key:value for key, value in val.items() if not key.startswith('_') and not callable(key)}
-
-    @classmethod
-    def create_element_from_dict(cls, dict_val):
-        if not type(dict_val) is dict:
-            raise ValueError("The argument must be a dict")
-        if 'element_type' in dict_val:
-            el_type = dict_val.pop("element_type")                                                  # remove element type. Should be already be choosen when using the class
-        else:
-            raise ValueError("the dictionary must contain an 'element_type'")
-        for elementClass in _child_types:
-            if elementClass.element_type == el_type:
-                return elementClass(**dict_val)
-        raise ValueError("'element_type' doesn't match any known element type")
-
-    @classmethod
-    def create_element_from_json(cls, json_str):
-        dict_val = json.loads(json_str)
-        return cls.create_element_from_dict(dict_val)
-
-    @classmethod
-    def create_element_from_db(cls, item):
-        if not isinstance(item, PlaylistElements):
-            raise ValueError("Need a db item from a playlist elements table")
-        
-        res = GenericPlaylistElement.clean_dict(item.__dict__)
-        tmp = res.pop("element_options")
-        res = {**res, **json.loads(tmp)}
-        return cls.create_element_from_dict(res)
+    ---------------------------------------------------------------------------
+""" 
 
 
 """
-    Identifies a drawing in the playlist
+    Identifies a drawing element
 """
 class DrawingElement(GenericPlaylistElement):
     element_type = "drawing"
@@ -120,19 +35,59 @@ class DrawingElement(GenericPlaylistElement):
             self.drawing_id = int(drawing_id)
         except:
             raise ValueError("The drawing id must be an integer")
+        self._distance = 0
+        self._total_distance = 0
+        self._new_position = DotMap({"x":0, "y":0})
+        self._last_position = self._new_position
+        self._x_regex = re.compile("[X]([0-9.-]+)($|\s)")                                           # looks for a +/- float number after an X, until the first space or the end of the line
+        self._y_regex = re.compile("[Y]([0-9.-]+)($|\s)")                                           # looks for a +/- float number after an Y, until the first space or the end of the line
+
         
     def execute(self, logger):
+        # loads the total lenght of the drawing to calculate eta
+        self._total_distance = UploadedFiles.get_drawing(self.drawing_id).path_length
+        if (self._total_distance is None) or (self._total_distance < 0):
+            self._total_distance = 0
+        
+        # loads the gcode file
         filename = os.path.join(str(Path(__file__).parent.parent.absolute()), "static/Drawings/{0}/{0}.gcode".format(self.drawing_id))
         with open(filename) as f:
             for line in f:
+                # clears the line
                 if line.startswith(";"):                                                            # skips commented lines
                     continue
                 if ";" in line:                                                                     # remove in line comments
                     line.split(";")
                     line = line[0]
+                # calculates the distance travelled
+                try:
+                    if "X" in line:
+                        self._new_position.x = float(self._x_regex.findall(line)[0][0])
+                    if "Y" in line:
+                        self._new_position.y = float(self._y_regex.findall(line)[0][0])
+                    self._distance += sqrt((self._new_position.x - self._last_position.x)**2 + (self._new_position.y - self._last_position.y)**2)
+                    self._last_position = self._new_position
+                except Exception as e:
+                    logger.exception(e)
+                # yields the line
                 yield line
 
+    def get_progress(self, feedrate):
+        # if for some reason the total distance was not calculated the ETA is unknown
+        if self._total_distance == 0:
+            return super().get_progress(feedrate)
 
+        # if a feedrate is available will use "s" otherwise will calculate the ETA as a percentage
+        if feedrate <= 0:
+            return {
+                "eta": self._distance/self._total_distance * 100,
+                "units": "%"
+            }
+        else:
+            return {
+                "eta": (self._total_distance - self._distance)/feedrate,
+                "units": "s"
+            }
 """
     Identifies a command element (sends a specific command/list of commands to the board)
 """
@@ -164,30 +119,29 @@ class TimeElement(GenericPlaylistElement):
         self.expiry_date = expiry_date if expiry_date != "" else None
         self.alarm_time = alarm_time if alarm_time != "" else None
         self.type = type
-        self._final_time = 0
+        self._final_time = -1
     
     def execute(self, logger):
         self._final_time = time()
-        if self.type == "alarm_type":                                                                 # compare the actual hh:mm:ss to the alarm to see if it must run today or tomorrow
+        if self.type == "alarm_type":                                                               # compare the actual hh:mm:ss to the alarm to see if it must run today or tomorrow
             now = datetime.now()
-            midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)                           # get midnight and add the alarm time
+            midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)                       # get midnight and add the alarm time
             alarm_time = datetime.strptime(self.alarm_time, "%H:%M:%S")
             alarm = midnight + timedelta(hours = alarm_time.hour, minutes = alarm_time.minute, seconds = alarm_time.second)
             if alarm == now:
                 return
             elif alarm < now:
-                alarm += timedelta(hours=24)                                                            # if the alarm is expired for today adds 24h
+                alarm += timedelta(hours=24)                                                        # if the alarm is expired for today adds 24h
             self._final_time = datetime.timestamp(alarm)
         if self.type == "expiry_date":
             self._final_time = datetime.timestamp(datetime.strptime(self.expiry_date, "%Y-%m-%d %H:%M:%S.%f"))
         elif self.type == "delay":
-            self._final_time += float(self.delay)                                                             # store current time and applies the delay
-        else:                                                                                           # should not be the case because the check is done already in the constructore
+            self._final_time += float(self.delay)                                                   # store current time and applies the delay
+        else:                                                                                       # should not be the case because the check is done already in the constructore
             return         
         
-
         while True:
-            if time() >= self._final_time:                                                                    # If the delay expires can break the while to start the next element
+            if time() >= self._final_time:                                                          # If the delay expires can break the while to start the next element
                 break
             elif time() < self._final_time-1:
                 logger.log(LINE_RECEIVED, "Waiting {:.1f} more seconds".format(self._final_time-time()))
@@ -202,6 +156,15 @@ class TimeElement(GenericPlaylistElement):
     def update_delay(self, interval):
         self._final_time += (float(interval - self.delay))
         self.delay = interval
+
+    # return a progress only if the element is running
+    def get_progress(self, feedrate):
+        if self._final_time != -1:
+            return {
+                "eta": self._final_time - time(),
+                "units": "s"
+            }
+        else: return super().get_progress(feedrate)
 
 """
     Plays an element in the playlist with a random order
@@ -226,7 +189,7 @@ class ShuffleElement(GenericPlaylistElement):
         return None
 
 """
-    Start another playlist
+    Starts another playlist
 """
 class StartPlaylistElement(GenericPlaylistElement):
     element_type = "start_playlist"
@@ -241,6 +204,10 @@ class StartPlaylistElement(GenericPlaylistElement):
         playlist_queue(self.playlist_id)
         return None
 
+
+
+# TODO implement also the other element types (execute method but also the frontend options)
+
 """
     Controls the led lights
 """
@@ -251,8 +218,6 @@ class LightsControl(GenericPlaylistElement):
     def __init__(self, **kwargs):
         super().__init__(element_type=LightsControl.element_type, **kwargs)
 
-
-# TODO implement also the other element types (execute method but also the frontend options)
 
 """
     Identifies a particular behaviour for the ball between drawings (like: move to the closest border, start from the center) (should put this as a drawing option?)

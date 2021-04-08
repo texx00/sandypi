@@ -1,4 +1,3 @@
-from server.database.playlist_elements import TimeElement
 from threading import Thread, Lock
 import os
 import time
@@ -16,10 +15,12 @@ from server.utils.logging_utils import formatter
 from server.hw_controller.device_serial import DeviceSerial
 from server.hw_controller.gcode_rescalers import Fit
 import server.hw_controller.firmware_defaults as firmware
+from server.database.playlist_elements import TimeElement
+from server.database.generic_playlist_element import UNKNOWN_PROGRESS
 
 """
 
-This class duty is to send commands to the hw. It can be a single command or an entire drawing.
+This class duty is to send commands to the hw. It can handle single commands as well as elements.
 
 
 """
@@ -57,16 +58,16 @@ class Feeder():
         # logger setup
         self.logger = logging.getLogger(__name__)
         self.logger.handlers = []           # remove all handlers
-        self.logger.propagate = False       # set it to files to avoid passing it to the parent logger
+        self.logger.propagate = False       # set it to False to avoid passing it to the parent logger
         # add custom logging levels
         logging.addLevelName(settings_utils.LINE_SENT, "LINE_SENT")
         logging.addLevelName(settings_utils.LINE_RECEIVED, "LINE_RECEIVED")
         logging.addLevelName(settings_utils.LINE_SERVICE, "LINE_SERVICE")
-        self.logger.setLevel(settings_utils.LINE_SENT)             # set to logger lowest level
+        self.logger.setLevel(settings_utils.LINE_SERVICE)             # set to logger lowest level
 
         # create file logging handler
         file_handler = RotatingFileHandler("server/logs/feeder.log", maxBytes=200000, backupCount=5)
-        file_handler.setLevel(settings_utils.LINE_SENT)
+        file_handler.setLevel(settings_utils.LINE_SERVICE)
         file_handler.setFormatter(formatter)
         self.logger.addHandler(file_handler)
 
@@ -89,11 +90,10 @@ class Feeder():
 
         # variables setup
 
-        self._isrunning = False
+        self._current_element = None
+        self._is_running = False
         self._stopped = False
-        self._ispaused = False
-        self.total_commands_number = None
-        self.command_number = 0
+        self._is_paused = False
         self._th = None
         self.serial_mutex = Lock()
         self.status_mutex = Lock()
@@ -141,13 +141,11 @@ class Feeder():
         self.serial.close()
 
     def get_status(self):
-        with self.serial_mutex:
-            # progress should be done on the path length
+        with self.status_mutex:
             return {
-                "is_running": self._isrunning, 
-                "progress": [self.command_number, self.total_commands_number], 
-                "is_paused": self._ispaused, 
-                "is_connected": self.is_connected()
+                "is_running": self._is_running, 
+                "progress": self._current_element.get_progress(self.feedrate) if not self._current_element is None else UNKNOWN_PROGRESS,
+                "is_paused": self._is_paused
             }
 
     def connect(self):
@@ -183,11 +181,10 @@ class Feeder():
             with self.serial_mutex:
                 self._th = Thread(target = self._thf, args=(element,), daemon=True)
                 self._th.name = "drawing_feeder"
-                self._isrunning = True
+                self._is_running = True
                 self._stopped = False
-                self._ispaused = False
+                self._is_paused = False
                 self._current_element = element
-                self.command_number = 0
                 with self.command_buffer_mutex:
                     self.command_buffer.clear()
                 self._th.start()
@@ -196,12 +193,12 @@ class Feeder():
     # ask if the feeder is already sending a file
     def is_running(self):
         with self.status_mutex:
-            return self._isrunning
+            return self._is_running
 
     # ask if the feeder is paused
     def is_paused(self):
         with self.status_mutex:
-            return self._ispaused
+            return self._is_paused
 
     # return the code of the drawing on the go
     def get_element(self):
@@ -222,7 +219,7 @@ class Feeder():
             with self.status_mutex:
                 if not self._stopped:
                     self.logger.info("Stopping drawing")
-                self._isrunning = False
+                self._is_running = False
                 self._current_element = None
             # block the function until the thread is stopped otherwise the thread may still be running when the new thread is started 
             # (_isrunning will turn True and the old thread will keep going)
@@ -251,12 +248,12 @@ class Feeder():
     # can resume with "resume()"
     def pause(self):
         with self.status_mutex:
-            self._ispaused = True
+            self._is_paused = True
     
     # resumes the drawing (only if used with "pause()" and not "stop()")
     def resume(self):
         with self.status_mutex:
-            self._ispaused = False
+            self._is_paused = False
 
     # function to prepare the command to be sent.
     #  * command: command to send
@@ -284,7 +281,7 @@ class Feeder():
         # check if the command is in the "BUFFERED_COMMANDS" list and stops if the buffer is full
         if any(code in command for code in BUFFERED_COMMANDS):
             if "F" in command:
-                self.feedrate = self.feed_regex.findall(command)[0][0]
+                self.feedrate = float(self.feed_regex.findall(command)[0][0])
             if "X" in command:
                 self.last_commanded_position.x = self.x_regex.findall(command)[0][0]
             if "Y" in command:
@@ -331,7 +328,8 @@ class Feeder():
         return result
     
     def is_connected(self):
-        return self.serial.is_connected()
+        with self.serial_mutex:
+            return self.serial.is_connected()
 
     # stops immediately the device
     def emergency_stop(self):
@@ -379,9 +377,7 @@ class Feeder():
         
         # TODO retrieve saved information for the gcode filter
         dims = {"table_x":100, "table_y":100, "drawing_max_x":100, "drawing_max_y":100, "drawing_min_x":0, "drawing_min_y":0}
-        # TODO calculate an estimate about the remaining time for the current drawing (for the moment can output the number of rows over the total number of lines in the file)
-        self.total_commands_number = 10**6  # TODO change this placeholder
-
+        
         filter = Fit(dims)
         
         for k, line in enumerate(self.get_element().execute(self.logger)):     # execute the element (iterate over the commands or do what the element is designed for)
@@ -426,7 +422,7 @@ class Feeder():
 
     # function called when the buffer has not been updated for some time (controlled by the buffered timeou)
     def _on_timeout(self):
-        if (self.command_buffer_mutex.locked and self.line_number == self._timeout_last_line):
+        if (self.command_buffer_mutex.locked and self.line_number == self._timeout_last_line and not self.is_paused()):
             # self.logger.warning("!Buffer timeout. Trying to clean the buffer!")
             # to clean the buffer try to send an M114 (marlin) or ? (Grbl) message. In this way will trigger the buffer cleaning mechanism
             command = firmware.get_buffer_command(self._firmware)

@@ -1,6 +1,8 @@
 from queue import Queue
 import json
-from server.sockets_interface.socketio_callbacks import queue_start_continous
+from threading import Thread
+import time
+
 from server.utils import settings_utils
 from server.hw_controller.continuous_queue_generator import ContinuousQueueGenerator
 from server.database.playlist_elements import TimeElement
@@ -14,6 +16,11 @@ class QueueManager():
         self.continuous_generator = None
         self.continuous_interval = 0
         self.q = Queue()
+
+        # setup status timer
+        self._th = Thread(target=self._thf, daemon=True)
+        self._th.name = "queue_status_interval"
+        self._th.start()
     
     def is_drawing(self):
         return self._isdrawing
@@ -129,7 +136,8 @@ class QueueManager():
         elements = list(map(lambda x: str(x), self.q.queue)) if len(self.q.queue) > 0 else []                       # converts elements to json
         res = {
             "current_element": str(self._element),
-            "elements": elements
+            "elements": elements,
+            "status": self.app.feeder.get_status()
         }
         self.app.semits.emit("queue_status", json.dumps(res))
     
@@ -158,3 +166,16 @@ class QueueManager():
         if autostart["on_ready"]:
             self.set_continuous_interval(autostart["interval"])
             self.start_continuous_drawing(autostart["shuffle"])
+
+
+    # periodically updates the queue status
+    def _thf(self):
+        while(True):
+            try:
+                # updates the queue status every 30 seconds but only while is drawing
+                time.sleep(30)
+                if self.is_drawing():
+                    self.send_queue_status()
+                
+            except Exception as e:
+                self.app.logger.exception(e)
