@@ -17,12 +17,12 @@
     min-height: 40vh;
 }
 
-.command-history-container{
+.command-line-history{
     max-height: 40vh;
 }
 
-@include media-breakpoint-up(md) {
+@media (max-width: 575.98px) {
     .command-line-history{
-        max-height: 40vh;
+        height: 300px;
     }
 }

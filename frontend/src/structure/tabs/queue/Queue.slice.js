@@ -6,7 +6,9 @@ const queueSlice = createSlice({
         isQueueEmpty: true,
         elements: [],
         currentElement: undefined,
-        intervalValue: 200
+        intervalValue: 0,
+        shuffle: false,
+        status: {eta: -1}
     },
     reducers: {
         setQueueElements(state, action){
@@ -23,13 +25,21 @@ const queueSlice = createSlice({
                 isQueueEmpty: queueEmpty,
                 elements: res.elements,
                 currentElement: res.current_element,
-                intervalValue: res.intervalValue
+                intervalValue: res.intervalValue,
+                status: res.status
             }
         },
         setQueueNotEmpty(state, action){
             return {
                 ...state,
                 isQueueEmpty: false
+            }
+        },
+        setContinuousStatus(state, action){
+            return {
+                ...state,
+                intervalValue: action.payload.interval,
+                shuffle: action.payload.shuffle
             }
         }
     }
@@ -38,7 +48,8 @@ const queueSlice = createSlice({
 export const{
     setQueueElements,
     setQueueStatus,
-    setQueueNotEmpty
+    setQueueNotEmpty,
+    setContinuousStatus
 } = queueSlice.actions;
 
 export default queueSlice.reducer;

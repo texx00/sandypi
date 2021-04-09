@@ -126,6 +126,14 @@ def drawing_queue(code):
     element = DrawingElement(drawing_id=code)
     app.qmanager.queue_element(element)
 
+@socketio.on("drawing_pause")
+def drawing_pause():
+    app.qmanager.pause()
+
+@socketio.on("drawing_resume")
+def drawing_resume():
+    app.qmanager.resume()
+
 @socketio.on("drawing_delete")
 def drawing_delete(code):
     item = db.session.query(UploadedFiles).filter_by(id=code).first()
@@ -177,19 +185,25 @@ def queue_stop_all():
     queue_stop_continuous()
     queue_stop_current()
 
+@socketio.on("queue_stop_queue")
+def queue_stop_queue():
+    queue_set_order("")
+    app.qmanager.send_queue_status()
+
 @socketio.on("queue_stop_continuous")
 def queue_stop_continuous():
     app.qmanager.stop_continuous()
-    queue_set_order("")
+    queue_stop_queue()
 
-@socketio.on("queue_start_drawings")
-def queue_start_drawings(res):
-    res = json.loads(res)
-    app.qmanager.start_continuous_drawing(res["shuffle"], res["playlist"])
+@socketio.on("queue_start_continuous")
+def queue_start_continous(data):
+    res = json.loads(data)
+    app.qmanager.start_continuous_drawing(res["shuffle"], res["playlist"], res["interval"])
 
-@socketio.on("queue_set_interval")
-def queue_set_interval(interval):
-    app.qmanager.set_continuous_interval(interval)
+@socketio.on("queue_update_continuous")
+def queue_update_continous(data):
+    res = json.loads(data)
+    app.qmanager.set_continuous_status(res)
 
 # --------------------------------------------------------- LEDS CALLBACKS -------------------------------------------------------------------------------
 

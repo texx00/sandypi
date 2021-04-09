@@ -2,19 +2,28 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Col, Form, Row } from 'react-bootstrap';
 import { PlayFill, Shuffle, StopFill } from 'react-bootstrap-icons';
+import _ from 'lodash';
 
 import IconButton from './IconButton';
 
-import { getQueueEmpty, getQueueIntervalValue } from '../structure/tabs/queue/selector';
+import { getQueueEmpty, getQueueIntervalValue, getQueueShuffle } from '../structure/tabs/queue/selector';
+import { setContinuousStatus } from '../structure/tabs/queue/Queue.slice';
 
-import { queueStartDrawings, queueStartShuffleDrawings, queueStopContinuous, queueSetInterval, playlistQueue } from '../sockets/sEmits';
+import { queueStartContinuous, queueStopContinuous, queueUpdateContinuous } from '../sockets/sEmits';
 
 const DEFAULT_MAX_VALUE = 86400.0;    // 60*60*24 seconds in a day
 
 const mapStateToProps = (state) => {
     return {
         isQueueEmpty: getQueueEmpty(state),
-        intervalValue: getQueueIntervalValue(state)
+        intervalValue: getQueueIntervalValue(state),
+        isShuffle: getQueueShuffle(state)
+    }
+}
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        setContinousStatus: (val) => dispatch(setContinuousStatus(val))
     }
 }
 
@@ -23,7 +32,8 @@ class PlayContinuous extends Component{
         super(props);
         this.initialPropsIntervalValue = this.props.intervalValue;
         this.state = {
-            intervalValue: this.props.intervalValue || 300
+            intervalValue: this.props.intervalValue || 0,
+            shuffle: this.props.isShuffle
         };
     }
 
@@ -31,44 +41,59 @@ class PlayContinuous extends Component{
         return delay > DEFAULT_MAX_VALUE ? (delay/DEFAULT_MAX_VALUE).toFixed(2)  + " days" : "1 day";
     }
 
-    saveInterval(){
-        queueSetInterval(this.state.intervalValue);
-    }
-
     componentDidUpdate(){
         if (this.props.intervalValue !== this.initialPropsIntervalValue){
             this.initialPropsIntervalValue = this.props.intervalValue;
-            this.setState({...this.state, intervalValue: this.props.intervalValue || 300});
+            this.setState({...this.state, intervalValue: this.props.intervalValue});
         }
     }
 
     renderButtons(){
         if (!this.props.isQueueEmpty)
-            return <Col sm={4} className="pl-4 pr-4 pt-4">
-                <IconButton icon={StopFill}
-                    className="w-100 center btn-dark p-2"
-                    onClick={queueStopContinuous}>Stop queue</IconButton>
-            </Col>
-        else return <Col sm={4} className="pl-4 pr-4">
-            <Row>
-                <IconButton icon={PlayFill} 
-                    onClick={() => {
-                        queueStartDrawings(this.props.playlistId);
-                    }} 
-                    className="w-100 center btn-dark p-2">Play</IconButton>
-            </Row>
-            <Row>
-                <IconButton icon={Shuffle} 
-                    onClick={() => queueStartShuffleDrawings(this.props.playlistId)} 
-                    className="w-100 center btn-dark p-2">Shuffle play</IconButton>
-            </Row>
-        </Col>
+            return <Row>
+                    <IconButton icon={StopFill}
+                        className="w-100 center btn-dark p-2"
+                        onClick={queueStopContinuous}>Stop</IconButton>
+                </Row>
+        else return <Row>
+                    <IconButton icon={PlayFill} 
+                        onClick={() => {
+                            queueStartContinuous(this.props.playlistId, this.state.shuffle, this.state.intervalValue);
+                        }} 
+                        className="w-100 center btn-dark p-2">Play</IconButton>
+                </Row>
+    }
+
+    updateStatus(){
+        let continuousStatus = {
+            shuffle: this.state.shuffle,
+            interval: this.state.intervalValue
+        }
+        queueUpdateContinuous(continuousStatus);
+        this.props.setContinousStatus(continuousStatus);
     }
 
     render(){
         return <Form className="m-4 mb-5">
             <Row className="rounded bg-primary p-2">
-                {this.renderButtons()}
+                <Col sm={4}>
+                    {this.renderButtons()}
+                    <Row>
+                        <Form.Group className="bg-dark p-2 rounded center w-100 m-1">
+                            <Form.Check
+                                label={<div className="text-primary d-flex">
+                                        <span className="align-self-center mr-2 ml-2">
+                                            <Shuffle className="icon"/>
+                                        </span>
+                                        Shuffle play
+                                    </div>} 
+                                type="switch"
+                                id={_.uniqueId("shuffle-")}
+                                checked={this.state.shuffle}
+                                onChange={(e)=>this.setState({...this.state, shuffle: e.target.checked}, this.updateStatus.bind(this))}/>
+                        </Form.Group>
+                    </Row>
+                </Col>
                 <Col sm={4}>
                     <Form.Group className="w-100 bg-dark rounded p-2 mt-1">
                         <Row>
@@ -87,7 +112,7 @@ class PlayContinuous extends Component{
                                 }}
                                 onMouseUp={(evt) => {
                                     this.setState({...this.state, intervalValue: evt.target.value},
-                                        this.saveInterval.bind(this));
+                                        this.updateStatus.bind(this));
                                 }}/>
                         </Row>
                     </Form.Group>
@@ -96,14 +121,16 @@ class PlayContinuous extends Component{
                     <Form.Group className="w-100 bg-dark rounded p-2 mt-1">
                         <Row className="mb-2">
                             <Col>
-                                <Form.Label className="center">Delay between drawings [s]</Form.Label>
+                                <Form.Label className="center">Interval between drawings [s]</Form.Label>
                             </Col>
                         </Row>
                         <Row>
                             <Col>
-                                <Form.Control value={this.state.intervalValue} 
+                                <Form.Control 
+                                    className="center"
+                                    value={this.state.intervalValue} 
                                     onBlur={(evt) => {
-                                        this.saveInterval();
+                                        this.updateStatus();
                                     }}
                                     onChange={(evt) => {
                                         if (evt.target.value === ""){
@@ -121,8 +148,8 @@ class PlayContinuous extends Component{
                                         if (evt.code === "Enter"){
                                             if (this.state.intervalValue === "")
                                                 this.setState({...this.state, intervalValue: 0}, 
-                                                    this.saveInterval.bind(this));
-                                            else this.saveInterval();
+                                                    this.updateStatus.bind(this));
+                                            else this.updateStatus();
                                             evt.preventDefault();
                                         }
                                         else return evt;
@@ -133,8 +160,7 @@ class PlayContinuous extends Component{
                 </Col>
             </Row>
         </Form>
-        
     }
 }
 
-export default connect(mapStateToProps)(PlayContinuous);
+export default connect(mapStateToProps, mapDispatchToProps)(PlayContinuous);
