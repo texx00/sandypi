@@ -5,11 +5,8 @@ Revises: 2f4ab5178ba3
 Create Date: 2021-04-06 15:30:50.963976
 
 """
-from typing import Sequence
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy import orm
-from sqlalchemy.sql.schema import PrimaryKeyConstraint
 
 
 # revision identifiers, used by Alembic.

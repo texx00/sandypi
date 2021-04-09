@@ -39,7 +39,8 @@ def preprocess_drawing(filename, file):
     # create the preview image
     try:
         with open(os.path.join(folder, str(new_file.id)+".gcode")) as file:
-            image, dimensions = factory.gcode_to_image(file)
+            dimensions, coords = factory.gcode_to_coords(file)
+            image = factory.draw_image(coords, dimensions)
             # saving the new image
             image.save(os.path.join(folder, str(new_file.id)+".jpg"))
         

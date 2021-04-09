@@ -3,13 +3,12 @@ import './SinglePlaylist.scss';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Container, Row, Col } from 'react-bootstrap';
-import { Play, X } from 'react-bootstrap-icons';
+import { X } from 'react-bootstrap-icons';
 
 import ConfirmButton from '../../../../components/ConfirmButton';
 import SortableElements from '../../../../components/SortableElements';
-import IconButton from '../../../../components/IconButton';
 
-import { playlistDelete, playlistQueue, playlistSave } from '../../../../sockets/sEmits';
+import { playlistDelete, playlistSave } from '../../../../sockets/sEmits';
 import { listsAreEqual } from '../../../../utils/dictUtils';
 
 import { tabBack } from '../../Tabs.slice';
@@ -87,6 +86,14 @@ class SinglePlaylist extends Component{
     }
 
     componentDidUpdate(){
+        if (this.props.mandatoryRefresh){
+            this.setState({...this.state, elements: this.addControlCard(this.props.playlist.elements)});
+            this.props.resetMandatoryRefresh()
+        }
+
+        if (this.props.playlistHasBeenDeleted){
+            this.props.handleTabBack();
+        }
     }
 
     handleElementUpdate(element){
@@ -132,14 +139,6 @@ class SinglePlaylist extends Component{
 
     // TODO add "enter to confirm" event to save the values of the fields in the elements options modals and also the name change
     render(){
-        if (this.props.mandatoryRefresh){
-            this.setState({...this.state, elements: this.addControlCard(this.props.playlist.elements)});
-            this.props.resetMandatoryRefresh()
-        }
-
-        if (this.props.playlistHasBeenDeleted){
-            this.props.handleTabBack();
-        }
 
         return <Container>
             <div>

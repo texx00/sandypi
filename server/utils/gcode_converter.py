@@ -56,7 +56,7 @@ class ImageFactory:
     # converts a gcode file to an image
     # requires: gcode file (not filepath)
     # return the image file
-    def gcode_to_image(self, file):
+    def gcode_to_coords(self, file):
         total_lenght = 0
         coords = []
         xmin =  100000
@@ -132,12 +132,6 @@ class ImageFactory:
             print("Coordinates:")
             print(coords)
             print("XMIN:{}, XMAX:{}, YMIN:{}, YMAX:{}".format(xmin, xmax, ymin, ymax))
-        limits = {
-            "xmin": xmin,
-            "xmax": xmax,
-            "ymin": ymin,
-            "ymax": ymax
-        }
         drawing_infos = {
             "total_lenght": total_lenght,
             "xmin": xmin,
@@ -147,12 +141,12 @@ class ImageFactory:
         }
 
         # return the image obtained from the coordinates
-        return self.draw_image(coords, limits), drawing_infos
+        return drawing_infos, coords
 
 
     # draws an image with the given coordinates (array of tuple of points) and the extremes of the points
-    def draw_image(self, coords, limits):
-        limits = DotMap(limits)
+    def draw_image(self, coords, drawing_infos):
+        limits = DotMap(drawing_infos)
         # Make the image larger than needed so can apply antialiasing
         factor = 5.0
         img_width = self.final_width*factor

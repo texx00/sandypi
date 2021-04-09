@@ -1,15 +1,18 @@
 import os
+import re
+import json
 from pathlib import Path
 from dotmap import DotMap
-import re
 from time import time, sleep
 from datetime import datetime, timedelta
 from math import sqrt
 
 from server.database.models import UploadedFiles
 from server.database.playlist_elements_tables import get_playlist_table_class
-from server.utils.settings_utils import LINE_RECEIVED
 from server.database.generic_playlist_element import GenericPlaylistElement
+from server.utils.settings_utils import LINE_RECEIVED
+from server.utils.gcode_converter import ImageFactory
+from server.utils.settings_utils import load_settings, get_only_values
 
 """ 
     ---------------------------------------------------------------------------
@@ -44,13 +47,29 @@ class DrawingElement(GenericPlaylistElement):
 
         
     def execute(self, logger):
+        # generate filename
+        filename = os.path.join(str(Path(__file__).parent.parent.absolute()), "static/Drawings/{0}/{0}.gcode".format(self.drawing_id))
+        
         # loads the total lenght of the drawing to calculate eta
-        self._total_distance = UploadedFiles.get_drawing(self.drawing_id).path_length
+        drawing_infos = UploadedFiles.get_drawing(self.drawing_id)
+        self._total_distance = drawing_infos.path_length
         if (self._total_distance is None) or (self._total_distance < 0):
             self._total_distance = 0
-        
-        # loads the gcode file
-        filename = os.path.join(str(Path(__file__).parent.parent.absolute()), "static/Drawings/{0}/{0}.gcode".format(self.drawing_id))
+            # if no path lenght is available try to calculate it and save it again (necessary for old versions compatibility, TODO remove this in future versions?)
+            # need to open the file an extra time to analyze it completely (cannot do it while executing the element)
+            try:
+                with open(filename) as f:
+                    settings = load_settings()
+                    factory = ImageFactory(get_only_values(settings["device"]))
+                    dimensions, _ = factory.gcode_to_coords(f)                                      # ignores the coordinates and use only the drawing dimensions
+                    drawing_infos.path_length = dimensions["total_lenght"]                       
+                    del dimensions["total_lenght"]
+                    drawing_infos.dimensions_info = json.dumps(dimensions)
+                    drawing_infos.save()
+                    self._total_distance = drawing_infos.path_length
+            except Exception as e:
+                logger.exception(e)
+
         with open(filename) as f:
             for line in f:
                 # clears the line

@@ -14,15 +14,17 @@ import { getElementClass } from '../playlists/SinglePlaylist/Elements';
 import { isViewQueue } from '../selector';
 
 import { setTab, tabBack } from '../Tabs.slice';
+import ETA from './ETA';
 import { setQueueElements, setQueueStatus } from './Queue.slice';
-import { getQueueCurrent, getQueueElements, getQueueEmpty } from './selector';
+import { getQueueCurrent, getQueueElements, getQueueEmpty, getQueueProgress } from './selector';
 
 const mapStateToProps = (state) => {
     return {
         elements: getQueueElements(state),
         currentElement: getQueueCurrent(state),
         isQueueEmpty: getQueueEmpty(state),
-        isViewQueue: isViewQueue(state)
+        isViewQueue: isViewQueue(state),
+        progress: getQueueProgress(state)
     }
 }
 
@@ -59,7 +61,6 @@ class Queue extends Component{
 
     parseQueue(data){
         let res = JSON.parse(data);
-        console.log(res);
         res.elements = res.elements.map((el) => { return JSON.parse(el) });
         this.props.setQueueStatus(res);
     }
@@ -80,6 +81,8 @@ class Queue extends Component{
     stopDrawing(){
         queueStopCurrent();
     }
+    
+    // TODO show shuffle/interval if in continous mode?
 
     renderPauseRestart(){
         // TODO add a pause and restart button
@@ -136,6 +139,9 @@ class Queue extends Component{
                         </Col>
                         <Col sm={1}/>
                         <Col sm={4} className="pr-5 pl-5">
+                            <Row>
+                                <ETA progress={this.props.progress || {eta: -1}}/>
+                            </Row>
                             <Row>
                                 <IconButton className={"w-100 center"} icon={Stop}>Stop</IconButton>
                             </Row>

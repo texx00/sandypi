@@ -365,7 +365,8 @@ class Feeder():
         def delay():
             time.sleep(5)
             self._on_device_ready()
-        th = Thread(target = delay)
+        th = Thread(target = delay, daemon=True)
+        th.name = "waiting_device_ready"
         th.start()
 
     # thread function

@@ -32,7 +32,7 @@ class PlayContinuous extends Component{
         super(props);
         this.initialPropsIntervalValue = this.props.intervalValue;
         this.state = {
-            intervalValue: this.props.intervalValue,
+            intervalValue: this.props.intervalValue || 0,
             shuffle: this.props.isShuffle
         };
     }

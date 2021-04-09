@@ -45,6 +45,9 @@ class UploadedFiles(db.Model):
 
     def __repr__(self):
         return '<Uploaded file %r>' % self.filename
+    
+    def save(self):
+        return db.session.commit()
 
     @classmethod
     def get_full_drawings_list(cls):
