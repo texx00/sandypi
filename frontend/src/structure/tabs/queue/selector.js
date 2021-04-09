@@ -11,4 +11,6 @@ const getQueueShuffle =         state => {return state.queue.shuffle};
 
 const getQueueProgress =        state => {return state.queue.status.progress};
 
-export {getQueueEmpty, getQueueElements, getQueueCurrent, getQueueIntervalValue, getQueueShuffle, getQueueProgress};
+const getIsQueuePaused =        state => {return state.queue.status.is_paused};
+
+export {getQueueEmpty, getQueueElements, getQueueCurrent, getQueueIntervalValue, getQueueShuffle, getQueueProgress, getIsQueuePaused};

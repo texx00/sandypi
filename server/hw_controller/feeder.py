@@ -249,11 +249,13 @@ class Feeder():
     def pause(self):
         with self.status_mutex:
             self._is_paused = True
+        self.logger.info("Paused")
     
     # resumes the drawing (only if used with "pause()" and not "stop()")
     def resume(self):
         with self.status_mutex:
             self._is_paused = False
+        self.logger.info("Resumed")
 
     # function to prepare the command to be sent.
     #  * command: command to send

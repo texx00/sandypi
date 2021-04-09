@@ -38,6 +38,14 @@ function drawingQueue(code){
     socket.emit("drawing_queue", code);
 }
 
+function drawingPause(){
+    socket.emit("drawing_pause");
+}
+
+function drawingResume(){
+    socket.emit("drawing_resume");
+}
+
 
 // ---- LEDS ----
 
@@ -133,6 +141,8 @@ export {
     drawingDelete, 
     drawingsRequest, 
     drawingQueue, 
+    drawingPause,
+    drawingResume,
     ledsSetColor,
     playlistsRequest, 
     playlistDelete,

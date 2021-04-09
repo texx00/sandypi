@@ -126,6 +126,14 @@ def drawing_queue(code):
     element = DrawingElement(drawing_id=code)
     app.qmanager.queue_element(element)
 
+@socketio.on("drawing_pause")
+def drawing_pause():
+    app.qmanager.pause()
+
+@socketio.on("drawing_resume")
+def drawing_resume():
+    app.qmanager.resume()
+
 @socketio.on("drawing_delete")
 def drawing_delete(code):
     item = db.session.query(UploadedFiles).filter_by(id=code).first()
@@ -180,6 +188,7 @@ def queue_stop_all():
 @socketio.on("queue_stop_queue")
 def queue_stop_queue():
     queue_set_order("")
+    app.qmanager.send_queue_status()
 
 @socketio.on("queue_stop_continuous")
 def queue_stop_continuous():

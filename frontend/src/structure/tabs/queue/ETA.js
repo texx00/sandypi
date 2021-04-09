@@ -12,20 +12,21 @@ function Counter(props) {
       return () => clearInterval(timer);
     }, [counter]);
   
-    if (counter < 3600) return Math.floor(counter/60) + "m " + Math.floor(counter%60) + "s";
-    else return Math.floor(counter/3600) + "h " + Math.floor((counter%3600)/60) + "m"
+    if (counter < 30) return <h3>Almost done...</h3>
+    else if (counter < 3600) return <h3>ETA {Math.floor(counter/60) + "m " + Math.floor(counter%60) + "s"}</h3>
+    else return <h3>ETA {Math.floor(counter/3600) + "h " + Math.floor((counter%3600)/60) + "m"}</h3>
   }
 
 class ETA extends Component{
 
     printETA(){
-        if (this.props.progress.eta < 60)
-            return <h3>Almost done...</h3>
-        else return <h3>ETA <Counter eta={this.props.progress.eta}/></h3>
+        return <Counter eta={this.props.progress.eta}/>
     }
 
     renderEta(){
-        if (this.props.progress.eta === -1)
+        if (this.props.isPaused)
+            return <h3>Drawing paused</h3>
+        else if (this.props.progress.eta === -1)
             return <OverlayTrigger overlay={
                 <Tooltip>
                     Set a feedrate with a "G0 Fxxx" command to get the ETA in s

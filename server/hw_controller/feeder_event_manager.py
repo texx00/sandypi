@@ -40,3 +40,4 @@ class FeederEventManager(FeederEventHandler):
 
     def on_device_ready(self):
         self.app.qmanager.check_autostart()
+        self.app.qmanager.send_queue_status()
