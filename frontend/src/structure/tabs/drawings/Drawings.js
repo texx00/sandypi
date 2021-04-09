@@ -11,9 +11,13 @@ import DrawingCard from './DrawingCard';
 
 import { setRefreshDrawing } from './Drawings.slice';
 import { getDrawings } from './selector';
+import { getQueueCurrent } from '../queue/selector';
 
 const mapStateToProps = (state) => {
-    return { drawings: getDrawings(state) }
+    return { 
+        drawings: getDrawings(state),
+        currentElement: getQueueCurrent(state) 
+    }
 }
 
 const mapDispatchToProps = (dispatch) => {
@@ -38,13 +42,17 @@ class Drawings extends Component{
     }
 
     renderDrawings(drawings){
-        if (drawings !== undefined)
+        if (drawings !== undefined){
+            let currentDrawingId = 0;
+            if (this.props.currentElement !== undefined)
+                if (this.props.currentElement.element_type === "drawing") 
+                    currentDrawingId = this.props.currentElement.drawing_id
             return drawings.map((d, index)=>{
                 return <Col key={index} sm={4}>
-                        <DrawingCard drawing={d}/>
+                        <DrawingCard drawing={d} highlight={d.id === currentDrawingId}/>
                     </Col>
             });
-        else{
+        }else{
             return <div></div>
         }
     }
