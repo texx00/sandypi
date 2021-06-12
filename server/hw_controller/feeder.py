@@ -15,7 +15,7 @@ from server.utils.logging_utils import formatter
 from server.hw_controller.device_serial import DeviceSerial
 from server.hw_controller.gcode_rescalers import Fit
 import server.hw_controller.firmware_defaults as firmware
-from server.database.playlist_elements import TimeElement
+from server.database.playlist_elements import DrawingElement, TimeElement
 from server.database.generic_playlist_element import UNKNOWN_PROGRESS
 
 """
@@ -374,7 +374,9 @@ class Feeder():
     # thread function
     # TODO move this function in a different class?
     def _thf(self, element):
-        self.send_script(self.settings['scripts']['before']["value"])
+        # runs the script only it the element is a drawing, otherwise will skip the "before" script
+        if isinstance(element, DrawingElement):
+            self.send_script(self.settings['scripts']['before']["value"])
 
         self.logger.info("Starting new drawing with code {}".format(element))
         
@@ -391,17 +393,24 @@ class Feeder():
                 continue
 
             line = line.upper()
-            while self.is_paused():
-                time.sleep(0.1)
-                # TODO parse line to scale/add padding to the drawing according to the drawing settings (in order to keep the original .gcode file)
-                #line = filter.parse_line(line)
-                #line = "N{} ".format(file_line) + line
 
             self.send_gcode_command(line)
+
+            while self.is_paused():
+                time.sleep(0.1)
+                # if a "stop" command is raised must exit the pause and stop the drawing
+                if not self.is_running():
+                    break
+
+            # TODO parse line to scale/add padding to the drawing according to the drawing settings (in order to keep the original .gcode file)
+            #line = filter.parse_line(line)
+            #line = "N{} ".format(file_line) + line
         with self.status_mutex:
             self._stopped = True
         if self.is_running():
-            self.send_script(self.settings['scripts']['after']["value"])
+            # runs the script only it the element is a drawing, otherwise will skip the "after" script
+            if isinstance(element, DrawingElement):
+                self.send_script(self.settings['scripts']['after']["value"])
             self.stop()
 
     # thread that keep reading the serial port

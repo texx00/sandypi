@@ -19,7 +19,7 @@ class ImageFactory:
     #  - final_border_px (default: 20): the border to leave around the picture in px
     #  - line_width (default: 5): line thickness (px)
     #  - verbose (boolean) (default: False): if True prints the coordinates and other stuff in the command line
-    def __init__(self, device, final_width=800, final_height=800, bg_color=(0,0,0), line_color=(255,255,255), final_border_px=20, line_width=3, verbose=False):
+    def __init__(self, device, final_width=800, final_height=800, bg_color=(0,0,0), line_color=(255,255,255), final_border_px=20, line_width=1, verbose=False):
         self.final_width = final_width
         self.final_height = final_height
         self.bg_color = bg_color if len(bg_color) == 4 else (*bg_color, 0)  # color argument requires also alpha value
@@ -178,6 +178,8 @@ class ImageFactory:
 
         # Resize the image to the final dimension to use antialiasing
         image = image.resize((int(self.final_width), int(self.final_height)), Image.ANTIALIAS)
+        if self.is_scara():
+            image = image.transpose(Image.FLIP_LEFT_RIGHT)
         return image
 
     def circle(self, d, c, r, color):
