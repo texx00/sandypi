@@ -9,6 +9,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
 from dotmap import DotMap
+from py_expression_eval import Parser
 
 from server.utils import limited_size_dict, buffered_timeout, settings_utils
 from server.utils.logging_utils import formatter
@@ -49,8 +50,9 @@ class FeederEventHandler():
 
 
 # List of commands that are buffered by the controller
-BUFFERED_COMMANDS = ("G0", "G00", "G1", "G01", "G2", "G02", "G3", "G03", "G28")
-
+BUFFERED_COMMANDS   = ("G0", "G00", "G1", "G01", "G2", "G02", "G3", "G03", "G28")
+# Defines the character used to define macros
+MACRO_CHAR          = "&"
 
 class Feeder():
     def __init__(self, handler = None, **kargvs):
@@ -110,6 +112,9 @@ class Feeder():
         self.feed_regex =   re.compile("[F]([0-9.-]+)($|\s)")           # looks for a +/- float number after an F, until the first space or the end of the line
         self.x_regex =      re.compile("[X]([0-9.-]+)($|\s)")           # looks for a +/- float number after an X, until the first space or the end of the line
         self.y_regex =      re.compile("[Y]([0-9.-]+)($|\s)")           # looks for a +/- float number after an Y, until the first space or the end of the line
+        self.macro_regex =  re.compile(MACRO_CHAR+"(.*?)"+MACRO_CHAR)   # looks for stuff between two "%" symbols. Used to parse macros
+        
+        self.macro_parser = Parser()                                    # macro expressions parser
 
         # buffer controll attrs
         self.command_buffer = deque()
@@ -261,6 +266,8 @@ class Feeder():
     #  * command: command to send
     #  * hide_command=False (optional): will hide the command from being sent also to the frontend (should be used for SW control commands)
     def send_gcode_command(self, command, hide_command=False):
+        command = self._parse_macro(command)
+
         if "G28" in command:
             self.last_commanded_position.x = 0
             self.last_commanded_position.y = 0
@@ -281,14 +288,17 @@ class Feeder():
                     self.command_buffer.clear()
 
         # check if the command is in the "BUFFERED_COMMANDS" list and stops if the buffer is full
-        if any(code in command for code in BUFFERED_COMMANDS):
-            if "F" in command:
-                self.feedrate = float(self.feed_regex.findall(command)[0][0])
-            if "X" in command:
-                self.last_commanded_position.x = self.x_regex.findall(command)[0][0]
-            if "Y" in command:
-                self.last_commanded_position.y = self.y_regex.findall(command)[0][0]
-
+        try:
+            if any(code in command for code in BUFFERED_COMMANDS):
+                if "F" in command:
+                    self.feedrate = float(self.feed_regex.findall(command)[0][0])
+                if "X" in command:
+                    self.last_commanded_position.x = float(self.x_regex.findall(command)[0][0])
+                if "Y" in command:
+                    self.last_commanded_position.y = float(self.y_regex.findall(command)[0][0])
+        except:
+            self.logger.error("Cannot parse something in the command: " + command)
+        finally:
             # wait until the lock for the buffer length is released -> means the board sent the ack for older lines and can send new ones
             with self.command_send_mutex:       # wait until get some "ok" command to remove extra entries from the buffer
                 pass
@@ -649,3 +659,24 @@ class Feeder():
             self.logger.info("Resetting line number")
             self.send_gcode_command("M110 N{}".format(line_number))
         # Grbl do not use line numbers
+
+    def _parse_macro(self, command):
+        if not MACRO_CHAR in command:
+            return command
+        macros = self.macro_regex.findall(command)
+        for m in macros:
+            try:
+                # see https://pypi.org/project/py-expression-eval/ for more info about the parser
+                res = self.macro_parser.parse(m).evaluate({
+                    "X": self.last_commanded_position.x, 
+                    "x": self.last_commanded_position.x,
+                    "Y": self.last_commanded_position.y, 
+                    "y": self.last_commanded_position.y,
+                    "F": self.feedrate,
+                    "f": self.feedrate
+                })
+                command = command.replace(MACRO_CHAR + m + MACRO_CHAR, str(res))
+            except Exception as e:
+                self.logger.error("Error while parsing macro: " + m)
+                self.logger.error(e)
+        return command
