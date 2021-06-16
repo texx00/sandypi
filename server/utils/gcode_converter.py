@@ -110,7 +110,7 @@ class ImageFactory:
                 rho = cos((com_X - com_Y + self.offset_2) * self.pi_conversion) * self.device_radius 
                 # calculate cartesian coords
                 x = cos(theta) * rho
-                y = sin(theta) * rho
+                y = -sin(theta) * rho   # uses - to remove preview mirroring
             elif self.is_polar():
                 x = cos((com_X + self.offset_1)*self.pi_conversion) * com_Y * self.device_radius
                 y = sin((com_X + self.offset_1)*self.pi_conversion) * com_Y * self.device_radius
@@ -178,8 +178,6 @@ class ImageFactory:
 
         # Resize the image to the final dimension to use antialiasing
         image = image.resize((int(self.final_width), int(self.final_height)), Image.ANTIALIAS)
-        if self.is_scara():
-            image = image.transpose(Image.FLIP_LEFT_RIGHT)
         return image
 
     def circle(self, d, c, r, color):
