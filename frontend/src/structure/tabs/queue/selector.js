@@ -20,4 +20,7 @@ const getQueueRepeat =          state => {return state.queue.repeat}
 // returns true if the shuffle mode is currently selected
 const getQueueShuffle =         state => {return state.queue.shuffle}
 
-export {getQueueEmpty, getQueueElements, getQueueCurrent, getQueueProgress, getIsQueuePaused, getQueueRepeat, getQueueShuffle};
+// returns true if the server is running, false, if is on hold
+const getQueueIsRunning =       state => {return state.queue.status.is_running}
+
+export {getQueueEmpty, getQueueElements, getQueueCurrent, getQueueProgress, getIsQueuePaused, getQueueRepeat, getQueueShuffle, getQueueIsRunning};

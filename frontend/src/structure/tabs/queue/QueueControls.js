@@ -6,7 +6,7 @@ import { ArrowRepeat, Eye, PauseFill, PlayFill, Shuffle, SkipForwardFill, StopFi
 
 import IconButton from '../../../components/IconButton';
 
-import { getIsQueuePaused, getQueueCurrent, getQueueElements, getQueueEmpty, getQueueRepeat, getQueueShuffle } from './selector';
+import { getIsQueuePaused, getQueueElements, getQueueEmpty, getQueueIsRunning, getQueueRepeat, getQueueShuffle } from './selector';
 import { setTab } from '../Tabs.slice';
 import { isViewQueue } from '../selector';
 import { toggleQueueRepeat, toggleQueueShuffle } from './Queue.slice';
@@ -15,12 +15,12 @@ import { drawingPause, drawingResume, queueNextDrawing, queueSetRepeat, queueSet
 const mapStateToProps = (state) => {
     return {
         elements:       getQueueElements(state),
-        currentElement: getQueueCurrent(state),
         isQueueEmpty:   getQueueEmpty(state),
         isPause:        getIsQueuePaused(state),
         isViewQueue:    isViewQueue(state),
         isRepeat:       getQueueRepeat(state),
-        isShuffle:      getQueueShuffle(state)
+        isShuffle:      getQueueShuffle(state),
+        isRunning:      getQueueIsRunning(state)
     }
 }
 
@@ -54,7 +54,7 @@ class QueueControls extends Component{
     }
 
     render(){
-        if (this.props.currentElement !== undefined){
+        if (this.props.isRunning){
             return <div className="preview-bar-container p-2 m-2 rounded">
                 
                 <IconButton className = {"btn p-2 " + (this.props.isViewQueue ? "" : " btn-dark")}

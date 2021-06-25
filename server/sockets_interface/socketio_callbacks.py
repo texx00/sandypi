@@ -183,7 +183,18 @@ def queue_next_drawing():
 @socketio.on("queue_stop_all")
 def queue_stop_all():
     queue_set_order("")
-    queue_next_drawing()
+    app.qmanager.stop()
+
+# sets the repeat flag for the queue
+@socketio.on("queue_set_repeat")
+def queue_set_repeat(val):
+    app.qmanager.set_repeat(val)
+    app.logger.info("repeat selected")
+
+# sets the shuffle flag for the queue
+@socketio.on("queue_set_shuffle")
+def queue_set_shuffle(val):
+    app.qmanager.set_shuffle(val)
 
 # --------------------------------------------------------- LEDS CALLBACKS -------------------------------------------------------------------------------
 

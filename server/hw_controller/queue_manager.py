@@ -2,6 +2,7 @@ from queue import Queue
 import json
 from threading import Thread
 import time
+import random
 
 from server.utils import settings_utils
 from server.hw_controller.continuous_queue_generator import ContinuousQueueGenerator
@@ -13,9 +14,9 @@ class QueueManager():
         self._element = None
         self.app = app
         self.socketio = socketio
-        self.continuous_generator = None
-        self.continuous_interval = 0
         self.q = Queue()
+        self.repeat = False
+        self.shuffle = False
 
         # setup status timer
         self._th = Thread(target=self._thf, daemon=True)
@@ -29,11 +30,13 @@ class QueueManager():
     def pause(self):
         self.app.feeder.pause()
         self.send_queue_status()
+        self.app.logger.info("Drawing paused")
     
     # resumes the feeder
     def resume(self):
         self.app.feeder.resume()
         self.send_queue_status()
+        self.app.logger.info("Drawing resumed")
 
     # returns a boolean: true if the queue is empty and it is drawing, false otherwise
     def is_queue_empty(self):
@@ -46,7 +49,7 @@ class QueueManager():
     def get_element(self):
         return self._element
     
-    # return set the current element
+    # set the current element
     def set_element(self, element):
         self.app.logger.info("Now running: {}".format(element))
         self._element = element
@@ -55,6 +58,18 @@ class QueueManager():
     # stop the current drawing and start the next
     def stop(self):
         self.app.feeder.stop()
+
+    # sets the repeat flag
+    def set_repeat(self, val):
+        if type(val) == type(True):
+            self.repeat = val
+        else: raise ValueError("The argument must be boolean")
+
+    # sets the shuffle flag
+    def set_shuffle(self, val):
+        if type(val) == type(True):
+            self.shuffle = val
+        else: raise ValueError("The argument must be boolean")
 
     # add an element to the queue
     def queue_element(self, element, show_toast=True):
@@ -100,16 +115,6 @@ class QueueManager():
     def queue_length(self):
         return self.q.qsize()
     
-    def update_interval(self, interval):
-        if self.continuous_interval != interval:
-            self.continuous_interval = interval
-            self.continuous_generator.set_interval(interval)
-            if self.is_drawing:
-                # check if is in continous mode and is running a timing element
-                if (type(self._element) is TimeElement) and (not self.continuous_generator is None):
-                    self.app.feeder.update_current_time_element(interval)
-                    self.send_queue_status()
-    
     # start the next drawing of the queue
     # by default will start it only if not already printing something
     # with "force_stop = True" will stop the actual drawing and start the next
@@ -118,19 +123,25 @@ class QueueManager():
             if not force_stop:
                 return False
         try:
+            # should not remove the element from the queue if repeat is active. Should just add it at the end of the queue
+            if (not self._element is None) and (self.repeat):
+                self.q.put(self._element)
             self._element = None
             if self.queue_length() > 0:
-                element = self.q.queue.popleft()
+                element = None
+                # if shuffle is enabled select a random drawing from the queue otherwise uses the first element of the queue
+                if self.shuffle:
+                    elements = list(self.q.queue)
+                    if len(element>1):  # if the list is longer than 2 will pop the last element to avoid using it again
+                        elements.pop(-1)
+                    element = elements.pop(random.randrange(len(elements)))
+                    self.set_new_order(elements)
+                else: 
+                    element = self.q.queue.popleft()
+                # starts the choosen element
                 self.start_element(element)
                 self.app.logger.info("Starting next element: {}".format(element))
                 return True
-            elif not self.continuous_generator is None:
-                els = self.continuous_generator.generate_next_elements()
-                if els is None:
-                    self.continuous_generator = None
-                else:
-                    for e in els:
-                        self.queue_element(e)
             return False
         except Exception as e:
             self.app.logger.exception(e)
@@ -149,30 +160,15 @@ class QueueManager():
     def send_queue_status(self):
         elements = list(map(lambda x: str(x), self.q.queue)) if len(self.q.queue) > 0 else []                       # converts elements to json
         res = {
-            "current_element": str(self._element),
-            "elements": elements,
-            "status": self.app.feeder.get_status()
+            "current_element":  str(self._element),
+            "elements":         elements,
+            "status":           self.app.feeder.get_status(),
+            "repeat":           self.repeat,
+            "shuffle":          self.shuffle,
         }
         self.app.semits.emit("queue_status", json.dumps(res))
     
-    # stops the automatic selection of the drawings
-    def stop_continuous(self):
-        self.continuous_generator = None
-        if type(self._element) is TimeElement:
-            self.stop()
-
-    # starts drawings continuously
-    def start_continuous_drawing(self, shuffle=False, playlist=0, interval=0):
-        self.continuous_interval = interval
-        self.continuous_generator = ContinuousQueueGenerator(shuffle=shuffle, interval=self.continuous_interval, playlist=playlist)
-        self.start_next()
-    
-    # changes the continuous mode (shuffle and interval)
-    def set_continuous_status(self, status):
-        if not self.continuous_generator is None:
-            self.update_interval(status["interval"])
-            self.continuous_generator.set_shuffle(status["shuffle"])
-
+    # FIXME change this to use the new queue logic
     # checks if should start drawing after the server is started and ready (can be set in the settings page)
     def check_autostart(self):
         autostart = settings_utils.get_only_values(settings_utils.load_settings()["autostart"])
@@ -182,8 +178,8 @@ class QueueManager():
             autostart["interval"] = 0
         
         if autostart["on_ready"]:
-            self.set_continuous_interval(autostart["interval"])
-            self.start_continuous_drawing(autostart["shuffle"])
+            pass
+            # FIXME here should start random drawings
 
     # periodically updates the queue status, used by the thread
     def _thf(self):

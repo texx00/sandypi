@@ -49,9 +49,6 @@ class Queue extends Component{
         if (!listsAreEqual(this.state.elements, this.props.elements)){
             this.setState({...this.state, elements: this.props.elements, refreshList: true});
         }
-        if (this.props.currentElement === undefined && this.props.isViewQueue){
-            this.props.handleTabBack();
-        }
     }
 
     componentDidMount(){

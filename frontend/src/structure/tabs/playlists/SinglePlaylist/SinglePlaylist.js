@@ -3,17 +3,18 @@ import './SinglePlaylist.scss';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Container, Row, Col } from 'react-bootstrap';
-import { X } from 'react-bootstrap-icons';
+import { Play, X } from 'react-bootstrap-icons';
 
 import ConfirmButton from '../../../../components/ConfirmButton';
 import SortableElements from '../../../../components/SortableElements';
+import IconButton from '../../../../components/IconButton';
+import ControlCard from './ControlCard';
 
-import { playlistDelete, playlistSave } from '../../../../sockets/sEmits';
+import { playlistDelete, playlistQueue, playlistSave } from '../../../../sockets/sEmits';
 import { listsAreEqual } from '../../../../utils/dictUtils';
 
 import { tabBack } from '../../Tabs.slice';
 import { addToPlaylist, deletePlaylist, resetPlaylistDeletedFlag, resetMandatoryRefresh, updateSinglePlaylist } from '../Playlists.slice';
-import ControlCard from './ControlCard';
 import { getSinglePlaylist, playlistHasBeenDeleted, singlePlaylistMustRefresh } from '../selector';
 
 const mapStateToProps = (state) => {
@@ -121,7 +122,21 @@ class SinglePlaylist extends Component{
     renderStartButtons(){
         if (this.state.elements.length === 0){
             return ""
-        }else return ""; //FIXME add some buttons to play the playlist
+        }else {
+            let startDrawingLabel = "Queue playlist";
+            if (this.props.currentElement === undefined){
+                startDrawingLabel = "Start playlist";
+            }
+            return <div>
+                <IconButton className="btn" 
+                    icon={Play}
+                    onClick={()=>{
+                        playlistQueue(this.props.playlist.id);
+                    }}>
+                    {startDrawingLabel}
+                </IconButton>
+            </div>
+        }
     }
 
     renderDeleteButton(){
@@ -169,11 +184,17 @@ class SinglePlaylist extends Component{
                     {this.props.playlist.name}
                 </h1>
             </div>
-            {this.renderStartButtons()}
-            {this.renderElements()}
             <Row className="center mt-5">
-                {this.renderDeleteButton()}
+                <Col></Col>
+                <Col>
+                    {this.renderStartButtons()}
+                </Col>
+                <Col>
+                    {this.renderDeleteButton()}
+                </Col>
+                <Col></Col>
             </Row>
+            {this.renderElements()}
         </Container>
     }
 }
