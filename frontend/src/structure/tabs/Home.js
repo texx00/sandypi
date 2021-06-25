@@ -7,7 +7,6 @@ import 'react-multi-carousel/lib/styles.css';
 
 import { Section } from '../../components/Section';
 import PlaceholderCard from '../../components/PlaceholderCard';
-import PlayContinuous from '../../components/PlayContinuous';
 
 import UploadDrawingsModal from './drawings/UploadDrawing';
 import DrawingCard from './drawings/DrawingCard';
@@ -23,16 +22,16 @@ import { setShowNewPlaylist } from './playlists/Playlists.slice';
 
 const mapStateToProps = (state) => {
     return { 
-        drawings: getDrawingsLimited(state),
-        playlists: getPlaylistsLimited(state)
+        drawings:   getDrawingsLimited(state),
+        playlists:  getPlaylistsLimited(state)
      }
 }
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        setRefreshDrawing: () => dispatch(setRefreshDrawing(true)),
-        handleTab: (name) => dispatch(setTab(name)),
-        setShowNewPlaylist: () => dispatch(setShowNewPlaylist(true))
+        setRefreshDrawing:      () => dispatch(setRefreshDrawing(true)),
+        handleTab:          (name) => dispatch(setTab(name)),
+        setShowNewPlaylist:     () => dispatch(setShowNewPlaylist(true))
     }
 }
 
@@ -108,7 +107,6 @@ class Home extends Component{
                         buttonIcon={FileEarmarkPlus}
                         sectionButtonHandler={()=>this.setState({showUpload: true})}
                         titleButtonHandler={()=>this.props.handleTab("drawings")}>
-                            <PlayContinuous />
                             <Carousel responsive={this.carouselResponsive} ssr>
                                 {this.renderDrawings(this.props.drawings)}
                             </Carousel>

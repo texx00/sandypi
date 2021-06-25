@@ -94,8 +94,8 @@ function queueSetOrder(list){
 }
 
 // stops only the current drawing and go on with the next one
-function queueStopCurrent(){
-    socket.emit("queue_stop_current");
+function queueNextDrawing(){
+    socket.emit("queue_next_drawing");
     window.showToast(<div>The current drawing is being stopped. <br/>The device will still run until the buffer is empty.</div>)
 }
 
@@ -105,28 +105,15 @@ function queueStopAll(){
     window.showToast(<div>Stopping the device...</div>);
 }
 
-// clears only the queue
-function queueStopQueue(){
-    socket.emit("queue_stop_queue");
-    window.showToast(<div>Clearing the queue...</div>);
+// updates the value of the "repeat" flag
+function queueSetRepeat(val){
+    socket.emit("queue_set_repeat", val);
 }
 
-// stops the continous play (will finish the current drawing)
-function queueStopContinuous(){
-    socket.emit("queue_stop_continuous");
-    window.showToast(<div>Will finish the current drawing and then stop</div>);
+// updates the value of the "shuffle" flag
+function queueSetShuffle(val){
+    socket.emit("queue_set_shuffle", val);
 }
-
-// starts drawing from 
-function queueStartContinuous(playlistId=0, shuffle=false, interval=0){
-    socket.emit("queue_start_continuous", JSON.stringify({shuffle: shuffle, playlist: playlistId, interval: interval}));
-}
-
-// update the continous play settings
-function queueUpdateContinuous(status){
-    socket.emit("queue_update_continuous", JSON.stringify(status));
-}
-
 
 // ---- MANUAL CONTROL ----
 
@@ -151,12 +138,10 @@ export {
     playlistCreateNew,
     queueGetStatus,
     queueSetOrder,
-    queueStopCurrent,
+    queueNextDrawing,
     queueStopAll,
-    queueStopQueue,
-    queueStopContinuous,
-    queueStartContinuous,
-    queueUpdateContinuous,
+    queueSetRepeat,
+    queueSetShuffle,
     settingsSave,
     settingsShutdownSystem,
     settingsRebootSystem

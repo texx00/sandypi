@@ -11,10 +11,9 @@ import IconButton from '../../../components/IconButton';
 import { createElementDrawing } from '../playlists/elementsFactory';
 import { getImgUrl } from '../../../utils/utils';
 
-import { getQueueEmpty } from '../queue/selector';
+import { getQueueCurrent } from '../queue/selector';
 import { getSingleDrawing } from './selector';
 import { getPlaylistsList } from '../playlists/selector';
-import { setQueueNotEmpty } from '../queue/Queue.slice';
 import { tabBack } from '../Tabs.slice';
 import { deleteDrawing, setRefreshDrawing } from './Drawings.slice';
 import { addToPlaylist } from '../playlists/Playlists.slice';
@@ -23,19 +22,18 @@ import Image from '../../../components/Image';
 
 const mapStateToProps = (state) => {
     return {
-        isQueueEmpty: getQueueEmpty(state),
-        drawing: getSingleDrawing(state),
-        playlists: getPlaylistsList(state)
+        currentElement: getQueueCurrent(state),
+        drawing:        getSingleDrawing(state),
+        playlists:      getPlaylistsList(state)
     }
 }
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        setQueueNotEmpty: () => dispatch(setQueueNotEmpty()),
-        handleTabBack: () => dispatch(tabBack()),
-        refreshDrawings: () => dispatch(setRefreshDrawing()),
-        deleteDrawing: (id) => dispatch(deleteDrawing(id)),
-        addToPlaylist: (bundle) => dispatch(addToPlaylist(bundle))
+        handleTabBack:          () => dispatch(tabBack()),
+        refreshDrawings:        () => dispatch(setRefreshDrawing()),
+        deleteDrawing:        (id) => dispatch(deleteDrawing(id)),
+        addToPlaylist:    (bundle) => dispatch(addToPlaylist(bundle))
     }
 }
 
@@ -61,7 +59,7 @@ class SingleDrawing extends Component{
     render(){
         if (this.props.drawing.id !== undefined){
             let startDrawingLabel = "Queue drawing";
-            if (this.props.isQueueEmpty){
+            if (this.props.currentElement === undefined){
                 startDrawingLabel = "Start drawing";
             }
             // TODO add possibility to edit the gcode file and render again the drawing

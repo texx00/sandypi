@@ -1,11 +1,11 @@
 import { Component } from 'react';
-import { Button } from 'react-bootstrap';
+import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
 
 import "../App.scss";
 
 class IconButton extends Component{
 
-    render(){
+    renderButton(){
         let iconProps = this.props.iconLarge === "true" ? {width: "32", height: "32"} : {};
         iconProps = this.props.iconMedium === "true" ? {width: "20", height: "20"} : iconProps;
         
@@ -26,6 +26,19 @@ class IconButton extends Component{
                 {icon}
             </div>
         </Button>
+    }
+
+    render(){
+        if (this.props.tip !== undefined && this.props.tip !== "")
+            return <OverlayTrigger overlay={
+                <Tooltip>
+                    {this.props.tip}
+                </Tooltip>}
+                delay={{ show: 3000, hide: 250 }}
+                placement="bottom">
+                    {this.renderButton()}
+            </OverlayTrigger>
+        else return this.renderButton();
     }
 
 }

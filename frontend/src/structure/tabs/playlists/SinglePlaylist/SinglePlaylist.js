@@ -15,28 +15,27 @@ import { tabBack } from '../../Tabs.slice';
 import { addToPlaylist, deletePlaylist, resetPlaylistDeletedFlag, resetMandatoryRefresh, updateSinglePlaylist } from '../Playlists.slice';
 import ControlCard from './ControlCard';
 import { getSinglePlaylist, playlistHasBeenDeleted, singlePlaylistMustRefresh } from '../selector';
-import PlayContinuous from '../../../../components/PlayContinuous';
 
 const mapStateToProps = (state) => {
     return {
-        playlist: getSinglePlaylist(state),
-        mandatoryRefresh: singlePlaylistMustRefresh(state),
-        playlistDeleted: playlistHasBeenDeleted(state)
+        playlist:           getSinglePlaylist(state),
+        mandatoryRefresh:   singlePlaylistMustRefresh(state),
+        playlistDeleted:    playlistHasBeenDeleted(state)
     }
 }
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleTabBack: () => {
+        handleTabBack:              () => {
             // can use multiple actions thanks to the thunk library
             dispatch(tabBack());
             dispatch(resetPlaylistDeletedFlag());
         },
-        deletePlaylist: (id) => dispatch(deletePlaylist(id)),
-        updateSinglePlaylist: (pl) => dispatch(updateSinglePlaylist(pl)),
-        addElements: (elements) => dispatch(addToPlaylist(elements)),
-        resetMandatoryRefresh: () => dispatch(resetMandatoryRefresh()),
-        resetPlaylistDeletedFlag: () => dispatch(resetPlaylistDeletedFlag())
+        deletePlaylist:           (id) => dispatch(deletePlaylist(id)),
+        updateSinglePlaylist:     (pl) => dispatch(updateSinglePlaylist(pl)),
+        addElements:        (elements) => dispatch(addToPlaylist(elements)),
+        resetMandatoryRefresh:      () => dispatch(resetMandatoryRefresh()),
+        resetPlaylistDeletedFlag:   () => dispatch(resetPlaylistDeletedFlag())
     }
 }
 
@@ -122,7 +121,7 @@ class SinglePlaylist extends Component{
     renderStartButtons(){
         if (this.state.elements.length === 0){
             return ""
-        }else return <PlayContinuous playlistId={this.props.playlist.id}/>
+        }else return ""; //FIXME add some buttons to play the playlist
     }
 
     renderDeleteButton(){
