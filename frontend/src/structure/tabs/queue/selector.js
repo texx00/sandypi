@@ -23,4 +23,17 @@ const getQueueShuffle =         state => {return state.queue.shuffle}
 // returns true if the server is running, false, if is on hold
 const getQueueIsRunning =       state => {return state.queue.status.is_running}
 
-export {getQueueEmpty, getQueueElements, getQueueCurrent, getQueueProgress, getIsQueuePaused, getQueueRepeat, getQueueShuffle, getQueueIsRunning};
+// returns the current interval value for the queue
+const getIntervalValue =        state => {return state.queue.interval}
+
+export {
+    getQueueEmpty, 
+    getQueueElements, 
+    getQueueCurrent, 
+    getQueueProgress, 
+    getIsQueuePaused, 
+    getQueueRepeat, 
+    getQueueShuffle, 
+    getQueueIsRunning, 
+    getIntervalValue
+};

@@ -16,6 +16,7 @@ import { getIsQueuePaused, getQueueCurrent, getQueueElements, getQueueEmpty, get
 import { isViewQueue } from '../selector';
 import { setQueueElements, setQueueStatus } from './Queue.slice';
 import { setTab, tabBack } from '../Tabs.slice';
+import IntervalControl from './IntervalControl';
 
 const mapStateToProps = (state) => {
     return {
@@ -107,8 +108,9 @@ class Queue extends Component{
                             <div className="p-2"/>
                         </Col>
                         <Col sm={4} className="pr-5 pl-5">
-                            <Row className="d-flex align-item-center h-100">
+                            <Row className="d-flex align-item-center h-100 m-auto">
                                 <ETA classname="align-item-center" progress={this.props.progress || {eta: -1}} isPaused={this.props.isPaused}/>
+                                <IntervalControl />
                             </Row>
                         </Col>
                     </Row>

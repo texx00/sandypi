@@ -68,6 +68,12 @@ button{
     margin: 0px !important;
 }
 
+.infos-box{
+    @extend .bg-light;
+    @extend .rounded;
+    @extend .text-dark;
+}
+
 /* HOVERS */
 
 .image-overlay-light{

@@ -115,6 +115,11 @@ function queueSetShuffle(val){
     socket.emit("queue_set_shuffle", val);
 }
 
+//updates the value of the queue interval
+function queueSetInterval(val){
+    socket.emit("queue_set_interval", val);
+}
+
 // ---- MANUAL CONTROL ----
 
 function controlEmergencyStop(){
@@ -142,6 +147,7 @@ export {
     queueStopAll,
     queueSetRepeat,
     queueSetShuffle,
+    queueSetInterval,
     settingsSave,
     settingsShutdownSystem,
     settingsRebootSystem

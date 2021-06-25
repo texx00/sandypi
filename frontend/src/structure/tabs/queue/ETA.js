@@ -49,7 +49,7 @@ class ETA extends Component{
     }
 
     render(){
-        return <div className="p-4 center bg-light text-dark rounded m-auto w-100">{this.renderEta()}</div>
+        return <div className="p-4 center infos-box m-auto w-100">{this.renderEta()}</div>
     }
 }
 

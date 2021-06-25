@@ -7,6 +7,7 @@ const queueSlice = createSlice({
         currentElement: undefined,
         repeat: false,
         shuffle: false,
+        interval: 0,
         status: {eta: -1}
     },
     reducers: {
@@ -22,7 +23,7 @@ const queueSlice = createSlice({
             return {
                 elements:       res.elements,
                 currentElement: res.current_element,
-                intervalValue:  res.intervalValue,
+                interval:       res.interval,
                 status:         res.status,
                 repeat:         res.repeat,
                 shuffle:        res.shuffle

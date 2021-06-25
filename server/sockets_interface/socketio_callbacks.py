@@ -175,7 +175,7 @@ def queue_set_order(elements):
 @socketio.on("queue_next_drawing")
 def queue_next_drawing():
     app.semits.show_toast_on_UI("Stopping drawing...") 
-    app.qmanager.stop()
+    app.qmanager.start_next(force_stop=True)
     if not app.qmanager.is_drawing():   # if the drawing was the last in the queue must send the updated status
         app.qmanager.send_queue_status()
 
@@ -195,6 +195,11 @@ def queue_set_repeat(val):
 @socketio.on("queue_set_shuffle")
 def queue_set_shuffle(val):
     app.qmanager.set_shuffle(val)
+
+# sets the queue interval
+@socketio.on("queue_set_interval")
+def queue_set_interval(val):
+    app.qmanager.set_interval(float(val))
 
 # --------------------------------------------------------- LEDS CALLBACKS -------------------------------------------------------------------------------
 

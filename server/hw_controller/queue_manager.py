@@ -8,19 +8,23 @@ from server.utils import settings_utils
 from server.hw_controller.continuous_queue_generator import ContinuousQueueGenerator
 from server.database.playlist_elements import TimeElement
 
+TIME_CONVERSION_FACTOR = 60*60      # hours to seconds
+
 class QueueManager():
     def __init__(self, app, socketio):
-        self._isdrawing = False
-        self._element = None
-        self.app = app
-        self.socketio = socketio
-        self.q = Queue()
-        self.repeat = False
-        self.shuffle = False
+        self._isdrawing     = False
+        self._element       = None
+        self.app            = app
+        self.socketio       = socketio
+        self.q              = Queue()
+        self.repeat         = False
+        self.shuffle        = False
+        self.interval       = 0
+        self._last_time     = 0
 
         # setup status timer
-        self._th = Thread(target=self._thf, daemon=True)
-        self._th.name = "queue_status_interval"
+        self._th            = Thread(target=self._thf, daemon=True)
+        self._th.name       = "queue_status_interval"
         self._th.start()
     
     def is_drawing(self):
@@ -59,17 +63,21 @@ class QueueManager():
     def stop(self):
         self.app.feeder.stop()
 
-    # sets the repeat flag
+    # set the repeat flag
     def set_repeat(self, val):
         if type(val) == type(True):
             self.repeat = val
         else: raise ValueError("The argument must be boolean")
 
-    # sets the shuffle flag
+    # set the shuffle flag
     def set_shuffle(self, val):
         if type(val) == type(True):
             self.shuffle = val
         else: raise ValueError("The argument must be boolean")
+
+    # set the queue interval [h]
+    def set_interval(self, val):
+        self.interval = val
 
     # add an element to the queue
     def queue_element(self, element, show_toast=True):
@@ -88,6 +96,10 @@ class QueueManager():
     
     def get_queue(self):
         return self.q.queue
+
+    def set_element_ended(self):
+        self.set_is_drawing(False)
+        self._last_time = time.time()
 
     # clear the queue
     def clear_queue(self):
@@ -122,7 +134,21 @@ class QueueManager():
         if(self.is_drawing()):
             if not force_stop:
                 return False
+            else: 
+                # will reset the time to 0 and stop the current drawing. Once the current drawing the next drawing should start from the event
+                self._last_time = 0
+                self.stop()
+                return False
         try:
+            # if the time has not expired should start a new drawing
+            if self.interval != 0:
+                if (self._last_time + self.interval*TIME_CONVERSION_FACTOR > time.time()):
+                    element = TimeElement(delay=self.interval*TIME_CONVERSION_FACTOR + time.time() - self._last_time)
+                    self.start_element(element)
+                    self.set_element(element)
+                    return True
+                # FIXME there is something wrong with these... It keep son looping
+            
             # should not remove the element from the queue if repeat is active. Should just add it at the end of the queue
             if (not self._element is None) and (self.repeat):
                 self.q.put(self._element)
@@ -165,6 +191,7 @@ class QueueManager():
             "status":           self.app.feeder.get_status(),
             "repeat":           self.repeat,
             "shuffle":          self.shuffle,
+            "interval":         self.interval
         }
         self.app.semits.emit("queue_status", json.dumps(res))
     

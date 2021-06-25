@@ -11,7 +11,7 @@ class FeederEventManager(FeederEventHandler):
     def on_element_ended(self, element):
         self.app.logger.info("Drawing ended")
         self.app.semits.show_toast_on_UI("Element ended")
-        self.app.qmanager.set_is_drawing(False)
+        self.app.qmanager.set_element_ended()
         self.app.qmanager.start_next()
         if self.app.qmanager.is_queue_empty():
             self.app.qmanager.send_queue_status()
