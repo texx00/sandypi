@@ -21,6 +21,7 @@ class QueueManager():
         self.shuffle        = False
         self.interval       = 0
         self._last_time     = 0
+        self._is_force_stop = False
 
         # setup status timer
         self._th            = Thread(target=self._thf, daemon=True)
@@ -61,6 +62,7 @@ class QueueManager():
 
     # stop the current drawing and start the next
     def stop(self):
+        self._is_force_stop = True
         self.app.feeder.stop()
 
     # set the repeat flag
@@ -99,7 +101,12 @@ class QueueManager():
 
     def set_element_ended(self):
         self.set_is_drawing(False)
-        self._last_time = time.time()
+        # if the ended element was forced to stop should not set the "last_time" otherwise when a new element is started there will be a delay element first
+        if self._is_force_stop:
+            self._is_force_stop = False
+        else:
+            self._last_time = time.time()
+        self.app.qmanager.start_next()
 
     # clear the queue
     def clear_queue(self):
@@ -135,19 +142,18 @@ class QueueManager():
             if not force_stop:
                 return False
             else: 
-                # will reset the time to 0 and stop the current drawing. Once the current drawing the next drawing should start from the event
+                # will reset the last_time to 0 in order to get the next element running without a delay and stop the current drawing. 
+                # Once the current drawing the next drawing should start from the feeder event manager
                 self._last_time = 0
                 self.stop()
-                return False
+                return True
         try:
             # if the time has not expired should start a new drawing
             if self.interval != 0:
                 if (self._last_time + self.interval*TIME_CONVERSION_FACTOR > time.time()):
-                    element = TimeElement(delay=self.interval*TIME_CONVERSION_FACTOR + time.time() - self._last_time)
+                    element = TimeElement(delay=self.interval*TIME_CONVERSION_FACTOR + time.time() - self._last_time, type="delay")
                     self.start_element(element)
-                    self.set_element(element)
                     return True
-                # FIXME there is something wrong with these... It keep son looping
             
             # should not remove the element from the queue if repeat is active. Should just add it at the end of the queue
             if (not self._element is None) and (self.repeat):
