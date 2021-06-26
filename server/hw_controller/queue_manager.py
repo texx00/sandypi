@@ -148,25 +148,29 @@ class QueueManager():
                 self.stop()
                 return True
         try:
-            # if the time has not expired should start a new drawing
-            if self.interval != 0:
+            # should not remove the element from the queue if repeat is active. Should just add it at the end of the queue
+            if (not self._element is None) and (self.repeat) and (not hasattr(self._element, "_repeat_off")):
+                self.q.put(self._element)
+            
+            # if the time has not expired should start a new drawing otherwise should start a delay element
+            if (self.interval != 0) and (not hasattr(self._element, "_repeat_off")):
                 if (self._last_time + self.interval*TIME_CONVERSION_FACTOR > time.time()):
                     element = TimeElement(delay=self.interval*TIME_CONVERSION_FACTOR + time.time() - self._last_time, type="delay")
+                    element._repeat_off = True              # when the "repeat" flag is selected, should not add this element to the queue
                     self.start_element(element)
                     return True
             
-            # should not remove the element from the queue if repeat is active. Should just add it at the end of the queue
-            if (not self._element is None) and (self.repeat):
-                self.q.put(self._element)
             self._element = None
             if self.queue_length() > 0:
                 element = None
                 # if shuffle is enabled select a random drawing from the queue otherwise uses the first element of the queue
                 if self.shuffle:
+                    tmp = None
                     elements = list(self.q.queue)
-                    if len(element>1):  # if the list is longer than 2 will pop the last element to avoid using it again
-                        elements.pop(-1)
+                    if len(elements)>1:  # if the list is longer than 2 will pop the last element to avoid using it again
+                        tmp = elements.pop(-1)
                     element = elements.pop(random.randrange(len(elements)))
+                    elements.append(tmp)
                     self.set_new_order(elements)
                 else: 
                     element = self.q.queue.popleft()
@@ -201,7 +205,6 @@ class QueueManager():
         }
         self.app.semits.emit("queue_status", json.dumps(res))
     
-    # FIXME change this to use the new queue logic
     # checks if should start drawing after the server is started and ready (can be set in the settings page)
     def check_autostart(self):
         autostart = settings_utils.get_only_values(settings_utils.load_settings()["autostart"])

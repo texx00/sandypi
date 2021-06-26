@@ -182,6 +182,8 @@ def queue_next_drawing():
 # clears the queue and stops the current element
 @socketio.on("queue_stop_all")
 def queue_stop_all():
+    queue_set_repeat(False)
+    queue_set_shuffle(False)
     queue_set_order("")
     app.qmanager.stop()
 
@@ -189,17 +191,19 @@ def queue_stop_all():
 @socketio.on("queue_set_repeat")
 def queue_set_repeat(val):
     app.qmanager.set_repeat(val)
-    app.logger.info("repeat selected")
+    app.logger.info("repeat: {}".format(val))
 
 # sets the shuffle flag for the queue
 @socketio.on("queue_set_shuffle")
 def queue_set_shuffle(val):
     app.qmanager.set_shuffle(val)
+    app.logger.info("shuffle: {}".format(val))
 
 # sets the queue interval
 @socketio.on("queue_set_interval")
 def queue_set_interval(val):
     app.qmanager.set_interval(float(val))
+    app.logger.info("interval: {}".format(val))
 
 # --------------------------------------------------------- LEDS CALLBACKS -------------------------------------------------------------------------------
 

@@ -100,9 +100,11 @@ class Queue extends Component{
             return <Container>
                 <Section sectionTitle="Now drawing">
                     <Row className={"center mb-5"}>
-                        <Col sm={6} className="position-relative">
-                            <ElementType element={this.props.currentElement}
-                                hideOptions={"true"}/>
+                        <Col sm={6} className="p-3">
+                            <div className="p-0 position-relative w-100">
+                                <ElementType element={this.props.currentElement}
+                                    hideOptions={"true"}/>
+                            </div>
                         </Col>
                         <Col sm={1}>
                             <div className="p-2"/>
