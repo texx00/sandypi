@@ -3,18 +3,19 @@ import { connect } from 'react-redux';
 
 import { Col, Form, OverlayTrigger, Row, Tooltip } from "react-bootstrap";
 import { queueSetInterval } from '../../../sockets/sEmits';
-import { getIntervalValue } from './selector';
+import { getIntervalValue, getIsQueuePaused } from './selector';
 
 const mapStateToProps = state => {
     return {
-        intervalValue: getIntervalValue(state),
-        isChanging: false
+        intervalValue:  getIntervalValue(state),
+        isPause:        getIsQueuePaused(state)
     }
 }
 
 class IntervalControl extends Component{
     state = {
-        intervalValue: 0
+        intervalValue: 0,
+        isChanging: false
     }
 
     saveInterval(){
@@ -28,10 +29,13 @@ class IntervalControl extends Component{
     }
 
     render(){
+        let tip = "Select 0 to run the drawings continuously, otherwise select the time interval that should be used between different drawings";
+        if (this.props.isPause)
+            tip = "It is not possible to change the time interval while the current element is paused";
         return <OverlayTrigger
             overlay={
             <Tooltip>
-                Select 0 to run the drawings continuously, otherwise select the time interval that should be used between different drawings
+                {tip}
             </Tooltip>}
             delay={{ show: 3000, hide: 250 }}
             placement="bottom">
@@ -47,8 +51,8 @@ class IntervalControl extends Component{
                     <Col sm={1} className="pr-3">0h</Col>
                     <Col sm={8}>
                         <Form.Control type="range" 
-                            className="range-style-dark bg-dark"
                             value={this.state.intervalValue}
+                            disabled={this.props.isPause}
                             min={0}
                             step={0.5}
                             max={24}

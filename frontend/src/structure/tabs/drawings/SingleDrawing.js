@@ -72,6 +72,7 @@ class SingleDrawing extends Component{
                         icon={Play}
                         onClick={()=>{
                             drawingQueue(this.props.drawing.id);
+                            this.props.handleTabBack();
                     }}>
                         {startDrawingLabel}
                     </IconButton>

@@ -64,6 +64,8 @@ class Queue extends Component{
     }
 
     handleSortableUpdate(list){
+        console.log("Elements: ");
+        console.log(list);
         if (!listsAreEqual(list, this.state.elements)){
             this.setState({...this.state, elements: list});
             this.props.setQueueElements(list);

@@ -417,10 +417,11 @@ class Feeder():
             #line = "N{} ".format(file_line) + line
         with self.status_mutex:
             self._stopped = True
+        
+        # runs the script only it the element is a drawing, otherwise will skip the "after" script
+        if isinstance(element, DrawingElement):
+            self.send_script(self.settings['scripts']['after']["value"])
         if self.is_running():
-            # runs the script only it the element is a drawing, otherwise will skip the "after" script
-            if isinstance(element, DrawingElement):
-                self.send_script(self.settings['scripts']['after']["value"])
             self.stop()
 
     # thread that keep reading the serial port
