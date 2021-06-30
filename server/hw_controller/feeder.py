@@ -6,13 +6,12 @@ from collections import deque
 from copy import deepcopy
 import re
 import logging
-from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
 from dotmap import DotMap
 from py_expression_eval import Parser
 
 from server.utils import limited_size_dict, buffered_timeout, settings_utils
-from server.utils.logging_utils import formatter
+from server.utils.logging_utils import formatter, MultiprocessRotatingFileHandler
 from server.hw_controller.device_serial import DeviceSerial
 from server.hw_controller.gcode_rescalers import Fit
 import server.hw_controller.firmware_defaults as firmware
@@ -68,7 +67,7 @@ class Feeder():
         self.logger.setLevel(settings_utils.LINE_SERVICE)             # set to logger lowest level
 
         # create file logging handler
-        file_handler = RotatingFileHandler("server/logs/feeder.log", maxBytes=200000, backupCount=5)
+        file_handler = MultiprocessRotatingFileHandler("server/logs/feeder.log", maxBytes=200000, backupCount=5)
         file_handler.setLevel(settings_utils.LINE_SERVICE)
         file_handler.setFormatter(formatter)
         self.logger.addHandler(file_handler)

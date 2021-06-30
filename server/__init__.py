@@ -16,7 +16,7 @@ import logging
 from threading import Thread
 
 from server.utils import settings_utils, software_updates, migrations
-from server.utils.logging_utils import server_file_handler, server_stream_handler
+from server.utils.logging_utils import log_queue_handler, server_stream_handler
 
 # Updating setting files (will apply changes only when a new SW version is installed)
 settings_utils.update_settings_file_version()
@@ -39,8 +39,8 @@ w_logger = logging.getLogger("werkzeug")
 w_logger.setLevel(1)
 w_logger.handlers = []
 
-w_logger.addHandler(server_file_handler)
-w_logger.addHandler(server_stream_handler)
+w_logger.addHandler(log_queue_handler)
+w_logger.addHandler(log_queue_handler)
 w_logger.propagate = False
 
 
@@ -49,8 +49,8 @@ w_logger.propagate = False
 app = Flask(__name__, template_folder='templates', static_folder="../frontend/build", static_url_path="/")
 
 app.logger.setLevel(1)
-app.logger.addHandler(server_file_handler)
-app.logger.addHandler(server_stream_handler)
+app.logger.addHandler(log_queue_handler)
+app.logger.addHandler(log_queue_handler)
 
 app.config['SECRET_KEY'] = 'secret!' # TODO put a key here
 app.config['UPLOAD_FOLDER'] = "./server/static/Drawings"
