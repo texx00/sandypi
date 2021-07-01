@@ -205,6 +205,11 @@ def queue_set_interval(val):
     app.qmanager.set_interval(float(val))
     app.logger.info("interval: {}".format(val))
 
+# starts a random drawing from the uploaded list
+@socketio.on("queue_start_random")
+def queue_start_random():
+    app.qmanager.start_random_drawing()
+
 # --------------------------------------------------------- LEDS CALLBACKS -------------------------------------------------------------------------------
 
 @socketio.on("leds_set_color")

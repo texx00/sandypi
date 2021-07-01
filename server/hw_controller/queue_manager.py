@@ -6,7 +6,7 @@ import random
 
 from server.utils import settings_utils
 from server.hw_controller.continuous_queue_generator import ContinuousQueueGenerator
-from server.database.playlist_elements import TimeElement
+from server.database.playlist_elements import ShuffleElement, TimeElement
 
 TIME_CONVERSION_FACTOR = 60*60      # hours to seconds
 
@@ -80,6 +80,11 @@ class QueueManager():
     # set the queue interval [h]
     def set_interval(self, val):
         self.interval = val
+
+    # starts a random drawing from the uploaded files
+    def start_random_drawing(self):
+        if not self.is_drawing() and self.q.empty():
+            self.queue_element(ShuffleElement())                    # queue a new random element drawing
 
     # add an element to the queue
     def queue_element(self, element, show_toast=True):
@@ -214,8 +219,9 @@ class QueueManager():
             autostart["interval"] = 0
         
         if autostart["on_ready"]:
-            pass
-            # FIXME here should start random drawings
+            self.start_random_drawing()
+            self.set_repeat(True)
+            # TODO check if it is working correctly
 
     # periodically updates the queue status, used by the thread
     def _thf(self):

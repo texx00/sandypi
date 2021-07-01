@@ -10,7 +10,7 @@ import { getIsQueuePaused, getQueueElements, getQueueEmpty, getQueueIsRunning, g
 import { setTab } from '../Tabs.slice';
 import { isViewQueue } from '../selector';
 import { toggleQueueRepeat, toggleQueueShuffle } from './Queue.slice';
-import { drawingPause, drawingResume, queueNextDrawing, queueSetRepeat, queueSetShuffle, queueStopAll } from '../../../sockets/sEmits';
+import { drawingPause, drawingResume, queueNextDrawing, queueSetRepeat, queueSetShuffle, queueStartRandom, queueStopAll } from '../../../sockets/sEmits';
 
 const mapStateToProps = (state) => {
     return {
@@ -100,7 +100,17 @@ class QueueControls extends Component{
                 </IconButton>
             </div>
         }else{
-            return ""
+            // TODO add a check to show this only if there is at least one uploaded drawing
+            return <div className="preview-bar-container p-2 m-2 rounded">
+                <IconButton className = "btn btn-dark p-2"
+                    onClick = {() => {
+                        queueStartRandom();
+                    }}
+                    icon={Shuffle}
+                    tip = "Will choose a random drawing to play among the ones uploaded. If the repeat button is selected will select a new one after the first is finished">
+                    Start a random drawing
+                </IconButton>
+            </div>
         }
     }
 }
