@@ -132,6 +132,13 @@ const defaultSettings = {
 			value: false,
 			label: "Start drawing on power up",
 			tip: "Enable this option to start drawing automatically from the full list of drawings every time the device is turned on"
+		},
+		interval: {
+			name: "autostart.interval",
+			type: "input",
+			value: 0,
+			label: "Interval between drawings [h]",
+			tip: "Write the number of seconds to let the table pause between drawings"
 		}
 	},
 	leds: {
