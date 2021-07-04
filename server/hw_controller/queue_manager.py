@@ -213,10 +213,6 @@ class QueueManager():
     # checks if should start drawing after the server is started and ready (can be set in the settings page)
     def check_autostart(self):
         autostart = settings_utils.get_only_values(settings_utils.load_settings()["autostart"])
-        try:
-            autostart["interval"] = int(autostart["interval"])
-        except:
-            autostart["interval"] = 0
         
         if autostart["on_ready"]:
             self.start_random_drawing()

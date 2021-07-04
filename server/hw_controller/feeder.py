@@ -576,9 +576,14 @@ class Feeder():
             # the response looks like: X:115.22 Y:116.38 Z:0.00 E:0.00 Count A:9218 B:9310 Z:0
             # still, M114 will receive the last position in the look-ahead planner thus the drawing will end first on the interface and then in the real device
             elif "Count" in line:
-                l = line.split(" ")
-                x = float(l[0][2:])     # remove "X:" from the string
-                y = float(l[1][2:])     # remove "Y:" from the string
+                try:
+                    l = line.split(" ")
+                    x = float(l[0][2:])     # remove "X:" from the string
+                    y = float(l[1][2:])     # remove "Y:" from the string
+                except Exception as e:
+                    self.logger.error("Error while parsing M114 result for line: {}".format(line))
+                    self.logger.exception(e)
+
                 # if the last commanded position coincides with the current position it means the buffer on the device is empty (could happen that the position is the same between different points but the M114 command should not be that frequent to run into this problem.) TODO check if it is good enough or if should implement additional checks like a timeout
                 # use a tolerance instead of equality because marlin is using strange rounding for the coordinates
                 if (abs(float(self.last_commanded_position.x)-x)<firmware.MARLIN.position_tolerance) and (abs(float(self.last_commanded_position.y)-y)<firmware.MARLIN.position_tolerance):

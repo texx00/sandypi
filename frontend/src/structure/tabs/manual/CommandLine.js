@@ -87,7 +87,7 @@ class CommandLine extends Component{
                                 onKeyUp={this.keyUpHandler.bind(this)}
                                 ref={this.inputRef}/>
                         </Col>
-                        <Col sm={4}>
+                        <Col sm={4} className="center">
                             <Button onClick={this.submitCommand.bind(this)}>Send command</Button>
                         </Col>
                     </Row>

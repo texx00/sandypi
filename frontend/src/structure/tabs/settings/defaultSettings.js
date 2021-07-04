@@ -132,20 +132,6 @@ const defaultSettings = {
 			value: false,
 			label: "Start drawing on power up",
 			tip: "Enable this option to start drawing automatically from the full list of drawings every time the device is turned on"
-		},
-		shuffle: {
-			name: "autostart.shuffle",
-			type: "check",
-			value: true,
-			label: "Shuffle drawings on autostart",
-			tip: "When the autostart is enabled, will play the drawings shuffled"
-		},
-		interval: {
-			name: "autostart.interval",
-			type: "input",
-			value: 0,
-			label: "Interval between drawings [s]",
-			tip: "Write the number of seconds to let the table pause between drawings"
 		}
 	},
 	leds: {
