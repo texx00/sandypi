@@ -25,9 +25,11 @@ class ManualControl extends Component{
                                     </Col>
                                 </Row>
                                 <Row>
-                                    <Col className="center">
-                                        <Button className="w-25 mr-3" onClick={()=>{controlEmergencyStop()}} title="Warning: this button will not stop the device during homing">EMERGENCY STOP</Button>
-                                        <Button className="2-25" onClick={()=>{sendCommand('G28')}}>Home</Button>
+                                    <Col sm={4} className="center">
+                                        <Button className="w-100 m-2" onClick={()=>{controlEmergencyStop()}} title="Warning: this button will not stop the device during homing">EMERGENCY STOP</Button>
+                                    </Col>
+                                    <Col sm={4} className="center">
+                                        <Button className="w-100 m-2" onClick={()=>{sendCommand('G28')}}>Home</Button>
                                     </Col>
                                 </Row>
                             </Section>

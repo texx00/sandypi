@@ -1,14 +1,12 @@
 import React, { Component } from 'react';
 import { Button, Col, Container, Row } from 'react-bootstrap';
-import { Pause, Play, SkipForward, Stop, Trash } from 'react-bootstrap-icons';
 import { connect } from 'react-redux';
 
-import IconButton from '../../../components/IconButton';
 import { Section, Subsection } from '../../../components/Section';
 import SortableElements from '../../../components/SortableElements';
 
 import { queueStatus } from '../../../sockets/sCallbacks';
-import { drawingPause, drawingResume, queueGetStatus, queueSetOrder, queueStopAll, queueStopCurrent } from '../../../sockets/sEmits';
+import { queueGetStatus, queueSetOrder } from '../../../sockets/sEmits';
 
 import { listsAreEqual } from '../../../utils/dictUtils';
 import { getElementClass } from '../playlists/SinglePlaylist/Elements';
@@ -18,24 +16,25 @@ import { getIsQueuePaused, getQueueCurrent, getQueueElements, getQueueEmpty, get
 import { isViewQueue } from '../selector';
 import { setQueueElements, setQueueStatus } from './Queue.slice';
 import { setTab, tabBack } from '../Tabs.slice';
+import IntervalControl from './IntervalControl';
 
 const mapStateToProps = (state) => {
     return {
-        elements: getQueueElements(state),
+        elements:       getQueueElements(state),
         currentElement: getQueueCurrent(state),
-        isQueueEmpty: getQueueEmpty(state),
-        isViewQueue: isViewQueue(state),
-        progress: getQueueProgress(state),
-        isPaused: getIsQueuePaused(state)
+        isQueueEmpty:   getQueueEmpty(state),
+        isViewQueue:    isViewQueue(state),
+        progress:       getQueueProgress(state),
+        isPaused:       getIsQueuePaused(state)
     }
 }
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        setQueueStatus: (val) => dispatch(setQueueStatus(val)),
-        handleTabBack: () => dispatch(tabBack()),
-        setQueueElements: (list) => dispatch(setQueueElements(list)),
-        setTabHome: () => dispatch(setTab('home'))
+        setQueueStatus:      (val) => dispatch(setQueueStatus(val)),
+        handleTabBack:          () => dispatch(tabBack()),
+        setQueueElements:   (list) => dispatch(setQueueElements(list)),
+        setTabHome:             () => dispatch(setTab('home'))
     }
 }
 
@@ -51,9 +50,6 @@ class Queue extends Component{
         if (!listsAreEqual(this.state.elements, this.props.elements)){
             this.setState({...this.state, elements: this.props.elements, refreshList: true});
         }
-        if (this.props.isQueueEmpty && this.props.isViewQueue){
-            this.props.handleTabBack();
-        }
     }
 
     componentDidMount(){
@@ -68,59 +64,13 @@ class Queue extends Component{
     }
 
     handleSortableUpdate(list){
+        console.log("Elements: ");
+        console.log(list);
         if (!listsAreEqual(list, this.state.elements)){
             this.setState({...this.state, elements: list});
             this.props.setQueueElements(list);
             queueSetOrder(list);
         }
-    }
-
-    clearQueue(){
-        // save an empty list
-        this.handleSortableUpdate([]);
-    }
-
-    stopDrawing(){
-        queueStopCurrent();
-    }
-    
-    // TODO show shuffle/interval if in continous mode?
-
-    renderPauseRestart(){
-        if (this.props.isPaused)
-            return <IconButton className={"w-100 center"}
-                icon={Play}
-                onClick={drawingResume}>
-                    Resume drawing
-            </IconButton>
-        else return <IconButton className={"w-100 center"}
-                icon={Pause}
-                onClick={drawingPause}>
-                    Pause drawing
-                </IconButton>
-    }
-
-    renderClearQueue(){
-        if (this.state.elements !== undefined)
-            if (this.state.elements.length > 0){
-                return [
-                    <Row>
-                        <IconButton className={"w-100 center"} 
-                            icon={SkipForward}
-                            onClick={queueStopCurrent}>
-                                Start next drawing
-                        </IconButton>
-                    </Row>,
-                    <Row>
-                        <IconButton className={"w-100 center"} 
-                            icon={Trash}
-                            onClick={this.clearQueue.bind(this)}>
-                                Clear queue
-                        </IconButton>
-                    </Row>
-                ]
-            }
-        return "";
     }
 
     renderList(){
@@ -138,7 +88,7 @@ class Queue extends Component{
     }
 
     render(){
-        if (this.props.isQueueEmpty){
+        if (this.props.isQueueEmpty && this.props.currentElement === undefined){
             return <Container>
                 <div className="center pt-5">
                     Nothing is being drawn at the moment
@@ -151,27 +101,21 @@ class Queue extends Component{
             let ElementType = getElementClass(this.props.currentElement);
             return <Container>
                 <Section sectionTitle="Now drawing">
-                    <Row className={"center"}>
-                        <Col sm={6} className="mb-5 position-relative">
-                            <ElementType element={this.props.currentElement}
-                                hideOptions={"true"}/>
+                    <Row className={"center mb-5"}>
+                        <Col sm={6} className="p-3">
+                            <div className="p-0 position-relative w-100">
+                                <ElementType element={this.props.currentElement}
+                                    hideOptions={"true"}/>
+                            </div>
                         </Col>
-                        <Col sm={1}/>
+                        <Col sm={1}>
+                            <div className="p-2"/>
+                        </Col>
                         <Col sm={4} className="pr-5 pl-5">
-                            <Row>
-                                <ETA progress={this.props.progress || {eta: -1}} isPaused={this.props.isPaused}/>
+                            <Row className="d-flex align-item-center h-100 m-auto">
+                                <ETA classname="align-item-center" progress={this.props.progress || {eta: -1}} isPaused={this.props.isPaused}/>
+                                <IntervalControl />
                             </Row>
-                            <Row>
-                                <IconButton className={"w-100 center"} 
-                                    icon={Stop}
-                                    onClick={queueStopAll}>
-                                        Stop
-                                </IconButton>
-                            </Row>
-                            <Row>
-                                {this.renderPauseRestart()}
-                            </Row>
-                            {this.renderClearQueue()}
                         </Col>
                     </Row>
                 </Section>

@@ -3,11 +3,11 @@ import { createSlice } from '@reduxjs/toolkit';
 const queueSlice = createSlice({
     name: "queue",
     initialState: {
-        isQueueEmpty: true,
         elements: [],
         currentElement: undefined,
-        intervalValue: 0,
+        repeat: false,
         shuffle: false,
+        interval: 0,
         status: {eta: -1}
     },
     reducers: {
@@ -20,26 +20,25 @@ const queueSlice = createSlice({
         setQueueStatus(state, action){
             let res = action.payload;
             res.current_element = res.current_element === "None" ? undefined : JSON.parse(res.current_element);
-            let queueEmpty = res.current_element === undefined;
             return {
-                isQueueEmpty: queueEmpty,
-                elements: res.elements,
+                elements:       res.elements,
                 currentElement: res.current_element,
-                intervalValue: res.intervalValue,
-                status: res.status
+                interval:       res.interval,
+                status:         res.status,
+                repeat:         res.repeat,
+                shuffle:        res.shuffle
             }
         },
-        setQueueNotEmpty(state, action){
+        toggleQueueShuffle(state, action){
             return {
                 ...state,
-                isQueueEmpty: false
+                shuffle: !state.shuffle
             }
         },
-        setContinuousStatus(state, action){
+        toggleQueueRepeat(state, action){
             return {
-                ...state,
-                intervalValue: action.payload.interval,
-                shuffle: action.payload.shuffle
+                ...state, 
+                repeat: !state.repeat
             }
         }
     }
@@ -48,8 +47,8 @@ const queueSlice = createSlice({
 export const{
     setQueueElements,
     setQueueStatus,
-    setQueueNotEmpty,
-    setContinuousStatus
+    toggleQueueShuffle,
+    toggleQueueRepeat
 } = queueSlice.actions;
 
 export default queueSlice.reducer;

@@ -186,7 +186,7 @@ class TimingElement extends GenericElement{
     renderElement(){
         let printTime = ""
         if (this.state.type === "delay")
-            printTime = "Delay: " + this.state.delay + "s";
+            printTime = "Delay: " + Math.round(this.state.delay) + "s";
         else if (this.state.type === "expiry_date")
             printTime = "Expires on: \n" + this.state.expiry_date;
         else if (this.state.type === "alarm_time")

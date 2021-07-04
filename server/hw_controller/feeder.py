@@ -6,13 +6,12 @@ from collections import deque
 from copy import deepcopy
 import re
 import logging
-from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
 from dotmap import DotMap
 from py_expression_eval import Parser
 
 from server.utils import limited_size_dict, buffered_timeout, settings_utils
-from server.utils.logging_utils import formatter
+from server.utils.logging_utils import formatter, MultiprocessRotatingFileHandler
 from server.hw_controller.device_serial import DeviceSerial
 from server.hw_controller.gcode_rescalers import Fit
 import server.hw_controller.firmware_defaults as firmware
@@ -68,7 +67,7 @@ class Feeder():
         self.logger.setLevel(settings_utils.LINE_SERVICE)             # set to logger lowest level
 
         # create file logging handler
-        file_handler = RotatingFileHandler("server/logs/feeder.log", maxBytes=200000, backupCount=5)
+        file_handler = MultiprocessRotatingFileHandler("server/logs/feeder.log", maxBytes=200000, backupCount=5)
         file_handler.setLevel(settings_utils.LINE_SERVICE)
         file_handler.setFormatter(formatter)
         self.logger.addHandler(file_handler)
@@ -417,10 +416,11 @@ class Feeder():
             #line = "N{} ".format(file_line) + line
         with self.status_mutex:
             self._stopped = True
+        
+        # runs the script only it the element is a drawing, otherwise will skip the "after" script
+        if isinstance(element, DrawingElement):
+            self.send_script(self.settings['scripts']['after']["value"])
         if self.is_running():
-            # runs the script only it the element is a drawing, otherwise will skip the "after" script
-            if isinstance(element, DrawingElement):
-                self.send_script(self.settings['scripts']['after']["value"])
             self.stop()
 
     # thread that keep reading the serial port
@@ -576,9 +576,14 @@ class Feeder():
             # the response looks like: X:115.22 Y:116.38 Z:0.00 E:0.00 Count A:9218 B:9310 Z:0
             # still, M114 will receive the last position in the look-ahead planner thus the drawing will end first on the interface and then in the real device
             elif "Count" in line:
-                l = line.split(" ")
-                x = float(l[0][2:])     # remove "X:" from the string
-                y = float(l[1][2:])     # remove "Y:" from the string
+                try:
+                    l = line.split(" ")
+                    x = float(l[0][2:])     # remove "X:" from the string
+                    y = float(l[1][2:])     # remove "Y:" from the string
+                except Exception as e:
+                    self.logger.error("Error while parsing M114 result for line: {}".format(line))
+                    self.logger.exception(e)
+
                 # if the last commanded position coincides with the current position it means the buffer on the device is empty (could happen that the position is the same between different points but the M114 command should not be that frequent to run into this problem.) TODO check if it is good enough or if should implement additional checks like a timeout
                 # use a tolerance instead of equality because marlin is using strange rounding for the coordinates
                 if (abs(float(self.last_commanded_position.x)-x)<firmware.MARLIN.position_tolerance) and (abs(float(self.last_commanded_position.y)-y)<firmware.MARLIN.position_tolerance):

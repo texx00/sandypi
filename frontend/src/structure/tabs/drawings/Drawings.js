@@ -4,7 +4,6 @@ import { FileEarmarkPlus } from 'react-bootstrap-icons';
 import { connect } from 'react-redux';
 
 import { Section } from '../../../components/Section';
-import PlayContinuous from '../../../components/PlayContinuous';
 
 import UploadDrawingsModal from './UploadDrawing';
 import DrawingCard from './DrawingCard';
@@ -15,13 +14,15 @@ import { getQueueCurrent } from '../queue/selector';
 
 const mapStateToProps = (state) => {
     return { 
-        drawings: getDrawings(state),
+        drawings:       getDrawings(state),
         currentElement: getQueueCurrent(state) 
     }
 }
 
 const mapDispatchToProps = (dispatch) => {
-    return {setRefreshDrawing: () => dispatch(setRefreshDrawing(true))}
+    return {
+        setRefreshDrawing: () => dispatch(setRefreshDrawing(true))
+    }
 }
 
 class Drawings extends Component{
@@ -63,8 +64,6 @@ class Drawings extends Component{
                 sectionButton="Upload new drawing"
                 buttonIcon={FileEarmarkPlus}
                 sectionButtonHandler={()=>this.setState({showUpload: true})}>
-            
-                <PlayContinuous />
 
                 <Row>
                     {this.renderDrawings(this.props.drawings)}
