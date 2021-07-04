@@ -17,11 +17,12 @@ class QueueManager():
         self.app            = app
         self.socketio       = socketio
         self.q              = Queue()
-        self.repeat         = False
-        self.shuffle        = False
-        self.interval       = 0
-        self._last_time     = 0
+        self.repeat         = False                     # true if should not delete the current element from the queue
+        self.shuffle        = False                     # true if should shuffle the queue
+        self.interval       = 0                         # pause between drawing in repeat mode
+        self._last_time     = 0                         # timestamp of the end of the last drawing
         self._is_force_stop = False
+        self._is_random     = False                     # used when queueing random drawings
 
         # setup status timer
         self._th            = Thread(target=self._thf, daemon=True)
@@ -58,10 +59,10 @@ class QueueManager():
     def set_element(self, element):
         self.app.logger.info("Now running: {}".format(element))
         self._element = element
-        self.set_is_drawing(True)
 
     # stop the current drawing and start the next
-    def stop(self):
+    def stop(self, is_random=False):
+        self._is_random = is_random
         self._is_force_stop = True
         self.app.feeder.stop()
 
@@ -69,10 +70,17 @@ class QueueManager():
     def set_repeat(self, val):
         if type(val) == type(True):
             self.repeat = val
+            if self._is_random:
+                if val:
+                    self.start_random_drawing()
+                else:
+                    self.clear_queue()
         else: raise ValueError("The argument must be boolean")
 
     # set the shuffle flag
     def set_shuffle(self, val):
+        if self._is_random:         # can change the shuffle option only if is not playing a random drawing
+            return
         if type(val) == type(True):
             self.shuffle = val
         else: raise ValueError("The argument must be boolean")
@@ -82,12 +90,20 @@ class QueueManager():
         self.interval = val
 
     # starts a random drawing from the uploaded files
-    def start_random_drawing(self):
-        if not self.is_drawing() and self.q.empty():
-            self.queue_element(ShuffleElement())                    # queue a new random element drawing
+    def start_random_drawing(self, repeat=False):
+        self.set_shuffle(True)
+        if self.q.empty():
+            self.queue_element(ShuffleElement(shuffle_type="0"), is_random=True)                    # queue a new random element drawing
+            if repeat:                                                                      # call again the same method only once to put an element in the queue
+                self.start_random_drawing(False)
+        else:
+            if not self.is_drawing():
+                self.queue_element(ShuffleElement(shuffle_type="0"), is_random=True)
+
 
     # add an element to the queue
-    def queue_element(self, element, show_toast=True):
+    def queue_element(self, element, show_toast=True, is_random=False):
+        self._is_random = is_random
         if self.q.empty() and not self.is_drawing():
             self.start_element(element)
             return
@@ -106,6 +122,8 @@ class QueueManager():
 
     def set_element_ended(self):
         self.set_is_drawing(False)
+        if self._is_random:
+            self.start_random_drawing()
         # if the ended element was forced to stop should not set the "last_time" otherwise when a new element is started there will be a delay element first
         if self._is_force_stop:
             self._is_force_stop = False
@@ -150,15 +168,15 @@ class QueueManager():
                 # will reset the last_time to 0 in order to get the next element running without a delay and stop the current drawing. 
                 # Once the current drawing the next drawing should start from the feeder event manager
                 self._last_time = 0
-                self.stop()
+                self.stop(self._is_random)
                 return True
         try:
             # should not remove the element from the queue if repeat is active. Should just add it at the end of the queue
-            if (not self._element is None) and (self.repeat) and (not hasattr(self._element, "_repeat_off")):
+            if (not self._element is None) and (self.repeat) and (not hasattr(self._element, "_repeat_off") and (not self._is_random)):
                 self.q.put(self._element)
             
             # if the time has not expired should start a new drawing otherwise should start a delay element
-            if (self.interval != 0) and (not hasattr(self._element, "_repeat_off")):
+            if (self.interval != 0) and (not hasattr(self._element, "_repeat_off") and (self.queue_length()>0)):
                 if (self._last_time + self.interval*TIME_CONVERSION_FACTOR > time.time()):
                     element = TimeElement(delay=self.interval*TIME_CONVERSION_FACTOR + time.time() - self._last_time, type="delay")
                     element._repeat_off = True              # when the "repeat" flag is selected, should not add this element to the queue
@@ -194,6 +212,7 @@ class QueueManager():
         element = element.before_start(self.app)
         if not element is None:
             self.app.logger.info("Sending gcode start command")
+            self.set_is_drawing(True)
             self.app.feeder.start_element(element, force_stop = True)
         else: self.start_next()
 
@@ -215,9 +234,14 @@ class QueueManager():
         autostart = settings_utils.get_only_values(settings_utils.load_settings()["autostart"])
         
         if autostart["on_ready"]:
-            self.start_random_drawing()
+            self.start_random_drawing(repeat=True)
             self.set_repeat(True)
-            # TODO check if it is working correctly
+
+            try:
+                if autostart["interval"]:
+                    self.set_interval(float(autostart["interval"]))
+            except Exception as e:
+                self.app.logger.exception(e)
 
     # periodically updates the queue status, used by the thread
     def _thf(self):

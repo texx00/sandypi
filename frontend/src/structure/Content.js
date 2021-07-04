@@ -27,7 +27,7 @@ const mapStateToProps = (state) => {
 class Content extends Component{
     
     render(){
-        return <div className="max-width m-auto text-light pt-3 pb-5">
+        return <div className="max-width m-auto text-light pt-3 pb-5 mh100">
             <DrawingDataDownloader />
             <PlaylistDataDownloader />
             

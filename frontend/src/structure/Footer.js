@@ -3,7 +3,7 @@ import {Navbar, Nav} from 'react-bootstrap';
 
 class Footer extends Component{
     render(){
-        return <footer>
+        return <footer >
             <Navbar bg="primary" collapseOnSelect expand="lg" className="center">
                 <Navbar.Toggle aria-controls="footer-nav" />
                 <Navbar.Collapse id="footer-nav" className="max-width">

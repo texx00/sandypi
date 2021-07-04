@@ -74,6 +74,12 @@ button{
     @extend .text-dark;
 }
 
+footer{
+    position: fixed;
+    bottom: 0px;
+    width: 100%;
+}
+
 /* HOVERS */
 
 .image-overlay-light{
