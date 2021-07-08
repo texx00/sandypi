@@ -5,7 +5,6 @@ import time
 import random
 
 from server.utils import settings_utils
-from server.hw_controller.continuous_queue_generator import ContinuousQueueGenerator
 from server.database.playlist_elements import ShuffleElement, TimeElement
 
 TIME_CONVERSION_FACTOR = 60*60      # hours to seconds
@@ -31,6 +30,9 @@ class QueueManager():
     
     def is_drawing(self):
         return self._isdrawing
+
+    def is_paused(self):
+        return self.app.feeder.get_status()["is_paused"]
 
     # pauses the feeder
     def pause(self):
@@ -129,7 +131,7 @@ class QueueManager():
             self._is_force_stop = False
         else:
             self._last_time = time.time()
-        self.app.qmanager.start_next()
+        self.start_next()
 
     # clear the queue
     def clear_queue(self):
