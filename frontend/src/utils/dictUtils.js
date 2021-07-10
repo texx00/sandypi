@@ -22,10 +22,16 @@ const setSubKey = (dict, keys, value) => {
     if (!Array.isArray(keys))
         keys = keys.split(".");
     
-    if (keys.length === 1)
+    if (keys.length === 1){
+        if (Array.isArray(dict))
+            dict = dict.filter(i => { return i.idx === parseInt(keys[0])});
         dict[keys[0]] = value;
-    else{
+    }else{
         let k = keys.shift();
+        if (Array.isArray(dict)){
+            let tmp = dict.filter(i => { return i.idx === parseInt(k)})[0];
+            dict[k] = setSubKey(tmp, keys, value);
+        }
         dict[k] = setSubKey(cloneDict(dict[k]), keys, value);
     }
     return dict;
@@ -36,11 +42,18 @@ const getSubKey = (dict, keys) => {
         keys = keys.split(".");
     let res = "";
     
-    if (keys.length === 1)
+    if (keys.length === 1){
+        if (Array.isArray(dict))
+            res = dict.filter(i => { return i.idx === parseInt(keys[0])});
+
         res = dict[keys[0]];
-    else{ 
+    }else{ 
         let k = keys.shift()
-        res = getSubKey(cloneDict(dict[k]), keys);
+        if (Array.isArray(dict)){
+            let tmp = dict.filter(i => { return i.idx === parseInt(k)})[0];
+            res = getSubKey(tmp, keys);
+        }
+        else res = getSubKey(cloneDict(dict[k]), keys);
     }
     return res;
 }
