@@ -11,7 +11,7 @@ class StartPause(GenericButtonEvent):
 
     def button_click(self):
         if self.app.qmanager.is_queue_empty():
-            self.app.qmanager.start_random_drawing()
+            self.app.qmanager.start_random_drawing(repeat=True)
         else:
             if self.app.qmanager.is_paused():
                 self.app.qmanager.resume()
@@ -25,11 +25,12 @@ class StartNext(GenericButtonEvent):
     description = "Starts the next drawing. With a long press stops the current drawing and clears the queue"
 
     def __init__(self, *argv, **kargv):
-        super().__init__(self, *argv, **kargv)
-        from server.sockets_interface.socketio_callbacks import queue_next_drawing, queue_stop_all
+        super().__init__(*argv, **kargv)
 
     def button_click(self):
-        queue_next_drawing()                # type: ignore (turn off pylance warning)
+        from server.sockets_interface.socketio_callbacks import queue_next_drawing
+        queue_next_drawing()
 
     def button_long_press(self):
-        queue_stop_all()                    # type: ignore (turn off pylance warning)
+        from server.sockets_interface.socketio_callbacks import queue_stop_all
+        queue_stop_all()

@@ -21,7 +21,8 @@ class GenericButtonEvent:
 
     # should not be necessary to overwrite the following methods
 
-    def __init__(self, app):
+    def __init__(self, app, pin):
+        self.pin = pin
         self.app = app
         self._selected_time = 0             # time at which the button was pressed
         self._long_time = 2                 # s after which the button is considered "long pressed"
@@ -51,6 +52,19 @@ class GenericButtonEvent:
             self.button_long_press()
         else:
             self.button_click()
+
+    # since the GPIO library is not able to distinguish between rising and falling edge when using the "BOTH" flag, needs to read the input level to understand if it low or high
+    def button_change(self, pin):
+        # importing here because this is a library that means something only for the pi, on other systems it won't be available
+        try:
+            import RPi.GPIO as GPIO
+            if GPIO.input(self.pin):
+                self.button_released()
+            else: self.button_selected()
+        except (RuntimeError, ModuleNotFoundError):
+            self.app.logger.error("The GPIO library is not available on this device. Please use button_selected or button_released methods in place of button_change")
+        except Exception as e:
+            self.app.logger.exception(e)
 
     # thread funtion that manage the tics
     def _thf(self):

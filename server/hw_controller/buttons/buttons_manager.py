@@ -7,7 +7,7 @@ from server.hw_controller.buttons.generic_button_event import GenericButtonEvent
 import server.hw_controller.buttons.events as button_events
 from server.utils.settings_utils import load_settings
 
-BOUNCE_TIME = 300
+BOUNCE_TIME = 100
 
 class ButtonsManager:
 
@@ -48,18 +48,27 @@ class ButtonsManager:
                     should_update = False
             
             if should_update:
-                if not self._buttons is None:
-                    GPIO.cleanup()
-                self._buttons = settings["buttons"]
-                self._events = []
-                # clear GPIO
                 import RPi.GPIO as GPIO 
-                for b in self._buttons: 
-                    bobj = self._events[self.label[b["functionality"]["value"]]](self.app)
-                    GPIO.setup(b.pin.value, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-                    GPIO.add_event_detect(b.pin.value, GPIO.FALLING, callback = bobj.button_selected, bouncetime = BOUNCE_TIME)
-                    GPIO.add_event_detect(b.pin.value, GPIO.RISING,  callback = bobj.button_released, bouncetime = BOUNCE_TIME)         # TODO check if can use two events on the same GPIO pin but with different edges
-
+                if not self._buttons is None:
+                    # clear GPIO
+                    for b in self._buttons:
+                        try:
+                            GPIO.remove_event_detect(int(b["pin"]["value"]))
+                        except:
+                            pass
+                    GPIO.cleanup()
+                GPIO.setmode(GPIO.BCM)
+                self._buttons = settings["buttons"]
+                # set new callbacks 
+                for b in self._buttons:
+                    try:
+                        pin = int(b["pin"]["value"])
+                    except:
+                        self.app.logger.error("Check the button pin number. Looks like is not a number")
+                    bobj = self._events[self._labels[b["functionality"]["value"]]](self.app, pin)
+                    GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)              # TODO add options for pullup/pulldown resistors and button state inversion
+                    GPIO.add_event_detect(pin, GPIO.BOTH, callback = bobj.button_change, bouncetime = BOUNCE_TIME)          # the rising or falling edge is detected in the button event class
+                    
     def gpio_is_available(self):
         return self._gpio_available
 
