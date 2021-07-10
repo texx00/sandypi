@@ -36,7 +36,7 @@ class SettingField extends Component{
         }else if(setting.type === "select"){
             return <Form.Group>
                     <Form.Group controlId={setting.name}>
-                        <Form.Label>Serial port</Form.Label>
+                        <Form.Label>{setting.label}</Form.Label>
                         <Form.Control as="select" 
                             value={this.getSettingValue(setting.name)} 
                             onChange={(e) => this.props.onUpdateSetting([ setting.name+".value", e.target.value ])}>
