@@ -126,6 +126,14 @@ def drawing_queue(code):
     element = DrawingElement(drawing_id=code)
     app.qmanager.queue_element(element)
 
+@socketio.on("drawing_pause")
+def drawing_pause():
+    app.qmanager.pause()
+
+@socketio.on("drawing_resume")
+def drawing_resume():
+    app.qmanager.resume()
+
 @socketio.on("drawing_delete")
 def drawing_delete(code):
     item = db.session.query(UploadedFiles).filter_by(id=code).first()
@@ -164,32 +172,43 @@ def queue_set_order(elements):
         app.qmanager.set_new_order(map(lambda e: GenericPlaylistElement.create_element_from_dict(e), json.loads(elements)))
 
 # stops only the current element
-@socketio.on("queue_stop_current")
-def queue_stop_current():
+@socketio.on("queue_next_drawing")
+def queue_next_drawing():
     app.semits.show_toast_on_UI("Stopping drawing...") 
-    app.qmanager.stop()
+    app.qmanager.start_next(force_stop=True)
     if not app.qmanager.is_drawing():   # if the drawing was the last in the queue must send the updated status
         app.qmanager.send_queue_status()
 
 # clears the queue and stops the current element
 @socketio.on("queue_stop_all")
 def queue_stop_all():
-    queue_stop_continuous()
-    queue_stop_current()
-
-@socketio.on("queue_stop_continuous")
-def queue_stop_continuous():
-    app.qmanager.stop_continuous()
+    queue_set_repeat(False)
+    queue_set_shuffle(False)
     queue_set_order("")
+    app.qmanager.stop()
 
-@socketio.on("queue_start_drawings")
-def queue_start_drawings(res):
-    res = json.loads(res)
-    app.qmanager.start_continuous_drawing(res["shuffle"], res["playlist"])
+# sets the repeat flag for the queue
+@socketio.on("queue_set_repeat")
+def queue_set_repeat(val):
+    app.qmanager.set_repeat(val)
+    app.logger.info("repeat: {}".format(val))
 
+# sets the shuffle flag for the queue
+@socketio.on("queue_set_shuffle")
+def queue_set_shuffle(val):
+    app.qmanager.set_shuffle(val)
+    app.logger.info("shuffle: {}".format(val))
+
+# sets the queue interval
 @socketio.on("queue_set_interval")
-def queue_set_interval(interval):
-    app.qmanager.set_continuous_interval(interval)
+def queue_set_interval(val):
+    app.qmanager.set_interval(float(val))
+    app.logger.info("interval: {}".format(val))
+
+# starts a random drawing from the uploaded list
+@socketio.on("queue_start_random")
+def queue_start_random():
+    app.qmanager.start_random_drawing(repeat=False)
 
 # --------------------------------------------------------- LEDS CALLBACKS -------------------------------------------------------------------------------
 

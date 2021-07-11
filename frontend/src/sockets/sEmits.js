@@ -38,6 +38,14 @@ function drawingQueue(code){
     socket.emit("drawing_queue", code);
 }
 
+function drawingPause(){
+    socket.emit("drawing_pause");
+}
+
+function drawingResume(){
+    socket.emit("drawing_resume");
+}
+
 
 // ---- LEDS ----
 
@@ -85,32 +93,37 @@ function queueSetOrder(list){
     socket.emit("queue_set_order", JSON.stringify(list));
 }
 
-function queueStopCurrent(){
-    socket.emit("queue_stop_current");
+// stops only the current drawing and go on with the next one
+function queueNextDrawing(){
+    socket.emit("queue_next_drawing");
     window.showToast(<div>The current drawing is being stopped. <br/>The device will still run until the buffer is empty.</div>)
 }
 
+// clears the queue and stop the device
 function queueStopAll(){
     socket.emit("queue_stop_all");
-    window.showToast(<div>Stopping the device...</div>)
+    window.showToast(<div>Stopping the device...</div>);
 }
 
-function queueStopContinuous(){
-    socket.emit("queue_stop_continuous")
+// updates the value of the "repeat" flag
+function queueSetRepeat(val){
+    socket.emit("queue_set_repeat", val);
 }
 
-function queueStartDrawings(playlistId=0,shuffle=false, ){
-    socket.emit("queue_start_drawings", JSON.stringify({shuffle: shuffle, playlist: playlistId}));
+// updates the value of the "shuffle" flag
+function queueSetShuffle(val){
+    socket.emit("queue_set_shuffle", val);
 }
 
-function queueStartShuffleDrawings(playlistId=0){
-    queueStartDrawings(playlistId, true);
+// updates the value of the queue interval
+function queueSetInterval(val){
+    socket.emit("queue_set_interval", val);
 }
 
-function queueSetInterval(interval){
-    socket.emit("queue_set_interval", interval);
+// starts a random drawing
+function queueStartRandom(){
+    socket.emit("queue_start_random");
 }
-
 
 // ---- MANUAL CONTROL ----
 
@@ -125,6 +138,8 @@ export {
     drawingDelete, 
     drawingsRequest, 
     drawingQueue, 
+    drawingPause,
+    drawingResume,
     ledsSetColor,
     playlistsRequest, 
     playlistDelete,
@@ -133,12 +148,12 @@ export {
     playlistCreateNew,
     queueGetStatus,
     queueSetOrder,
-    queueStopCurrent,
+    queueNextDrawing,
     queueStopAll,
-    queueStopContinuous,
-    queueStartDrawings,
-    queueStartShuffleDrawings,
+    queueSetRepeat,
+    queueSetShuffle,
     queueSetInterval,
+    queueStartRandom,
     settingsSave,
     settingsShutdownSystem,
     settingsRebootSystem

@@ -9,17 +9,16 @@ class FeederEventManager(FeederEventHandler):
         self.command_index = 0
 
     def on_element_ended(self, element):
-        self.app.logger.info("B> Drawing ended")
+        self.app.logger.info("Drawing ended")
         self.app.semits.show_toast_on_UI("Element ended")
-        self.app.qmanager.set_is_drawing(False)
-        self.app.qmanager.start_next()
+        self.app.qmanager.set_element_ended()
         if self.app.qmanager.is_queue_empty():
             self.app.qmanager.send_queue_status()
 
     def on_element_started(self, element):
-        self.app.logger.info("B> Drawing started")
-        self.app.semits.show_toast_on_UI("Element started")
         self.app.qmanager.set_element(element)
+        self.app.logger.info("Drawing started")
+        self.app.semits.show_toast_on_UI("Element started")
         self.app.qmanager.send_queue_status()
         self.command_index = 0
     
@@ -40,3 +39,4 @@ class FeederEventManager(FeederEventHandler):
 
     def on_device_ready(self):
         self.app.qmanager.check_autostart()
+        self.app.qmanager.send_queue_status()

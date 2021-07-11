@@ -1,5 +1,5 @@
 from PIL import Image, ImageDraw
-from math import cos, sin, pi
+from math import cos, sin, pi, sqrt
 from dotmap import DotMap
 
 class ImageFactory:
@@ -19,7 +19,7 @@ class ImageFactory:
     #  - final_border_px (default: 20): the border to leave around the picture in px
     #  - line_width (default: 5): line thickness (px)
     #  - verbose (boolean) (default: False): if True prints the coordinates and other stuff in the command line
-    def __init__(self, device, final_width=800, final_height=800, bg_color=(0,0,0), line_color=(255,255,255), final_border_px=20, line_width=5, verbose=False):
+    def __init__(self, device, final_width=800, final_height=800, bg_color=(0,0,0), line_color=(255,255,255), final_border_px=20, line_width=1, verbose=False):
         self.final_width = final_width
         self.final_height = final_height
         self.bg_color = bg_color if len(bg_color) == 4 else (*bg_color, 0)  # color argument requires also alpha value
@@ -56,7 +56,8 @@ class ImageFactory:
     # converts a gcode file to an image
     # requires: gcode file (not filepath)
     # return the image file
-    def gcode_to_image(self, file):
+    def gcode_to_coords(self, file):
+        total_lenght = 0
         coords = []
         xmin =  100000
         xmax = -100000
@@ -92,6 +93,9 @@ class ImageFactory:
                 if p[0]=="Y":
                     com_Y = float(p[1:])
             
+            # calculates incremental lenght
+            total_lenght += sqrt(com_X**2 + com_Y**2)
+            
             # converting command X and Y to x, y coordinates (default conversion is cartesian)
             x = com_X
             y = com_Y
@@ -106,7 +110,7 @@ class ImageFactory:
                 rho = cos((com_X - com_Y + self.offset_2) * self.pi_conversion) * self.device_radius 
                 # calculate cartesian coords
                 x = cos(theta) * rho
-                y = sin(theta) * rho
+                y = -sin(theta) * rho   # uses - to remove preview mirroring
             elif self.is_polar():
                 x = cos((com_X + self.offset_1)*self.pi_conversion) * com_Y * self.device_radius
                 y = sin((com_X + self.offset_1)*self.pi_conversion) * com_Y * self.device_radius
@@ -128,7 +132,8 @@ class ImageFactory:
             print("Coordinates:")
             print(coords)
             print("XMIN:{}, XMAX:{}, YMIN:{}, YMAX:{}".format(xmin, xmax, ymin, ymax))
-        limits = {
+        drawing_infos = {
+            "total_lenght": total_lenght,
             "xmin": xmin,
             "xmax": xmax,
             "ymin": ymin,
@@ -136,12 +141,12 @@ class ImageFactory:
         }
 
         # return the image obtained from the coordinates
-        return self.draw_image(coords, limits)
+        return drawing_infos, coords
 
 
     # draws an image with the given coordinates (array of tuple of points) and the extremes of the points
-    def draw_image(self, coords, limits):
-        limits = DotMap(limits)
+    def draw_image(self, coords, drawing_infos):
+        limits = DotMap(drawing_infos)
         # Make the image larger than needed so can apply antialiasing
         factor = 5.0
         img_width = self.final_width*factor

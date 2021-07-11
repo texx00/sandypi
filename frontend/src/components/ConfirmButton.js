@@ -9,14 +9,17 @@ class ConfirmButton extends Component{
     }
 
     render(){
-        return <div>
-                <IconButton 
-                    className={this.state.mustConfirm ? "d-none" : ""}
-                    onClick={()=> this.setState({mustConfirm: true})}
-                    icon={this.props.icon}>
-                        {this.props.children}
-                </IconButton>
-                <div className={this.state.mustConfirm ? "" : "d-none"}>
+        // TODO make this better
+        return <div className={this.props.className + " pr-2"}>
+                <div className={"w-100" + (this.state.mustConfirm ? " d-none" : "")}>
+                    <IconButton 
+                        className={this.props.className}
+                        onClick={()=> this.setState({mustConfirm: true})}
+                        icon={this.props.icon}>
+                            {this.props.children}
+                    </IconButton>    
+                </div>
+                <div className={this.state.mustConfirm ? "" : " d-none"}>
                     <Row>
                         <Col>Are you sure?
                         </Col>

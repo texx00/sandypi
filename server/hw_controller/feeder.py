@@ -6,19 +6,21 @@ from collections import deque
 from copy import deepcopy
 import re
 import logging
-from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
 from dotmap import DotMap
+from py_expression_eval import Parser
 
 from server.utils import limited_size_dict, buffered_timeout, settings_utils
-from server.utils.logging_utils import formatter
+from server.utils.logging_utils import formatter, MultiprocessRotatingFileHandler
 from server.hw_controller.device_serial import DeviceSerial
 from server.hw_controller.gcode_rescalers import Fit
 import server.hw_controller.firmware_defaults as firmware
+from server.database.playlist_elements import DrawingElement, TimeElement
+from server.database.generic_playlist_element import UNKNOWN_PROGRESS
 
 """
 
-This class duty is to send commands to the hw. It can be a single command or an entire drawing.
+This class duty is to send commands to the hw. It can handle single commands as well as elements.
 
 
 """
@@ -47,8 +49,9 @@ class FeederEventHandler():
 
 
 # List of commands that are buffered by the controller
-BUFFERED_COMMANDS = ("G0", "G00", "G1", "G01", "G2", "G02", "G3", "G03", "G28")
-
+BUFFERED_COMMANDS   = ("G0", "G00", "G1", "G01", "G2", "G02", "G3", "G03", "G28")
+# Defines the character used to define macros
+MACRO_CHAR          = "&"
 
 class Feeder():
     def __init__(self, handler = None, **kargvs):
@@ -56,16 +59,16 @@ class Feeder():
         # logger setup
         self.logger = logging.getLogger(__name__)
         self.logger.handlers = []           # remove all handlers
-        self.logger.propagate = False       # set it to files to avoid passing it to the parent logger
+        self.logger.propagate = False       # set it to False to avoid passing it to the parent logger
         # add custom logging levels
         logging.addLevelName(settings_utils.LINE_SENT, "LINE_SENT")
         logging.addLevelName(settings_utils.LINE_RECEIVED, "LINE_RECEIVED")
         logging.addLevelName(settings_utils.LINE_SERVICE, "LINE_SERVICE")
-        self.logger.setLevel(settings_utils.LINE_SENT)             # set to logger lowest level
+        self.logger.setLevel(settings_utils.LINE_SERVICE)             # set to logger lowest level
 
         # create file logging handler
-        file_handler = RotatingFileHandler("server/logs/feeder.log", maxBytes=200000, backupCount=5)
-        file_handler.setLevel(settings_utils.LINE_SENT)
+        file_handler = MultiprocessRotatingFileHandler("server/logs/feeder.log", maxBytes=200000, backupCount=5)
+        file_handler.setLevel(settings_utils.LINE_SERVICE)
         file_handler.setFormatter(formatter)
         self.logger.addHandler(file_handler)
 
@@ -88,11 +91,10 @@ class Feeder():
 
         # variables setup
 
-        self._isrunning = False
+        self._current_element = None
+        self._is_running = False
         self._stopped = False
-        self._ispaused = False
-        self.total_commands_number = None
-        self.command_number = 0
+        self._is_paused = False
         self._th = None
         self.serial_mutex = Lock()
         self.status_mutex = Lock()
@@ -109,6 +111,9 @@ class Feeder():
         self.feed_regex =   re.compile("[F]([0-9.-]+)($|\s)")           # looks for a +/- float number after an F, until the first space or the end of the line
         self.x_regex =      re.compile("[X]([0-9.-]+)($|\s)")           # looks for a +/- float number after an X, until the first space or the end of the line
         self.y_regex =      re.compile("[Y]([0-9.-]+)($|\s)")           # looks for a +/- float number after an Y, until the first space or the end of the line
+        self.macro_regex =  re.compile(MACRO_CHAR+"(.*?)"+MACRO_CHAR)   # looks for stuff between two "%" symbols. Used to parse macros
+        
+        self.macro_parser = Parser()                                    # macro expressions parser
 
         # buffer controll attrs
         self.command_buffer = deque()
@@ -140,8 +145,12 @@ class Feeder():
         self.serial.close()
 
     def get_status(self):
-        with self.serial_mutex:
-            return {"is_running":self._isrunning, "progress":[self.command_number, self.total_commands_number], "is_paused":self._ispaused, "is_connected":self.is_connected()}
+        with self.status_mutex:
+            return {
+                "is_running": self._is_running, 
+                "progress": self._current_element.get_progress(self.feedrate) if not self._current_element is None else UNKNOWN_PROGRESS,
+                "is_paused": self._is_paused
+            }
 
     def connect(self):
         self.logger.info("Connecting to serial device...")
@@ -176,11 +185,10 @@ class Feeder():
             with self.serial_mutex:
                 self._th = Thread(target = self._thf, args=(element,), daemon=True)
                 self._th.name = "drawing_feeder"
-                self._isrunning = True
+                self._is_running = True
                 self._stopped = False
-                self._ispaused = False
+                self._is_paused = False
                 self._current_element = element
-                self.command_number = 0
                 with self.command_buffer_mutex:
                     self.command_buffer.clear()
                 self._th.start()
@@ -189,17 +197,23 @@ class Feeder():
     # ask if the feeder is already sending a file
     def is_running(self):
         with self.status_mutex:
-            return self._isrunning
+            return self._is_running
 
     # ask if the feeder is paused
     def is_paused(self):
         with self.status_mutex:
-            return self._ispaused
+            return self._is_paused
 
     # return the code of the drawing on the go
     def get_element(self):
         with self.status_mutex:
             return self._current_element
+
+    def update_current_time_element(self, new_interval):
+        with self.status_mutex:
+            if type(self._current_element) is TimeElement:
+                if self._current_element.type == "delay":
+                    self._current_element.update_delay(new_interval)
     
     # stops the drawing
     # blocking function: waits until the thread is stopped
@@ -209,7 +223,7 @@ class Feeder():
             with self.status_mutex:
                 if not self._stopped:
                     self.logger.info("Stopping drawing")
-                self._isrunning = False
+                self._is_running = False
                 self._current_element = None
             # block the function until the thread is stopped otherwise the thread may still be running when the new thread is started 
             # (_isrunning will turn True and the old thread will keep going)
@@ -238,17 +252,21 @@ class Feeder():
     # can resume with "resume()"
     def pause(self):
         with self.status_mutex:
-            self._ispaused = True
+            self._is_paused = True
+        self.logger.info("Paused")
     
     # resumes the drawing (only if used with "pause()" and not "stop()")
     def resume(self):
         with self.status_mutex:
-            self._ispaused = False
+            self._is_paused = False
+        self.logger.info("Resumed")
 
     # function to prepare the command to be sent.
     #  * command: command to send
     #  * hide_command=False (optional): will hide the command from being sent also to the frontend (should be used for SW control commands)
     def send_gcode_command(self, command, hide_command=False):
+        command = self._parse_macro(command)
+
         if "G28" in command:
             self.last_commanded_position.x = 0
             self.last_commanded_position.y = 0
@@ -269,14 +287,17 @@ class Feeder():
                     self.command_buffer.clear()
 
         # check if the command is in the "BUFFERED_COMMANDS" list and stops if the buffer is full
-        if any(code in command for code in BUFFERED_COMMANDS):
-            if "F" in command:
-                self.feedrate = self.feed_regex.findall(command)[0][0]
-            if "X" in command:
-                self.last_commanded_position.x = self.x_regex.findall(command)[0][0]
-            if "Y" in command:
-                self.last_commanded_position.y = self.y_regex.findall(command)[0][0]
-
+        try:
+            if any(code in command for code in BUFFERED_COMMANDS):
+                if "F" in command:
+                    self.feedrate = float(self.feed_regex.findall(command)[0][0])
+                if "X" in command:
+                    self.last_commanded_position.x = float(self.x_regex.findall(command)[0][0])
+                if "Y" in command:
+                    self.last_commanded_position.y = float(self.y_regex.findall(command)[0][0])
+        except:
+            self.logger.error("Cannot parse something in the command: " + command)
+        finally:
             # wait until the lock for the buffer length is released -> means the board sent the ack for older lines and can send new ones
             with self.command_send_mutex:       # wait until get some "ok" command to remove extra entries from the buffer
                 pass
@@ -318,7 +339,8 @@ class Feeder():
         return result
     
     def is_connected(self):
-        return self.serial.is_connected()
+        with self.serial_mutex:
+            return self.serial.is_connected()
 
     # stops immediately the device
     def emergency_stop(self):
@@ -354,26 +376,25 @@ class Feeder():
         def delay():
             time.sleep(5)
             self._on_device_ready()
-        th = Thread(target = delay)
+        th = Thread(target = delay, daemon=True)
+        th.name = "waiting_device_ready"
         th.start()
 
     # thread function
     # TODO move this function in a different class?
     def _thf(self, element):
-        self.send_script(self.settings['scripts']['before']["value"])
+        # runs the script only it the element is a drawing, otherwise will skip the "before" script
+        if isinstance(element, DrawingElement):
+            self.send_script(self.settings['scripts']['before']["value"])
 
         self.logger.info("Starting new drawing with code {}".format(element))
-        with self.serial_mutex:
-            element = self._current_element
         
         # TODO retrieve saved information for the gcode filter
         dims = {"table_x":100, "table_y":100, "drawing_max_x":100, "drawing_max_y":100, "drawing_min_x":0, "drawing_min_y":0}
-        # TODO calculate an estimate about the remaining time for the current drawing (for the moment can output the number of rows over the total number of lines in the file)
-        self.total_commands_number = 10**6  # TODO change this placeholder
-
+        
         filter = Fit(dims)
         
-        for k, line in enumerate(element.execute(self.logger)):     # execute the element (iterate over the commands or do what the element is designed for)
+        for k, line in enumerate(self.get_element().execute(self.logger)):     # execute the element (iterate over the commands or do what the element is designed for)
             if not self.is_running():
                 break
             
@@ -381,17 +402,25 @@ class Feeder():
                 continue
 
             line = line.upper()
-            while self.is_paused():
-                time.sleep(0.1)
-                # TODO parse line to scale/add padding to the drawing according to the drawing settings (in order to keep the original .gcode file)
-                #line = filter.parse_line(line)
-                #line = "N{} ".format(file_line) + line
 
             self.send_gcode_command(line)
+
+            while self.is_paused():
+                time.sleep(0.1)
+                # if a "stop" command is raised must exit the pause and stop the drawing
+                if not self.is_running():
+                    break
+
+            # TODO parse line to scale/add padding to the drawing according to the drawing settings (in order to keep the original .gcode file)
+            #line = filter.parse_line(line)
+            #line = "N{} ".format(file_line) + line
         with self.status_mutex:
             self._stopped = True
-        if self.is_running():
+        
+        # runs the script only it the element is a drawing, otherwise will skip the "after" script
+        if isinstance(element, DrawingElement):
             self.send_script(self.settings['scripts']['after']["value"])
+        if self.is_running():
             self.stop()
 
     # thread that keep reading the serial port
@@ -415,7 +444,7 @@ class Feeder():
 
     # function called when the buffer has not been updated for some time (controlled by the buffered timeou)
     def _on_timeout(self):
-        if (self.command_buffer_mutex.locked and self.line_number == self._timeout_last_line):
+        if (self.command_buffer_mutex.locked and self.line_number == self._timeout_last_line and not self.is_paused()):
             # self.logger.warning("!Buffer timeout. Trying to clean the buffer!")
             # to clean the buffer try to send an M114 (marlin) or ? (Grbl) message. In this way will trigger the buffer cleaning mechanism
             command = firmware.get_buffer_command(self._firmware)
@@ -547,9 +576,14 @@ class Feeder():
             # the response looks like: X:115.22 Y:116.38 Z:0.00 E:0.00 Count A:9218 B:9310 Z:0
             # still, M114 will receive the last position in the look-ahead planner thus the drawing will end first on the interface and then in the real device
             elif "Count" in line:
-                l = line.split(" ")
-                x = float(l[0][2:])     # remove "X:" from the string
-                y = float(l[1][2:])     # remove "Y:" from the string
+                try:
+                    l = line.split(" ")
+                    x = float(l[0][2:])     # remove "X:" from the string
+                    y = float(l[1][2:])     # remove "Y:" from the string
+                except Exception as e:
+                    self.logger.error("Error while parsing M114 result for line: {}".format(line))
+                    self.logger.exception(e)
+
                 # if the last commanded position coincides with the current position it means the buffer on the device is empty (could happen that the position is the same between different points but the M114 command should not be that frequent to run into this problem.) TODO check if it is good enough or if should implement additional checks like a timeout
                 # use a tolerance instead of equality because marlin is using strange rounding for the coordinates
                 if (abs(float(self.last_commanded_position.x)-x)<firmware.MARLIN.position_tolerance) and (abs(float(self.last_commanded_position.y)-y)<firmware.MARLIN.position_tolerance):
@@ -630,3 +664,24 @@ class Feeder():
             self.logger.info("Resetting line number")
             self.send_gcode_command("M110 N{}".format(line_number))
         # Grbl do not use line numbers
+
+    def _parse_macro(self, command):
+        if not MACRO_CHAR in command:
+            return command
+        macros = self.macro_regex.findall(command)
+        for m in macros:
+            try:
+                # see https://pypi.org/project/py-expression-eval/ for more info about the parser
+                res = self.macro_parser.parse(m).evaluate({
+                    "X": self.last_commanded_position.x, 
+                    "x": self.last_commanded_position.x,
+                    "Y": self.last_commanded_position.y, 
+                    "y": self.last_commanded_position.y,
+                    "F": self.feedrate,
+                    "f": self.feedrate
+                })
+                command = command.replace(MACRO_CHAR + m + MACRO_CHAR, str(res))
+            except Exception as e:
+                self.logger.error("Error while parsing macro: " + m)
+                self.logger.error(e)
+        return command

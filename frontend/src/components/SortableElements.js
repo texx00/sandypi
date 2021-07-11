@@ -32,10 +32,8 @@ class SortableElements extends Component{
     }
 
     removeElement(idx){
-        let oldState = this.state.list;
-        let newList = oldState.filter((el, i)=> {return el.id !==idx});
-        this.setState({...this.state, list: newList, edited: true});
-        this.prepareUpdate(newList);
+        let newList = this.state.list.filter((el, key) => {return key !== idx});
+        this.setState({...this.state, list: newList, edited: true}, () => this.prepareUpdate(newList));
     }
 
     render(){
@@ -64,7 +62,7 @@ class SortableElements extends Component{
                 }
                 return true;
             }}>
-                {this.state.list.map((el)=>{                // generate list of elements to show in the list
+                {this.state.list.map((el, idx)=>{                // generate list of elements to show in the list
                     if (el.element_type === "control_card"){
                         let c = React.cloneElement(this.props.children, {key:0});
                         return c;                           // return the child as the control card  
@@ -72,8 +70,8 @@ class SortableElements extends Component{
 
                     let ElementType = getElementClass(el);
 
-                    return <ElementCard key={el.id} 
-                        handleUnmount={()=>this.removeElement(el.id)}
+                    return <ElementCard key={idx} 
+                        handleUnmount={()=>this.removeElement(idx)}
                         showCross={this.state.showChildCross}>
                         <ElementType element={el} 
                             onOptionsChange={(el) => this.props.onElementOptionsChange(el)}
@@ -89,7 +87,8 @@ class ElementCard extends React.Component{
         super(props);
         this.state = {
             active: true,
-            showCross: false
+            showCross: false,
+            unmounted: false
         }
     }
     
@@ -102,8 +101,9 @@ class ElementCard extends React.Component{
     }
 
     onTransitionEnd(){
-        if (!this.state.active){
-            this.props.handleUnmount(this)
+        if (!this.state.active && !this.state.unmounted){
+            this.setState({...this.state, unmounted: true, active: true}, ()=>this.props.handleUnmount(this));
+            // TODO check if it is deleting only one element at a time from the list
         }
     }
 

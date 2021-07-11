@@ -4,20 +4,25 @@ import { FileEarmarkPlus } from 'react-bootstrap-icons';
 import { connect } from 'react-redux';
 
 import { Section } from '../../../components/Section';
-import PlayContinuous from '../../../components/PlayContinuous';
 
 import UploadDrawingsModal from './UploadDrawing';
 import DrawingCard from './DrawingCard';
 
 import { setRefreshDrawing } from './Drawings.slice';
 import { getDrawings } from './selector';
+import { getQueueCurrent } from '../queue/selector';
 
 const mapStateToProps = (state) => {
-    return { drawings: getDrawings(state) }
+    return { 
+        drawings:       getDrawings(state),
+        currentElement: getQueueCurrent(state) 
+    }
 }
 
 const mapDispatchToProps = (dispatch) => {
-    return {setRefreshDrawing: () => dispatch(setRefreshDrawing(true))}
+    return {
+        setRefreshDrawing: () => dispatch(setRefreshDrawing(true))
+    }
 }
 
 class Drawings extends Component{
@@ -38,13 +43,17 @@ class Drawings extends Component{
     }
 
     renderDrawings(drawings){
-        if (drawings !== undefined)
+        if (drawings !== undefined){
+            let currentDrawingId = 0;
+            if (this.props.currentElement !== undefined)
+                if (this.props.currentElement.element_type === "drawing") 
+                    currentDrawingId = this.props.currentElement.drawing_id
             return drawings.map((d, index)=>{
                 return <Col key={index} sm={4}>
-                        <DrawingCard drawing={d}/>
+                        <DrawingCard drawing={d} highlight={d.id === currentDrawingId}/>
                     </Col>
             });
-        else{
+        }else{
             return <div></div>
         }
     }
@@ -55,8 +64,6 @@ class Drawings extends Component{
                 sectionButton="Upload new drawing"
                 buttonIcon={FileEarmarkPlus}
                 sectionButtonHandler={()=>this.setState({showUpload: true})}>
-            
-                <PlayContinuous />
 
                 <Row>
                     {this.renderDrawings(this.props.drawings)}

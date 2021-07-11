@@ -5,18 +5,49 @@ from sqlalchemy.sql import func
 
 from server import db
 
+# Incremental ids table
+# Keep track of the highest id value for the other tables if it is necessary to have a monotonic id
+class IdsSequences(db.Model):
+    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    id_name = db.Column(db.String(20), unique=True, nullable=False)
+    last_value = db.Column(db.Integer, nullable=False)
+
+    # return the incremented id and save the last value in the table
+    @classmethod
+    def get_incremented_id(cls, table):
+        ret_value = 1
+        res = db.session.query(IdsSequences).filter(IdsSequences.id_name==table.__table__.name).first()
+        # check if a row for the table has already been created
+        if res is None:
+            # get highest id in the table
+            res = db.session.query(table).order_by(table.id.desc()).first()
+            # if table is empty start from 1 otherwise use max(id) + 1
+            if not res is None:
+                ret_value = res.id + 1
+            db.session.add(IdsSequences(id_name = table.__table__.name, last_value = ret_value))
+            db.session.commit()
+        else:
+            res.last_value += 1
+            db.session.commit()
+            ret_value = res.last_value
+        return ret_value
 
 # Gcode files table
 # Stores information about the single drawing
 class UploadedFiles(db.Model):
-    id = db.Column(db.Integer, primary_key=True)                                # drawing code
+    id = db.Column(db.Integer, db.Sequence("uploaded_id"), primary_key=True, autoincrement=True)       # drawing code (use "sequence" to avoid using the same id for new drawings (this will create problems with the cached data on the frontend, showing an old drawing instead of the freshly uploaded one))
     filename = db.Column(db.String(80), unique=False, nullable=False)           # gcode filename
     up_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)   # Creation timestamp
     edit_date = db.Column(db.DateTime, default=datetime.utcnow)                 # last time the drawing was edited (to update: datetime.datetime.utcnow())
     last_drawn_date = db.Column(db.DateTime)                                    # last time the drawing was used by the table: to update: (datetime.datetime.utcnow())
+    path_length = db.Column(db.Float)                                           # total path lenght
+    dimensions_info = db.Column(db.String(150), unique=False)                   # additional dimensions information as json string object
 
     def __repr__(self):
-        return '<User %r>' % self.filename
+        return '<Uploaded file %r>' % self.filename
+    
+    def save(self):
+        return db.session.commit()
 
     @classmethod
     def get_full_drawings_list(cls):
@@ -25,8 +56,10 @@ class UploadedFiles(db.Model):
     @classmethod
     def get_random_drawing(cls):
         return db.session.query(UploadedFiles).order_by(func.random()).first()
-        #return db.session.query(UploadedFiles).options(load_only('id')).offset(func.floor(func.random()*db.session.query(func.count(UploadedFiles.id)))).limit(1).all()
 
+    @classmethod
+    def get_drawing(cls, id):
+        return db.session.query(UploadedFiles).filter(UploadedFiles.id==id).first()
 
 # move these imports here to avoid circular import in the GenericPlaylistElement
 from server.database.playlist_elements_tables import create_playlist_table, delete_playlist_table, get_playlist_table_class
@@ -35,11 +68,11 @@ from server.database.playlist_elements import GenericPlaylistElement
 # Playlist table
 # Keep track of all the playlists
 class Playlists(db.Model):
-    id = db.Column(db.Integer, primary_key=True)                                # id of the playlist
+    id = db.Column(db.Integer, primary_key=True)                                                    # id of the playlist
     name = db.Column(db.String(80), unique=False, nullable=False, default="New playlist")
-    creation_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow) # Creation timestamp
-    edit_date = db.Column(db.DateTime, default=datetime.utcnow)                 # Last time the playlist was edited (to update: datetime.datetime.utcnow())
-    version = db.Column(db.Integer, default=0)                  # Incremental version number: +1 every time the playlist is saved
+    creation_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)                 # Creation timestamp
+    edit_date = db.Column(db.DateTime, default=datetime.utcnow)                                     # Last time the playlist was edited (to update: datetime.datetime.utcnow())
+    version = db.Column(db.Integer, default=0)                                                      # Incremental version number: +1 every time the playlist is saved
            
     def save(self):
         self.edit_date = datetime.utcnow()

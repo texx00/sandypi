@@ -8,36 +8,35 @@ import { Play, X } from 'react-bootstrap-icons';
 import ConfirmButton from '../../../../components/ConfirmButton';
 import SortableElements from '../../../../components/SortableElements';
 import IconButton from '../../../../components/IconButton';
+import ControlCard from './ControlCard';
 
 import { playlistDelete, playlistQueue, playlistSave } from '../../../../sockets/sEmits';
 import { listsAreEqual } from '../../../../utils/dictUtils';
 
 import { tabBack } from '../../Tabs.slice';
 import { addToPlaylist, deletePlaylist, resetPlaylistDeletedFlag, resetMandatoryRefresh, updateSinglePlaylist } from '../Playlists.slice';
-import ControlCard from './ControlCard';
 import { getSinglePlaylist, playlistHasBeenDeleted, singlePlaylistMustRefresh } from '../selector';
-import PlayContinuous from '../../../../components/PlayContinuous';
 
 const mapStateToProps = (state) => {
     return {
-        playlist: getSinglePlaylist(state),
-        mandatoryRefresh: singlePlaylistMustRefresh(state),
-        playlistDeleted: playlistHasBeenDeleted(state)
+        playlist:           getSinglePlaylist(state),
+        mandatoryRefresh:   singlePlaylistMustRefresh(state),
+        playlistDeleted:    playlistHasBeenDeleted(state)
     }
 }
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleTabBack: () => {
+        handleTabBack:              () => {
             // can use multiple actions thanks to the thunk library
             dispatch(tabBack());
             dispatch(resetPlaylistDeletedFlag());
         },
-        deletePlaylist: (id) => dispatch(deletePlaylist(id)),
-        updateSinglePlaylist: (pl) => dispatch(updateSinglePlaylist(pl)),
-        addElements: (elements) => dispatch(addToPlaylist(elements)),
-        resetMandatoryRefresh: () => dispatch(resetMandatoryRefresh()),
-        resetPlaylistDeletedFlag: () => dispatch(resetPlaylistDeletedFlag())
+        deletePlaylist:           (id) => dispatch(deletePlaylist(id)),
+        updateSinglePlaylist:     (pl) => dispatch(updateSinglePlaylist(pl)),
+        addElements:        (elements) => dispatch(addToPlaylist(elements)),
+        resetMandatoryRefresh:      () => dispatch(resetMandatoryRefresh()),
+        resetPlaylistDeletedFlag:   () => dispatch(resetPlaylistDeletedFlag())
     }
 }
 
@@ -87,6 +86,14 @@ class SinglePlaylist extends Component{
     }
 
     componentDidUpdate(){
+        if (this.props.mandatoryRefresh){
+            this.setState({...this.state, elements: this.addControlCard(this.props.playlist.elements)});
+            this.props.resetMandatoryRefresh()
+        }
+
+        if (this.props.playlistHasBeenDeleted){
+            this.props.handleTabBack();
+        }
     }
 
     handleElementUpdate(element){
@@ -115,7 +122,21 @@ class SinglePlaylist extends Component{
     renderStartButtons(){
         if (this.state.elements.length === 0){
             return ""
-        }else return <PlayContinuous playlistId={this.props.playlist.id}/>
+        }else {
+            let startDrawingLabel = "Queue playlist";
+            if (this.props.currentElement === undefined){
+                startDrawingLabel = "Start playlist";
+            }
+            return <div>
+                <IconButton className="btn" 
+                    icon={Play}
+                    onClick={()=>{
+                        playlistQueue(this.props.playlist.id);
+                    }}>
+                    {startDrawingLabel}
+                </IconButton>
+            </div>
+        }
     }
 
     renderDeleteButton(){
@@ -132,14 +153,6 @@ class SinglePlaylist extends Component{
 
     // TODO add "enter to confirm" event to save the values of the fields in the elements options modals and also the name change
     render(){
-        if (this.props.mandatoryRefresh){
-            this.setState({...this.state, elements: this.addControlCard(this.props.playlist.elements)});
-            this.props.resetMandatoryRefresh()
-        }
-
-        if (this.props.playlistHasBeenDeleted){
-            this.props.handleTabBack();
-        }
 
         return <Container>
             <div>
@@ -171,11 +184,17 @@ class SinglePlaylist extends Component{
                     {this.props.playlist.name}
                 </h1>
             </div>
-            {this.renderStartButtons()}
-            {this.renderElements()}
             <Row className="center mt-5">
-                {this.renderDeleteButton()}
+                <Col></Col>
+                <Col>
+                    {this.renderStartButtons()}
+                </Col>
+                <Col>
+                    {this.renderDeleteButton()}
+                </Col>
+                <Col></Col>
             </Row>
+            {this.renderElements()}
         </Container>
     }
 }

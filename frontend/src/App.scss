@@ -64,6 +64,22 @@ button{
     font-weight: 900;
 }
 
+.no-margin{
+    margin: 0px !important;
+}
+
+.infos-box{
+    @extend .bg-light;
+    @extend .rounded;
+    @extend .text-dark;
+}
+
+footer{
+    position: fixed;
+    bottom: 0px;
+    width: 100%;
+}
+
 /* HOVERS */
 
 .image-overlay-light{
@@ -171,7 +187,6 @@ hr{
         padding-right: 30px;
         padding-left: 30px;
     }
-
 }
 
 /* Carousel mutli overrides */
