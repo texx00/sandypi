@@ -1,5 +1,13 @@
 # Software versions and added features
 
+## v0.4-alpha
+
+* Rework of the queue mechanics and the queue controls
+* Added top bar controls
+* Added eta estimation
+* Fixed mobile layout
+* Other fixes
+
 ## v0.3-alpha
 
 * Major improvements to the playlists
