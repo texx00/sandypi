@@ -91,6 +91,12 @@ Now you can install SandyPi (will take a while):
 
 This step may be long (even over 1h).
 
+In order to use the hardware buttons it is also necessary to follow the following steps:
+* from within the virtual environment, run the `which flask` command,
+* follow the given path and edit the file by changing the first line to `#!/usr/bin/python3`. It is possible to edit the file with the command `sudo nano file_path`, change the file, press CTRL+X to exit, press `y` and `Enter` to save the changes
+
+This is a temporary problem and will be fixed once Docker is used ([issue #8](https://github.com/texx00/sandypi/issues/8)).
+
 ### Running the server
 
 To run the server use:

@@ -2,6 +2,8 @@ import json
 import shutil
 import os
 
+from dotenv.main import load_dotenv
+
 from server import socketio, app, db
 
 from server.utils import settings_utils, software_updates
@@ -86,6 +88,7 @@ def settings_save(data, is_connect):
     settings = settings_utils.load_settings()
     #app.leds_controller.update_settings(settings)  # TODO update leds controller settings
     app.feeder.update_settings(settings)
+    app.bmanager.update(settings)
     app.semits.show_toast_on_UI("Settings saved")
 
     # updating feeder
@@ -101,8 +104,16 @@ def settings_save(data, is_connect):
 @socketio.on("settings_request")
 def settings_request():
     settings = settings_utils.load_settings()
-    settings["serial"]["port"]["available_values"] = app.feeder.serial_ports_list()
+    settings["buttons"]["available_values"] =           app.bmanager.get_buttons_options()
+    settings["buttons"]["available"] =                  app.bmanager.gpio_is_available() or (not os.getenv("DEV_HWBUTTONS") is None)
+    settings["serial"]["port"]["available_values"] =    app.feeder.serial_ports_list()
     settings["serial"]["port"]["available_values"].append("FAKE")
+    tmp = []
+    labels = [v["label"] for v in settings["buttons"]["available_values"]]
+    for b in settings["buttons"]["buttons"]:
+        b["functionality"]["available_values"] = labels
+        tmp.append(b)
+    settings["buttons"]["buttons"] = tmp
     app.semits.emit("settings_now", json.dumps(settings))
 
 @socketio.on("send_gcode_command")

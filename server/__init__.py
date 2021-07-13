@@ -1,3 +1,4 @@
+from server.hw_controller.buttons.buttons_manager import ButtonsManager
 from server.utils.settings_utils import get_ip4_addresses
 from flask import Flask, url_for
 from flask.helpers import send_from_directory
@@ -93,6 +94,9 @@ app.semits = SocketioEmits(app,socketio, db)
 app.feeder = Feeder(FeederEventManager(app))
 #app.feeder.connect()
 app.qmanager = QueueManager(app, socketio)
+
+# Buttons controller initialization
+app.bmanager = ButtonsManager(app)
 
 #app.leds_controller = LedsController(app)
 #app.leds_controller.start()

@@ -167,6 +167,11 @@ const defaultSettings = {
 			value: 18,
 			label: "Pin number"
 		}
+	},
+	buttons: {
+		buttons: [],
+		available_values: [],
+		available: false
 	}
 }
 

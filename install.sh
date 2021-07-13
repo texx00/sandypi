@@ -8,6 +8,14 @@ echo "Starting installation time: $now"
 echo "--------------------------------------------------------------------"
 echo ""
 
+if cat /proc/device-tree/model | grep -q 'Raspberry' 
+then
+    echo "---- Installing HW related libraries (buttons and LEDs) -----"
+    echo ""
+    apt-get install rpi.gpio python3-rpi.gpio
+fi
+
+
 echo '----- Installing python dependencies -----'
 python3 -m pip install -r requirements.txt
 
