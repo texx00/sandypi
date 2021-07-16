@@ -82,9 +82,10 @@ class DeviceSerial():
                         self._readline()
                         self.serial.write(str(obj).encode())
                         # TODO try to send byte by byte instead of a full line? (to reduce the risk of sending commands with missing digits or wrong values that may lead to a wrong position value)
-                except:
+                except Exception as e:
                     self.close()
                     self.logger.error("Error while sending a command")
+                    self.logger.exception(e)
     
     # return a list of available serial ports
     def serial_port_list(self):

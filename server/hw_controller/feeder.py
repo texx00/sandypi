@@ -6,6 +6,7 @@ from collections import deque
 from copy import deepcopy
 import re
 import logging
+import pprint
 from dotenv import load_dotenv
 from dotmap import DotMap
 from py_expression_eval import Parser
@@ -156,20 +157,23 @@ class Feeder():
         self.logger.info("Connecting to serial device...")
         with self.serial_mutex:
             if not self.serial is None:
-                self.serial.close()
+                pass
+                #self.close()
             try:
+                import pprint
+
+                pretty_settings = pprint.pformat(self.settings)
+                self.logger.debug("Connecting serial with parameters: " + pretty_settings)
                 self.serial = DeviceSerial(self.settings['serial']['port']["value"], self.settings['serial']['baud']["value"], logger_name = __name__) 
                 self.serial.set_onreadline_callback(self.on_serial_read)
                 self.serial.start_reading()
                 self.logger.info("Connection successfull")
-            except:
+            except Exception as e:
                 self.logger.info("Error during device connection")
-                self.logger.info(traceback.print_exc())
+                self.logger.exception(e)
                 self.serial = DeviceSerial(logger_name = __name__)
                 self.serial.set_onreadline_callback(self.on_serial_read)
                 self.serial.start_reading()
-
-        self.device_ready = False   # this line is set to true as soon as the board sends a message
 
 
     def set_event_handler(self, handler):
@@ -295,8 +299,9 @@ class Feeder():
                     self.last_commanded_position.x = float(self.x_regex.findall(command)[0][0])
                 if "Y" in command:
                     self.last_commanded_position.y = float(self.y_regex.findall(command)[0][0])
-        except:
+        except Exception as e:
             self.logger.error("Cannot parse something in the command: " + command)
+            self.logger.exception(e)
         finally:
             # wait until the lock for the buffer length is released -> means the board sent the ack for older lines and can send new ones
             with self.command_send_mutex:       # wait until get some "ok" command to remove extra entries from the buffer
@@ -498,7 +503,7 @@ class Feeder():
             else:
                 self._on_device_ready_delay()   # if the device is ready will allow the communication after a small delay
 
-        # check marlin specific messages
+        # check grbl specific messages
         if firmware.is_grbl(self._firmware):
             if line.startswith("<"):
                 try:
@@ -518,8 +523,8 @@ class Feeder():
                     if (self.is_running() or self.is_paused()):
                         hide_line = True
                     self.logger.log(settings_utils.LINE_SERVICE, line)
-                except: # sometimes may not receive the entire line thus it may throw an error
-                    pass
+                except Exception as e: # sometimes may not receive the entire line thus it may throw an error
+                    self.logger.exception(e)
                 return
 
             # errors
