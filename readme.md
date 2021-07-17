@@ -91,11 +91,6 @@ Now you can install SandyPi (will take a while):
 
 This step may be long (even over 1h).
 
-In order to use the hardware buttons it is also necessary to follow the following steps:
-* from within the virtual environment, run the `which flask` command,
-* follow the given path and edit the file by changing the first line to `#!/usr/bin/python3`. It is possible to edit the file with the command `sudo nano file_path`, change the file, press CTRL+X to exit, press `y` and `Enter` to save the changes
-
-This is a temporary problem and will be fixed once Docker is used ([issue #8](https://github.com/texx00/sandypi/issues/8)).
 
 ### Running the server
 
@@ -122,6 +117,31 @@ Follow the [guide](/docs/first_setup.md) for your first setup or for [more info 
 
 The software will automatically load (`.gcode`) files positioned in the `server/autodetect` folder.
 The file will be automatically deleted from the folder once loaded.
+
+## Additional hardware setup
+
+### Buttons
+
+In order to use the hardware buttons it is also necessary to follow the following steps:
+* from within the virtual environment, run the `which flask` command,
+* follow the given path and edit the file by changing the first line to `#!/usr/bin/python3`. It is possible to edit the file with the command `sudo nano file_path`, change the file, press CTRL+X to exit, press `y` and `Enter` to save the changes
+
+This is a temporary problem and will be fixed once Docker is used ([issue #8](https://github.com/texx00/sandypi/issues/8)).
+
+### LEDs
+
+The software can handle different type of leds.
+If digital leds are used, it is necessary to disable the audio module since it is using the same gpio channels used for controlling the LEDs. The following steps may be necessary:
+- create the file `/etc/modprobe.d/snd-blacklist.conf` fill it with the following line: `blacklist snd_bcm2835`
+- if the snd_bcm2835 is present also inside the `/etc/modules` file comment it out with the `#` character
+- when running a headless setup check the `/boot/config.txt` file and add the following lines and then reboot the system:
+```
+hdmi_force_hotplug=1
+hdmi_force_edid_audio=1
+```
+- if it is still not working correctly try to comment out `dtparam=audio=on` in the `/boot/config.txt` file and reboot
+
+For more details check the [page of the library](https://pypi.org/project/rpi-ws281x/) used.
 
 ## Installation troubleshooting
 

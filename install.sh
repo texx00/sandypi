@@ -12,7 +12,10 @@ if cat /proc/device-tree/model | grep -q 'Raspberry'
 then
     echo "---- Installing HW related libraries (buttons and LEDs) -----"
     echo ""
+    # gpio library to manage buttons
     apt-get install rpi.gpio python3-rpi.gpio
+    # leds library
+    python3 -m pip install adafruit-circuitpython-neopixel
 fi
 
 

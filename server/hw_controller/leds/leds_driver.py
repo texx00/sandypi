@@ -41,11 +41,11 @@ class LedsDriver:
         # platform dependent imports
         try:
             if __name__ == "__main__":
-                from libs.WS2812B import WS2812B                                    # in order to test the file directly
+                from libs.RGBNeopixels import RGBNeopixels                                    # in order to test the file directly
             else:
-                from server.hw_controller.leds.libs.WS2812B import WS2812B
+                from server.hw_controller.leds.libs.RGBNeopixels import RGBNeopixels
             
-            self.leds = WS2812B(self.led_number, pin)
+            self.leds = RGBNeopixels(self.led_number, pin)
             return True
 
         except Exception as e:
