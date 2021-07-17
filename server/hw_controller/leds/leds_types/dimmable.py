@@ -9,9 +9,7 @@ class Dimmable(GenericLedDriver):
             self.pwm = GPIO.PWM(self.pin, 100)
             self.pwm.start(0)
         except (RuntimeError, ModuleNotFoundError) as e:
-            self.logger.error("The GPIO is not accessible. If you are using a raspberry pi be sure to use superuser privileges to run this software. \n    Be sure to check also the installation instructions dedicated to the hw options\n   If the error persist open an issue on github\n\n")
-            self.logger.exception(e)
-            raise ModuleNotFoundError("The GPIO module is not available")
+            raise
 
     def fill(self, color):
         val = int(mean(color)/2.55)                 # (mean/255)*100

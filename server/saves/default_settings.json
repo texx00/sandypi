@@ -150,30 +150,36 @@
             "name": "leds.width",
             "type": "input",
             "value": 30,
-            "label": "Leds number on the largest side"
+            "label": "Leds number on the largest side",
+            "tip": "Number of LEDs in the longest side"
         },
         "height": {
             "name": "leds.height",
             "type": "input",
             "value": 20,
-            "label": "Leds number on the smallest side"
+            "label": "Leds number on the smallest side",
+            "tip": "Number of LEDs in the shortest side"
         },
         "type": {
             "name": "leds.type",
             "type": "select",
             "value": "Dimmable",
             "available_values": [
-                "WS2812B",
+                "RGB",
+                "RGBW",
                 "Dimmable"
             ],
-            "label": "Select a led type"
+            "label": "Select a led type",
+            "tip": "RGB and RGBW LEDs are compatible with WS2812B compatible drivers. The 'Dimmable' option is suitable for single color strips."
         },
         "pin1": {
             "name": "leds.pin1",
             "type": "input",
             "value": 18,
-            "label": "Pin number"
-        }
+            "label": "Pin number",
+            "tip": "Uses the BCM pin number"
+        },
+        "available": false
     },
     "buttons": {
         "buttons": [],

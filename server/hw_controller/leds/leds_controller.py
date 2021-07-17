@@ -18,6 +18,9 @@ class LedsController:
         self._running = False
         self.update_settings(settings_utils.get_only_values(settings_utils.load_settings()))
 
+    def is_available(self):
+        return not self.driver is None
+
     def start(self):
         if not self.driver is None:
             self._running = True
@@ -93,8 +96,8 @@ class LedsController:
             except Exception as e: 
                 self.driver = None
                 self.app.semits.show_toast_on_UI("Led driver type not compatible with current HW")
-                self.app.logger.error("Cannot initialize leds controller")
                 self.app.logger.exception(e)
+                self.app.logger.error("Cannot initialize leds controller")
         if restart:
             self.start()
         

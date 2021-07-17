@@ -17,7 +17,7 @@ class ButtonsManager:
             import RPi.GPIO as GPIO
             self._gpio_available = True
         except (RuntimeError, ModuleNotFoundError):
-            self.app.logger.error("The GPIO is not accessible. If you are using a raspberry pi be sure to use superuser privileges to run this software. \n    Be sure to check also the installation instructions dedicated to the hw options\n   If the error persist open an issue on github\n\n")
+            self.app.logger.error("buttons:The GPIO is not accessible. If you are using a raspberry pi be sure to use superuser privileges to run this software. \n    Be sure to check also the installation instructions dedicated to the hw options\n    If the error persist open an issue on github")
             self._gpio_available = False
 
         # loading events

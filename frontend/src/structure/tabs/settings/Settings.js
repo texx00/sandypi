@@ -58,13 +58,7 @@ class Settings extends Component{
         if (!this.props.settings.buttons.available) // TODO include LEDS in this check
             return "";
         else return <Subsection sectionTitle="Additional hardware">
-            {/*<SectionGroup sectionTitle="LEDs">
-                <Container>
-                    <Form.Row>
-                        {this.mapEntries(ledsEntries)}
-                    </Form.Row>
-                </Container>
-            </SectionGroup>*/}
+            {this.generateHWLEDs()}
             {this.generateHWButtonsForm()}
         </Subsection>
     }
@@ -114,13 +108,25 @@ class Settings extends Component{
         </SectionGroup>;
     }
 
+    generateHWLEDs(){
+        if (this.props.settings.leds.available){
+            let ledsEntries =      Object.entries(this.props.settings.leds);
+            return <SectionGroup sectionTitle="LEDs">
+                <Container>
+                    <Form.Row>
+                        {this.mapEntries(ledsEntries)}
+                    </Form.Row>
+                </Container>
+            </SectionGroup>
+        }else return "";
+    }
+
     // render the list of settings divided by sections
     render(){
         let serialEntries =    Object.entries(this.props.settings.serial);
         let deviceEntries =    Object.entries(this.props.settings.device);
         let scriptEntries =    Object.entries(this.props.settings.scripts);
         let autostartEntries = Object.entries(this.props.settings.autostart);
-        //let ledsEntries =      Object.entries(this.props.settings.leds);
 
         return <Container>
             <Form>

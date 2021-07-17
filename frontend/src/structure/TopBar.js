@@ -8,13 +8,14 @@ import QueueControls from './tabs/queue/QueueControls';
 
 import { showBack } from './tabs/selector';
 import { setTab, tabBack } from './tabs/Tabs.slice';
-import { systemIsLinux } from './tabs/settings/selector';
+import { showLEDs, systemIsLinux } from './tabs/settings/selector';
 import { settingsRebootSystem, settingsShutdownSystem } from '../sockets/sEmits';
 
 const mapStateToProps = (state) => {
     return { 
         showBack: showBack(state),
-        isLinux: systemIsLinux(state)
+        isLinux: systemIsLinux(state),
+        showLEDs: showLEDs(state)
     }
 }
 
@@ -57,6 +58,12 @@ class TopBar extends Component{
             </IconButton>
     }
 
+    renderLEDsTab(){
+        if (this.props.showLEDs)
+            return <Nav.Link key={5} onClick={()=>{this.props.handleTab("leds")}}>LEDs</Nav.Link>
+        else return "";
+    }
+
     render(){
         return <div>
             
@@ -70,7 +77,7 @@ class TopBar extends Component{
                             <Nav.Link key={2} onClick={()=>{this.props.handleTab("drawings")}}>Drawings</Nav.Link>
                             <Nav.Link key={3} onClick={()=>{this.props.handleTab("playlists")}}>Playlists</Nav.Link>
                             <Nav.Link key={4} onClick={()=>{this.props.handleTab("manual")}}>Manual control</Nav.Link>
-                            {/*<Nav.Link key={5} onClick={()=>{this.props.handleTab("leds")}}>LEDs</Nav.Link>*/}
+                            {this.renderLEDsTab()}
                             {this.renderBack()}
                         </Nav>
                         <QueueControls/>
