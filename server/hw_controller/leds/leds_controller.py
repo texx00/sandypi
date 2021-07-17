@@ -1,16 +1,22 @@
-from server.utils import settings_utils
-from server.hw_controller.leds.leds_driver import LedsDriver
 from threading import Thread, Lock
+from dotmap import DotMap
+from time import sleep
+
+from server.utils import settings_utils
+
+from server.hw_controller.leds.leds_types.dimmable import Dimmable
+from server.hw_controller.leds.leds_types.RGB_neopixels import RGBNeopixels
+from server.hw_controller.leds.leds_types.RGBW_neopixels import RGBWNeopixels
 
 class LedsController:
     def __init__(self, app):
         self.app = app
-        settings = settings_utils.load_settings()
         self.dimensions = None
-        self.update_settings(settings)
+        self.driver = None
+        self._mutex = Lock()
         self._should_update = False
-        self.mutex = Lock()
-        # may have problems with the leds controller if self.driver.deinit or self.stop is not called on app shutdown
+        self._running = False
+        self.update_settings(settings_utils.get_only_values(settings_utils.load_settings()))
 
     def start(self):
         if not self.driver is None:
@@ -20,21 +26,31 @@ class LedsController:
             self._th.start()
     
     def stop(self):
-        self._running = False
+        with self._mutex:
+            self.driver.clear()
+            self._running = False
     
     def _thf(self):
         self.app.logger.info("Leds controller started")
-        while(self._running):
-            with self.mutex:
-                if (self._should_update):
-                    self.driver.fill(self._color)
-                    self._should_update = False
-        self.app.logger.error("test")
-        self.driver.deinit()
+        try:
+            while(True):
+                with self._mutex:
+                    if self._should_update:
+                        self.driver.fill(self._color)
+                        self._should_update = False
+                    if not self._running:
+                        break
+                sleep(0.01)
+        except Exception as e:
+            self.app.logger.exception(e)
+
+        if not self.driver is None:
+            self.driver.deinit()
+        self.app.logger.info("Leds controller stopped")
 
     # sets a fixed color for the leds
     def set_color(self, color):
-        with self.mutex:
+        with self._mutex:
             self._color = color
             self._should_update = True
 
@@ -51,25 +67,34 @@ class LedsController:
     # Updates dimensions of the led matrix
     # Updates the led driver object only if the dimensions are changed
     def update_settings(self, settings):
-        self.stop()
+        self.app.logger.error("Updating settings")
+        restart = False
+        if self._running:
+            self.stop()
+            restart = True
+        settings = DotMap(settings)
         # TODO convert setting to a dotmap?
-        dims = (settings["leds"]["width"]["value"], settings["leds"]["height"]["value"])
+        dims = (settings.leds.width, settings.leds.height)
         if self.dimensions != dims:
             self.dimensions = dims
-            self.driver = LedsDriver(self.dimensions)
             self.leds_type = None
             self.pin = None
-        if (self.leds_type != settings["leds"]["type"]["value"]) or (self.pin != settings["leds"]["pin1"]["value"]):
-            self.pin = settings["leds"]["pin1"]["value"]
-            self.leds_type = settings["leds"]["type"]["value"]
-            is_ok = False
-            if self.leds_type == "WS2812B":
-                is_ok = self.driver.use_WS2812B(self.pin)
-            elif self.leds_type == "Dimmable":
-                is_ok = self.driver.use_dimmable(self.pin)
-            if not is_ok: 
+        if (self.leds_type != settings.leds.type) or (self.pin != settings.leds.pin1):
+            self.pin = settings.leds.pin1
+            self.leds_type = settings.leds.type
+            try:
+                leds_number = (int(self.dimensions[0])+int(self.dimensions[1]))*2
+                if self.leds_type == "RGB":
+                    self.driver = RGBNeopixels(leds_number, settings.leds.pin1, logger=self.app.logger)
+                elif self.leds_type == "RGBW":
+                    self.driver = RGBWNeopixels(leds_number, settings.leds.pin1, logger=self.app.logger)
+                elif self.leds_type == "Dimmable":
+                    self.driver = Dimmable(leds_number, settings.leds.pin1, logger=self.app.logger)
+            except Exception as e: 
                 self.driver = None
                 self.app.semits.show_toast_on_UI("Led driver type not compatible with current HW")
                 self.app.logger.error("Cannot initialize leds controller")
-        self.start()
+                self.app.logger.exception(e)
+        if restart:
+            self.start()
         

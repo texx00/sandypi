@@ -80,11 +80,7 @@ from server.hw_controller.queue_manager import QueueManager
 from server.hw_controller.feeder import Feeder
 from server.hw_controller.feeder_event_manager import FeederEventManager
 from server.preprocessing.file_observer import GcodeObserverManager
-
-# Commenting out leds part. TODO finish the leds part
-# Needs to uncomment also in the socket callbacks: in settings_save and in leds_set_color
-#from server.hw_controller.leds.leds_controller import LedsController
-#from server.hw_controller.leds.leds_driver import LedsDriver
+from server.hw_controller.leds.leds_controller import LedsController
 
 
 # Initializes sockets emits
@@ -98,8 +94,8 @@ app.qmanager = QueueManager(app, socketio)
 # Buttons controller initialization
 app.bmanager = ButtonsManager(app)
 
-#app.leds_controller = LedsController(app)
-#app.leds_controller.start()
+# Leds controller initialization
+app.leds_controller = LedsController(app)
 
 # Get lates commit short hash to use as a version to refresh cached files
 sw_version = software_updates.get_commit_shash()
@@ -125,6 +121,7 @@ def home():
 def run_post():
     sleep(2)
     app.feeder.connect()
+    app.leds_controller.start()
 
 th = Thread(target = run_post)
 th.name = "feeder_starter"

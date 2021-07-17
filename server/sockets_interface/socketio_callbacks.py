@@ -123,6 +123,7 @@ def send_gcode_command(command):
 @socketio.on("settings_shutdown_system")
 def settings_shutdown_system():
     app.semits.show_toast_on_UI("Shutting down the device")
+    app.leds_controller.stop()
     os.system("sudo shutdown now")
 
 @socketio.on("settings_reboot_system")

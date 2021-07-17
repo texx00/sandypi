@@ -1,7 +1,7 @@
 import board
 import neopixel
 from adafruit_blinka.microcontroller.bcm283x.pin import Pin
-from RGBW_neopixels import RGBWNeopixels
+from server.hw_controller.leds.leds_types.RGBW_neopixels import RGBWNeopixels
 
 class RGBNeopixels(RGBWNeopixels):
     def __init__(self, leds_number, bcm_pin, *argvs, **kargvs):

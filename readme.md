@@ -143,6 +143,8 @@ hdmi_force_edid_audio=1
 
 For more details check the [page of the library](https://pypi.org/project/rpi-ws281x/) used.
 
+When the dimmable type is used it is necessary to follow also the [procedure to enable the hardware buttons](#buttons)
+
 ## Installation troubleshooting
 
 If you find problems during the installation check the [troubleshooting](/docs/troubleshooting.md) page
