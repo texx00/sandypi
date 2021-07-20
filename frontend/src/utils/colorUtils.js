@@ -43,7 +43,7 @@ function alphaToBrightness(rgba){
         b = rgba.b,
         a = rgba.a;
     
-    // formulas to get the brightness down from 0.5 down or 
+    // formulas to get the brightness down from completely off (black) to full on (white)
     let a1 = Math.min(a, BRIGHTNESS_CHANGE_TH)/BRIGHTNESS_CHANGE_TH;
     let a2 = Math.max(a-BRIGHTNESS_CHANGE_TH, 0)/(1-BRIGHTNESS_CHANGE_TH);
     r = Math.floor(r*a1 + (255-r)*a2);

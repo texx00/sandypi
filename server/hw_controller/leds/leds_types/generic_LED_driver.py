@@ -13,15 +13,15 @@ class GenericLedDriver():
         return self.pixels[key]
     
     def __setitem__(self, key, color):
-        self.pixels[key] = self._normalize_size(color)
+        self.pixels[key] = self._normalize_color(color)
 
     def fill(self, color):
-        self.pixels[:] = self._normalize_size(color)
+        self.pixels[:] = self._normalize_color(color)
 
     def clear(self):
         self.fill((0,0,0,0))
 
-    def _normalize_size(self, color):
+    def _normalize_color(self, color):
         if not len(color) == self.colors:
             tmp = [0] * self.colors
             for i, c in enumerate(color):

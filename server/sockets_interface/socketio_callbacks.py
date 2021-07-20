@@ -106,7 +106,7 @@ def settings_request():
     settings = settings_utils.load_settings()
     settings["buttons"]["available_values"] =           app.bmanager.get_buttons_options()
     settings["buttons"]["available"] =                  app.bmanager.gpio_is_available() or (not os.getenv("DEV_HWBUTTONS") is None)
-    settings["leds"]["available"] =                     app.leds_controller.is_available() or (not os.getenv("DEV_HWLEDS") is None)
+    settings["leds"]["available"] =                     app.lmanager.is_available() or (not os.getenv("DEV_HWLEDS") is None)
     settings["serial"]["port"]["available_values"] =    app.feeder.serial_ports_list()
     settings["serial"]["port"]["available_values"].append("FAKE")
     tmp = []
@@ -124,7 +124,8 @@ def send_gcode_command(command):
 @socketio.on("settings_shutdown_system")
 def settings_shutdown_system():
     app.semits.show_toast_on_UI("Shutting down the device")
-    app.leds_controller.stop()
+    app.feeder.stop()
+    app.lmanager.stop()
     os.system("sudo shutdown now")
 
 @socketio.on("settings_reboot_system")
