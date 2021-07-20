@@ -226,9 +226,8 @@ def queue_start_random():
 # --------------------------------------------------------- LEDS CALLBACKS -------------------------------------------------------------------------------
 
 @socketio.on("leds_set_color")
-def leds_set_color(data):
-    color = json.loads(data)
-    #app.leds_controller.set_color((color["r"], color["g"], color["b"])) # TODO uncomment when ready
+def leds_set_color(color):
+    app.lmanager.set_color(color) # TODO uncomment when ready
 
 
 # --------------------------------------------------------- MANUAL CONTROL -------------------------------------------------------------------------------

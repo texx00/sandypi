@@ -2,7 +2,7 @@ from server.hw_controller.leds.leds_types.generic_LED_driver import GenericLedDr
 
 class RGBWNeopixels(GenericLedDriver):
     def __init__(self, leds_number, bcm_pin, *argvs, **kargvs):
-        super().__init__(leds_number, bcm_pin, *argvs, **kargvs)
+        super().__init__(leds_number, bcm_pin, colors=4, *argvs, **kargvs)
         try:
             import board
             import neopixel

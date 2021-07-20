@@ -53,8 +53,14 @@ class LedsController:
 
     # sets a fixed color for the leds
     def set_color(self, color):
+        r = int(color[1:2], 16)
+        g = int(color[3:4], 16)
+        b = int(color[5:6], 16)
+        w = 0
+        if len(color)>7:
+            w = int(color[7:8], 16)
         with self._mutex:
-            self._color = color
+            self._color = (r, g, b, w)
             self._should_update = True
 
     def start_animation(self, animation):

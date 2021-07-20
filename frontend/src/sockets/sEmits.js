@@ -48,9 +48,8 @@ function drawingResume(){
 
 
 // ---- LEDS ----
-
 function ledsSetColor(color){
-    socket.emit("leds_set_color", JSON.stringify(color));
+    socket.emit("leds_set_color", color);
 }
 
 
