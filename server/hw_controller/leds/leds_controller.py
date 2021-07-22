@@ -53,12 +53,12 @@ class LedsController:
 
     # sets a fixed color for the leds
     def set_color(self, color):
-        r = int(color[1:2], 16)
-        g = int(color[3:4], 16)
-        b = int(color[5:6], 16)
+        r = int(color[1:3], 16)
+        g = int(color[3:5], 16)
+        b = int(color[5:7], 16)
         w = 0
         if len(color)>7:
-            w = int(color[7:8], 16)
+            w = int(color[7:9], 16)
         with self._mutex:
             self._color = (r, g, b, w)
             self._should_update = True
@@ -76,7 +76,6 @@ class LedsController:
     # Updates dimensions of the led matrix
     # Updates the led driver object only if the dimensions are changed
     def update_settings(self, settings):
-        self.app.logger.error("Updating settings")
         restart = False
         if self._running:
             self.stop()
