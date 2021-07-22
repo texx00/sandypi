@@ -32,12 +32,12 @@ class ButtonsManager:
                 self._events[cl[0]] = cl[1]
                 self._labels[cl[1].label] = cl[0]
         
-        self.update(load_settings())
+        self.update_settings(load_settings())
     
     def get_buttons_options(self):
         return self.available_buttons_events
     
-    def update(self, settings):
+    def update_settings(self, settings):
         if self.gpio_is_available():
             settings = settings["buttons"]
             should_update = True
@@ -71,7 +71,3 @@ class ButtonsManager:
                     
     def gpio_is_available(self):
         return self._gpio_available
-
-
-
-

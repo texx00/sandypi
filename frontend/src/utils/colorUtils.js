@@ -37,15 +37,15 @@ function hexToRGB(h) {
 
 const BRIGHTNESS_CHANGE_TH = 0.5;   
 
-function alphaToBrightness(rgba){
+function alphaToBrightness(rgba, th=BRIGHTNESS_CHANGE_TH){
     let r = rgba.r,
         g = rgba.g,
         b = rgba.b,
         a = rgba.a;
     
     // formulas to get the brightness down from completely off (black) to full on (white)
-    let a1 = Math.min(a, BRIGHTNESS_CHANGE_TH)/BRIGHTNESS_CHANGE_TH;
-    let a2 = Math.max(a-BRIGHTNESS_CHANGE_TH, 0)/(1-BRIGHTNESS_CHANGE_TH);
+    let a1 = Math.min(a, th)/th;
+    let a2 = Math.max(a-th, 0)/(1-th);
     r = Math.floor(r*a1 + (255-r)*a2);
     g = Math.floor(g*a1 + (255-g)*a2);
     b = Math.floor(b*a1 + (255-b)*a2);

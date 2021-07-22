@@ -2,8 +2,6 @@ import json
 import shutil
 import os
 
-from dotenv.main import load_dotenv
-
 from server import socketio, app, db
 
 from server.utils import settings_utils, software_updates
@@ -86,9 +84,9 @@ def playlist_refresh_single(playlist_id):
 def settings_save(data, is_connect):
     settings_utils.save_settings(data)
     settings = settings_utils.load_settings()
-    #app.leds_controller.update_settings(settings)  # TODO update leds controller settings
     app.feeder.update_settings(settings)
-    app.bmanager.update(settings)
+    app.bmanager.update_settings(settings)
+    app.lmanager.update_settings(settings)
     app.semits.show_toast_on_UI("Settings saved")
 
     # updating feeder

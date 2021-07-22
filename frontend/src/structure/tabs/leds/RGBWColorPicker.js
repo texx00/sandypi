@@ -4,7 +4,7 @@ import { HuePicker, AlphaPicker } from 'react-color';
 
 import { alphaToBrightness, hexToRGB, RGBAToHex, RGBToHex } from '../../../utils/colorUtils';
 
-const DEFAULT_COLOR = "#ff0000"
+const DEFAULT_COLOR = "#ff0000";
 
 class RGBWColorPicker extends Component{
     constructor(props){

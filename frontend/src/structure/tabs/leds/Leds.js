@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import { Section } from '../../../components/Section';
 import { ledsSetColor } from '../../../sockets/sEmits';
 import { getSettings } from '../settings/selector';
+import DimmableColorPicker from './DimmableColorPicker';
 import RGBWColorPicker from './RGBWColorPicker';
 
 const mapStateToProps = (state) => {
@@ -26,13 +27,22 @@ class LedsController extends Component{
         }
     }
 
+    renderColorPicker(){
+        if (this.props.settings.leds.type.value === "Dimmable"){
+            return <DimmableColorPicker 
+                onColorChange={this.changeColor.bind(this)}/>
+        } else {
+            let show_white_channel = this.props.settings.leds.type.value === "RGBW";
+            return <RGBWColorPicker
+                useWhite={show_white_channel}
+                onColorChange={this.changeColor.bind(this)}/>
+        }
+    }
+
     render(){
-        let show_white_channel = this.props.settings.leds.type.value === "RGBW";
         return <Container>
             <Section sectionTitle="LEDs control">
-                <RGBWColorPicker
-                    useWhite={show_white_channel}
-                    onColorChange={this.changeColor.bind(this)}/>
+                {this.renderColorPicker()}
             </Section>
         </Container>
     }

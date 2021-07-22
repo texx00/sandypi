@@ -16,7 +16,7 @@ class LedsController:
         self._mutex = Lock()
         self._should_update = False
         self._running = False
-        self.update_settings(settings_utils.get_only_values(settings_utils.load_settings()))
+        self.update_settings(settings_utils.load_settings())
 
     def is_available(self):
         return not self.driver is None
@@ -81,9 +81,8 @@ class LedsController:
         if self._running:
             self.stop()
             restart = True
-        settings = DotMap(settings)
-        # TODO convert setting to a dotmap?
-        dims = (settings.leds.width, settings.leds.height)
+        settings = DotMap(settings_utils.get_only_values(settings))
+        dims = (int(settings.leds.width), int(settings.leds.height))
         if self.dimensions != dims:
             self.dimensions = dims
             self.leds_type = None
