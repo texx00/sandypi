@@ -3,8 +3,8 @@ import logging
 
 class GenericLedDriver():
     def __init__(self, leds_number, bcm_pin, logger=None, colors=3):
-        self.leds_number = leds_number
-        self.pin = bcm_pin
+        self.leds_number = int(leds_number)
+        self.pin = int(bcm_pin)
         self.colors = colors
         self.logger = logger if not logger is None else logging.getLogger()
         self.pixels = [0] * self.leds_number
