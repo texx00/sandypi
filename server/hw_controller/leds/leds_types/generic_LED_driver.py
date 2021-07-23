@@ -1,13 +1,14 @@
-
+from abc import ABC, abstractmethod
 import logging
 
-class GenericLedDriver():
+class GenericLedDriver(ABC):
     def __init__(self, leds_number, bcm_pin, logger=None, colors=3):
         self.leds_number = int(leds_number)
         self.pin = int(bcm_pin)
         self.colors = colors
         self.logger = logger if not logger is None else logging.getLogger()
         self.pixels = [0] * self.leds_number
+        self.init_pixels()
     
     def __getitem__(self, key):
         return self.pixels[key]
@@ -30,6 +31,10 @@ class GenericLedDriver():
         return color
         
     # abstract methods
-
+    @abstractmethod
     def deinit(self):
-        raise NotImplementedError
+        """Deinitializes and free the hardware resources"""
+
+    @abstractmethod
+    def init_pixels(self):
+        """Initilizes the self.pixels objects"""
