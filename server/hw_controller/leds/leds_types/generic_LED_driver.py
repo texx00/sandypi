@@ -23,10 +23,15 @@ class GenericLedDriver(ABC):
         self.fill((0,0,0,0))
 
     def _normalize_color(self, color):
-        if not len(color) == self.colors:
+        if len(color) < self.colors:
             tmp = [0] * self.colors
             for i, c in enumerate(color):
                 tmp[i] = c
+            return tuple(tmp)
+        if len(color) > self.colors:
+            tmp = [0] * self.colors
+            for i in range(self.colors):
+                tmp[i] = color[i]
             return tuple(tmp)
         return color
         
