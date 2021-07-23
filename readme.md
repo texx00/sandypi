@@ -130,20 +130,8 @@ This is a temporary problem and will be fixed once Docker is used ([issue #8](ht
 
 ### LEDs
 
-The software can handle different type of leds.
-If digital leds are used, it is necessary to disable the audio module since it is using the same gpio channels used for controlling the LEDs. The following steps may be necessary:
-- create the file `/etc/modprobe.d/snd-blacklist.conf` fill it with the following line: `blacklist snd_bcm2835`
-- if the snd_bcm2835 is present also inside the `/etc/modules` file comment it out with the `#` character
-- when running a headless setup check the `/boot/config.txt` file and add the following lines and then reboot the system:
-```
-hdmi_force_hotplug=1
-hdmi_force_edid_audio=1
-```
-- if it is still not working correctly try to comment out `dtparam=audio=on` in the `/boot/config.txt` file and reboot
+It is possible to control LEDs strips directly from the interface. [Check the full procedure for more info](/docs/hardware/leds.md).
 
-For more details check the [page of the library](https://pypi.org/project/rpi-ws281x/) used.
-
-When the dimmable type is used it is necessary to follow also the [procedure to enable the hardware buttons](#buttons)
 
 ## Installation troubleshooting
 
@@ -220,7 +208,7 @@ Here is a brief list of what the software is capable of and what will be impleme
 * [x] Feed the table periodically
 * [x] Shuffle mode to play shuffled drawings continuosly
 * [x] Show the realtime gcode simulation with time estimate (ETA)
-* [ ] Simple lights/led control
+* [x] Simple lights/led control
 * [ ] Update the software with a single button
 * [ ] Create logo
 * [ ] Run the server not on a production server
