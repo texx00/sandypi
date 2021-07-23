@@ -5,7 +5,6 @@ class Dimmable(GenericLedDriver):
     def __init__(self, leds_number, bcm_pin, *argvs, **kargvs):
         super().__init__(leds_number, bcm_pin, colors=1, *argvs, **kargvs)
         
-
     def fill(self, color):
         val = int(mean(color)/2.55)                 # (mean/255)*100
         self.pwm.ChangeDutyCycle(val)

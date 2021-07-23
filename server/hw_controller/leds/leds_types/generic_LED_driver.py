@@ -34,6 +34,10 @@ class GenericLedDriver(ABC):
                 tmp[i] = color[i]
             return tuple(tmp)
         return color
+
+    def set_brightness(self, brightness):
+        # TODO create this
+        pass
         
     # abstract methods
     @abstractmethod

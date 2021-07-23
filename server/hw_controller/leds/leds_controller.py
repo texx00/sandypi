@@ -13,6 +13,7 @@ class LedsController:
         self.app = app
         self.dimensions = None
         self.driver = None
+        self.sensor = None
         self._mutex = Lock()
         self._should_update = False
         self._running = False
@@ -20,6 +21,9 @@ class LedsController:
 
     def is_available(self):
         return not self.driver is None
+
+    def has_light_sensor(self):
+        return not self.sensor is None
 
     def start(self):
         if not self.driver is None:
@@ -76,6 +80,7 @@ class LedsController:
     # Updates dimensions of the led matrix
     # Updates the led driver object only if the dimensions are changed
     def update_settings(self, settings):
+        # TODO create also light sensor
         restart = False
         if self._running:
             self.stop()

@@ -105,6 +105,7 @@ def settings_request():
     settings["buttons"]["available_values"] =           app.bmanager.get_buttons_options()
     settings["buttons"]["available"] =                  app.bmanager.gpio_is_available() or (not os.getenv("DEV_HWBUTTONS") is None)
     settings["leds"]["available"] =                     app.lmanager.is_available() or (not os.getenv("DEV_HWLEDS") is None)
+    settings["leds"]["has_light_sensor"] =              app.lmanager.has_light_sensor() or (not os.getenv("DEV_HWLEDS") is None)
     settings["serial"]["port"]["available_values"] =    app.feeder.serial_ports_list()
     settings["serial"]["port"]["available_values"].append("FAKE")
     tmp = []

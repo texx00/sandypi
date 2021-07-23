@@ -179,7 +179,8 @@
             "label": "Pin number",
             "tip": "Uses the BCM pin number"
         },
-        "available": false
+        "available": false,
+        "has_light_sensor": false
     },
     "buttons": {
         "buttons": [],

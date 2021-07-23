@@ -16,6 +16,8 @@ then
     apt-get install rpi.gpio python3-rpi.gpio
     # leds library
     python3 -m pip install adafruit-circuitpython-neopixel
+    # light sensor library
+    python3 -m pip install adafruit-circuitpython-tsl2591
 fi
 
 

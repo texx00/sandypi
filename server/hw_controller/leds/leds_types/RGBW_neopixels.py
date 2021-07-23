@@ -4,6 +4,17 @@ class RGBWNeopixels(GenericLedDriver):
     def __init__(self, leds_number, bcm_pin, *argvs, **kargvs):
         kargvs["colors"] = 4
         super().__init__(leds_number, bcm_pin, *argvs, **kargvs)
+    
+    def fill(self, color):
+        self.pixels.fill(self._normalize_color(color))
+    
+    # abstract methods overwrites
+
+    def deinit(self):
+        self.clear()
+        self.pixels.deinit()
+
+    def init_pixels(self):
         try:
             import board
             import neopixel
@@ -13,13 +24,6 @@ class RGBWNeopixels(GenericLedDriver):
             self.clear()
         except:
             raise ModuleNotFoundError("Cannot find the libraries to control the selected hardware")
-    
-    def fill(self, color):
-        self.pixels.fill(self._normalize_color(color))
-    
-    def deinit(self):
-        self.clear()
-        self.pixels.deinit()
 
 
 if __name__ == "__main__":
