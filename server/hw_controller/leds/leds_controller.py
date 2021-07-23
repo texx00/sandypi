@@ -76,7 +76,6 @@ class LedsController:
     # Updates dimensions of the led matrix
     # Updates the led driver object only if the dimensions are changed
     def update_settings(self, settings):
-        self.app.logger.error("Updating settings")
         restart = False
         if self._running:
             self.stop()

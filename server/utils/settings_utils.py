@@ -56,7 +56,7 @@ def match_dict(mod_dict, ref_dict):
         
         new_dict = dict(mod_dict)   # clone object
         for k in ref_dict.keys():
-            if not k in new_dict:
+            if (not k in new_dict) or (k == "available_values"):
                 new_dict[k] = ref_dict[k]    # if key is not set, adds the key as an empty dict
             else:
                 new_dict[k] = match_dict(new_dict[k], ref_dict[k])
