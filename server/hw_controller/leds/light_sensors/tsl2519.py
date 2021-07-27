@@ -1,8 +1,8 @@
 from server.hw_controller.leds.light_sensors.generic_light_sensor import GenericLightSensor
 from math import sqrt
 
-LUX_MAX = 10000
-BRIGHTNESS_MIN = 0.1
+LUX_MAX = 30
+BRIGHTNESS_MIN = 0.05
 
 class TSL2519(GenericLightSensor):
     """Light sensor based on TSL2519 (I2C) sensor"""

@@ -227,8 +227,15 @@ def queue_start_random():
 
 @socketio.on("leds_set_color")
 def leds_set_color(color):
-    app.lmanager.set_color(color) # TODO uncomment when ready
+    app.lmanager.set_color(color) 
 
+@socketio.on("leds_auto_dim")
+def leds_set_autodim(val):
+    # TODO add an "autodim" on in the settings
+    if val:
+        app.lmanager.sensor.start()
+    else:
+        app.lmanager.sensor.stop()
 
 # --------------------------------------------------------- MANUAL CONTROL -------------------------------------------------------------------------------
 

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import logging
+from server.utils.custom_math import multiply_tuple
 
 class GenericLedDriver(ABC):
 
@@ -70,8 +71,3 @@ class GenericLedDriver(ABC):
     @abstractmethod
     def init_pixels(self):
         """Initilizes the self.pixels objects"""
-
-
-def multiply_tuple(tup, fval):
-    tup = tuple(i*fval for i in tup)
-    return tup

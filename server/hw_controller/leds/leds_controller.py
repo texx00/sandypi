@@ -3,6 +3,7 @@ from dotmap import DotMap
 from time import sleep
 
 from server.utils import settings_utils
+from server.utils.custom_math import multiply_tuple
 
 from server.hw_controller.leds.leds_types.dimmable import Dimmable
 from server.hw_controller.leds.leds_types.RGB_neopixels import RGBNeopixels
@@ -18,6 +19,7 @@ class LedsController:
         self._mutex = Lock()
         self._should_update = False
         self._running = False
+        self._color = (0,0,0,0)
         self.update_settings(settings_utils.load_settings())
 
     def is_available(self):
@@ -25,7 +27,7 @@ class LedsController:
 
     def has_light_sensor(self):
         if not self.sensor is None:
-            return self.sensor.connected()
+            return self.sensor.is_connected()
         return False
 
     def start(self):
@@ -69,6 +71,11 @@ class LedsController:
         with self._mutex:
             self._color = (r, g, b, w)
             self._should_update = True
+
+    def set_brightness(self, brightness):
+        color = multiply_tuple(self._color, brightness)
+        if not self.driver is None:
+            self.driver.fill(color)
 
     def start_animation(self, animation):
         # TODO add animations picker:
