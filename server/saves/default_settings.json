@@ -216,7 +216,7 @@
                 "TSL2519"
             ],
             "label": "Choose the type of light sensor available",
-            "depends_on": "leds.has_light_sensor",
+            "depends_on": "leds.available",
             "depends_values": [
                 true
             ]
