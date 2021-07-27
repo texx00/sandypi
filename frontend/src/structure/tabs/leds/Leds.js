@@ -3,7 +3,7 @@ import { Container } from 'react-bootstrap';
 import { connect } from 'react-redux';
 
 import { Section } from '../../../components/Section';
-import { ledsSetColor } from '../../../sockets/sEmits';
+import { ledsAutoDim, ledsSetColor } from '../../../sockets/sEmits';
 import { getSettings } from '../settings/selector';
 import DimmableColorPicker from './DimmableColorPicker';
 import RGBWColorPicker from './RGBWColorPicker';
@@ -33,8 +33,11 @@ class LedsController extends Component{
                 onColorChange={this.changeColor.bind(this)}/>
         } else {
             let show_white_channel = this.props.settings.leds.type.value === "RGBW";
+            let show_auto_dim = this.props.settings.leds.has_light_sensor.value;
             return <RGBWColorPicker
                 useWhite={show_white_channel}
+                useAutoDim={show_auto_dim}
+                onAutoDimChange={(ad) => ledsAutoDim(ad)}
                 onColorChange={this.changeColor.bind(this)}/>
         }
     }

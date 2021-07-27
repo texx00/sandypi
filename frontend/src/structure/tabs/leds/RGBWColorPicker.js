@@ -15,7 +15,8 @@ class RGBWColorPicker extends Component{
             brightness: 0.5,
             original_color: hexToRGB(DEFAULT_COLOR),
             components_color: DEFAULT_COLOR+"7f",               // starting from the middle of the brightness bar
-            show_white: false
+            show_white: false,
+            show_autodim: false
         }
         this.state_backup = {};
     }
@@ -62,8 +63,7 @@ class RGBWColorPicker extends Component{
 
     renderWhiteControl(){
         if (this.props.useWhite){
-            return <Row>
-                <Col className="center m-4">
+            return <Col className="center m-4">
                     <FormGroup>
                         <Form.Check
                             label="Use white channel only"
@@ -82,7 +82,25 @@ class RGBWColorPicker extends Component{
                             checked={this.state.show_white}/>
                     </FormGroup>
                 </Col>
-            </Row>
+        }
+        else return "";
+    }
+
+    renderAutoDim(){
+        if (this.props.useAutoDim){
+            return <Col className="center m-4">
+                <FormGroup>
+                    <Form.Check
+                        label="Use autodim"
+                        id="leds_autodim_control_checkbox"
+                        type="switch"
+                        onChange={(e) => {
+                            this.setState({...this.state, show_autodim: e.target.checked},
+                                () => this.props.onAutoDimChange(e.target.checked))
+                        }}
+                        checked={this.state.show_autodim}/>
+                </FormGroup>
+            </Col>
         }
         else return "";
     }
@@ -108,7 +126,10 @@ class RGBWColorPicker extends Component{
                         }}/>
                 </Col>
             </Row>
-            {this.renderWhiteControl()}
+            <Row>
+                {this.renderWhiteControl()}
+                {this.renderAutoDim()}
+            </Row>
             <Row>
                 <Col>
                     <h4 className="center m-4">Brightness</h4>
