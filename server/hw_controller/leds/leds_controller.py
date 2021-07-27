@@ -20,6 +20,7 @@ class LedsController:
         self._should_update = False
         self._running = False
         self._color = (0,0,0,0)
+        self._brightness = 1
         self.update_settings(settings_utils.load_settings())
 
     def is_available(self):
@@ -48,7 +49,9 @@ class LedsController:
             while(True):
                 with self._mutex:
                     if self._should_update:
-                        self.driver.fill(self._color)
+                        # this is a bad hack in order to use the autodim function. 
+                        # FIXME Need to rethink the led controller and the way colors are managed to take into account also the brightness. Needs some time
+                        self.set_brightness(self._brightness)
                         self._should_update = False
                     if not self._running:
                         break
@@ -73,6 +76,7 @@ class LedsController:
             self._should_update = True
 
     def set_brightness(self, brightness):
+        self._brightness = brightness
         color = multiply_tuple(self._color, brightness)
         if not self.driver is None:
             self.driver.fill(color)
