@@ -6,6 +6,7 @@ class Dimmable(GenericLedDriver):
         super().__init__(leds_number, bcm_pin, colors=1, *argvs, **kargvs)
         
     def fill(self, color):
+        self._original_colors[:] = color
         val = int(mean(color)/2.55)                 # (mean/255)*100
         self.pwm.ChangeDutyCycle(val)
         self.pixels[:] = color
@@ -14,6 +15,7 @@ class Dimmable(GenericLedDriver):
         val = int(mean(color)/2.55)                 # (mean/255)*100
         self.pwm.ChangeDutyCycle(val)
         self.pixels[key] = color
+        self._original_colors[:] = val
     
     # abstract methods overrides
 

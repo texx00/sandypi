@@ -151,14 +151,34 @@
             "type": "input",
             "value": 30,
             "label": "Leds number on the largest side",
-            "tip": "Number of LEDs in the longest side"
+            "tip": "Number of LEDs in the longest side",
+            "depends_on": "device.type",
+            "depends_values": [
+                "Cartesian"
+            ]
         },
         "height": {
             "name": "leds.height",
             "type": "input",
             "value": 20,
             "label": "Leds number on the smallest side",
-            "tip": "Number of LEDs in the shortest side"
+            "tip": "Number of LEDs in the shortest side",
+            "depends_on": "device.type",
+            "depends_values": [
+                "Cartesian"
+            ]
+        },
+        "circumference": {
+            "name": "leds.circumference",
+            "type": "input",
+            "value": 50,
+            "label": "Total LEDs number",
+            "tip": "The total number of LEDs pixels in the table",
+            "depends_on": "device.type",
+            "depends_values": [
+                "Scara",
+                "Polar"
+            ]
         },
         "type": {
             "name": "leds.type",
@@ -179,8 +199,28 @@
             "label": "Pin number",
             "tip": "Uses the BCM pin number"
         },
-        "available": false,
-        "has_light_sensor": false
+        "available": {
+            "value": false,
+            "hide": true
+        },
+        "has_light_sensor": {
+            "value": false,
+            "hide": true
+        },
+        "light_sensor": {
+            "name": "leds.light_sensor",
+            "type": "select",
+            "value": "",
+            "available_values": [
+                "No sensor",
+                "TSL2519"
+            ],
+            "label": "Choose the type of light sensor available",
+            "depends_on": "leds.has_light_sensor",
+            "depends_values": [
+                true
+            ]
+        }
     },
     "buttons": {
         "buttons": [],

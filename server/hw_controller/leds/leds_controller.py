@@ -7,6 +7,7 @@ from server.utils import settings_utils
 from server.hw_controller.leds.leds_types.dimmable import Dimmable
 from server.hw_controller.leds.leds_types.RGB_neopixels import RGBNeopixels
 from server.hw_controller.leds.leds_types.RGBW_neopixels import RGBWNeopixels
+from server.hw_controller.leds.light_sensors.tsl2519 import TSL2519
 
 class LedsController:
     def __init__(self, app):
@@ -23,7 +24,9 @@ class LedsController:
         return not self.driver is None
 
     def has_light_sensor(self):
-        return not self.sensor is None
+        if not self.sensor is None:
+            return self.sensor.connected()
+        return False
 
     def start(self):
         if not self.driver is None:
@@ -80,13 +83,12 @@ class LedsController:
     # Updates dimensions of the led matrix
     # Updates the led driver object only if the dimensions are changed
     def update_settings(self, settings):
-        # TODO create also light sensor
         restart = False
         if self._running:
             self.stop()
             restart = True
         settings = DotMap(settings_utils.get_only_values(settings))
-        dims = (int(settings.leds.width), int(settings.leds.height))
+        dims = (int(settings.leds.width), int(settings.leds.height), int(settings.leds.circumference))
         if self.dimensions != dims:
             self.dimensions = dims
             self.leds_type = None
@@ -95,7 +97,9 @@ class LedsController:
             self.pin = settings.leds.pin1
             self.leds_type = settings.leds.type
             try:
-                leds_number = (int(self.dimensions[0])+int(self.dimensions[1]))*2
+                # the leds number calculation depends on the type of table. 
+                # If is square or rectangular should use a base and height, for round tables will use the total number of leds directly
+                leds_number = (int(self.dimensions[0]) + int(self.dimensions[1]))*2 if settings.device.type == "Cartesian" else int(self.dimensions[2])
                 if self.leds_type == "RGB":
                     self.driver = RGBNeopixels(leds_number, settings.leds.pin1, logger=self.app.logger)
                 elif self.leds_type == "RGBW":
@@ -107,6 +111,18 @@ class LedsController:
                 self.app.semits.show_toast_on_UI("Led driver type not compatible with current HW")
                 self.app.logger.exception(e)
                 self.app.logger.error("Cannot initialize leds controller")
+            try: 
+                if settings.leds.light_sensor == "TSL2519":
+                    self.sensor = TSL2519(self.app)
+                else:
+                    if not self.sensor is None:
+                        self.sensor.deinit()
+            except Exception as e:
+                if self.is_available():
+                    self.app.semits.show_toast_on_UI("The select sensor is not compatible with the current setup")
+                self.app.logger.error("Cannot initialize leds light sensor")
+                self.app.logger.exception(e)
+
         if restart:
             self.start()
         
