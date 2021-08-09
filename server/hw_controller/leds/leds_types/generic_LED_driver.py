@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 import logging
 from math import floor
 
+BRIGHTNESS_CHANGE_VALUE = 0.1
+
 class GenericLedDriver(ABC):
 
     def __init__(self, leds_number, bcm_pin, logger=None, colors=3):
@@ -61,10 +63,17 @@ class GenericLedDriver(ABC):
         
         The value of the brightness should be in the range 0-1"""
 
+        brightness = min(1, max(0, brightness))     # restrict the brightness to be inside the range
+
         if brightness != self.brightness:
             self.brightness = brightness
             self.pixels[:] = self._normalize_color(self._original_colors)
         
+    def increase_brightness(self):
+        self.set_brightness(self.brightness + BRIGHTNESS_CHANGE_VALUE)
+    
+    def decrease_brightness(self):
+        self.set_brightness(self.brightness - BRIGHTNESS_CHANGE_VALUE)
 
     # abstract methods
     @abstractmethod
