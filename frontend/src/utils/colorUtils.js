@@ -34,8 +34,10 @@ function hexToRGB(h) {
 // Above that threshold the color becomes lighter, below this it becomes darker
 // Higher thresholds increases the control in the dark side, 
 // lower threshold increases the control in the bright side (this was not inspired in any way from starwars)
+// This idea was to remove the need of another control for the color saturation (with this mixing the saturation tends toward the whitish version of the color)
+// With BRIGHTNESS_CHANGE_TH = 1 the mixing is not done and there is only brightness control (brightness 1 -> full color saturation at full brightness)
 
-const BRIGHTNESS_CHANGE_TH = 0.5;   
+const BRIGHTNESS_CHANGE_TH = 1;   
 
 function alphaToBrightness(rgba, th=BRIGHTNESS_CHANGE_TH){
     let r = rgba.r,
@@ -43,12 +45,18 @@ function alphaToBrightness(rgba, th=BRIGHTNESS_CHANGE_TH){
         b = rgba.b,
         a = rgba.a;
     
-    // formulas to get the brightness down from completely off (black) to full on (white)
-    let a1 = Math.min(a, th)/th;
-    let a2 = Math.max(a-th, 0)/(1-th);
-    r = Math.floor(r*a1 + (255-r)*a2);
-    g = Math.floor(g*a1 + (255-g)*a2);
-    b = Math.floor(b*a1 + (255-b)*a2);
+    if (BRIGHTNESS_CHANGE_TH === 1){
+        r = Math.floor(r*a);
+        g = Math.floor(g*a);
+        b = Math.floor(b*a);
+    }else{
+        // formulas to get the brightness down from completely off (black) to full on (white)
+        let a1 = Math.min(a, th)/th;
+        let a2 = Math.max(a-th, 0)/(1-th);
+        r = Math.floor(r*a1 + (255-r)*a2);
+        g = Math.floor(g*a1 + (255-g)*a2);
+        b = Math.floor(b*a1 + (255-b)*a2);
+    }
 
     return {r: r, g: g, b: b}
 }

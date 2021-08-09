@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import logging
-from server.utils.custom_math import multiply_tuple
+from math import floor
 
 class GenericLedDriver(ABC):
 
@@ -10,14 +10,14 @@ class GenericLedDriver(ABC):
         self.colors = colors
         self.logger = logger if not logger is None else logging.getLogger()
         self.pixels = [0] * self.leds_number
-        self._original_colors = [0] * self.leds_number
+        self._original_colors = [[0]*self.colors for i in range(self.leds_number)]
         self.brightness = 1
         self.init_pixels()
-    
+
 
     def __getitem__(self, key):
         return self.pixels[key]
-    
+
 
     def __setitem__(self, key, color):
         self._original_colors[key] = color
@@ -27,7 +27,7 @@ class GenericLedDriver(ABC):
     def fill(self, color):
         """Fill the strip with the given color"""
 
-        self.pixels[:] = color
+        self._original_colors[:] = [color]*self.leds_number
         self.pixels[:] = self._normalize_color(color)
 
 
@@ -38,19 +38,22 @@ class GenericLedDriver(ABC):
 
 
     def _normalize_color(self, color):
-        """Normalizes the color lenght depending on the leds type (can be 1,3 or 4 depending if is a single channel or RGB, RGBW)"""
+        """Normalizes the color lenght depending on the leds type (can be 1,3 or 4 depending if is a single channel or RGB, RGBW)
 
+        Fixes also the color brightness"""
+
+        # If a list of colors is give iterates over all the elements
+        if type(color[0]) in (list, tuple) :
+            return [self._normalize_color(c) for c in color]
+
+        tmp = [0] * self.colors
         if len(color) < self.colors:
-            tmp = [0] * self.colors
             for i, c in enumerate(color):
-                tmp[i] = c
-            return tuple(tmp)
-        if len(color) > self.colors:
-            tmp = [0] * self.colors
+                tmp[i] = floor(c * self.brightness)
+        else:
             for i in range(self.colors):
-                tmp[i] = color[i]
-            return tuple(tmp)
-        return color
+                tmp[i] = floor(color[i] * self.brightness)
+        return tuple(tmp)
 
 
     def set_brightness(self, brightness):
@@ -58,8 +61,9 @@ class GenericLedDriver(ABC):
         
         The value of the brightness should be in the range 0-1"""
 
-        self.brightness = brightness
-        self.pixels[:] = self._normalize_color(list(multiply_tuple(c, brightness) for c in self._original_colors))
+        if brightness != self.brightness:
+            self.brightness = brightness
+            self.pixels[:] = self._normalize_color(self._original_colors)
         
 
     # abstract methods
