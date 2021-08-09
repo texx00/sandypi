@@ -31,6 +31,10 @@ const settingsSlice = createSlice({
                     idx = parseInt(settings.buttons.buttons.reduce((p,v) => {return p.idx > v.idx ? p.idx : v.idx})) + 1;
                 else idx = settings.buttons.buttons[0].idx + 1;
             }
+            // TODO add the usage value in the list of available values from the settings
+            let click_filtered_values = settings.buttons.available_values.filter((i) => {return i.usage !== "long"}).map((i) => {return i.label});
+            let press_filtered_values = settings.buttons.available_values.filter((i) => {return i.usage !== "click"}).map((i) => {return i.label});
+
             let buttonSetting = {
                 idx: idx,
                 pin: {
@@ -40,12 +44,31 @@ const settingsSlice = createSlice({
                     value: 0,
                     name: "buttons.buttons."+idx+".pin"
                 },
-                functionality: {
+                click: {
                     type: "select",
-                    label: "Button functionality",
-                    available_values: settings.buttons.available_values.map((i) => {return i.label}),
+                    label: "Click action",
+                    available_values: click_filtered_values,
                     value: settings.buttons.available_values[0].label,
-                    name: "buttons.buttons."+idx+".functionality"
+                    name: "buttons.buttons."+idx+".click"
+                },
+                press: {
+                    type: "select",
+                    label: "Long press action",
+                    available_values: press_filtered_values,
+                    value: settings.buttons.available_values[0].label,
+                    name: "buttons.buttons."+idx+".press"
+                },
+                pull: {
+                    type: "select",
+                    label: "Pull resistor type",
+                    available_values: [
+                        "Pullup internal",
+                        "Pulldown internal",
+                        "Pullup external",
+                        "Pulldown external"
+                    ],
+                    value: "Pullup internal",
+                    name: "buttons.buttons."+idx+".pull"
                 }
             };
             settings.buttons.buttons.push(buttonSetting);

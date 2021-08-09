@@ -65,7 +65,7 @@ class ButtonsManager:
                         pin = int(b["pin"]["value"])
                     except:
                         self.app.logger.error("Check the button pin number. Looks like is not a number")
-                    bobj = self._events[self._labels[b["functionality"]["value"]]](self.app, pin)
+                    bobj = self._events[self. ](self.app, pin)
                     GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)              # TODO add options for pullup/pulldown resistors and button state inversion
                     GPIO.add_event_detect(pin, GPIO.BOTH, callback = bobj.button_change, bouncetime = BOUNCE_TIME)          # the rising or falling edge is detected in the button event class
                     

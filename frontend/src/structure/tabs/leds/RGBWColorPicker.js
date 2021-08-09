@@ -12,9 +12,9 @@ class RGBWColorPicker extends Component{
         this.backgroundRef = React.createRef();
         this.state={
             color: DEFAULT_COLOR,
-            brightness: 0.5,
+            brightness: 1,
             original_color: hexToRGB(DEFAULT_COLOR),
-            components_color: DEFAULT_COLOR+"7f",               // starting from the middle of the brightness bar
+            components_color: DEFAULT_COLOR+"ff",
             show_white: false,
             show_autodim: false
         }
@@ -73,7 +73,7 @@ class RGBWColorPicker extends Component{
                                 if (e.target.checked){
                                     this.state_backup = this.state;
                                     this.setState({...this.state, show_white: e.target.checked}, 
-                                        () => this.updateColor({r:127, g:127, b:127},1))
+                                        () => this.updateColor({r:255, g:255, b:255},1))
                                 }else{
                                     this.setState({...this.state, show_white: e.target.checked}, 
                                         () => this.updateColor(this.state_backup.original_color, this.state_backup.brightness))
