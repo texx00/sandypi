@@ -22,6 +22,7 @@ class GenericLightSensor(ABC):
     def stop(self):
         """Stops the light sensor from controlling the LED strip"""
         self._is_running = False
+        self.app.lmanager.set_brightness(1)
 
     def _thf(self):
         while self._is_running:

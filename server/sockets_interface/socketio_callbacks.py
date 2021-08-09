@@ -111,7 +111,8 @@ def settings_request():
     tmp = []
     labels = [v["label"] for v in settings["buttons"]["available_values"]]
     for b in settings["buttons"]["buttons"]:
-        b["functionality"]["available_values"] = labels
+        b["click"]["available_values"] = labels
+        b["press"]["available_values"] = labels
         tmp.append(b)
     settings["buttons"]["buttons"] = tmp
     app.semits.emit("settings_now", json.dumps(settings))

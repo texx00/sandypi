@@ -18,7 +18,9 @@ class TSL2519(GenericLightSensor):
             raise ModuleNotFoundError("Cannot find the libraries to control the selected hardware")
 
     def get_brightness(self):
-        return max(sqrt(min(self._sensor.lux, LUX_MAX)/LUX_MAX), BRIGHTNESS_MIN)             # calculating the brightness to use
+        lux = self._sensor.lux
+        self.app.logger.info("Sensor light intensity: {} lux".format(lux))      # FIXME remove this
+        return max(sqrt(min(lux, LUX_MAX)/LUX_MAX), BRIGHTNESS_MIN)             # calculating the brightness to use
 
     def is_connected(self):
         return not self._sensor is None

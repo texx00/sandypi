@@ -6,7 +6,7 @@ class RGBWNeopixels(GenericLedDriver):
         super().__init__(leds_number, bcm_pin, *argvs, **kargvs)
     
     def fill(self, color):
-        self._original_colors[:] = color
+        self._original_colors[:] = [color]*self.leds_number
         self.pixels.fill(self._normalize_color(color))
     
     # abstract methods overwrites

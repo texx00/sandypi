@@ -20,6 +20,7 @@ class LedsController:
         self._should_update = False
         self._running = False
         self._color = (0,0,0,0)
+        self._brightness = 1
         self.update_settings(settings_utils.load_settings())
 
     def is_available(self):
@@ -73,9 +74,8 @@ class LedsController:
             self._should_update = True
 
     def set_brightness(self, brightness):
-        color = multiply_tuple(self._color, brightness)
         if not self.driver is None:
-            self.driver.fill(color)
+            self.driver.set_brightness(brightness)
 
     def start_animation(self, animation):
         # TODO add animations picker:
