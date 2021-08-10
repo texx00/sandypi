@@ -32,6 +32,8 @@ class GenericLedDriver(ABC):
         self._original_colors[:] = [color]*self.leds_number
         self.pixels[:] = self._normalize_color(color)
 
+    def fill_white(self):
+        self.fill((255,255,255))
 
     def clear(self):
         """Clears the LED strip"""

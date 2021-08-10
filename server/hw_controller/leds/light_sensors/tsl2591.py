@@ -4,7 +4,7 @@ from math import sqrt
 LUX_MAX = 30
 BRIGHTNESS_MIN = 0.05
 
-class TSL2519(GenericLightSensor):
+class TSL2591(GenericLightSensor):
     """Light sensor based on TSL2519 (I2C) sensor"""
 
     def __init__(self, app):

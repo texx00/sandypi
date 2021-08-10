@@ -42,6 +42,9 @@ class BrightnessUp(GenericButtonAction):
     def execute(self):
         self.app.lmanager.driver.increase_brightness()
 
+    def tic(self, tic):
+        self.execute()
+
 
 class BrightnessDown(GenericButtonAction):
     label = "Brightness down"
@@ -49,6 +52,9 @@ class BrightnessDown(GenericButtonAction):
 
     def execute(self):
         self.app.lmanager.driver.decrease_brightness()
+    
+    def tic(self, tic):
+        self.execute()
 
 
 class BrightnessUpDown(GenericButtonAction):
@@ -62,6 +68,12 @@ class BrightnessUpDown(GenericButtonAction):
 
     def execute(self):
         self.increasing = not self.increasing
+        # if lights are completely up should decrease
+        if self.app.lmanager.driver.brightness == 1:
+            self.increasing = False
+        # if lights are completely down should increase
+        if self.app.lmanager.driver.brightness == 0:
+            self.increasing = True
 
     def tic(self, tic):
         if self.increasing:

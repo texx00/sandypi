@@ -8,7 +8,7 @@ from server.utils.custom_math import multiply_tuple
 from server.hw_controller.leds.leds_types.dimmable import Dimmable
 from server.hw_controller.leds.leds_types.RGB_neopixels import RGBNeopixels
 from server.hw_controller.leds.leds_types.RGBW_neopixels import RGBWNeopixels
-from server.hw_controller.leds.light_sensors.tsl2519 import TSL2519
+from server.hw_controller.leds.light_sensors.tsl2591 import TSL2591
 
 class LedsController:
     def __init__(self, app):
@@ -20,8 +20,10 @@ class LedsController:
         self._should_update = False
         self._running = False
         self._color = (0,0,0,0)
-        self._brightness = 1
+        self._brightness = 0
+        self._just_turned_on = True
         self.update_settings(settings_utils.load_settings())
+        self.reset_lights()
 
     def is_available(self):
         return not self.driver is None
@@ -42,6 +44,12 @@ class LedsController:
         with self._mutex:
             self.driver.clear()
             self._running = False
+
+    def reset_lights(self):
+        if not self.driver is None:
+            self.set_brightness(0)
+            self.driver.fill_white()
+        self._just_turned_on = True
     
     def _thf(self):
         self.app.logger.info("Leds controller started")
@@ -72,8 +80,12 @@ class LedsController:
         with self._mutex:
             self._color = (r, g, b, w)
             self._should_update = True
+        if self._just_turned_on:
+            self.app.logger.info("Turning on brightness")
+            self.set_brightness(1)
 
     def set_brightness(self, brightness):
+        self._just_turned_on = False
         if not self.driver is None:
             self.driver.set_brightness(brightness)
 
@@ -90,6 +102,7 @@ class LedsController:
     # Updates dimensions of the led matrix
     # Updates the led driver object only if the dimensions are changed
     def update_settings(self, settings):
+        # TODO check if the settings are changed and restart the driver only in that case
         restart = False
         if self._running:
             self.stop()
@@ -119,8 +132,8 @@ class LedsController:
                 self.app.logger.exception(e)
                 self.app.logger.error("Cannot initialize leds controller")
             try: 
-                if settings.leds.light_sensor == "TSL2519":
-                    self.sensor = TSL2519(self.app)
+                if settings.leds.light_sensor == "TSL2591":
+                    self.sensor = TSL2591(self.app)
                 else:
                     if not self.sensor is None:
                         self.sensor.deinit()
@@ -132,4 +145,5 @@ class LedsController:
 
         if restart:
             self.start()
+            self.reset_lights()
         

@@ -9,6 +9,9 @@ class RGBWNeopixels(GenericLedDriver):
         self._original_colors[:] = [color]*self.leds_number
         self.pixels.fill(self._normalize_color(color))
     
+    def fill_white(self):
+        self.fill((0,0,0,255))
+    
     # abstract methods overwrites
 
     def deinit(self):
