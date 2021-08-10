@@ -41,9 +41,22 @@ class LedsController:
             self._th.start()
     
     def stop(self):
-        with self._mutex:
-            self.driver.clear()
-            self._running = False
+        if not self.driver is None:
+            with self._mutex:
+                self.driver.clear()
+                self._running = False
+
+    def decrease_brightness(self):
+        if not self.driver is None:
+            self.driver.decrease_brightness()
+
+    def increase_brightness(self):
+        if not self.driver is None:
+            self.driver.increase_brightness()
+    
+    def fill(self, color):
+        if not self.driver is None:
+            self.driver.fill(color)
 
     def reset_lights(self):
         if not self.driver is None:

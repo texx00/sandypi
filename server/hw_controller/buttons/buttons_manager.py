@@ -35,6 +35,7 @@ class ButtonsManager:
         self.update_settings(load_settings())
     
     def get_buttons_options(self):
+        # TODO filter actions that are not available (like leds brightness/control if the leds are not available)
         return self.available_buttons_actions
     
     def update_settings(self, settings):

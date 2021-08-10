@@ -245,7 +245,7 @@ const defaultSettings = {
 			value: "",
 			available_values: [
 				"No sensor",
-				"TSL2519"
+				"TSL2591"
 			],
 			label: "Choose the type of light sensor available",
 			depends_on: "leds.available",

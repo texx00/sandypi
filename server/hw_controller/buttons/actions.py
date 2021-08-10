@@ -40,7 +40,7 @@ class BrightnessUp(GenericButtonAction):
     description = "Increases the LEDs brightness"
 
     def execute(self):
-        self.app.lmanager.driver.increase_brightness()
+        self.app.lmanager.increase_brightness()
 
     def tic(self, tic):
         self.execute()
@@ -51,7 +51,7 @@ class BrightnessDown(GenericButtonAction):
     description = "Decreases the LEDs brightness"
 
     def execute(self):
-        self.app.lmanager.driver.decrease_brightness()
+        self.app.lmanager.decrease_brightness()
     
     def tic(self, tic):
         self.execute()
@@ -69,17 +69,18 @@ class BrightnessUpDown(GenericButtonAction):
     def execute(self):
         self.increasing = not self.increasing
         # if lights are completely up should decrease
-        if self.app.lmanager.driver.brightness == 1:
-            self.increasing = False
-        # if lights are completely down should increase
-        if self.app.lmanager.driver.brightness == 0:
-            self.increasing = True
+        if not self.app.lmanager.driver is None:
+            if self.app.lmanager.driver.brightness == 1:
+                self.increasing = False
+            # if lights are completely down should increase
+            if self.app.lmanager.driver.brightness == 0:
+                self.increasing = True
 
     def tic(self, tic):
         if self.increasing:
-            self.app.lmanager.driver.increase_brightness()
+            self.app.lmanager.increase_brightness()
         else:
-            self.app.lmanager.driver.decrease_brightness()
+            self.app.lmanager.decrease_brightness()
 
 
 class LEDsChangeColor(GenericButtonAction):
@@ -89,5 +90,5 @@ class LEDsChangeColor(GenericButtonAction):
     def execute(self):
         rgb = hsv_to_rgb(random(),1,1)
         c = [i*255 for i in rgb]
-        self.app.lmanager.driver.fill(c)
+        self.app.lmanager.fill(c)
 

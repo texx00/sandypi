@@ -101,7 +101,7 @@ class Feeder():
         if handler is None:
             self.handler = FeederEventHandler()
         else: self.handler = handler
-        self.serial = None
+        self.serial = DeviceSerial(logger_name = __name__)
         self.line_number = 0
         self._timeout_last_line = self.line_number
         self.feedrate = 0
