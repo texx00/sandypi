@@ -131,6 +131,18 @@ def print_help():
 
 if __name__ == "__main__":
     folder = os.path.dirname(os.path.realpath(__file__))
+
+    # check if must update the software before starting
+    if platform.system() == "Windows":
+        if os.path.isfile("{}\\run_update.txt".format(folder)):
+            os.remove("{}\\run_update.txt".format(folder))
+            os.system("{}\\install.bat".format(folder))
+    else:
+        if os.path.isfile("{}/run_update.txt".format(folder)):
+            os.remove("{}\\run_update.txt".format(folder))
+            os.system("bash {}/install.sh".format(folder))
+
+    # start the server
     generate_start_file(folder)                 # generate the .bat or .sh file
 
     try:

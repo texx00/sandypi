@@ -1,6 +1,8 @@
 import json
 import shutil
 import os
+from os.path import dirname
+import platform
 
 from server import socketio, app, db
 
@@ -35,11 +37,20 @@ def updates_check():
 
 @socketio.on("software_run_update")
 def updates_run_update():
-    app.logger.error("TODO: RUN SOFTWARE UPDATE")
+    folder = dirname(dirname(dirname(os.path.realpath(__file__))))              # must get the main folder path to create the hidden file
+    if platform.system() == "Windows":
+        f = open("{}\\run_update.txt".format(folder), "w")
+        f.write(".")
+        f.close()
+        app.semits.show_toast_on_UI("Restart the server to apply the update")
+    else:
+        os.system("touch {}/run_update.txt".format(folder))
+        os.system("sudo reboot now")
 
 @socketio.on("software_change_branch")
 def updates_run_update(branch):
-    app.logger.error("TODO: RUN BRANCH CHANGE {}".format(branch))
+    os.system("git checkout {}".format(branch.lower()))
+    updates_run_update()
 
 # --------------------------------------------------------- PLAYLISTS CALLBACKS -------------------------------------------------------------------------------
 
