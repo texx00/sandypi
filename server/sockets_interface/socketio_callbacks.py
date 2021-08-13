@@ -49,7 +49,7 @@ def updates_run_update():
 
 @socketio.on("software_change_branch")
 def updates_run_update(branch):
-    os.system("git checkout {}".format(branch.lower()))
+    software_updates.switch_to_branch(branch.lower())
     updates_run_update()
 
 # --------------------------------------------------------- PLAYLISTS CALLBACKS -------------------------------------------------------------------------------
@@ -136,6 +136,9 @@ def settings_request():
     settings["leds"]["has_light_sensor"]["value"] =     app.lmanager.has_light_sensor()     or (not os.getenv("DEV_HWLEDS") is None)
     settings["serial"]["port"]["available_values"] =    app.feeder.serial_ports_list()
     settings["serial"]["port"]["available_values"].append("FAKE")
+    settings["updates"]["hash"] =                       app.umanager.short_hash
+    settings["updates"]["branch"] =                     app.umanager.branch
+    settings["updates"]["update_available"] =           app.umanager.update_available
     tmp = []
     labels = [v["label"] for v in settings["buttons"]["available_values"]]
     for b in settings["buttons"]["buttons"]:

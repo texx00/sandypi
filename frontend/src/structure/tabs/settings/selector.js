@@ -16,8 +16,8 @@ const shouldCheckUpdate =   state => {
     else return false;
 };    // check for an update every day once
 
-const isUpToDate =          state => {
-    return state.settings.updates.updates_available;
+const updateAvailable =          state => {
+    return state.settings.updates.update_available;
 }
 
 const getCurrentBranch =    state => {
@@ -34,7 +34,7 @@ export {
     getIsFastMode, 
     systemIsLinux, 
     shouldCheckUpdate, 
-    isUpToDate,
+    updateAvailable,
     getCurrentBranch,
     getCurrentHash,
     showLEDs 

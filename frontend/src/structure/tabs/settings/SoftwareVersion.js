@@ -4,13 +4,13 @@ import { Col, Container, Form, Modal, Row } from 'react-bootstrap';
 import { CloudArrowDown } from 'react-bootstrap-icons';
 
 import IconButton from '../../../components/IconButton';
-import { getCurrentBranch, getCurrentHash, isUpToDate } from './selector';
+import { getCurrentBranch, getCurrentHash, updateAvailable } from './selector';
 import { setTab } from '../Tabs.slice';
 import { softwareChangeBranch, softwareStartUpdate } from '../../../sockets/sEmits';
 
 const mapStateToProps = (state) => {
     return {
-        isUpToDate: isUpToDate(state),
+        updateAvailable: updateAvailable(state),
         currentHash: getCurrentHash(state),
         currentBranch: getCurrentBranch(state)
     }
@@ -36,12 +36,12 @@ class SoftwareVersion extends Component{
     }
 
     renderUpdateButton(){
-        if (this.isUpToDate){
-            return <p>You are up to date</p>
-        }else return <IconButton icon={CloudArrowDown}
-            onClick={() => this.setState({...this.state, showUpdateConfirmModal: true})}>
-            Update the software
-        </IconButton>
+        if (this.props.updateAvailable){
+            return <IconButton icon={CloudArrowDown}
+                onClick={() => this.setState({...this.state, showUpdateConfirmModal: true})}>
+                Update the software
+            </IconButton>
+        }else return <p className="center rounded text-dark bg-primary p-3">The software is up to date</p>
     }
 
     render(){
