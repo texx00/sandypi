@@ -48,7 +48,29 @@ def get_commit_shash():
     result = subprocess.check_output(['git', 'log', '--pretty=format:"%h"', "-n", "1"])
     return result.decode(encoding="UTF-8").replace('"', '')    
 
-if __name__ == "__main__":
-    print(compare_local_remote_tags(verbose=True))
+def get_branch_name():
+    result = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', "HEAD"])
+    return result.decode(encoding="UTF_8").replace("\n", "")
 
-    print("\n---------------\nShort hash: {}".format(get_commit_shash()))
+def get_update_available():
+    #subprocess.check_output(['git', "remote", "update"])
+    result = subprocess.check_output(['git', "show", "origin/" + get_branch_name()]).decode(encoding="UTF-8")
+    remote_hash = result.split("\n")[0].split(" ")[1]
+    result = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode(encoding="UTF-8")
+    local_hash = result.replace("\n", "")
+    print(remote_hash)
+    print(local_hash)
+    return not (remote_hash == local_hash)
+
+def switch_to_branch(branch):
+    subprocess.check_output(["git", "checkout", "."])       # clearing local files before moving to another branch
+    subprocess.check_output(["git", "checkout", branch])    # moving to the other branch
+
+if __name__ == "__main__":
+    #print(compare_local_remote_tags(verbose=True))
+
+    print("branch name: {}".format(get_branch_name()))
+
+    print("update available: {}".format(get_update_available()))
+
+    print("Short hash: {}".format(get_commit_shash()))
