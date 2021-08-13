@@ -5,9 +5,9 @@ name: Python application
 
 on:
   push:
-    branches: [ master, flask-tests, alpha ]
+    branches: [ master, alpha, beta ]
   pull_request:
-    branches: [ master, flask-tests, alpha ]
+    branches: [ master, alpha, beta ]
 
 jobs:
   build:
