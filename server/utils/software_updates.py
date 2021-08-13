@@ -45,12 +45,16 @@ def get_branch_name():
     return result.decode(encoding="UTF_8").replace("\n", "")
 
 def get_update_available():
-    #subprocess.check_output(['git', "remote", "update"])
-    result = subprocess.check_output(['git', "show", "origin/" + get_branch_name()]).decode(encoding="UTF-8")
-    remote_hash = result.split("\n")[0].split(" ")[1]
-    result = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode(encoding="UTF-8")
-    local_hash = result.replace("\n", "")
-    return not (remote_hash == local_hash)
+    try:
+        subprocess.check_output(['git', "remote", "update"])
+        result = subprocess.check_output(['git', "show", "origin/" + get_branch_name()]).decode(encoding="UTF-8")
+        remote_hash = result.split("\n")[0].split(" ")[1]
+        result = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode(encoding="UTF-8")
+        local_hash = result.replace("\n", "")
+        return not (remote_hash == local_hash)
+    except:
+        # usually is a connection error but should make better checks
+        return False
 
 def switch_to_branch(branch):
     subprocess.check_output(["git", "checkout", "."])       # clearing local files before moving to another branch

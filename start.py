@@ -140,7 +140,7 @@ if __name__ == "__main__":
             os.system("{}\\install.bat".format(folder))
     else:
         if os.path.isfile("{}/run_update.txt".format(folder)):
-            os.remove("{}\\run_update.txt".format(folder))
+            os.remove("{}/run_update.txt".format(folder))
             os.system("git pull")
             os.system("bash {}/install.sh".format(folder))
 
