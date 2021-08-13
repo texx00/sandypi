@@ -50,6 +50,8 @@ class SoftwareVersion extends Component{
                 ATTENTION: the update button is just a shortcut to update without the need of the command line.
                 This feature is not optimized yet and the automatic update may not work. 
                 Use it only if you know what you are doing.
+                The update will take a while (up to 1h). 
+                If nothing happens after 1h probably something has gone wrong.
             </p>
             <p>
                 NOTE: the master branch is the most stable version of the software. 
