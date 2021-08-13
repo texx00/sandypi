@@ -199,7 +199,10 @@ class ShuffleElement(GenericPlaylistElement):
     def before_start(self, app):
         if self.shuffle_type == None or self.shuffle_type == "0":
             # select random drawing
-            return DrawingElement(drawing_id = UploadedFiles.get_random_drawing().id)
+            drawing = UploadedFiles.get_random_drawing()
+            if drawing is None:                                         # there is no drawing to be played
+                return False
+            return DrawingElement(drawing_id = drawing.id)
         elif self.playlist_id != 0:
             # select a random drawing from the current playlist
             res = get_playlist_table_class(self.playlist_id).get_random_drawing_element()
