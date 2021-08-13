@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
-import { Container, Form, Col, Button } from 'react-bootstrap';
-import { PlusSquare, Trash } from 'react-bootstrap-icons';
+import { Container, Form, Col, Button, Row } from 'react-bootstrap';
+import { PlusSquare, Save, Trash } from 'react-bootstrap-icons';
 import { connect } from 'react-redux';
 
 import { Section, Subsection, SectionGroup } from '../../../components/Section';
@@ -11,7 +11,7 @@ import { createNewHWButton, removeHWButton, updateAllSettings, updateSetting } f
 
 import { settingsNow } from '../../../sockets/sCallbacks';
 import { settingsSave } from '../../../sockets/sEmits';
-import { cloneDict, listsAreEqual } from '../../../utils/dictUtils';
+import { cloneDict } from '../../../utils/dictUtils';
 import SettingField from './SettingField';
 
 const mapStateToProps = (state) => {
@@ -58,13 +58,7 @@ class Settings extends Component{
         if (!this.props.settings.buttons.available) // TODO include LEDS in this check
             return "";
         else return <Subsection sectionTitle="Additional hardware">
-            {/*<SectionGroup sectionTitle="LEDs">
-                <Container>
-                    <Form.Row>
-                        {this.mapEntries(ledsEntries)}
-                    </Form.Row>
-                </Container>
-            </SectionGroup>*/}
+            {this.generateHWLEDs()}
             {this.generateHWButtonsForm()}
         </Subsection>
     }
@@ -75,20 +69,30 @@ class Settings extends Component{
         let rows = this.props.settings.buttons.buttons.map((button_option, i) => {
             let b = cloneDict(button_option);
             let idx = b.idx;
-            let tmp = this.props.settings.buttons.available_values.filter(i => {return i.label === b.functionality.value});
+            let tmp = this.props.settings.buttons.available_values.filter(i => {return i.label === b.click.value});
             if (tmp.length > 0)
-                b.functionality.tip = tmp[0].description;
-            return <Form.Row key={idx}>
+                b.click.tip = tmp[0].description;
+            return <Form.Row key={idx} className="mb-5">
                 <SettingField
                     singleSetting={b.pin}
                     settings={this.props.settings}
                     onUpdateSetting={this.props.updateSetting.bind(this)}
                     key={"bp_"+idx}/>
                 <SettingField
-                    singleSetting={b.functionality}
+                    singleSetting={b.click}
                     settings={this.props.settings}
                     onUpdateSetting={this.props.updateSetting.bind(this)}
-                    key={"bf_"+idx}/>
+                    key={"bc_"+idx}/>
+                <SettingField
+                    singleSetting={b.press}
+                    settings={this.props.settings}
+                    onUpdateSetting={this.props.updateSetting.bind(this)}
+                    key={"br_"+idx}/>
+                <SettingField
+                    singleSetting={b.pull}
+                    settings={this.props.settings}
+                    onUpdateSetting={this.props.updateSetting.bind(this)}
+                    key={"bl_"+idx}/>
                 <Col sm={4} className="mt-4 w-100 pt-1">
                     <IconButton 
                         className="w-100 mt-1 center"
@@ -100,10 +104,14 @@ class Settings extends Component{
             </Form.Row>
         });
         return <SectionGroup sectionTitle="Buttons">
-            <p>In this section it is possible to specify which functionality should be associated to any HW button wired in the table. Add as many buttons as needed, specify the GPIO input pin (BCM index) and select the associated function from the dropdown menu</p>
+            <p>
+                In this section it is possible to specify which functionality should be associated to any HW button wired in the table. 
+                Add as many buttons as needed, specify the GPIO input pin (BCM index) and select the associated function from the dropdown menu. 
+                For every button two actions are available: click and long press.
+                Each action can be choosen independently.</p>
             <Container>
                 {rows}
-                <Form.Row className="center">
+                <Form.Row className="center mt-2">
                     <IconButton className="center w-100"
                         icon={PlusSquare}
                         onClick={this.props.createNewHWButton.bind(this)}>
@@ -114,18 +122,31 @@ class Settings extends Component{
         </SectionGroup>;
     }
 
+    generateHWLEDs(){
+        if (this.props.settings.leds.available){
+            let ledsEntries =      Object.entries(this.props.settings.leds);
+            return <SectionGroup sectionTitle="LEDs">
+                <Container>
+                    <Form.Row>
+                        {this.mapEntries(ledsEntries)}
+                    </Form.Row>
+                </Container>
+            </SectionGroup>
+        }else return "";
+    }
+
     // render the list of settings divided by sections
     render(){
         let serialEntries =    Object.entries(this.props.settings.serial);
         let deviceEntries =    Object.entries(this.props.settings.device);
         let scriptEntries =    Object.entries(this.props.settings.scripts);
         let autostartEntries = Object.entries(this.props.settings.autostart);
-        //let ledsEntries =      Object.entries(this.props.settings.leds);
 
         return <Container>
             <Form>
                 <Section sectionTitle="Settings"
                     sectionButtonHandler={this.saveForm.bind(this)}
+                    buttonIcon={Save}
                     sectionButton="Save settings">
                     <Subsection sectionTitle="Device settings">
                         <SectionGroup sectionTitle="Serial port settings">
@@ -164,6 +185,16 @@ class Settings extends Component{
                     </Subsection>
                     {this.generateHWSettings()}
                 </Section>
+                <Row className="pr-3 pl-2 mb-5">
+                    <Col>
+                        <IconButton
+                            className="w-100 center"
+                            icon={Save}
+                            onClick={() => this.saveForm()}>
+                                Save settings
+                        </IconButton>
+                    </Col>
+                </Row>
             </Form>
         </Container>
     }

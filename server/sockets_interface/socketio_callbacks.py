@@ -2,8 +2,6 @@ import json
 import shutil
 import os
 
-from dotenv.main import load_dotenv
-
 from server import socketio, app, db
 
 from server.utils import settings_utils, software_updates
@@ -86,9 +84,9 @@ def playlist_refresh_single(playlist_id):
 def settings_save(data, is_connect):
     settings_utils.save_settings(data)
     settings = settings_utils.load_settings()
-    #app.leds_controller.update_settings(settings)  # TODO update leds controller settings
     app.feeder.update_settings(settings)
-    app.bmanager.update(settings)
+    app.bmanager.update_settings(settings)
+    app.lmanager.update_settings(settings)
     app.semits.show_toast_on_UI("Settings saved")
 
     # updating feeder
@@ -105,13 +103,16 @@ def settings_save(data, is_connect):
 def settings_request():
     settings = settings_utils.load_settings()
     settings["buttons"]["available_values"] =           app.bmanager.get_buttons_options()
-    settings["buttons"]["available"] =                  app.bmanager.gpio_is_available() or (not os.getenv("DEV_HWBUTTONS") is None)
+    settings["buttons"]["available"] =                  app.bmanager.gpio_is_available()    or (not os.getenv("DEV_HWBUTTONS") is None)
+    settings["leds"]["available"]["value"] =            app.lmanager.is_available()         or (not os.getenv("DEV_HWLEDS") is None)
+    settings["leds"]["has_light_sensor"]["value"] =     app.lmanager.has_light_sensor()     or (not os.getenv("DEV_HWLEDS") is None)
     settings["serial"]["port"]["available_values"] =    app.feeder.serial_ports_list()
     settings["serial"]["port"]["available_values"].append("FAKE")
     tmp = []
     labels = [v["label"] for v in settings["buttons"]["available_values"]]
     for b in settings["buttons"]["buttons"]:
-        b["functionality"]["available_values"] = labels
+        b["click"]["available_values"] = labels
+        b["press"]["available_values"] = labels
         tmp.append(b)
     settings["buttons"]["buttons"] = tmp
     app.semits.emit("settings_now", json.dumps(settings))
@@ -123,6 +124,8 @@ def send_gcode_command(command):
 @socketio.on("settings_shutdown_system")
 def settings_shutdown_system():
     app.semits.show_toast_on_UI("Shutting down the device")
+    app.feeder.stop()
+    app.lmanager.stop()
     os.system("sudo shutdown now")
 
 @socketio.on("settings_reboot_system")
@@ -224,10 +227,16 @@ def queue_start_random():
 # --------------------------------------------------------- LEDS CALLBACKS -------------------------------------------------------------------------------
 
 @socketio.on("leds_set_color")
-def leds_set_color(data):
-    color = json.loads(data)
-    #app.leds_controller.set_color((color["r"], color["g"], color["b"])) # TODO uncomment when ready
+def leds_set_color(color):
+    app.lmanager.set_color(color) 
 
+@socketio.on("leds_auto_dim")
+def leds_set_autodim(val):
+    # TODO add an "autodim" on in the settings
+    if val:
+        app.lmanager.sensor.start()
+    else:
+        app.lmanager.sensor.stop()
 
 # --------------------------------------------------------- MANUAL CONTROL -------------------------------------------------------------------------------
 

@@ -48,11 +48,13 @@ function drawingResume(){
 
 
 // ---- LEDS ----
-
 function ledsSetColor(color){
-    socket.emit("leds_set_color", JSON.stringify(color));
+    socket.emit("leds_set_color", color);
 }
 
+function ledsAutoDim(val){
+    socket.emit("leds_auto_dim", val);
+}
 
 // ---- PLAYLISTS ----
 // emit a socket to request an updated list of playlists
@@ -141,6 +143,7 @@ export {
     drawingPause,
     drawingResume,
     ledsSetColor,
+    ledsAutoDim,
     playlistsRequest, 
     playlistDelete,
     playlistQueue,

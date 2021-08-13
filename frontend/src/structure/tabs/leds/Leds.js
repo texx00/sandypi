@@ -1,42 +1,54 @@
 import React, { Component } from 'react';
 import { Container } from 'react-bootstrap';
-import { ChromePicker } from 'react-color';
+import { connect } from 'react-redux';
 
 import { Section } from '../../../components/Section';
-import { ledsSetColor } from '../../../sockets/sEmits';
+import { ledsAutoDim, ledsSetColor } from '../../../sockets/sEmits';
+import { getSettings } from '../settings/selector';
+import DimmableColorPicker from './DimmableColorPicker';
+import RGBWColorPicker from './RGBWColorPicker';
 
+const mapStateToProps = (state) => {
+    return {
+        settings: getSettings(state)
+    }
+}
 
 class LedsController extends Component{
     constructor(props){
-        super(props);
-        this.backgroundRef = React.createRef();
-        this.state={color: "#aaaaaa"}
+        super();
+        this.last_color = "";
     }
 
-    componentDidMount(){
-        this.backgroundRef.current.style.backgroundColor = this.state.color;
+    changeColor(color){
+        if (color !== this.last_color){
+            this.last_color = color;
+            ledsSetColor(color);
+        }
     }
 
-    handleColorChange(color){
-        this.setState({...this.state, color: color.hex});
-        this.backgroundRef.current.style.backgroundColor = color.hex;
-        ledsSetColor(color.rgb);
+    renderColorPicker(){
+        if (this.props.settings.leds.type.value === "Dimmable"){
+            return <DimmableColorPicker 
+                onColorChange={this.changeColor.bind(this)}/>
+        } else {
+            let show_white_channel = this.props.settings.leds.type.value === "RGBW";
+            let show_auto_dim = this.props.settings.leds.has_light_sensor.value;
+            return <RGBWColorPicker
+                useWhite={show_white_channel}
+                useAutoDim={show_auto_dim}
+                onAutoDimChange={(ad) => ledsAutoDim(ad)}
+                onColorChange={this.changeColor.bind(this)}/>
+        }
     }
 
     render(){
         return <Container>
-            <Section sectionTitle="Select leds color">
-                <div className="w-100 center mt-5">
-                <div ref={this.backgroundRef} className="p-5 rounded">
-                    <ChromePicker 
-                        className="leds-color-picker"
-                        color={this.state.color}
-                        onChange={this.handleColorChange.bind(this)}/>
-                </div>
-                </div>
+            <Section sectionTitle="LEDs control">
+                {this.renderColorPicker()}
             </Section>
         </Container>
     }
 }
 
-export default LedsController;
+export default connect(mapStateToProps)(LedsController);

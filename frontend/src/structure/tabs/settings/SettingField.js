@@ -71,7 +71,7 @@ class SettingField extends Component{
     render(){
         let setting = this.props.singleSetting;
         // check if the option should be rendered depending on the value of another option (like if the device is cartesian will not show width and height)
-        if (this.checkDependsValue(setting.depends_on, setting.depends_values))
+        if (this.checkDependsValue(setting.depends_on, setting.depends_values) && !setting.hide)
             if (setting.tip !== "" && setting.tip !== undefined)
                 return <Col sm={4} className="mt-auto">
                     <OverlayTrigger overlay={
