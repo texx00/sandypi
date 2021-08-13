@@ -1,6 +1,8 @@
 import json
 import shutil
 import os
+from os.path import dirname
+import platform
 
 from server import socketio, app, db
 
@@ -9,20 +11,46 @@ from server.database.models import Playlists
 from server.database.playlist_elements import DrawingElement, GenericPlaylistElement
 from server.database.models import UploadedFiles, Playlists
 
-# request to check if a new version of the software is available 
-@socketio.on('software_updates_check')
-def handle_software_updates_check():
-    result = software_updates.compare_local_remote_tags()
-    if result:
-        if result["behind_remote"]:
-            toast = """A new update is available ({0})\n
-            Your version is {1}\n
-            Check the github page to update to the latest version.
-            """.format(result["remote_latest"], result["local"])
-            socketio.emit("software_updates_response", toast)
 
 
 # TODO split in multiple files?    
+
+
+# --------------------------------------------------------------- UPDATES -------------------------------------------------------------------------------------
+
+# request to check if a new version of the software is available 
+@socketio.on('software_updates_check')
+def updates_check():
+    if software_updates.get_branch_name() == "master":
+        result = software_updates.compare_local_remote_tags()
+        if result:
+            if result["behind_remote"]:
+                toast = """A new update is available ({0})\n
+                Your version is {1}\n
+                Check the settings tab to upgrade the software""".format(result["remote_latest"], result["local"])
+                socketio.emit("software_updates_response", toast)
+    else:
+        if software_updates.get_update_available():
+            toast = """A new update is available\n
+                Check the settings tab to upgrade the software"""
+            socketio.emit("software_updtates_response", toast)
+
+@socketio.on("software_run_update")
+def updates_run_update():
+    folder = dirname(dirname(dirname(os.path.realpath(__file__))))              # must get the main folder path to create the hidden file
+    if platform.system() == "Windows":
+        f = open("{}\\run_update.txt".format(folder), "w")
+        f.write(".")
+        f.close()
+        app.semits.show_toast_on_UI("Restart the server to apply the update")
+    else:
+        os.system("touch {}/run_update.txt".format(folder))
+        os.system("sudo reboot now")
+
+@socketio.on("software_change_branch")
+def updates_run_update(branch):
+    software_updates.switch_to_branch(branch.lower())
+    updates_run_update()
 
 # --------------------------------------------------------- PLAYLISTS CALLBACKS -------------------------------------------------------------------------------
 
@@ -108,6 +136,9 @@ def settings_request():
     settings["leds"]["has_light_sensor"]["value"] =     app.lmanager.has_light_sensor()     or (not os.getenv("DEV_HWLEDS") is None)
     settings["serial"]["port"]["available_values"] =    app.feeder.serial_ports_list()
     settings["serial"]["port"]["available_values"].append("FAKE")
+    settings["updates"]["hash"] =                       app.umanager.short_hash
+    settings["updates"]["branch"] =                     app.umanager.branch
+    settings["updates"]["update_available"] =           app.umanager.update_available
     tmp = []
     labels = [v["label"] for v in settings["buttons"]["available_values"]]
     for b in settings["buttons"]["buttons"]:

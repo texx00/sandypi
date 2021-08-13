@@ -130,8 +130,19 @@ function queueStartRandom(){
 // ---- MANUAL CONTROL ----
 
 function controlEmergencyStop(){
-    socket.emit("control_emergency_stop")
+    socket.emit("control_emergency_stop");
 }
+
+// ----- UPDATES -----
+
+function softwareStartUpdate(){
+    socket.emit("software_run_update");
+}
+
+function softwareChangeBranch(branch){
+    socket.emit("software_change_branch", branch);
+}
+
 
 
 export {
@@ -159,5 +170,7 @@ export {
     queueStartRandom,
     settingsSave,
     settingsShutdownSystem,
-    settingsRebootSystem
+    settingsRebootSystem,
+    softwareChangeBranch,
+    softwareStartUpdate
 };

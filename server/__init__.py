@@ -100,8 +100,8 @@ app.bmanager = ButtonsManager(app)
 # Leds controller initialization
 app.lmanager = LedsController(app)
 
-# Get lates commit short hash to use as a version to refresh cached files
-sw_version = software_updates.get_commit_shash()
+# Updates manager
+app.umanager = software_updates.UpdatesManager()
 
 @app.context_processor
 def override_url_for():
@@ -110,7 +110,7 @@ def override_url_for():
 # Adds a version number to the static url to update the cached files when a new version of the software is loaded
 def versioned_url_for(endpoint, **values):
     if endpoint == 'static':
-        values["version"] = sw_version
+        values["version"] = app.umanager.short_hash
     return url_for(endpoint, **values)
 
 
