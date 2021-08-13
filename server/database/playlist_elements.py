@@ -201,7 +201,7 @@ class ShuffleElement(GenericPlaylistElement):
             # select random drawing
             drawing = UploadedFiles.get_random_drawing()
             if drawing is None:                                         # there is no drawing to be played
-                return False
+                return None
             return DrawingElement(drawing_id = drawing.id)
         elif self.playlist_id != 0:
             # select a random drawing from the current playlist
