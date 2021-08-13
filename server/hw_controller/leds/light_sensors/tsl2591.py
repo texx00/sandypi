@@ -19,8 +19,10 @@ class TSL2591(GenericLightSensor):
 
     def get_brightness(self):
         lux = self._sensor.lux
+        tmp = max(sqrt(min(lux, LUX_MAX)/LUX_MAX), BRIGHTNESS_MIN)              # calculating the brightness to use
         self.app.logger.info("Sensor light intensity: {} lux".format(lux))      # FIXME remove this
-        return max(sqrt(min(lux, LUX_MAX)/LUX_MAX), BRIGHTNESS_MIN)             # calculating the brightness to use
+        self.app.logger.info("Sensor current brightness: {}".format(tmp))       # FIXME remove this
+        return tmp          
 
     def is_connected(self):
         return not self._sensor is None
