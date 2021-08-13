@@ -9,20 +9,37 @@ from server.database.models import Playlists
 from server.database.playlist_elements import DrawingElement, GenericPlaylistElement
 from server.database.models import UploadedFiles, Playlists
 
-# request to check if a new version of the software is available 
-@socketio.on('software_updates_check')
-def handle_software_updates_check():
-    result = software_updates.compare_local_remote_tags()
-    if result:
-        if result["behind_remote"]:
-            toast = """A new update is available ({0})\n
-            Your version is {1}\n
-            Check the github page to update to the latest version.
-            """.format(result["remote_latest"], result["local"])
-            socketio.emit("software_updates_response", toast)
 
 
 # TODO split in multiple files?    
+
+
+# --------------------------------------------------------------- UPDATES -------------------------------------------------------------------------------------
+
+# request to check if a new version of the software is available 
+@socketio.on('software_updates_check')
+def updates_check():
+    if software_updates.get_branch_name() == "master":
+        result = software_updates.compare_local_remote_tags()
+        if result:
+            if result["behind_remote"]:
+                toast = """A new update is available ({0})\n
+                Your version is {1}\n
+                Check the settings tab to upgrade the software""".format(result["remote_latest"], result["local"])
+                socketio.emit("software_updates_response", toast)
+    else:
+        if software_updates.get_update_available():
+            toast = """A new update is available\n
+                Check the settings tab to upgrade the software"""
+            socketio.emit("software_updtates_response", toast)
+
+@socketio.on("software_run_update")
+def updates_run_update():
+    app.logger.error("TODO: RUN SOFTWARE UPDATE")
+
+@socketio.on("software_change_branch")
+def updates_run_update(branch):
+    app.logger.error("TODO: RUN BRANCH CHANGE {}".format(branch))
 
 # --------------------------------------------------------- PLAYLISTS CALLBACKS -------------------------------------------------------------------------------
 

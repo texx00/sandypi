@@ -13,6 +13,7 @@ import { settingsNow } from '../../../sockets/sCallbacks';
 import { settingsSave } from '../../../sockets/sEmits';
 import { cloneDict } from '../../../utils/dictUtils';
 import SettingField from './SettingField';
+import SoftwareVersion from './SoftwareVersion';
 
 const mapStateToProps = (state) => {
     return {
@@ -185,6 +186,11 @@ class Settings extends Component{
                     </Subsection>
                     {this.generateHWSettings()}
                 </Section>
+                <SectionGroup sectionTitle="Software info">
+                    <Container>
+                        <SoftwareVersion/>
+                    </Container>
+                </SectionGroup>
                 <Row className="pr-3 pl-2 mb-5">
                     <Col>
                         <IconButton

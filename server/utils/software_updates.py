@@ -58,8 +58,6 @@ def get_update_available():
     remote_hash = result.split("\n")[0].split(" ")[1]
     result = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode(encoding="UTF-8")
     local_hash = result.replace("\n", "")
-    print(remote_hash)
-    print(local_hash)
     return not (remote_hash == local_hash)
 
 def switch_to_branch(branch):

@@ -262,6 +262,11 @@ const defaultSettings = {
 
 		],
 		available: false
+	},
+	updates: {
+		hash: "",
+		branch: "Master",
+		update_available: false
 	}
 }
 

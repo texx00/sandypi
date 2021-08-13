@@ -226,5 +226,10 @@
         "buttons": [],
         "available_values": [],
         "available": false
+    },
+    "updates": {
+        "hash": "",
+        "branch": "Master",
+        "update_available": false
     }
 }
