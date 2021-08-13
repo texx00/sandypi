@@ -13,7 +13,7 @@ import glob
 # If the serial device request is not available it will create a virtual serial device
 
 class DeviceSerial():
-    def __init__(self, serialname = None, baudrate = None, logger_name = None, autostart = False):
+    def __init__(self, serialname = None, baudrate = 115200, logger_name = None, autostart = False):
         self.logger = logging.getLogger(logger_name) if not logger_name is None else logging.getLogger()
         self.serialname = serialname
         self.baudrate = baudrate
