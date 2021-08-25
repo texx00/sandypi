@@ -1,3 +1,4 @@
+from server.database.playlist_elements import DrawingElement
 from server.hw_controller.feeder import FeederEventHandler
 import time
 
@@ -12,11 +13,13 @@ class FeederEventManager(FeederEventHandler):
         self.app.logger.info("Drawing ended")
         self.app.semits.show_toast_on_UI("Element ended")
         self.app.qmanager.set_element_ended()
+        self.app.smanager.drawing_ended(element.get_path_lenght_done())     # using path_lenght_done to take into account also the "stop drawing" cases
         if self.app.qmanager.is_queue_empty():
             self.app.qmanager.send_queue_status()
 
     def on_element_started(self, element):
         self.app.qmanager.set_element(element)
+        self.app.smanager.drawing_started()
         self.app.logger.info("Drawing started")
         self.app.semits.show_toast_on_UI("Element started")
         self.app.qmanager.send_queue_status()

@@ -12,6 +12,7 @@ dist
 *.pyc
 
 server/saves/saved_settings.json
+server/saves/stats.json
 run_update.txt
 
 start.bat
