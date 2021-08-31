@@ -6,6 +6,7 @@ from dotmap import DotMap
 from time import time, sleep
 from datetime import datetime, timedelta
 from math import sqrt
+import copy
 
 from server.database.models import UploadedFiles
 from server.database.playlist_elements_tables import get_playlist_table_class
@@ -85,7 +86,7 @@ class DrawingElement(GenericPlaylistElement):
                     if "Y" in line:
                         self._new_position.y = float(self._y_regex.findall(line)[0][0])
                     self._distance += sqrt((self._new_position.x - self._last_position.x)**2 + (self._new_position.y - self._last_position.y)**2)
-                    self._last_position = self._new_position
+                    self._last_position = copy.copy(self._new_position)
                 except Exception as e:
                     logger.exception(e)
                 # yields the line
@@ -107,6 +108,15 @@ class DrawingElement(GenericPlaylistElement):
                 "eta": (self._total_distance - self._distance)/feedrate,
                 "units": "s"
             }
+    
+    def get_path_length_total(self):
+        """Returns the total lenght of the path of the drawing"""
+        return self._total_distance
+    
+    def get_path_lenght_done(self):
+        """Returns the path lenght that has been done for the current drawing"""
+        return self._distance
+
 """
     Identifies a command element (sends a specific command/list of commands to the board)
 """

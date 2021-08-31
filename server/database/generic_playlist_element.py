@@ -63,6 +63,16 @@ class GenericPlaylistElement():
     def get_progress(self, feedrate):
         return UNKNOWN_PROGRESS
 
+    # Returns the total path of the movements of the current drawing (in [mm])
+    def get_path_length_total(self):
+        """Returns the total lenght of the path of the drawing"""
+        return 0
+    
+    # Returns the current partial path done (in [mm])
+    def get_path_lenght_done(self):
+        """Returns the path lenght that has been done for the current drawing"""
+        return 0
+
     # --- base class methods - should not be necessary to overwrite these ---
 
     def _set_from_dict(self, values):

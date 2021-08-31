@@ -84,6 +84,7 @@ from server.hw_controller.feeder import Feeder
 from server.hw_controller.feeder_event_manager import FeederEventManager
 from server.preprocessing.file_observer import GcodeObserverManager
 from server.hw_controller.leds.leds_controller import LedsController
+from server.utils.stats import StatsManager
 
 
 # Initializes sockets emits
@@ -102,6 +103,9 @@ app.lmanager = LedsController(app)
 
 # Updates manager
 app.umanager = software_updates.UpdatesManager()
+
+# Stats manager
+app.smanager = StatsManager()
 
 @app.context_processor
 def override_url_for():
