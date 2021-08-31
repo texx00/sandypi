@@ -45,7 +45,7 @@ class StatsManager():
             if drawing_length != 0:
                 self.stats["total_length"] += drawing_length
                 if not self.start_time == 0:
-                    self.stats["run_time"] = time() - self.start_time
+                    self.stats["run_time"] += time() - self.start_time
             self.start_time = 0
         self._update_stats()
 
