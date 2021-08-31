@@ -3,11 +3,11 @@ from dotmap import DotMap
 from time import sleep
 
 from server.utils import settings_utils
-from server.utils.custom_math import multiply_tuple
 
 from server.hw_controller.leds.leds_types.dimmable import Dimmable
 from server.hw_controller.leds.leds_types.RGB_neopixels import RGBNeopixels
 from server.hw_controller.leds.leds_types.RGBW_neopixels import RGBWNeopixels
+from server.hw_controller.leds.leds_types.WWA_neopixels import WWANeopixels
 from server.hw_controller.leds.light_sensors.tsl2591 import TSL2591
 
 class LedsController:
@@ -133,12 +133,15 @@ class LedsController:
                 # the leds number calculation depends on the type of table. 
                 # If is square or rectangular should use a base and height, for round tables will use the total number of leds directly
                 leds_number = (int(self.dimensions[0]) + int(self.dimensions[1]))*2 if settings.device.type == "Cartesian" else int(self.dimensions[2])
+                leds_class = Dimmable
                 if self.leds_type == "RGB":
-                    self.driver = RGBNeopixels(leds_number, settings.leds.pin1, logger=self.app.logger)
+                    leds_class = RGBNeopixels
                 elif self.leds_type == "RGBW":
-                    self.driver = RGBWNeopixels(leds_number, settings.leds.pin1, logger=self.app.logger)
-                elif self.leds_type == "Dimmable":
-                    self.driver = Dimmable(leds_number, settings.leds.pin1, logger=self.app.logger)
+                    leds_class = RGBWNeopixels
+                elif self.leds_type == "WWA":
+                    leds_class = WWANeopixels
+                
+                self.driver = leds_class(leds_number, settings.leds.pin1, logger=self.app.logger)
             except Exception as e: 
                 self.driver = None
                 self.app.semits.show_toast_on_UI("Led driver type not compatible with current HW")
