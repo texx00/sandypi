@@ -1,28 +1,33 @@
 import React, { Component } from 'react';
 import { Col, Container, Form, FormGroup, Row } from 'react-bootstrap';
 import { HuePicker, AlphaPicker } from 'react-color';
+import Color from 'colorjs.io';
 
 import "./hueOverwrite.scss";
 
 import { alphaToBrightness, hexToRGB, RGBAToHex, RGBToHex } from '../../../utils/colorUtils';
 
-const DEFAULT_COLOR = "#ff0000";
+const DEFAULT_COLOR = "#ff0000";                                // color picker left position (for the hue picker it starts with red)
+// new colors for the picker. 
+// they must coincide with the colors in the "./hueOverwrite.scss" file
+const AMBER = new Color("#ffc400");
+const WARM_WHITE = new Color("#f2ff00");
+const COLD_WHITE = new Color("#9fffff");
 
 class WWAColorPicker extends Component{
     constructor(props){
         super(props);
         this.backgroundRef = React.createRef();
         this.state={
-            color: "#ffff00",                                   // color converted to WWA values
+            color: "#ffc400",                                   // color converted to WWA values
             brightness: 1,
             original_color: {                                   // original rgb color from the picker
                 rgb: hexToRGB(DEFAULT_COLOR), 
                 hex: DEFAULT_COLOR,
                 hsl: {h:0}
             },
-            alpha_picker_color: "#ffff00ff",                    // color used by the alpha color picker
+            alpha_picker_color: "#ffc400ff",                    // color used by the alpha color picker
             picker_color: DEFAULT_COLOR,                        // color used by the color picker
-            show_white: false,
             show_autodim: false
         }
         this.state_backup = {};
@@ -32,12 +37,44 @@ class WWAColorPicker extends Component{
         this.updateBackground(this.state.color);
     }
 
+    // this method returns the correct value for the hw.
+    // cannot send the visualized rgb value since the hw is using a different encoding for the colors:
+    // r -> (R -> amber, G -> cold white, B -> warm white)
+    getHWRGBColor(){
+        let h = this.state.original_color.hsl.h;
+        let res = {
+            a: this.state.brightness
+        };
+        // dividing into the two different mixings (A - WW and WW - CW)
+        if (h<180){                         // A - WW
+            res.r = 255*(180-h)/180;
+            res.b = 255*h/180;
+            res.g = 0;
+        }else{                              // WW - CW
+            h -= 180;                       // brings back the h into the 180 range (easier to handle the formulas)
+            res.r = 0;
+            res.b = 255*(180-h)/180;
+            res.g = 255*h/180;
+        }
+        res = alphaToBrightness(res);       // adjusting brightness
+        delete res.a;                       // removing alpha value (not needed by the hw controller)
+        return RGBToHex(res);               // returning hex value
+    }
+
     updateColor(color, brightness){
         let h = color.hsl.h;
         let ledColor = {};
-        ledColor.r = Math.floor(Math.min(255, 255*(360-h)/180));
-        ledColor.g = 255;
-        ledColor.b = Math.floor(Math.min(255, 255*(h)/180));
+        // mapping color depending on the h value of the bar
+        let res;
+        if (h<180){ // first half of the picker mixes amber and warm white
+            res = AMBER.mix(WARM_WHITE, h/180);
+        }else{      // second half mixes warm white and cold white
+            res = WARM_WHITE.mix(COLD_WHITE, (h-180)/180);
+        }
+        // estracting the rgb value
+        ledColor.r = res.p3[0]*255;
+        ledColor.g = res.p3[1]*255;
+        ledColor.b = res.p3[2]*255;
         ledColor.a = brightness;
         ledColor = alphaToBrightness(ledColor);
         delete ledColor.a;
@@ -52,7 +89,7 @@ class WWAColorPicker extends Component{
         },
         () => {
             this.updateBackground();
-            this.props.onColorChange(this.state.color);
+            this.props.onColorChange(this.getHWRGBColor());
         });
     }
 
