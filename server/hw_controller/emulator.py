@@ -59,6 +59,7 @@ class Emulator():
             except:
                 y = self.last_y
             # calculate time
+            self.feedrate = max(self.feedrate, 0.01)
             t = max(math.sqrt((x-self.last_x)**2 + (y-self.last_y)**2) / self.feedrate * 60.0, 0.1)   # TODO need to use the max 0.005 because cannot simulate anything on the frontend otherwise... May look for a better solution
             
             # update positions

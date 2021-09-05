@@ -1,3 +1,5 @@
+// TODO could be interesting to use the "colorjs.io" module instead of using these functions
+
 function RGBToHex(rgb) {
 
     let r = rgb.r.toString(16);

@@ -187,7 +187,8 @@
             "available_values": [
                 "RGB",
                 "RGBW",
-                "Dimmable"
+                "Dimmable",
+                "WWA"
             ],
             "label": "Select a led type",
             "tip": "RGB and RGBW LEDs are compatible with WS2812B compatible drivers. The 'Dimmable' option is suitable for single color strips."
