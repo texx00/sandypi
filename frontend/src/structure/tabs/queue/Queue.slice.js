@@ -11,6 +11,12 @@ const queueSlice = createSlice({
         status: {eta: -1}
     },
     reducers: {
+        setInterval(state, action){
+            return {
+                ...state, 
+                interval: action.payload
+            }
+        },
         setQueueElements(state, action){
             return {
                 ...state,
@@ -45,6 +51,7 @@ const queueSlice = createSlice({
 });
 
 export const{
+    setInterval,
     setQueueElements,
     setQueueStatus,
     toggleQueueShuffle,

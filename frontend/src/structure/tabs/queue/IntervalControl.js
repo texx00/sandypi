@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { Col, Form, OverlayTrigger, Row, Tooltip } from "react-bootstrap";
 import { queueSetInterval } from '../../../sockets/sEmits';
 import { getIntervalValue, getIsQueuePaused } from './selector';
+import { setInterval } from './Queue.slice';
 
 const mapStateToProps = state => {
     return {
@@ -12,20 +13,35 @@ const mapStateToProps = state => {
     }
 }
 
+const mapDispatchToProps = dispatch => {
+    return {
+        setInterval: (interval) => dispatch(setInterval(interval)) 
+    }
+}
+
 class IntervalControl extends Component{
-    state = {
-        intervalValue: 0,
-        isChanging: false
+    constructor(props){
+        super();
+        this.state = {
+            intervalValue: props.intervalValue,
+            isChanging: false
+        }
     }
 
     saveInterval(){
         queueSetInterval(this.state.intervalValue);
+        this.props.setInterval(this.state.intervalValue);
     }
 
-    componentDidMount(){
+    componentDidUpdate(){
         if (this.props.intervalValue !== this.state.intervalValue && !this.state.isChanging){
             this.setState({...this.state, intervalValue: this.props.intervalValue});
         }
+    }
+
+    slideEnd(evt){
+        this.setState({...this.state, intervalValue: evt.target.value, isChanging: false},
+            this.saveInterval.bind(this));
     }
 
     render(){
@@ -59,10 +75,8 @@ class IntervalControl extends Component{
                             onChange={(evt) => {
                                 this.setState({...this.state, intervalValue: evt.target.value, isChanging: true});
                             }}
-                            onMouseUp={(evt) => {
-                                this.setState({...this.state, intervalValue: evt.target.value, isChanging: false},
-                                    this.saveInterval.bind(this));
-                            }}/>
+                            onTouchEnd={this.slideEnd.bind(this)}
+                            onMouseUp={this.slideEnd.bind(this)}/>
                     </Col>
                     <Col sm={1} className="pl-2">24h</Col>
                 </Row>
@@ -72,4 +86,4 @@ class IntervalControl extends Component{
     }
 }
 
-export default connect(mapStateToProps)(IntervalControl);
+export default connect(mapStateToProps, mapDispatchToProps)(IntervalControl);
