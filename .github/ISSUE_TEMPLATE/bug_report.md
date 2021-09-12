@@ -23,7 +23,7 @@ A clear and concise description of what you expected to happen.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**Desktop (please complete the following information):**
+**Platform (please complete the following information):**
  - server OS: [Windows, Raspbian OS]
  - server hardware [PC, Raspberry Pi 3B+, ....]
  - serial device firmware [Marling, Grbl, ...] + version
