@@ -11,7 +11,10 @@ from server.database.models import Playlists
 from server.database.playlist_elements import DrawingElement, GenericPlaylistElement
 from server.database.models import UploadedFiles, Playlists
 
-
+@socketio.on('connect')
+def on_client_connected():
+    app.qmanager.send_queue_status()        # sending queue status
+    settings_request()                      # sending updated settings
 
 # TODO split in multiple files?    
 
