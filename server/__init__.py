@@ -1,7 +1,9 @@
+from server.hw_controller.buttons.buttons_manager import ButtonsManager
 from server.utils.settings_utils import get_ip4_addresses
 from flask import Flask, url_for
 from flask.helpers import send_from_directory
 from flask_socketio import SocketIO
+from engineio.payload import Payload
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
@@ -54,6 +56,8 @@ w_logger.addHandler(server_file_handler)
 
 app.config['SECRET_KEY'] = 'secret!' # TODO put a key here
 app.config['UPLOAD_FOLDER'] = "./server/static/Drawings"
+
+Payload.max_decode_packets = 200             # increasing this number increases CPU usage but it may be necessary to be able to run leds in realtime (default should be 16)
 socketio = SocketIO(app, cors_allowed_origins="*")
 CORS(app)   # setting up cors for react
 
@@ -79,11 +83,8 @@ from server.hw_controller.queue_manager import QueueManager
 from server.hw_controller.feeder import Feeder
 from server.hw_controller.feeder_event_manager import FeederEventManager
 from server.preprocessing.file_observer import GcodeObserverManager
-
-# Commenting out leds part. TODO finish the leds part
-# Needs to uncomment also in the socket callbacks: in settings_save and in leds_set_color
-#from server.hw_controller.leds.leds_controller import LedsController
-#from server.hw_controller.leds.leds_driver import LedsDriver
+from server.hw_controller.leds.leds_controller import LedsController
+from server.utils.stats import StatsManager
 
 
 # Initializes sockets emits
@@ -94,11 +95,17 @@ app.feeder = Feeder(FeederEventManager(app))
 #app.feeder.connect()
 app.qmanager = QueueManager(app, socketio)
 
-#app.leds_controller = LedsController(app)
-#app.leds_controller.start()
+# Buttons controller initialization
+app.bmanager = ButtonsManager(app)
 
-# Get lates commit short hash to use as a version to refresh cached files
-sw_version = software_updates.get_commit_shash()
+# Leds controller initialization
+app.lmanager = LedsController(app)
+
+# Updates manager
+app.umanager = software_updates.UpdatesManager()
+
+# Stats manager
+app.smanager = StatsManager()
 
 @app.context_processor
 def override_url_for():
@@ -107,7 +114,7 @@ def override_url_for():
 # Adds a version number to the static url to update the cached files when a new version of the software is loaded
 def versioned_url_for(endpoint, **values):
     if endpoint == 'static':
-        values["version"] = sw_version
+        values["version"] = app.umanager.short_hash
     return url_for(endpoint, **values)
 
 
@@ -121,6 +128,7 @@ def home():
 def run_post():
     sleep(2)
     app.feeder.connect()
+    app.lmanager.start()
 
 th = Thread(target = run_post)
 th.name = "feeder_starter"

@@ -150,29 +150,87 @@
             "name": "leds.width",
             "type": "input",
             "value": 30,
-            "label": "Leds number on the largest side"
+            "label": "Leds number on the largest side",
+            "tip": "Number of LEDs in the longest side",
+            "depends_on": "device.type",
+            "depends_values": [
+                "Cartesian"
+            ]
         },
         "height": {
             "name": "leds.height",
             "type": "input",
             "value": 20,
-            "label": "Leds number on the smallest side"
+            "label": "Leds number on the smallest side",
+            "tip": "Number of LEDs in the shortest side",
+            "depends_on": "device.type",
+            "depends_values": [
+                "Cartesian"
+            ]
+        },
+        "circumference": {
+            "name": "leds.circumference",
+            "type": "input",
+            "value": 50,
+            "label": "Total LEDs number",
+            "tip": "The total number of LEDs pixels in the table",
+            "depends_on": "device.type",
+            "depends_values": [
+                "Scara",
+                "Polar"
+            ]
         },
         "type": {
             "name": "leds.type",
             "type": "select",
             "value": "Dimmable",
             "available_values": [
-                "WS2812B",
-                "Dimmable"
+                "RGB",
+                "RGBW",
+                "Dimmable",
+                "WWA"
             ],
-            "label": "Select a led type"
+            "label": "Select a led type",
+            "tip": "RGB and RGBW LEDs are compatible with WS2812B compatible drivers. The 'Dimmable' option is suitable for single color strips."
         },
         "pin1": {
             "name": "leds.pin1",
             "type": "input",
             "value": 18,
-            "label": "Pin number"
+            "label": "Pin number",
+            "tip": "Uses the BCM pin number"
+        },
+        "available": {
+            "value": false,
+            "hide": true
+        },
+        "has_light_sensor": {
+            "value": false,
+            "hide": true
+        },
+        "light_sensor": {
+            "name": "leds.light_sensor",
+            "type": "select",
+            "value": "",
+            "available_values": [
+                "No sensor",
+                "TSL2591"
+            ],
+            "label": "Choose the type of light sensor available",
+            "depends_on": "leds.available",
+            "depends_values": [
+                true
+            ]
         }
+    },
+    "buttons": {
+        "buttons": [],
+        "available_values": [],
+        "available": false
+    },
+    "updates": {
+        "hash": "",
+        "branch": "Master",
+        "update_available": false
     }
 }

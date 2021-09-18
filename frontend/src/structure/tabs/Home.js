@@ -92,7 +92,12 @@ class Home extends Component{
             </Carousel>
         }else{
             result = <div className="center w-100">
-                    <Button onClick={()=> this.props.createNewPlaylist()}>Start by creating a new playlist now</Button>
+                    <Button onClick={()=> { 
+                            this.props.setShowNewPlaylist();
+                            playlistCreateNew();
+                        }}>
+                        Start by creating a new playlist now
+                    </Button>
                 </div>
         }
         return result;

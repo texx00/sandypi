@@ -14,6 +14,14 @@ LINE_SERVICE = 4
 settings_path = "./server/saves/saved_settings.json"
 defaults_path = "./server/saves/default_settings.json"
 
+OVERWRITE_FIELDS = [
+    "available_values",
+    "depends_on",
+    "depends_values",
+    "tip",
+    "label"
+]
+
 def save_settings(settings):
     dataj = json.dumps(settings, indent=4)
     with open(settings_path,"w") as f:
@@ -56,7 +64,7 @@ def match_dict(mod_dict, ref_dict):
         
         new_dict = dict(mod_dict)   # clone object
         for k in ref_dict.keys():
-            if not k in new_dict:
+            if (not k in new_dict) or (k in OVERWRITE_FIELDS):
                 new_dict[k] = ref_dict[k]    # if key is not set, adds the key as an empty dict
             else:
                 new_dict[k] = match_dict(new_dict[k], ref_dict[k])

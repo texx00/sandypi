@@ -91,6 +91,7 @@ Now you can install SandyPi (will take a while):
 
 This step may be long (even over 1h).
 
+
 ### Running the server
 
 To run the server use:
@@ -116,6 +117,21 @@ Follow the [guide](/docs/first_setup.md) for your first setup or for [more info 
 
 The software will automatically load (`.gcode`) files positioned in the `server/autodetect` folder.
 The file will be automatically deleted from the folder once loaded.
+
+## Additional hardware setup
+
+### Buttons
+
+In order to use the hardware buttons it is also necessary to follow the following steps:
+* from within the virtual environment, run the `which flask` command,
+* follow the given path and edit the file by changing the first line to `#!/usr/bin/python3`. It is possible to edit the file with the command `sudo nano file_path`, change the file, press CTRL+X to exit, press `y` and `Enter` to save the changes
+
+This is a temporary problem and will be fixed once Docker is used ([issue #8](https://github.com/texx00/sandypi/issues/8)).
+
+### LEDs
+
+It is possible to control LEDs strips directly from the interface. [Check the full procedure for more info](/docs/hardware/leds.md).
+
 
 ## Installation troubleshooting
 
@@ -192,7 +208,7 @@ Here is a brief list of what the software is capable of and what will be impleme
 * [x] Feed the table periodically
 * [x] Shuffle mode to play shuffled drawings continuosly
 * [x] Show the realtime gcode simulation with time estimate (ETA)
-* [ ] Simple lights/led control
+* [x] Simple lights/led control
 * [ ] Update the software with a single button
 * [ ] Create logo
 * [ ] Run the server not on a production server

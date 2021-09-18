@@ -48,11 +48,13 @@ function drawingResume(){
 
 
 // ---- LEDS ----
-
 function ledsSetColor(color){
-    socket.emit("leds_set_color", JSON.stringify(color));
+    socket.emit("leds_set_color", color);
 }
 
+function ledsAutoDim(val){
+    socket.emit("leds_auto_dim", val);
+}
 
 // ---- PLAYLISTS ----
 // emit a socket to request an updated list of playlists
@@ -128,8 +130,19 @@ function queueStartRandom(){
 // ---- MANUAL CONTROL ----
 
 function controlEmergencyStop(){
-    socket.emit("control_emergency_stop")
+    socket.emit("control_emergency_stop");
 }
+
+// ----- UPDATES -----
+
+function softwareStartUpdate(){
+    socket.emit("software_run_update");
+}
+
+function softwareChangeBranch(branch){
+    socket.emit("software_change_branch", branch);
+}
+
 
 
 export {
@@ -141,6 +154,7 @@ export {
     drawingPause,
     drawingResume,
     ledsSetColor,
+    ledsAutoDim,
     playlistsRequest, 
     playlistDelete,
     playlistQueue,
@@ -156,5 +170,7 @@ export {
     queueStartRandom,
     settingsSave,
     settingsShutdownSystem,
-    settingsRebootSystem
+    settingsRebootSystem,
+    softwareChangeBranch,
+    softwareStartUpdate
 };

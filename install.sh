@@ -8,6 +8,19 @@ echo "Starting installation time: $now"
 echo "--------------------------------------------------------------------"
 echo ""
 
+if cat /proc/device-tree/model | grep -q 'Raspberry' 
+then
+    echo "---- Installing HW related libraries (buttons and LEDs) -----"
+    echo ""
+    # gpio library to manage buttons
+    apt-get install rpi.gpio python3-rpi.gpio
+    # leds library
+    python3 -m pip install adafruit-circuitpython-neopixel
+    # light sensor library
+    python3 -m pip install adafruit-circuitpython-tsl2591
+fi
+
+
 echo '----- Installing python dependencies -----'
 python3 -m pip install -r requirements.txt
 

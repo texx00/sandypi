@@ -255,6 +255,17 @@ button.react-multiple-carousel__arrow:hover{
     background-color: $black;
 }
 
+.highlight-tab{
+    background-color: $dark;
+    color: $primary !important;
+    @extend .rounded;
+}
+
+// fixing checkbox appearance
+.custom-control{
+    z-index: inherit;
+}
+
 // development styles 
 .bgred{
     background-color: red;
