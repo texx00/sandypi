@@ -24,6 +24,7 @@ class FeederEventManager(FeederEventHandler):
         self.app.semits.show_toast_on_UI("Element started")
         self.app.qmanager.send_queue_status()
         self.command_index = 0
+        self.last_send_time = time.time()
     
     def on_message_received(self, line):
         # Send the line to the server

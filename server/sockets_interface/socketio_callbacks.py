@@ -172,6 +172,7 @@ def settings_reboot_system():
 @socketio.on("drawing_queue")
 def drawing_queue(code):
     element = DrawingElement(drawing_id=code)
+    app.qmanager.reset_play_random()
     app.qmanager.queue_element(element)
 
 @socketio.on("drawing_pause")

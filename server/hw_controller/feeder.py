@@ -189,6 +189,8 @@ class Feeder():
                 self._stopped = False
                 self._is_paused = False
                 self._current_element = element
+                if self.command_send_mutex.locked():
+                    self.command_send_mutex.release()
                 with self.command_buffer_mutex:
                     self.command_buffer.clear()
                 self._th.start()
@@ -297,10 +299,9 @@ class Feeder():
                     self.last_commanded_position.y = float(self.y_regex.findall(command)[0][0])
         except:
             self.logger.error("Cannot parse something in the command: " + command)
-        finally:
-            # wait until the lock for the buffer length is released -> means the board sent the ack for older lines and can send new ones
-            with self.command_send_mutex:       # wait until get some "ok" command to remove extra entries from the buffer
-                pass
+        # wait until the lock for the buffer length is released -> means the board sent the ack for older lines and can send new ones
+        with self.command_send_mutex:       # wait until get some "ok" command to remove extra entries from the buffer
+            pass
 
         # send the command after parsing the content
         # need to use the mutex here because it is changing also the line number

@@ -21,7 +21,7 @@ class QueueManager():
         self.interval       = 0                         # pause between drawing in repeat mode
         self._last_time     = 0                         # timestamp of the end of the last drawing
         self._is_force_stop = False
-        self._is_random     = False                     # used when queueing random drawings
+        self._play_random   = False                     # True if the device was started with a "start a random drawing" commands
 
         # setup status timer
         self._th            = Thread(target=self._thf, daemon=True)
@@ -63,26 +63,30 @@ class QueueManager():
         self._element = element
 
     # stop the current drawing and start the next
-    def stop(self, is_random=False):
-        self._is_random = is_random
+    def stop(self):
+        self._play_random = False
         self._is_force_stop = True
         self.app.feeder.stop()
+    
+    def reset_play_random(self):
+        self._play_random = False
 
     # set the repeat flag
     def set_repeat(self, val):
         if type(val) == type(True):
             self.repeat = val
-            if self._is_random:
-                if val:
-                    self.start_random_drawing()
-                else:
+            if val and (len(self.q.queue) > 0) and self._play_random:
+                self._put_random_element_in_queue()
+                self.send_queue_status()
+            else:
+                if self._play_random:
                     self.clear_queue()
-        else: raise ValueError("The argument must be boolean")
+                self.reset_play_random()
+        else: 
+            raise ValueError("The argument must be boolean")
 
     # set the shuffle flag
     def set_shuffle(self, val):
-        if self._is_random:         # can change the shuffle option only if is not playing a random drawing
-            return
         if type(val) == type(True):
             self.shuffle = val
         else: raise ValueError("The argument must be boolean")
@@ -91,21 +95,23 @@ class QueueManager():
     def set_interval(self, val):
         self.interval = val
 
+    def _put_random_element_in_queue(self):
+        self.q.put(ShuffleElement(shuffle_type="0"))                            # queue a new random element drawing
+
     # starts a random drawing from the uploaded files
     def start_random_drawing(self, repeat=False):
+        self._play_random = True
         self.set_shuffle(True)
         if self.q.empty():
-            self.queue_element(ShuffleElement(shuffle_type="0"), is_random=True)                    # queue a new random element drawing
-            if repeat:                                                                      # call again the same method only once to put an element in the queue
-                self.start_random_drawing(False)
+            self._put_random_element_in_queue()
         else:
             if not self.is_drawing():
-                self.queue_element(ShuffleElement(shuffle_type="0"), is_random=True)
+                self._put_random_element_in_queue()
+        self.start_next()
 
 
     # add an element to the queue
-    def queue_element(self, element, show_toast=True, is_random=False):
-        self._is_random = is_random
+    def queue_element(self, element, show_toast=True):
         if self.q.empty() and not self.is_drawing():
             self.start_element(element)
             return
@@ -124,8 +130,6 @@ class QueueManager():
 
     def set_element_ended(self):
         self.set_is_drawing(False)
-        if self._is_random:
-            self.start_random_drawing()
         # if the ended element was forced to stop should not set the "last_time" otherwise when a new element is started there will be a delay element first
         if self._is_force_stop:
             self._is_force_stop = False
@@ -136,6 +140,7 @@ class QueueManager():
     # clear the queue
     def clear_queue(self):
         self.q.queue.clear()
+        self.send_queue_status()
     
     def set_new_order(self, elements):
         self.clear_queue()
@@ -170,12 +175,16 @@ class QueueManager():
                 # will reset the last_time to 0 in order to get the next element running without a delay and stop the current drawing. 
                 # Once the current drawing the next drawing should start from the feeder event manager
                 self._last_time = 0
-                self.stop(self._is_random)
+                self.stop()
                 return True
+            
         try:
             # should not remove the element from the queue if repeat is active. Should just add it at the end of the queue
-            if (not self._element is None) and (self.repeat) and (not hasattr(self._element, "_repeat_off") and (not self._is_random)):
-                self.q.put(self._element)
+            if (not self._element is None) and (self.repeat) and (not hasattr(self._element, "_repeat_off")):
+                if hasattr(self._element, "was_random"):
+                    self._put_random_element_in_queue()
+                else:
+                    self.q.put(self._element)
             
             # if the time has not expired should start a new drawing otherwise should start a delay element
             if (self.interval != 0) and (not hasattr(self._element, "_repeat_off") and (self.queue_length()>0)):
@@ -186,24 +195,26 @@ class QueueManager():
                     return True
             
             self._element = None
-            if self.queue_length() > 0:
-                element = None
-                # if shuffle is enabled select a random drawing from the queue otherwise uses the first element of the queue
-                if self.shuffle:
-                    tmp = None
-                    elements = list(self.q.queue)
-                    if len(elements)>1:  # if the list is longer than 2 will pop the last element to avoid using it again
-                        tmp = elements.pop(-1)
-                    element = elements.pop(random.randrange(len(elements)))
-                    elements.append(tmp)
-                    self.set_new_order(elements)
-                else: 
-                    element = self.q.queue.popleft()
-                # starts the choosen element
-                self.start_element(element)
-                self.app.logger.info("Starting next element: {}".format(element))
-                return True
-            return False
+            if self.queue_length() == 0:
+                return False
+            element = None
+            # if shuffle is enabled select a random drawing from the queue otherwise uses the first element of the queue
+            if self.shuffle:
+                tmp = None
+                elements = list(self.q.queue)
+                if len(elements)>1:  # if the list is longer than 2 will pop the last element to avoid using it again
+                    tmp = elements.pop(-1)
+                element = elements.pop(random.randrange(len(elements)))
+                elements.append(tmp)
+                self.set_new_order(elements)
+            else: 
+                element = self.q.queue.popleft()
+            if element is None: 
+                return False
+            # starts the choosen element
+            self.start_element(element)
+            self.app.logger.info("Starting next element: {}".format(element))
+            return True
         except Exception as e:
             self.app.logger.exception(e)
             self.app.logger.error("An error occured while starting a new drawing from the queue:\n{}".format(str(e)))
@@ -220,7 +231,8 @@ class QueueManager():
 
     # sends the queue status to the frontend
     def send_queue_status(self):
-        elements = list(map(lambda x: str(x), self.q.queue)) if len(self.q.queue) > 0 else []                       # converts elements to json
+        els = [i for i in self.q.queue if not i is None]
+        elements = list(map(lambda x: str(x), els)) if len(els) > 0 else []                       # converts elements to json
         res = {
             "current_element":  str(self._element),
             "elements":         elements,
