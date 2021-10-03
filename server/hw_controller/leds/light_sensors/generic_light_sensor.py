@@ -27,7 +27,6 @@ class GenericLightSensor(ABC):
         """Stops the light sensor from controlling the LED strip"""
         self._is_running = False
         self._history = []
-        self.app.lmanager.set_brightness(1)
 
     def _thf(self):
         while self._is_running:
@@ -41,6 +40,7 @@ class GenericLightSensor(ABC):
 
             self.app.logger.info("Averaged brightness: {}".format(brightness))      # FIXME remove this
             self.app.lmanager.set_brightness(brightness)
+        self.app.lmanager.set_brightness(1)
     
     def deinit(self):
         """Deinitializes the sensor hw"""
