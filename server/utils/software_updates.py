@@ -65,13 +65,15 @@ def switch_to_branch(branch):
 
 class UpdatesManager():
     def __init__(self):
+        pass
+        """
         self.branch = get_branch_name()
         self.short_hash = get_commit_shash()
         if self.branch == "master":
             self.update_available = compare_local_remote_tags()["behind_remote"]
         else:
             self.update_available = get_update_available()
-
+        """
 
 if __name__ == "__main__":
     #print(compare_local_remote_tags(verbose=True))

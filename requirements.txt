@@ -24,7 +24,7 @@ mccabe==0.6.1
 netifaces==0.10.9
 packaging==20.8
 Pillow==8.3.2
-pip==21.1.2
+pip==21.3.1
 pluggy==0.13.1
 py==1.10.0
 py-expression-eval==0.3.13
