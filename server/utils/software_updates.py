@@ -65,7 +65,9 @@ def switch_to_branch(branch):
 
 class UpdatesManager():
     def __init__(self):
-        pass
+        self.branch = "test"
+        self.short_hash = "test"
+        self.update_available = False
         """
         self.branch = get_branch_name()
         self.short_hash = get_commit_shash()

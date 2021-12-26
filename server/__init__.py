@@ -68,7 +68,10 @@ def base_static(filename):
     return send_from_directory(app.root_path + app.config['UPLOAD_FOLDER'].replace("./server", "")+ "/{}/".format(filename), "{}.jpg".format(filename))
 
 # database
-file_path = os.path.join(os.path.abspath(os.getcwd()), "database.db")
+dbpath = os.environ.get("DB_PATH")
+if not dbpath is None:
+    file_path = dbpath + "/database.db"
+else: file_path = os.path.join(os.path.abspath(os.getcwd()), "database.db")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+file_path
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
@@ -114,6 +117,7 @@ def override_url_for():
 # Adds a version number to the static url to update the cached files when a new version of the software is loaded
 def versioned_url_for(endpoint, **values):
     if endpoint == 'static':
+        pass
         values["version"] = app.umanager.short_hash
     return url_for(endpoint, **values)
 
