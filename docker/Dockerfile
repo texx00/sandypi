@@ -40,6 +40,8 @@ COPY docker/check_prestart.py docker/start_server.sh ./
 # copying server data
 COPY migrations migrations
 COPY server server
+# copy placeholder copy hidden by the .dockerignore
+COPY docker/placeholder.jpg server/static/placeholder.jpg
 # TODO should check if these files are available inside a volume at runtime and substitute them with the custom ones
 COPY .env.template .env
 COPY .flaskenv setup.py ./

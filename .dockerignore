@@ -21,4 +21,10 @@
 **/secrets.dev.yaml
 **/values.dev.yaml
 **/__pycache__
+
+# project specific ignores
+**/database.db
+**/server/autodetect/**
+**/server/saves/saved_settings.json
+**/server/static/Drawings/**
 README.md
