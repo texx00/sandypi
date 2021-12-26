@@ -1,9 +1,9 @@
 version: "3.9"
 services:
-  # watchtower service to manage updates
+  # Watchtower service to manage updates
   watchtower:
     image: containrrr/watchtower
-    restart: always
+    restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/timezone:/etc/timezone:ro
@@ -13,15 +13,16 @@ services:
       - WATCHTOWER_INCLUDE_RESTARTING=true
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
-  # sandypi image
+  # Sandypi image
   sandypi:
     image: test
-    restart: always
+    restart: unless-stopped
     volumes:
       - database:/database
       - static:/sandypi/server/static
       - saves:/sandypi/server/saves
       - autodetect:/sandypi/server/autodetect
+      - logs:/sandypi/server/logs
     ports:
      - 5000:5000
     labels:
@@ -39,4 +40,7 @@ volumes:
     driver: local
   autodetect:
     name: autodetect
+    driver: local
+  logs:
+    name: logs
     driver: local

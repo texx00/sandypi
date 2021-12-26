@@ -50,7 +50,6 @@ COPY .flaskenv setup.py ./
 COPY --from=step1 build frontend/build
 
 RUN python setup.py install
-# TODO add volumes
 # TODO buildx port for raspberry
 
 EXPOSE 5000
