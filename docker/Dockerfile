@@ -26,7 +26,7 @@ WORKDIR /sandypi
 # setting up virtual environment
 RUN apt-get update && apt-get install python3-dev gcc libc-dev -y
 ENV FLASK_ENV=production VIRTUAL_ENV=/env PATH="$VIRTUAL_ENV/bin:$PATH" IS_DOCKER=true DB_PATH="/database"
-RUN python -m pip install virtualenv wheel gunicorn
+RUN python -m pip install virtualenv wheel
 RUN python -m venv ${VIRTUAL_ENV}
 
 
@@ -35,7 +35,7 @@ COPY requirements.txt requirements.txt
 RUN python -m pip install -r requirements.txt
 
 # copying docker start files
-COPY docker/check_prestart.py docker/start_server.sh ./
+COPY docker/check_prestart.py docker/start_server.sh docker/wsgi.py ./
 
 # copying server data
 COPY migrations migrations

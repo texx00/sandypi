@@ -61,7 +61,7 @@ Payload.max_decode_packets = 200             # increasing this number increases 
 socketio = SocketIO(app, cors_allowed_origins="*")
 CORS(app)   # setting up cors for react
 
-# 
+ 
 @app.route('/Drawings/<path:filename>')
 def base_static(filename):
     filename = secure_filename(filename)
@@ -91,7 +91,7 @@ from server.utils.stats import StatsManager
 
 
 # Initializes sockets emits
-app.semits = SocketioEmits(app,socketio, db)
+app.semits = SocketioEmits(app, socketio, db)
 
 # Device controller initialization
 app.feeder = Feeder(FeederEventManager(app))
