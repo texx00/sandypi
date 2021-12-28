@@ -15,7 +15,7 @@ services:
       - "com.centurylinklabs.watchtower.enable=true"
   # Sandypi image
   sandypi:
-    image: test
+    image: texx00/sandypi
     restart: unless-stopped
     volumes:
       - database:/database

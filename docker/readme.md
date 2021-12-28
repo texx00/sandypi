@@ -1,4 +1,4 @@
-# Docker installation
+# Installation with Docker
 
 From Sandypi v0.6, Docker is the suggested way to install the software.
 The installation is much easier, quicker and less prone to issues/problems during the installation process itself.
