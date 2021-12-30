@@ -27,7 +27,7 @@ WORKDIR /sandypi
 # for some reason I'm not able to build this with the slim version of the image because the apt-get install is failing (connection issues to the packages sites)
 # as a workaround will use the non-slim version of the image -> will get a larger image on the registry
 #RUN apt-get update && apt-get install python3-dev gcc libc-dev -y
-ENV FLASK_ENV=production VIRTUAL_ENV=/env PATH="$VIRTUAL_ENV/bin:$PATH" IS_DOCKER=true
+ENV FLASK_ENV=production VIRTUAL_ENV=/env PATH="$VIRTUAL_ENV/bin:$PATH" IS_DOCKER=true CFLAGS=-fcommon
 RUN python -m pip install virtualenv wheel
 RUN python -m venv ${VIRTUAL_ENV}
 
@@ -35,6 +35,10 @@ RUN python -m venv ${VIRTUAL_ENV}
 # installing python dependencies
 COPY requirements.txt requirements.txt
 RUN python -m pip install -r requirements.txt
+
+# installing GPIO libraries only on arm/v7
+ARG TARGETVARIANT TARGETARCH
+RUN if [ "$TARGETARCH/$TARGETVARIANT" = "arm/v7" ] ; then python -m pip install RPi.GPIO board adafruit-circuitpython-neopixel adafruit-circuitpython-tsl2591 ; fi
 
 # copying docker start files
 COPY docker/check_prestart.py docker/start_server.sh docker/wsgi.py ./

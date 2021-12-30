@@ -23,13 +23,17 @@ services:
       - saves:/sandypi/server/saves
       - autodetect:/sandypi/server/autodetect
       - logs:/sandypi/server/logs
-      - /dev:/dev       # this is necessary to access the usb drive to control the device
+      - /dev:/dev                               # this is necessary to access the usb drive to control the device
+      - /sbin/shutdown:/sbin/shutdown           # necessary to shutdown the device
+      - /sbin/reboot:/sbin/reboot               # necessary to reboot the device
     ports:
      - 5000:5000
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     privileged: 
-      true              # necessary to access the serial device
+      true                                      # necessary to access the serial device
+    pid:
+      "host"                                    # necessary to reboot/shutdown from within the container
 
 volumes:
   database:
