@@ -20,5 +20,4 @@ jobs:
     - name: Build the Docker image
       run: |
         echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin docker.io
-        docker buildx build --platform linux/amd64,linux/arm/v7 -f docker/Dockerfile.armv7 -t docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPOSITORY }}-${GIT_BRANCH}:$GITHUB_SHA
-        docker push docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPOSITORY }}-${GIT_BRANCH}:$GITHUB_SHA
+        docker buildx build --platform linux/amd64,linux/arm/v7 -f docker/Dockerfile.armv7 -t docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPOSITORY }}-${GIT_BRANCH}:$GITHUB_SHA --push .

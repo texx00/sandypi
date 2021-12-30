@@ -10,7 +10,8 @@ Unfortunately this installation is not compatible with the old installation meth
 
 ## Download the docker-compose file
 
-It is possible to download the file in two ways:
+The [Docker image](https://hub.docker.com/repository/docker/texx00/sandypi) requires some specific setup to run.
+To simplify this setup it is possible to use a docker-compose script that can be downloaded in two different ways:
 
 - [command line](download-from-command-line)
 - [from browser](download-from-browser)
@@ -51,6 +52,13 @@ Now, from every device on the network should be possible to reach the software b
 
 The provided docker-compose file is setting up not only Sandypi but also Watchtower. The latter, is capable of monitoring the availability of updates for the other images. This means that by default, you will have always the latest available version of Sandypi running on your hardware.
 Automatic software updates can be disabled in Sandypi settings through the interface.
+
+To manually force an update:
+
+```bash
+$> docker-compose pull
+$> docker-compose up -d
+```
 
 ## Shared folders (Docker volumes)
 
