@@ -5,6 +5,7 @@ This page reports some details about developing and debugging the project.
 ## Visual Studio Code debugging setup
 
 The project is developed with VS Code. It is possible to setup the debugger to run the flask server with some simple steps:
+
 * create a launch.json file
 * add a configuration
 * select the Flask launch type
@@ -46,7 +47,8 @@ Flask-migrate is a powerful tool to manage the migration between versions automa
 The frontend of the app is using *React*, *Redux* and *Bootstrap 4*. If you are not confortable with those check them out before having a look at the project.
 
 To work on the frontend it is necessary to run the react server:
-```
+
+```bash
 {main project folder}
 
 $>cd frontend
@@ -64,7 +66,8 @@ For this reason, any change to the build folder is ignored and will be overwrite
 It is possible to run the server on the raspberry and the frontend development server on another computer (the raspberry can be slow to compile the frontend files).
 
 To work like this, start the server on the raspberry and then use the following command to start the React development server:
-```
+
+```bash
 - Windows (cmd): $> set "REACT_APP_SERVER_IP=xxx.xxx.xxx.xxx" && yarn start
 - Linux:$> REACT_APP_SERVER_IP=xxx.xxx.xxx.xxx yarn start
 ```
@@ -74,6 +77,10 @@ where `xxx.xxx.xxx.xxx` is the ip address of the remote machine.
 ## Compatibility
 
 The software is intended to run primarily on a Raspberry Pi. For this reason, before mergin the pull requests, testing on that platform must be performed.
+
+## Docker
+
+From version v0.6, the project can be run on docker containers. Since the main target device for the software is Raspberry Pi, the image must be built compatible with the arm/v7 architecture. Check [how to build](../docker/build.md) in order to build and test an image compatible with Raspberri Pi hardware.
 
 ## How to help
 

@@ -37,7 +37,6 @@ $> docker buildx use sandypibuilder
 
 After the builder is created it is necessary to initiate it. The following command will force Docker to download the right tools:
 
-
 ```bash
 $> docker buildx inspect --bootstrap
 ```
@@ -49,5 +48,3 @@ $> docker buildx build --platform linux/amd64,linux/arm/v7 -f docker/Dockerfile.
 ```
 
 Now it is possible to push the image to your own docker registry and download it directly on the Raspberry Pi.
-
-

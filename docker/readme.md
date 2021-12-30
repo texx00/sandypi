@@ -43,9 +43,13 @@ To stop it:
 $> docker-compose down
 ```
 
+## Using the software
+
+Now, from every device on the network should be possible to reach the software by putting the ip address of the device in any browser with this format: `ip_address:5100`. The `5100` is the default port for Sandypi. It is also possible to change it. See [Changing port](changing-port) for more detailed instructions.
+
 ## Software updates
 
-The provided docker-compose file is setting up not only Sandypi but also Watchtower. The latter, is capable of monitoring the availability of updates for the other images. This means that by default, you will have always the latest available version of Sandypi running on your hardware. 
+The provided docker-compose file is setting up not only Sandypi but also Watchtower. The latter, is capable of monitoring the availability of updates for the other images. This means that by default, you will have always the latest available version of Sandypi running on your hardware.
 Automatic software updates can be disabled in Sandypi settings through the interface.
 
 ## Shared folders (Docker volumes)
@@ -58,8 +62,8 @@ The structure is like this: "main_volume_folder" -> "volume_name" -> _data -> "t
 
 To access the main volume folders:
 
- * Windows: open "\\wsl$\docker-desktop-data\version-pack-data\community\docker\volumes" in Windows explorer
- * Linux: open /var/lib/docker/volumes/
+* Windows: open "\\wsl$\docker-desktop-data\version-pack-data\community\docker\volumes" in Windows explorer
+* Linux: open /var/lib/docker/volumes/
 
 ## Volumes
 
@@ -67,7 +71,7 @@ To access the main volume folders:
 
 This folder contains the server logs. These files can be helpfull in understanding issues/problems with the software. It is a really good idea to attach these files to Github issues when a problem is reported.
 
-Another way to see the logs is to use `docker ps` to get the id of the container and then 
+Another way to see the logs is to use `docker ps` to get the id of the container and then:
 
 ```bash
 $> docker logs <container_id>
@@ -95,13 +99,45 @@ Sandypi comes in different flavours. By default, the image running is the main/s
 
 In case you want to try the alpha or beta versions of the software you just need to change one line in the docker-compose.yml file.
 
-You will need to subsitute the `master` word with `alpha` or `beta` in the image line:
+You will need to add `-alpha` or `-beta` in the image line (it is also possible to specify the version instead of using the `latest` version):
 
 ```yml
-# Sandypi image
+# Sandypi main image
 sandypi:
-  image: texx00/sandypi-master:version
+  image: texx00/sandypi:latest
   restart: unless-stopped
   volumes:
     ...
+```
+
+```yml
+# Sandypi beta image
+sandypi:
+  image: texx00/sandypi-beta:latest
+  restart: unless-stopped
+  volumes:
+    ...
+```
+
+```yml
+# Sandypi alpha image
+sandypi:
+  image: texx00/sandypi-alpha:latest
+  restart: unless-stopped
+  volumes:
+    ...
+```
+
+## Changing port
+
+It is also possible to change the port used by the software (the number `xxxx` to put after the ip address [`ip_address:xxxx`]).
+Just change only the **first** number in the "ports" field inside the `docker-compose.yml` file.
+By using 80:5000 it will not be necessary to specify the port anymore but the software will be reachable simply by putting the device's ip address in the browser address bar (no need for the `xxxx` number at the end).
+
+***IMPORTANT:*** leave the number after the columns as 5000.
+
+```yml
+  sandypi:
+   ports:
+     - 80:5000
 ```

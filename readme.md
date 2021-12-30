@@ -29,109 +29,22 @@ The project is opensource under MIT license and thus anyone can help (there is s
 
 ## Installation
 
-### Windows
+Now it is possible to install Sandypi with Docker. In this way the installation is much simpler and less prone to errors.
+See the [new installation procedure here](docker/readme.md).
 
-Install python 3.7 or above together with pip, npm and git and restart your computer to make the commands available system wide.
-
-Open cmd and install virtual env as:
-`$> python -m pip install virtualenv`
-
-Download the repo with:
-
-`$> git clone https://github.com/texx00/sandypi.git`
-
-Open the sandypi folder, create a new virtual environment and activate it:
-
-```
-$> cd sandypi
-$> python -m venv env
-$> \env\Scripts\activate.bat
-
-(env)$> 
-```
-
-Now you can install SandyPi (will take a while):
-```
-(env)$> install.bat
-```
-
-### Raspbian OS (Buster and above)
-
-Make sure on your system git, npm, pip and virtualenv are already available:
-
-```
-$> sudo apt-get install git python3-pip npm
-$> sudo pip3 install virtualenv
-```
-
-To avoid possible problems when the server is running install also the libopenjp2-7 and libtiff5 packages:
-
-`
-$> sudo apt-get install libopenjp2-7 libtiff5
-`
-
-Download the repo with:
-
-`$> git clone https://github.com/texx00/sandypi.git`
-
-Open the sandypi folder, create a new virtual environment and activate it:
-
-```
-$> cd sandypi
-$> virtualenv env
-$> source env/bin/activate
-
-(env)$> 
-```
-
-Now you can install SandyPi (will take a while):
-```
-(env)$> sudo sh install.sh
-```
-
-This step may be long (even over 1h).
-
-
-### Running the server
-
-To run the server use:
-`$> python start.py`
-When running on linux use `python3` instead of `python`.
-
-The script will activate the environment automatically.
-
-The service can be stopped with `CTRL+C`
-
-It is possible to set the server to start automatically when the device turns on with `$> python start.py -a=on`
-
-To stop the server starting automatically use `$> python start.py -a=off`
-
-### Web interface
-
-Once the service is running it is possible to connect through a browser by typing the device ip address and connecting to the port 5000 like `192.168.1.15:5000`
-If you are running on the local device you can also use `127.0.0.1:5000`
-
-Follow the [guide](/docs/first_setup.md) for your first setup or for [more info about the usage](/docs/usage.md)
-
-### Autodetect drawings
-
-The software will automatically load (`.gcode`) files positioned in the `server/autodetect` folder.
-The file will be automatically deleted from the folder once loaded.
+The old installation procedure is considered deprecated and should not be used. It may be usefull only for development purposes. For this reason, it is still [available here](docs/old_installation.md).
 
 ## Additional hardware setup
 
 ### Buttons
 
-In order to use the hardware buttons it is also necessary to follow the following steps:
-* from within the virtual environment, run the `which flask` command,
-* follow the given path and edit the file by changing the first line to `#!/usr/bin/python3`. It is possible to edit the file with the command `sudo nano file_path`, change the file, press CTRL+X to exit, press `y` and `Enter` to save the changes
-
-This is a temporary problem and will be fixed once Docker is used ([issue #8](https://github.com/texx00/sandypi/issues/8)).
+The software supports the usage of hardware buttons.
+Wire the buttons and select the type of wiring from the settings section (pull-up/pull-down, internal/external).
+Once the wiring type and the pin number is specified it is possible to associate a specific function to click and long press events on the button.
 
 ### LEDs
 
 It is possible to control LEDs strips directly from the interface. [Check the full procedure for more info](/docs/hardware/leds.md).
-
 
 ## Installation troubleshooting
 
@@ -159,31 +72,17 @@ In the settings select the serial port, the correct baudrate (usually 115200 or 
 
 ## Updates
 
-The software will prompt weekly if a new tag version has been added.
-The tagged version should be more or less stable.
-Mid-tags commits may not be stable (for this reason the software will not notify these updates).
+With Docker, the software will automatically update to the latest version automatically.
+If you want to force the update manually use (from the folder in which you downloaded the docker-compose.yml file):
 
-To update to the last available version of the software in linux you can run the following commands:
-
-```
-$> source env/bin/activate
-(env) $> git pull
-(env) $> sudo sh install.sh
+```bash
+$> docker-compose pull
+$> docker-compose up -d
 ```
 
-If you are working on Windows you should use instead:
-
-```
-$> source env/bin/activate
-(env) $> git pull
-(env) $> install.bat
-```
-
-If you have problems after the update check the [troubleshooting](/docs/troubleshooting.md) guide.
-
-_____
+___
 *NOTE:* the software is still in **ALPHA** which means lots of features may not work as expected. Updates may fix some but may also introduce more bugs. If you find any please open an issue. One the fundaments of the software are ready a stable branch will be released with more stable updates.
-____
+___
 
 ## Development and testing
 
