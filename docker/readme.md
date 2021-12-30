@@ -67,6 +67,12 @@ To access the main volume folders:
 
 This folder contains the server logs. These files can be helpfull in understanding issues/problems with the software. It is a really good idea to attach these files to Github issues when a problem is reported.
 
+Another way to see the logs is to use `docker ps` to get the id of the container and then 
+
+```bash
+$> docker logs <container_id>
+```
+
 ### Autodetect
 
 This folder is scanned periodically by the server: if one or more new drawings files are detected, they are uploaded automatically and will become available in the interface. It is possible to save directly the files here (also with automatic scripts) instead of uploading them by hand in the interface.

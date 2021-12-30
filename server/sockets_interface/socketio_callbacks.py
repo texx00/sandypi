@@ -48,7 +48,7 @@ def updates_run_update():
         app.semits.show_toast_on_UI("Restart the server to apply the update")
     else:
         os.system("touch {}/run_update.txt".format(folder))
-        os.system("reboot now")
+        os.system("/sbin/reboot now")
 
 @socketio.on("software_change_branch")
 def updates_run_update(branch):
@@ -160,12 +160,12 @@ def settings_shutdown_system():
     app.semits.show_toast_on_UI("Shutting down the device")
     app.feeder.stop()
     app.lmanager.stop()
-    os.system("shutdown now")
+    os.system("/sbin/shutdown now")     # in order to shutdown inside a docker container
 
 @socketio.on("settings_reboot_system")
 def settings_reboot_system():
     app.semits.show_toast_on_UI("Rebooting system...")
-    os.system("reboot now")
+    os.system("/sbin/reboot")           # in order to reboot inside a docker container
 
 # --------------------------------------------------------- DRAWINGS CALLBACKS -------------------------------------------------------------------------------
 

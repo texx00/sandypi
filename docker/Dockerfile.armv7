@@ -2,8 +2,6 @@
 
 # IMPORTANT! before building this image it is important to use "python dev_tools/update_frontend_version_hash.py"
 
-# build with: docker build -f docker/Dockerfile -t tagname .
-
 # building frontend
 FROM node:16.13.0-alpine AS step1
 
@@ -38,7 +36,11 @@ RUN python -m pip install -r requirements.txt
 
 # installing GPIO libraries only on arm/v7
 ARG TARGETVARIANT TARGETARCH
-RUN if [ "$TARGETARCH/$TARGETVARIANT" = "arm/v7" ] ; then python -m pip install RPi.GPIO board adafruit-circuitpython-neopixel adafruit-circuitpython-tsl2591 ; fi
+RUN if [ "$TARGETARCH/$TARGETVARIANT" = "arm/v7" ] ; then python -m pip install RPi.GPIO board adafruit-circuitpython-neopixel adafruit-circuitpython-tsl2591 rpi_ws281x ; fi
+
+# TODO should check if these files are available inside a volume at runtime and substitute them with the custom ones
+COPY .env.template .env
+COPY .flaskenv setup.py ./
 
 # copying docker start files
 COPY docker/check_prestart.py docker/start_server.sh docker/wsgi.py ./
@@ -48,9 +50,6 @@ COPY migrations migrations
 COPY server server
 # copy placeholder copy hidden by the .dockerignore
 COPY docker/placeholder.jpg server/static/placeholder.jpg
-# TODO should check if these files are available inside a volume at runtime and substitute them with the custom ones
-COPY .env.template .env
-COPY .flaskenv setup.py ./
 
 # copying frontend files into python image
 COPY --from=step1 build frontend/build
