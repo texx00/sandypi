@@ -65,12 +65,8 @@ For this reason, any change to the build folder is ignored and will be overwrite
 
 It is possible to run the server on the raspberry and the frontend development server on another computer (the raspberry can be slow to compile the frontend files).
 
-To work like this, start the server on the raspberry and then use the following command to start the React development server:
+To work like this, change the ip address of the REACT_DEVELOPMENT_SERVER variable inside frontend/.env.development
 
-```bash
-- Windows (cmd): $> set "REACT_APP_SERVER_IP=xxx.xxx.xxx.xxx" && yarn start
-- Linux:$> REACT_APP_SERVER_IP=xxx.xxx.xxx.xxx yarn start
-```
 
 where `xxx.xxx.xxx.xxx` is the ip address of the remote machine.
 

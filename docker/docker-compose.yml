@@ -11,12 +11,20 @@ services:
       - WATCHTOWER_CLEANUP=true
       - WATCHTOWER_LABEL_ENABLE=true
       - WATCHTOWER_INCLUDE_RESTARTING=true
+      - WATCHTOWER_LIFECYCLE_HOOKS=true
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
+      - "com.centurylinklabs.watchtower.lifecycle.pre-check=/sandypi/check_pre_update.sh"
   # Sandypi image
   sandypi:
-    image: texx00/sandypi-master:latest
+    image: texx00/sandypi:latest
     restart: unless-stopped
+    environment:
+      # this is the version of this docker compose file. If this file is changed/updated, watchtower is not able to pull it from the web.
+      # this variable is compared with the DOCKER_COMPOSE_FILE_EXPECTED_VERSION variable wich comes with the image (which is pulled automatically)
+      # if the two versions are not matching will prompt the user with a message to let him know that a new docker-compose file is available and can be pulled manually
+      # IMPORTANT: when this value is changed, need to change also the value in the dockerfile
+      - DOCKER_COMPOSE_FILE_VERSION=1
     volumes:
       - database:/database
       - static:/sandypi/server/static

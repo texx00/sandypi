@@ -70,8 +70,8 @@ The structure is like this: "main_volume_folder" -> "volume_name" -> _data -> "t
 
 To access the main volume folders:
 
-* Windows: open "\\wsl$\docker-desktop-data\version-pack-data\community\docker\volumes" in Windows explorer
-* Linux: open /var/lib/docker/volumes/
+- Windows: open "\\\\wsl$\docker-desktop-data\version-pack-data\community\docker\volumes" in Windows explorer
+- Linux: open /var/lib/docker/volumes/
 
 ## Volumes
 

@@ -72,13 +72,17 @@ In the settings select the serial port, the correct baudrate (usually 115200 or 
 
 ## Updates
 
-With Docker, the software will automatically update to the latest version automatically.
+With Docker, the software can update itself automatically to the latest version automatically.
+By default, this behaviour is disabled but you can enable automatic updates in the settings section of the UI.
 If you want to force the update manually use (from the folder in which you downloaded the docker-compose.yml file):
 
 ```bash
 $> docker-compose pull
 $> docker-compose up -d
 ```
+
+If a new version of the docker-compose.yml file is released, the software will not be able to automatically update the file. A notification will appear in Sandypi and a reminder will be always shown in the settings page.
+To update the docker-compose file follow the same instructions of the [installation procedure](docker/readme.md).
 
 ___
 *NOTE:* the software is still in **ALPHA** which means lots of features may not work as expected. Updates may fix some but may also introduce more bugs. If you find any please open an issue. One the fundaments of the software are ready a stable branch will be released with more stable updates.

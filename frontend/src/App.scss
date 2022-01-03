@@ -261,6 +261,13 @@ button.react-multiple-carousel__arrow:hover{
     @extend .rounded;
 }
 
+.corner-icon{
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    color: $danger;
+}
+
 // fixing checkbox appearance
 .custom-control{
     z-index: inherit;

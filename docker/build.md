@@ -44,7 +44,8 @@ $> docker buildx inspect --bootstrap
 Now it is possible to start the build process with (must be run from the main Sandypi folder):
 
 ```bash
-$> docker buildx build --platform linux/amd64,linux/arm/v7 -f docker/Dockerfile.armv7 -t remote_repo_user/sandypi --push .
+$> python dev_tools/update_frontend_version_hash.py
+$> docker buildx build --platform linux/amd64,linux/arm/v7 -f docker/Dockerfile -t remote_repo_user/sandypi --push .
 ```
 
 Now it is possible to push the image to your own docker registry and download it directly on the Raspberry Pi.

@@ -8,7 +8,7 @@ import QueueControls from './tabs/queue/QueueControls';
 
 import { getTab, showBack } from './tabs/selector';
 import { setTab, tabBack } from './tabs/Tabs.slice';
-import { showLEDs, systemIsLinux } from './tabs/settings/selector';
+import { showLEDs, systemIsLinux, updateDockerComposeLatest } from './tabs/settings/selector';
 import { settingsRebootSystem, settingsShutdownSystem } from '../sockets/sEmits';
 
 const mapStateToProps = (state) => {
@@ -16,7 +16,8 @@ const mapStateToProps = (state) => {
         showBack: showBack(state),
         isLinux: systemIsLinux(state),
         showLEDs: showLEDs(state),
-        selectedTab: getTab(state)
+        selectedTab: getTab(state),
+        dockerComposeUpdateAvailable: updateDockerComposeLatest(state)
     }
 }
 
@@ -36,12 +37,19 @@ class TopBar extends Component{
     }
 
     renderSettingsButton(){
+        let notificationCounter = 0;
+        let renderedCounter = "";
+        if (!this.props.dockerComposeUpdateAvailable)
+            notificationCounter++;
+        if (notificationCounter>0){
+            renderedCounter = <span class="badge badge-danger ml-2">{notificationCounter}</span>
+        }
         if (this.props.isLinux)
             return <Dropdown as={ButtonGroup}>
                 <IconButton className="btn btn-dark mr-0" 
                     onClick={()=>{this.props.handleTab("settings")}}
                     icon={Sliders}>
-                        Settings
+                        Settings{renderedCounter}
                 </IconButton>
 
                 <Dropdown.Toggle split className="btn btn-dark ml-0" id="dropdown-split-basic" />
@@ -55,7 +63,7 @@ class TopBar extends Component{
         else return <IconButton className="btn btn-dark" 
                 onClick={()=>{this.props.handleTab("settings")}}
                 icon={Sliders}>
-                    Settings
+                    Settings{renderedCounter}
             </IconButton>
     }
 
