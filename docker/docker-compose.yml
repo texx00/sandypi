@@ -2,7 +2,7 @@ version: "3.9"
 services:
   # Watchtower service to manage updates
   watchtower:
-    image: containrrr/watchtower
+    image: containrrr/watchtower:latest
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -10,11 +10,10 @@ services:
     environment:
       - WATCHTOWER_CLEANUP=true
       - WATCHTOWER_LABEL_ENABLE=true
-      - WATCHTOWER_INCLUDE_RESTARTING=true
+      - WATCHTOWER_DEBUG=true
       - WATCHTOWER_LIFECYCLE_HOOKS=true
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
-      - "com.centurylinklabs.watchtower.lifecycle.pre-check=/sandypi/check_pre_update.sh"
   # Sandypi service
   sandypi:
     image: texx00/sandypi:latest
@@ -40,6 +39,7 @@ services:
      - 5100:5000
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
+      - "com.centurylinklabs.watchtower.lifecycle.pre-update=/sandypi/check_pre_update.sh"
     privileged: 
       true                                      # necessary to access the serial device
 

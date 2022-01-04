@@ -50,8 +50,8 @@ Now, from every device on the network should be possible to reach the software b
 
 ## Software updates
 
-The provided docker-compose file is setting up not only Sandypi but also Watchtower. The latter, is capable of monitoring the availability of updates for the other images. This means that by default, you will have always the latest available version of Sandypi running on your hardware.
-Automatic software updates can be disabled in Sandypi settings through the interface.
+The provided docker-compose file is setting up not only Sandypi but also Watchtower. The latter, is capable of monitoring the availability of updates for the other images. This means that if enabled, you will have always the latest available version of Sandypi running on your hardware.
+Automatic software updates can be enabled in Sandypi settings through the interface.
 
 To manually force an update:
 

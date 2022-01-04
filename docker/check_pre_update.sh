@@ -1,9 +1,11 @@
-$FILE = "./server/saves/autoupdate.txt"
+#!/bin/bash
+
+FILE="./server/saves/autoupdate.txt"
 
 if test -f "$FILE"; then
     echo "$FILE exists.";
-    echo "0"
+    exit 0
 else
     echo "$FILE doesn't exist."
-    echo "1"
+    exit 1
 fi
