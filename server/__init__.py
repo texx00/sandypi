@@ -68,7 +68,7 @@ def base_static(filename):
     return send_from_directory(app.root_path + app.config['UPLOAD_FOLDER'].replace("./server", "")+ "/{}/".format(filename), "{}.jpg".format(filename))
 
 # database
-DATABASE_FILENAME = "database.db"
+DATABASE_FILENAME = os.path.join("server", "database", "db", "database.db")
 dbpath = os.environ.get("DB_PATH")
 if not dbpath is None:
     file_path = os.path.join(dbpath, DATABASE_FILENAME)

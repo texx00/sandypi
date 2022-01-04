@@ -64,5 +64,4 @@ EXPOSE 5000
 ENTRYPOINT ["bash", "start_server.sh"]
 
 # TODO check if .env file is being copied during the pre_run checks
-# TODO check database.db file position (if it is saved in the right volume on linux)
 # TODO test if watchtower is working correctly

@@ -15,7 +15,7 @@ services:
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
       - "com.centurylinklabs.watchtower.lifecycle.pre-check=/sandypi/check_pre_update.sh"
-  # Sandypi image
+  # Sandypi service
   sandypi:
     image: texx00/sandypi:latest
     restart: unless-stopped
@@ -26,7 +26,7 @@ services:
       # IMPORTANT: when this value is changed, need to change also the value in the dockerfile
       - DOCKER_COMPOSE_FILE_VERSION=1
     volumes:
-      - database:/database
+      - database:/sandypi/server/database/db
       - static:/sandypi/server/static
       - saves:/sandypi/server/saves
       - autodetect:/sandypi/server/autodetect
