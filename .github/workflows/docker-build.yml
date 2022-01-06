@@ -41,5 +41,5 @@ jobs:
         push: true
         file: docker/Dockerfile
         tags: |
-          texx00/sandypi-${GIT_BRANCH}:$GITHUB_SHA
-          texx00/sandypi-${GIT_BRANCH}:latest
+          ${{ secrets.DOCKER_HUB_USERNAME }}/sandypi-${{GIT_BRANCH}}:${{GITHUB_SHA}}
+          ${{ secrets.DOCKER_HUB_USERNAME }}/sandypi-${{GIT_BRANCH}}:latest
