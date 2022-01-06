@@ -35,6 +35,12 @@ Now you can install SandyPi (will take a while):
 (env)$> install.bat
 ```
 
+If the software is being installed for development purposes it is necessary to use this command instead:
+
+```bash
+(env) $> install.bat develop
+```
+
 ## Raspbian OS (Buster and above)
 
 Make sure on your system git, npm, pip and virtualenv are already available:

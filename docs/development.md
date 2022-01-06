@@ -2,6 +2,12 @@
 
 This page reports some details about developing and debugging the project.
 
+## Installation
+
+In order to start working on the project it is necessary to install the software manually, without docker.
+
+Check the [installation procedure](old_installation.md) here.
+
 ## Visual Studio Code debugging setup
 
 The project is developed with VS Code. It is possible to setup the debugger to run the flask server with some simple steps:

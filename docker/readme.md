@@ -13,8 +13,8 @@ Unfortunately this installation is not compatible with the old installation meth
 The [Docker image](https://hub.docker.com/repository/docker/texx00/sandypi) requires some specific setup to run.
 To simplify this setup it is possible to use a docker-compose script that can be downloaded in two different ways:
 
-- [command line](download-from-command-line)
-- [from browser](download-from-browser)
+- [from the command line](download-from-command-line)
+- [from a web browser](download-from-browser)
 
 ### Download from command line
 
@@ -23,8 +23,8 @@ To simplify this setup it is possible to use a docker-compose script that can be
 
 ### Download from browser
 
-- open [this link](https://github.com/texx00/sandypi/blob/feature/docker/readme.md) in your browser
-- on the top right there should be a `raw` button: right-click on it and select `Save as ...`
+- open [this link](https://github.com/texx00/sandypi/blob/master/docker/docker-compose.yml) in your browser
+- on the top right there should be the `Raw` button: right-click on it and select `Save as ...`
 - save the file where you can find it
 - change the extension of the file from `.txt` to `.yml`
 
@@ -50,10 +50,10 @@ Now, from every device on the network should be possible to reach the software b
 
 ## Software updates
 
-The provided docker-compose file is setting up not only Sandypi but also Watchtower. The latter, is capable of monitoring the availability of updates for the other images. This means that if enabled, you will have always the latest available version of Sandypi running on your hardware.
+The provided docker-compose file is setting up not only Sandypi but also Watchtower. The latter, is capable of monitoring the availability of updates for the other images. This means that, if enabled, you will have always the latest available version of Sandypi running on your hardware.
 Automatic software updates can be enabled in Sandypi settings through the interface.
 
-To manually force an update:
+To manually force an update it is possible to use:
 
 ```bash
 $> docker-compose pull
@@ -64,7 +64,7 @@ $> docker-compose up -d
 
 In order to retain data between updates, the docker image is saving the data in some shared folders that are located outside the docker image (Docker volumes).
 
-It may be necessary or useful to access some of these folders. For example, the data can be backed up to replace the sd card and mantain the same drawings and playlist in the new pi image.
+It may be necessary or useful to access some of these folders. For example, the data can be backed up to replace the sd card and mantain the same drawings and playlist in the new Pi image.
 
 The structure is like this: "main_volume_folder" -> "volume_name" -> _data -> "the actual data"
 
@@ -77,9 +77,9 @@ To access the main volume folders:
 
 ### Logs
 
-This folder contains the server logs. These files can be helpfull in understanding issues/problems with the software. It is a really good idea to attach these files to Github issues when a problem is reported.
+This folder contains the server logs. These files can be helpful in understanding issues/problems with the software. It is advisable to attach these files to any new Github issue when a problem is reported to help in understanding what is its cause.
 
-Another way to see the logs is to use `docker ps` to get the id of the container and then:
+Another way to see the logs is to use `docker ps` to get the id of the container (a string of letters and numbers) and then:
 
 ```bash
 $> docker logs <container_id>
@@ -97,11 +97,11 @@ If the default flask environmental variables need to be changed, it is possible 
 
 ### Database
 
-The database volume is used to save the SQL database. Nothing interesting here.
+The database volume is used to save the SQL database. Nothing interesting here other than for backup reasons.
 
 ### Static
 
-This folder contains the files that have been uploaded. This is interesting only for backups as the database volume.
+This folder contains the files that have been uploaded. This is interesting only for backups as per the database volume.
 
 ## Choosing a specific branch
 

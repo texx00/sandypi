@@ -16,7 +16,8 @@ The final aim of the project is to create something similar to a social network 
 ## The project
 
 The aim of the project is to create something focused on the sandtables. For sure, other solution exist (like octoprint) but their aim is for 3D printers thus the experience is not optimized for this application.
-The project is really immature and barely usable at the moment, see it as a preview of what it can become.
+
+The project is still work-in-progress which means you may encounter some bug or problems. Please, check the issues or opena new one if you are facing something wrong.
 
 The project is opensource under MIT license and thus anyone can help (there is so much to do!).
 
@@ -58,9 +59,9 @@ ___
 At the moment, the software is tested only with Marlin 2.0 and Grbl 1.1
 Should be compatible with other firmwares as well. If not please open an issue.
 
-The software has been built succesfully on Windows and Raspbian OS (running on Raspberry pi 3 B+ or 4).
+The software is running in Docker. The images are compatible with armv7 (Raspberry Pi) and amd64 (Linux and Windows with wsl).
 
-Raspberry Pi Zero W can be used but it is necessary to follow [this guide](/docs/pizero_installation.md)
+Once the software is correctly installed it is necessary to select the correct firmware used on the sandtable. This can be done through the web interface in the settings page. The interface can be reached through any browser by using the ip address of the device follower by `:5100` like `ip_address:5100`.
 
 ### Marlin 2.0 setup
 
@@ -85,7 +86,7 @@ If a new version of the docker-compose.yml file is released, the software will n
 To update the docker-compose file follow the same instructions of the [installation procedure](docker/readme.md).
 
 ___
-*NOTE:* the software is still in **ALPHA** which means lots of features may not work as expected. Updates may fix some but may also introduce more bugs. If you find any please open an issue. One the fundaments of the software are ready a stable branch will be released with more stable updates.
+*NOTE:* the software is still in **ALPHA** which means lots of features may not work as expected. Updates may fix some but may also introduce more bugs. If you find any please open an issue.
 ___
 
 ## Development and testing
@@ -93,11 +94,10 @@ ___
 Any help in the app development is accepted.
 Also testing the software counts! If you find any bug or you have any idea just check if an issue is already open for that topic or open it yourself.
 For the coding, debugging and so on check the [development section](/docs/development.md).
-In this case, during the installation it is necessary to run `(env) $> install.bat develop`.
 
 ## Current status
 
-The project is really primitive and need a lot of work.
+The project still need a lot of work.
 Here is a brief list of what the software is capable of and what will be implemented for sure in the future:
 
 * [x] Web interface to be accessible from different devices over the network
