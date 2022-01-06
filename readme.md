@@ -112,7 +112,8 @@ Here is a brief list of what the software is capable of and what will be impleme
 * [x] Shuffle mode to play shuffled drawings continuosly
 * [x] Show the realtime gcode simulation with time estimate (ETA)
 * [x] Simple lights/led control
-* [ ] Update the software with a single button
+* [x] Update the software automatically
+* [x] Interact with physical buttons to control the table
 * [ ] Create logo
 * [ ] Run the server not on a production server
 * [ ] Advanced lights controls: syncronization between lights and ball

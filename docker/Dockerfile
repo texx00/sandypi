@@ -1,6 +1,6 @@
 # Docker file to run the server in a docker environment
 
-# IMPORTANT! before building this image it is important to use "python dev_tools/update_frontend_version_hash.py"
+# IMPORTANT! before building this image it is important to use "python dev_tools/update_frontend_version_hash.py". Check the build.md file
 
 # building frontend
 FROM node:16.13.0-alpine AS step1
@@ -31,7 +31,7 @@ RUN python -m venv ${VIRTUAL_ENV}
 
 # installing GPIO libraries only on arm/v7
 ARG TARGETVARIANT TARGETARCH
-RUN if [ "$TARGETARCH/$TARGETVARIANT" = "arm/v7" ] ; then python -m pip install RPi.GPIO board adafruit-circuitpython-neopixel adafruit-circuitpython-tsl2591 rpi_ws281x ; fi
+RUN if [ "$TARGETARCH/$TARGETVARIANT" = "arm/v7" ] ; then python -m pip install RPi.GPIO adafruit-circuitpython-neopixel adafruit-circuitpython-tsl2591 rpi_ws281x ; fi
 
 # adding docker-compose file version here to compare at runtime if need to update the file manually on the host
 # this version should always match the DOCKER_COMPOSE_FILE_VERSION in the docker-compose.yml file
@@ -56,9 +56,9 @@ COPY docker/placeholder.jpg server/static/placeholder.jpg
 # copying frontend files into python image
 COPY --from=step1 build frontend/build
 
-RUN python setup.py install
-
 COPY git_shash.json git_shash.json
+
+RUN python setup.py install
 
 EXPOSE 5000
 ENTRYPOINT ["bash", "start_server.sh"]
