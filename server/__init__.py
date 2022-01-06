@@ -1,4 +1,3 @@
-from server.hw_controller.buttons.buttons_manager import ButtonsManager
 from server.utils.settings_utils import get_ip4_addresses
 from flask import Flask, url_for
 from flask.helpers import send_from_directory
@@ -12,13 +11,14 @@ from werkzeug.utils import secure_filename
 
 import os
 
-from time import sleep, time
+from time import sleep
 from dotenv import load_dotenv
 import logging
 from threading import Thread
 
 from server.utils import settings_utils, software_updates, migrations
 from server.utils.logging_utils import server_stream_handler, server_file_handler
+
 
 # Updating setting files (will apply changes only when a new SW version is installed)
 settings_utils.update_settings_file_version()
@@ -61,34 +61,42 @@ Payload.max_decode_packets = 200             # increasing this number increases 
 socketio = SocketIO(app, cors_allowed_origins="*")
 CORS(app)   # setting up cors for react
 
-# 
+ 
 @app.route('/Drawings/<path:filename>')
 def base_static(filename):
     filename = secure_filename(filename)
     return send_from_directory(app.root_path + app.config['UPLOAD_FOLDER'].replace("./server", "")+ "/{}/".format(filename), "{}.jpg".format(filename))
 
 # database
-file_path = os.path.join(os.path.abspath(os.getcwd()), "database.db")
+DATABASE_FILENAME = os.path.join("server", "database", "db", "database.db")
+dbpath = os.environ.get("DB_PATH")
+if not dbpath is None:
+    file_path = os.path.join(dbpath, DATABASE_FILENAME)
+else: 
+    file_path = os.path.join(os.path.abspath(os.getcwd()), DATABASE_FILENAME)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+file_path
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db, include_object=migrations.include_object)
 
-
 # After setting up the database it is possible to import the app components
-import server.api.drawings
-import server.sockets_interface.socketio_callbacks
-from server.sockets_interface.socketio_emits import SocketioEmits
-from server.hw_controller.queue_manager import QueueManager
-from server.hw_controller.feeder import Feeder
-from server.hw_controller.feeder_event_manager import FeederEventManager
-from server.preprocessing.file_observer import GcodeObserverManager
-from server.hw_controller.leds.leds_controller import LedsController
-from server.utils.stats import StatsManager
+try:
+    import server.api.drawings
+    from server.sockets_interface.socketio_emits import SocketioEmits
+    import server.sockets_interface.socketio_callbacks
+    from server.hw_controller.queue_manager import QueueManager
+    from server.hw_controller.feeder import Feeder
+    from server.hw_controller.feeder_event_manager import FeederEventManager
+    from server.preprocessing.file_observer import GcodeObserverManager
+    from server.hw_controller.leds.leds_controller import LedsController
+    from server.hw_controller.buttons.buttons_manager import ButtonsManager
+    from server.utils.stats import StatsManager
 
+except Exception as e:
+    app.logger.exception(e)
 
 # Initializes sockets emits
-app.semits = SocketioEmits(app,socketio, db)
+app.semits = SocketioEmits(app, socketio, db)
 
 # Device controller initialization
 app.feeder = Feeder(FeederEventManager(app))
@@ -114,6 +122,7 @@ def override_url_for():
 # Adds a version number to the static url to update the cached files when a new version of the software is loaded
 def versioned_url_for(endpoint, **values):
     if endpoint == 'static':
+        pass
         values["version"] = app.umanager.short_hash
     return url_for(endpoint, **values)
 

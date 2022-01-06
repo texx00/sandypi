@@ -20,7 +20,7 @@ from server.utils.settings_utils import load_settings, get_only_values
 
     The elements must derive from the GenericPlaylistElement class.
     Check "generic_playlist_element.py" for more detailed instructions.
-    New elements must be added to the _child_types list at the end of this file
+    New elements must be added to the _get_elements_types list at the end of this file
 
     ---------------------------------------------------------------------------
 """ 
@@ -270,5 +270,5 @@ class ClearElement(GenericPlaylistElement):
     def __init__(self, **kwargs):
         super().__init__(element_type=ClearElement.element_type, **kwargs)
 
-
-_child_types = [DrawingElement, TimeElement, CommandElement, ShuffleElement, StartPlaylistElement, PositioningElement, ClearElement, LightsControl]
+def _get_elements_types():
+    return [DrawingElement, TimeElement, CommandElement, ShuffleElement, StartPlaylistElement, PositioningElement, ClearElement, LightsControl]

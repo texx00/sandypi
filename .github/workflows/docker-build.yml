@@ -1,0 +1,28 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ beta, alpha, docker ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Set env vars
+      run: |
+        # Short name for current branch. For PRs, use target branch (base ref)
+        GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}
+        echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
+    - name: Build the Docker image
+      run: |
+        python dev_tools/update_frontend_version_hash.py
+        echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin docker.io
+        docker buildx build --platform linux/amd64,linux/arm/v7 -f docker/Dockerfile.armv7 -t docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPOSITORY }}-${GIT_BRANCH}:$GITHUB_SHA --push .

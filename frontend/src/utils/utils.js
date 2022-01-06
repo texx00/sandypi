@@ -6,10 +6,11 @@
  * The variable will be used only in development, not for the build process
 */
 function getWorkingDomain(){
-    if(process.env.REACT_APP_SERVER_IP !== undefined){
-        console.log("Using REACT_APP_SERVER_IP environmental variable: " + process.env.REACT_APP_SERVER_IP);
-        return document.location.protocol + '//' + process.env.REACT_APP_SERVER_IP + ":5000";
-    }else return document.location.protocol + '//' + document.domain + ":5000";
+    if (process.env.REACT_APP_DEVELOPMENT_SERVER !== undefined){
+        console.log("Using REACT_APP_DEVELOPMENT_SERVER environmental variable: " + process.env.REACT_APP_DEVELOPMENT_SERVER);
+        return document.location.protocol + '//' + process.env.REACT_APP_DEVELOPMENT_SERVER;
+    }
+    return document.location.protocol + '//' + document.domain + ":" + document.location.port;
 }
 
 const domain = getWorkingDomain();
@@ -26,4 +27,6 @@ function getImgUrl(id){
     else return "";
 }
 
-export { domain, getImgUrl, checkArray };
+const home_site = "https://github.com/texx00/sandypi";
+
+export { domain, getImgUrl, checkArray, home_site };

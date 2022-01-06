@@ -1,15 +1,13 @@
 import json
 import shutil
 import os
-from os.path import dirname
-import platform
 
 from server import socketio, app, db
 
-from server.utils import settings_utils, software_updates
-from server.database.models import Playlists
-from server.database.playlist_elements import DrawingElement, GenericPlaylistElement
+from server.utils import settings_utils
+from server.database.elements_factory import ElementsFactory
 from server.database.models import UploadedFiles, Playlists
+from server.database.playlist_elements import DrawingElement
 
 @socketio.on('connect')
 def on_client_connected():
@@ -22,49 +20,21 @@ def on_client_connected():
 # --------------------------------------------------------------- UPDATES -------------------------------------------------------------------------------------
 
 # request to check if a new version of the software is available 
-@socketio.on('software_updates_check')
-def updates_check():
-    if software_updates.get_branch_name() == "master":
-        result = software_updates.compare_local_remote_tags()
-        if result:
-            if result["behind_remote"]:
-                toast = """A new update is available ({0})\n
-                Your version is {1}\n
-                Check the settings tab to upgrade the software""".format(result["remote_latest"], result["local"])
-                socketio.emit("software_updates_response", toast)
-    else:
-        if software_updates.get_update_available():
-            toast = """A new update is available\n
-                Check the settings tab to upgrade the software"""
-            socketio.emit("software_updtates_response", toast)
-
-@socketio.on("software_run_update")
-def updates_run_update():
-    folder = dirname(dirname(dirname(os.path.realpath(__file__))))              # must get the main folder path to create the hidden file
-    if platform.system() == "Windows":
-        f = open("{}\\run_update.txt".format(folder), "w")
-        f.write(".")
-        f.close()
-        app.semits.show_toast_on_UI("Restart the server to apply the update")
-    else:
-        os.system("touch {}/run_update.txt".format(folder))
-        os.system("sudo reboot now")
-
-@socketio.on("software_change_branch")
-def updates_run_update(branch):
-    software_updates.switch_to_branch(branch.lower())
-    updates_run_update()
+@socketio.on('updates_toggle_auto_enabled')
+def toggle_autoupdate_enabled():
+    app.umanager.toggle_autoupdate()
+    settings_request()
 
 # --------------------------------------------------------- PLAYLISTS CALLBACKS -------------------------------------------------------------------------------
 
 # delete a playlist
 @socketio.on("playlist_delete")
-def playlist_delete(id):
+def playlist_delete(playlist_id):
     try:
-        Playlists.delete_playlist(id)
-        app.logger.info("Playlist code {} deleted".format(id))
-    except Exception as e:
-        app.logger.error("'Delete playlist code {}' error".format(id))
+        Playlists.delete_playlist(playlist_id)
+        app.logger.info("Playlist code {} deleted".format(playlist_id))
+    except Exception:
+        app.logger.error("'Delete playlist code {}' error".format(playlist_id))
     playlist_refresh()
 
 # save the changes to the playlist
@@ -133,15 +103,15 @@ def settings_save(data, is_connect):
 @socketio.on("settings_request")
 def settings_request():
     settings = settings_utils.load_settings()
-    settings["buttons"]["available_values"] =           app.bmanager.get_buttons_options()
-    settings["buttons"]["available"] =                  app.bmanager.gpio_is_available()    or (not os.getenv("DEV_HWBUTTONS") is None)
-    settings["leds"]["available"]["value"] =            app.lmanager.is_available()         or (not os.getenv("DEV_HWLEDS") is None)
-    settings["leds"]["has_light_sensor"]["value"] =     app.lmanager.has_light_sensor()     or (not os.getenv("DEV_HWLEDS") is None)
-    settings["serial"]["port"]["available_values"] =    app.feeder.serial_ports_list()
+    settings["buttons"]["available_values"] =               app.bmanager.get_buttons_options()
+    settings["buttons"]["available"] =                      app.bmanager.gpio_is_available()    or int(os.getenv("DEV_HWBUTTONS",   default="0"))
+    settings["leds"]["available"]["value"] =                app.lmanager.is_available()         or int(os.getenv("DEV_HWLEDS",      default="0"))
+    settings["leds"]["has_light_sensor"]["value"] =         app.lmanager.has_light_sensor()     or int(os.getenv("DEV_HWLEDS",      default="0"))
+    settings["serial"]["port"]["available_values"] =        app.feeder.serial_ports_list()
     settings["serial"]["port"]["available_values"].append("FAKE")
-    settings["updates"]["hash"] =                       app.umanager.short_hash
-    settings["updates"]["branch"] =                     app.umanager.branch
-    settings["updates"]["update_available"] =           app.umanager.update_available
+    settings["updates"]["hash"] =                           app.umanager.short_hash
+    settings["updates"]["docker_compose_latest_version"] =  app.umanager.docker_compose_latest_version
+    settings["updates"]["autoupdate"] =                     app.umanager.is_autoupdate_enabled()
     tmp = []
     labels = [v["label"] for v in settings["buttons"]["available_values"]]
     for b in settings["buttons"]["buttons"]:
@@ -160,12 +130,12 @@ def settings_shutdown_system():
     app.semits.show_toast_on_UI("Shutting down the device")
     app.feeder.stop()
     app.lmanager.stop()
-    os.system("sudo shutdown now")
+    os.system("/sbin/shutdown now")     # in order to shutdown inside a docker container
 
 @socketio.on("settings_reboot_system")
 def settings_reboot_system():
     app.semits.show_toast_on_UI("Rebooting system...")
-    os.system("sudo reboot")
+    os.system("/sbin/reboot")           # in order to reboot inside a docker container
 
 # --------------------------------------------------------- DRAWINGS CALLBACKS -------------------------------------------------------------------------------
 
@@ -218,7 +188,7 @@ def queue_set_order(elements):
     if elements == "":
         app.qmanager.clear_queue()
     else:
-        app.qmanager.set_new_order(map(lambda e: GenericPlaylistElement.create_element_from_dict(e), json.loads(elements)))
+        app.qmanager.set_new_order(map(lambda e: ElementsFactory.create_element_from_dict(e), json.loads(elements)))
 
 # stops only the current element
 @socketio.on("queue_next_drawing")

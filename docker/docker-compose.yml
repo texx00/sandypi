@@ -1,0 +1,61 @@
+version: "3.9"
+services:
+  # Watchtower service to manage updates
+  watchtower:
+    image: containrrr/watchtower:latest
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/timezone:/etc/timezone:ro
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_LABEL_ENABLE=true
+      - WATCHTOWER_DEBUG=true
+      - WATCHTOWER_LIFECYCLE_HOOKS=true
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+  # Sandypi service
+  sandypi:
+    image: texx00/sandypi:latest
+    restart: unless-stopped
+    environment:
+      # this is the version of this docker compose file. If this file is changed/updated, watchtower is not able to pull it from the web.
+      # this variable is compared with the DOCKER_COMPOSE_FILE_EXPECTED_VERSION variable wich comes with the image (which is pulled automatically)
+      # if the two versions are not matching will prompt the user with a message to let him know that a new docker-compose file is available and can be pulled manually
+      # IMPORTANT: when this value is changed, need to change also the value in the dockerfile
+      - DOCKER_COMPOSE_FILE_VERSION=1
+    volumes:
+      - database:/sandypi/server/database/db
+      - static:/sandypi/server/static
+      - saves:/sandypi/server/saves
+      - autodetect:/sandypi/server/autodetect
+      - logs:/sandypi/server/logs
+      - /dev:/dev                               # this is necessary to access the usb drive to control the device
+      - /run/systemd/system:/run/systemd/system # necessary to shutdown/reboot the device
+      - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket # necessary to shutdown/reboot the device
+      - /sbin/shutdown:/sbin/shutdown           # necessary to shutdown the device
+      - /sbin/reboot:/sbin/reboot               # necessary to reboot the device
+    ports:
+     - 5100:5000
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+      - "com.centurylinklabs.watchtower.lifecycle.pre-update=/sandypi/check_pre_update.sh"
+    privileged: 
+      true                                      # necessary to access the serial device
+
+volumes:
+  database:
+    name: database
+    driver: local
+  static:
+    name: static
+    driver: local
+  saves:
+    name: saves
+    driver: local
+  autodetect:
+    name: autodetect
+    driver: local
+  logs:
+    name: logs
+    driver: local

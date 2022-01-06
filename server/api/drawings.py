@@ -1,8 +1,7 @@
 from flask import request, jsonify
-from server.sockets_interface.socketio_callbacks import drawings_refresh
-from server.preprocessing.drawing_creator import preprocess_drawing
 from server import app
-
+from server.preprocessing.drawing_creator import preprocess_drawing
+from server.sockets_interface.socketio_callbacks import drawings_refresh
 
 ALLOWED_EXTENSIONS = ["gcode", "nc", "thr"]
 
