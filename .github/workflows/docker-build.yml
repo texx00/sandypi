@@ -34,7 +34,7 @@ jobs:
         username: ${{ secrets.DOCKER_HUB_USERNAME }}
         password: ${{ secrets.DOCKER_HUB_TOKEN }}
     - name: test
-      run: echo ${{GIT_BRANCH}}
+      run: echo "Creating docker image for branch $GIT_BRANCH"
     - name: Build and push
       uses: docker/build-push-action@v2
       with:
@@ -43,5 +43,5 @@ jobs:
         push: true
         file: docker/Dockerfile
         tags: |
-          ${{ secrets.DOCKER_HUB_USERNAME }}/sandypi-${{GIT_BRANCH}}:${{GITHUB_SHA}}
-          ${{ secrets.DOCKER_HUB_USERNAME }}/sandypi-${{GIT_BRANCH}}:latest
+          ${{ secrets.DOCKER_HUB_USERNAME }}/sandypi-$GIT_BRANCH:$GITHUB_SHA
+          ${{ secrets.DOCKER_HUB_USERNAME }}/sandypi-$GIT_BRANCH:latest
