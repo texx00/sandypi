@@ -2,7 +2,7 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ beta, alpha, docker ]
+    branches: [ beta, alpha ]
 
 jobs:
 
@@ -17,9 +17,9 @@ jobs:
       with:
         python-version: 3.9
     - name: Buildx setup
-      uses: actions/setup-buildx-action@v1
+      uses: docker/setup-buildx-action@v1
     - name: Qemu setup
-      uses: actions/setup-qemu-action@v1
+      uses: docker/setup-qemu-action@v1
     - name: Set env vars
       run: |
         # Short name for current branch. For PRs, use target branch (base ref)
