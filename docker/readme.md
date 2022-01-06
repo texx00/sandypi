@@ -91,7 +91,9 @@ This folder is scanned periodically by the server: if one or more new drawings f
 
 ### Saves
 
-Here the config files are saved. If necessary they can be modified by hand but should be easier to modify them by hand. The "saved_settings.json" file is regenerated from the "default_settings.json" if deleted (in case something goes wrong with the settings)
+Here the config files are saved. If necessary they can be modified by hand but should be easier to modify them by hand. The "saved_settings.json" file is regenerated from the "default_settings.json" if deleted (in case something goes wrong with the settings).
+
+If the default flask environmental variables need to be changed, it is possible to load a `.env` file inside this folder. The file will be copied when the container is first started and the new values for the variables will be used. Check the `.env.template` file to see which variables can be changed. (The changes will be available only after the container is restarted.)
 
 ### Database
 

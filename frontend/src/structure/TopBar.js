@@ -68,7 +68,7 @@ class TopBar extends Component{
     }
 
     renderLEDsTab(){
-        if (this.props.showLEDs)
+        if (this.props.showLEDs.value)
             return <Nav.Link className={"h5" + (this.props.selectedTab === "leds" ? " highlight-tab" : "")}
                 key={5} 
                 onClick={()=>{this.props.handleTab("leds")}}>

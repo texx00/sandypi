@@ -62,6 +62,3 @@ COPY git_shash.json git_shash.json
 
 EXPOSE 5000
 ENTRYPOINT ["bash", "start_server.sh"]
-
-# TODO check if .env file is being copied during the pre_run checks
-# TODO test if watchtower is working correctly
