@@ -25,6 +25,7 @@ jobs:
         # Short name for current branch. For PRs, use target branch (base ref)
         GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}
         echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
+        echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
     - name: Update shash in files
       run: |
         python dev_tools/update_frontend_version_hash.py
@@ -33,8 +34,8 @@ jobs:
       with:
         username: ${{ secrets.DOCKER_HUB_USERNAME }}
         password: ${{ secrets.DOCKER_HUB_TOKEN }}
-    - name: test
-      run: echo "Creating docker image for branch $GIT_BRANCH"
+    - name: Env var values
+      run: echo "Creating docker image for branch $GIT_BRANCH with shash $SHORT_SHA"
     - name: Build and push
       uses: docker/build-push-action@v2
       with:
@@ -43,5 +44,5 @@ jobs:
         push: true
         file: docker/Dockerfile
         tags: |
-          ${{ secrets.DOCKER_HUB_USERNAME }}/sandypi-${{ env.GIT_BRANCH }}:${{ github.SHA }}
+          ${{ secrets.DOCKER_HUB_USERNAME }}/sandypi-${{ env.GIT_BRANCH }}:${{ env.SHORT_SHA }}
           ${{ secrets.DOCKER_HUB_USERNAME }}/sandypi-${{ env.GIT_BRANCH }}:latest
