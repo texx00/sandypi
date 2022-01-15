@@ -127,20 +127,18 @@ class SinglePlaylist extends Component{
             if (this.props.currentElement === undefined){
                 startDrawingLabel = "Start playlist";
             }
-            return <div>
-                <IconButton className="btn" 
+            return <IconButton className="btn w-100 center" 
                     icon={Play}
                     onClick={()=>{
                         playlistQueue(this.props.playlist.id);
                     }}>
                     {startDrawingLabel}
                 </IconButton>
-            </div>
         }
     }
 
     renderDeleteButton(){
-        return <ConfirmButton className="btn" 
+        return <ConfirmButton 
             icon={X}
             onClick={()=> {
                 playlistDelete(this.props.playlist.id);

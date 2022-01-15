@@ -10,10 +10,9 @@ class ConfirmButton extends Component{
 
     render(){
         // TODO make this better
-        return <div className={this.props.className + " pr-2"}>
+        return <div className={this.props.className}>
                 <div className={"w-100" + (this.state.mustConfirm ? " d-none" : "")}>
-                    <IconButton 
-                        className={this.props.className}
+                    <IconButton className="w-100 center"
                         onClick={()=> this.setState({mustConfirm: true})}
                         icon={this.props.icon}>
                             {this.props.children}
