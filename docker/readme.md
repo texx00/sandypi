@@ -19,7 +19,7 @@ To simplify this setup it is possible to use a docker-compose script that can be
 ### Download from command line
 
 - open a terminal window (or connect through ssh to the device)
-- use: `wget https://raw.githubusercontent.com/texx00/sandypi/feature/docker/docker/docker-compose.yml`
+- use: `wget https://raw.githubusercontent.com/texx00/sandypi/master/docker/docker-compose.yml`
 
 ### Download from browser
 

@@ -51,7 +51,7 @@ COPY docker/check_prestart.py docker/start_server.sh docker/wsgi.py docker/check
 COPY migrations migrations
 COPY server server
 # copy placeholder copy hidden by the .dockerignore
-COPY docker/placeholder.jpg server/static/placeholder.jpg
+COPY docker/placeholder.jpg server/static/Drawings/placeholder.jpg
 
 # copying frontend files into python image
 COPY --from=step1 build frontend/build
