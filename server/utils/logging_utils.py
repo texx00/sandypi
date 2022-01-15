@@ -16,15 +16,18 @@ class MultiprocessRotatingFileHandler(RotatingFileHandler):
     # this is for sure not the best solution but it looks like it is working now
     def rotate(self, source, dest):
         shutil.copyfile(source, dest)
-        f = open(source, 'r+')
+        f = open(source, "r+")
         f.truncate(0)
+
 
 # FIXME the rotating file handler is not working for some reason. should find a different solution. Create a new log file everytime the table is turned on? The file should be cached for some iterations? (5?)
 
 # create a common formatter for the app
 formatter = Formatter("[%(asctime)s] %(levelname)s in %(name)s (%(filename)s): %(message)s")
 
-server_file_handler = MultiprocessRotatingFileHandler("server/logs/server.log", maxBytes=2000000, backupCount=5)
+server_file_handler = MultiprocessRotatingFileHandler(
+    "server/logs/server.log", maxBytes=2000000, backupCount=5
+)
 server_file_handler.setLevel(1)
 server_file_handler.setFormatter(formatter)
 

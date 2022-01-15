@@ -24,7 +24,12 @@ from server.utils.logging_utils import server_stream_handler, server_file_handle
 settings_utils.update_settings_file_version()
 
 # Shows ipv4 adresses
-print("\nTo run the server use 'ip:5000' in your browser with one of the following ip adresses: {}\n".format(str(get_ip4_addresses())), flush=True)
+print(
+    "\nTo run the server use 'ip:5000' in your browser with one of the following ip adresses: {}\n".format(
+        str(get_ip4_addresses())
+    ),
+    flush=True,
+)
 
 # Logging setup
 load_dotenv()
@@ -48,34 +53,44 @@ w_logger.propagate = False
 
 # app setup
 # is using the frontend build forlder for the static path
-app = Flask(__name__, template_folder='templates', static_folder="../frontend/build", static_url_path="/")
+app = Flask(
+    __name__, template_folder="templates", static_folder="../frontend/build", static_url_path="/"
+)
 
 app.logger.setLevel(1)
 w_logger.addHandler(server_stream_handler)
 w_logger.addHandler(server_file_handler)
 
-app.config['SECRET_KEY'] = 'secret!' # TODO put a key here
-app.config['UPLOAD_FOLDER'] = "./server/static/Drawings"
+app.config["SECRET_KEY"] = "secret!"  # TODO put a key here
+app.config["UPLOAD_FOLDER"] = "./server/static/Drawings"
 
-Payload.max_decode_packets = 200             # increasing this number increases CPU usage but it may be necessary to be able to run leds in realtime (default should be 16)
+# increasing this number increases CPU usage but it may be necessary to be able to run leds in realtime (default should be 16)
+Payload.max_decode_packets = 200
+
 socketio = SocketIO(app, cors_allowed_origins="*")
-CORS(app)   # setting up cors for react
+CORS(app)  # setting up cors for react
 
- 
-@app.route('/Drawings/<path:filename>')
+
+@app.route("/Drawings/<path:filename>")
 def base_static(filename):
     filename = secure_filename(filename)
-    return send_from_directory(app.root_path + app.config['UPLOAD_FOLDER'].replace("./server", "")+ "/{}/".format(filename), "{}.jpg".format(filename))
+    return send_from_directory(
+        app.root_path
+        + app.config["UPLOAD_FOLDER"].replace("./server", "")
+        + "/{}/".format(filename),
+        "{}.jpg".format(filename),
+    )
+
 
 # database
 DATABASE_FILENAME = os.path.join("server", "database", "db", "database.db")
 dbpath = os.environ.get("DB_PATH")
 if not dbpath is None:
     file_path = os.path.join(dbpath, DATABASE_FILENAME)
-else: 
+else:
     file_path = os.path.join(os.path.abspath(os.getcwd()), DATABASE_FILENAME)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+file_path
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + file_path
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db, include_object=migrations.include_object)
 
@@ -100,7 +115,6 @@ app.semits = SocketioEmits(app, socketio, db)
 
 # Device controller initialization
 app.feeder = Feeder(FeederEventManager(app))
-#app.feeder.connect()
 app.qmanager = QueueManager(app, socketio)
 
 # Buttons controller initialization
@@ -115,20 +129,22 @@ app.umanager = software_updates.UpdatesManager()
 # Stats manager
 app.smanager = StatsManager()
 
+
 @app.context_processor
 def override_url_for():
     return dict(url_for=versioned_url_for)
 
+
 # Adds a version number to the static url to update the cached files when a new version of the software is loaded
 def versioned_url_for(endpoint, **values):
-    if endpoint == 'static':
+    if endpoint == "static":
         pass
         values["version"] = app.umanager.short_hash
     return url_for(endpoint, **values)
 
 
 # Home routes
-@app.route('/')
+@app.route("/")
 def home():
     return send_from_directory(app.static_folder, "index.html")
 
@@ -139,7 +155,8 @@ def run_post():
     app.feeder.connect()
     app.lmanager.start()
 
-th = Thread(target = run_post)
+
+th = Thread(target=run_post)
 th.name = "feeder_starter"
 th.start()
 
@@ -147,5 +164,5 @@ th.start()
 # initializes the .gcode file observer on the autostart folder
 app.observer = GcodeObserverManager("./server/autodetect", logger=app.logger)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     socketio.run(app)
