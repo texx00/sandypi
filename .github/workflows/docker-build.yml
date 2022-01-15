@@ -1,0 +1,48 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ beta, alpha ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Buildx setup
+      uses: docker/setup-buildx-action@v1
+    - name: Qemu setup
+      uses: docker/setup-qemu-action@v1
+    - name: Set env vars
+      run: |
+        # Short name for current branch. For PRs, use target branch (base ref)
+        GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}
+        echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
+        echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
+    - name: Update shash in files
+      run: |
+        python dev_tools/update_frontend_version_hash.py
+    - name: Login to DockerHub
+      uses: docker/login-action@v1 
+      with:
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.DOCKER_HUB_TOKEN }}
+    - name: Env var values
+      run: echo "Creating docker image for branch $GIT_BRANCH with shash $SHORT_SHA"
+    - name: Build and push
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        platforms: linux/amd64,linux/arm/v7
+        push: true
+        file: docker/Dockerfile
+        tags: |
+          ${{ secrets.DOCKER_HUB_USERNAME }}/sandypi-${{ env.GIT_BRANCH }}:${{ env.SHORT_SHA }}
+          ${{ secrets.DOCKER_HUB_USERNAME }}/sandypi-${{ env.GIT_BRANCH }}:latest

@@ -133,16 +133,11 @@ function controlEmergencyStop(){
     socket.emit("control_emergency_stop");
 }
 
-// ----- UPDATES -----
+// ---- UPDATES ----
 
-function softwareStartUpdate(){
-    socket.emit("software_run_update");
+function toggleAutoUpdateEnabled(){
+    socket.emit("updates_toggle_auto_enabled");
 }
-
-function softwareChangeBranch(branch){
-    socket.emit("software_change_branch", branch);
-}
-
 
 
 export {
@@ -171,6 +166,5 @@ export {
     settingsSave,
     settingsShutdownSystem,
     settingsRebootSystem,
-    softwareChangeBranch,
-    softwareStartUpdate
+    toggleAutoUpdateEnabled
 };

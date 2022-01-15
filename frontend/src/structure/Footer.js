@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import {Navbar, Nav} from 'react-bootstrap';
+import { home_site } from '../utils/utils';
 
 class Footer extends Component{
     render(){
@@ -11,7 +12,7 @@ class Footer extends Component{
                         Copyright © 2020
                     </Nav>
                     <Nav>
-                        For more detail visit the project homepage on  <a className="ml-1" href="https://github.com/texx00/sandypi" rel="noreferrer" target="_blank">GitHub</a>
+                        For more detail visit the project homepage on  <a className="ml-1" href={home_site} rel="noreferrer" target="_blank">GitHub</a>
                     </Nav>
                 </Navbar.Collapse>
             </Navbar>

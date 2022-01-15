@@ -25,7 +25,10 @@ def generate_start_file(folder):
             "cd {}\n".format(folder),                   # go to the correct folder
             "source env/bin/activate\n",                # activate the environment
             "chmod 777 .\n",                            # changing permission to the files otherwise cannot use the db
-            "touch 'server.started'\n",                 # create a file to say that the server has been started
+            "if test -f \"run_update.txt\"; then\n",
+            "   echo \"Running update\"\n",
+            "   sudo python3 start.py\n",
+            "fi\n",
             "flask run --host=0.0.0.0\n"]               # start the server
     
     with open(file_path, "w") as f:

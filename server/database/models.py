@@ -63,7 +63,8 @@ class UploadedFiles(db.Model):
 
 # move these imports here to avoid circular import in the GenericPlaylistElement
 from server.database.playlist_elements_tables import create_playlist_table, delete_playlist_table, get_playlist_table_class
-from server.database.playlist_elements import GenericPlaylistElement
+from server.database.elements_factory import ElementsFactory
+from server.database.generic_playlist_element import GenericPlaylistElement
 
 # Playlist table
 # Keep track of all the playlists
@@ -88,7 +89,7 @@ class Playlists(db.Model):
             if "id" in i:   # delete old ids to mantain the new sorting scheme (the elements list should be already ordered, for this reason we clear the elements and add them in the right order)
                 del i["id"]
             if not isinstance(i, GenericPlaylistElement):
-                i = GenericPlaylistElement.create_element_from_dict(i)
+                i = ElementsFactory.create_element_from_dict(i)
             i.save(self._ec())
         db.session.commit()
     
@@ -99,7 +100,7 @@ class Playlists(db.Model):
         els = self._ec().get_playlist_elements()
         res = []
         for e in els:
-            res.append(GenericPlaylistElement.create_element_from_db(e))
+            res.append(ElementsFactory.create_element_from_db(e))
         return res
     
     def get_elements_json(self):
