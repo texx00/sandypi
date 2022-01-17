@@ -167,7 +167,7 @@ def settings_reboot_system():
 @socketio.on("drawing_queue")
 def drawing_queue(code):
     element = DrawingElement(drawing_id=code)
-    app.qmanager.reset_play_random()
+    app.qmanager.reset_random_queue()
     app.qmanager.queue_element(element)
 
 
@@ -247,21 +247,21 @@ def queue_stop_all():
 # sets the repeat flag for the queue
 @socketio.on("queue_set_repeat")
 def queue_set_repeat(val):
-    app.qmanager.set_repeat(val)
+    app.qmanager.repeat = val
     app.logger.info("repeat: {}".format(val))
 
 
 # sets the shuffle flag for the queue
 @socketio.on("queue_set_shuffle")
 def queue_set_shuffle(val):
-    app.qmanager.set_shuffle(val)
+    app.qmanager.shuffle = val
     app.logger.info("shuffle: {}".format(val))
 
 
 # sets the queue interval
 @socketio.on("queue_set_interval")
 def queue_set_interval(val):
-    app.qmanager.set_interval(float(val))
+    app.qmanager.interval = float(val)
     app.logger.info("interval: {}".format(val))
 
 
