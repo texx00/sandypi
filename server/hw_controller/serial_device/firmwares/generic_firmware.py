@@ -7,8 +7,9 @@ from threading import RLock, Lock
 from py_expression_eval import Parser
 
 from server.hw_controller.serial_device.estimation.generic_estimator import GenericEstimator
+from server.hw_controller.serial_device.firmwares.commands_buffer import CommandBuffer
 from server.hw_controller.serial_device.firmwares.firmware_event_handler import FirwmareEventHandler
-from server.utils import buffered_timeout, limited_size_dict, settings_utils
+from server.utils import buffered_timeout, settings_utils
 
 # Defines the character used to define macros
 MACRO_CHAR = "&"
@@ -51,17 +52,11 @@ class GenericFirmware(ABC):
         self.estimator = GenericEstimator()
 
         # buffer control
-        self.command_send_mutex = Lock()
-        self.command_buffer_mutex = Lock()
-        self.command_buffer = deque()
-        self.command_buffer_max_length = 8
-        self.command_buffer_history = limited_size_dict.LimitedSizeDict(
-            size_limit=self.command_buffer_max_length + 40
-        )  # keep saved the last n commands
-        self._buffered_line = ""
+        self.buffer = CommandBuffer(4)
 
         # timeout setup
-        self.buffer_command = ""  # command used to force an ack
+        self.force_ack_command = ""  # command used to force an ack
+        self.ack = ""  # the ack string sent from the device
         # timeout used to clear the buffer if some acks are lost
         self._timeout_last_line = 0
         self._timeout = buffered_timeout.BufferTimeout(30, self._on_timeout)
@@ -119,6 +114,13 @@ class GenericFirmware(ABC):
         with self._mutex:
             return self._is_ready
 
+    def is_connected(self):
+        """
+        Returns:
+            True if the device is connected
+        """
+        return self._serial_device.is_connected()
+
     def get_current_position(self):
         """
         Returns:
@@ -173,21 +175,20 @@ class GenericFirmware(ABC):
         """
         Send the command
         """
-        with self._mutex:
-            command = self._prepare_command(command)
-            self.estimator.parse_command(command)
-            self._handle_send_command(command, hide_command)
-            self._update_timeout()  # update the timeout because a new command has been sent
+        command = self._prepare_command(command)
+        self.estimator.parse_command(command)
+        self._handle_send_command(command, hide_command)
+        self._update_timeout()  # update the timeout because a new command has been sent
 
     def _handle_send_command(self, command, hide_command=False):
         """
         Send the gcode command to the device and handle the buffer
         """
+        # wait until the lock for the buffer length is released
+        # if the lock is released means the board sent the ack for older lines and can send new ones
+        with self.buffer.get_buffer_wait_mutex():
+            pass
         with self._mutex:
-            # wait until the lock for the buffer length is released
-            # if the lock is released means the board sent the ack for older lines and can send new ones
-            with self.command_send_mutex:
-                pass
 
             # send the command after parsing the content
             # need to use the mutex here because it is changing also the line number
@@ -195,16 +196,10 @@ class GenericFirmware(ABC):
                 line = self._generate_line(command)
 
                 self._serial_device.send(line)  # send line
+                self.buffer.push_command(line, self.line_number)
                 self._logger.log(settings_utils.LINE_SENT, line.replace("\n", ""))
 
                 # TODO fix the problem with small geometries may be with the serial port being to slow. For long (straight) segments the problem is not evident. Do not understand why it is happening
-
-            with self.command_buffer_mutex:
-                if (
-                    len(self.command_buffer) >= self.command_buffer_max_length
-                    and not self.command_send_mutex.locked()
-                ):
-                    self.command_send_mutex.acquire()  # if the buffer is full acquire the lock so that cannot send new lines until the reception of an ack. Notice that this will stop only buffered commands. The other commands will be sent anyway
 
             if not hide_command:
                 self.event_handler.on_line_sent(line)  # uses the handler callback for the new line
@@ -241,10 +236,13 @@ class GenericFirmware(ABC):
         Callback for when the timeout is expired
         """
         with self._mutex:
-            if self.command_buffer_mutex.locked and self.line_number == self._timeout_last_line:
+            if (
+                self.buffer.get_buffer_wait_mutex().locked
+                and self.line_number == self._timeout_last_line
+            ):
                 # self.logger.warning("!Buffer timeout. Trying to clean the buffer!")
                 # to clean the buffer try to send a buffer update message. In this way will trigger the buffer cleaning mechanism
-                command = self.buffer_command
+                command = self.force_ack_command
                 line = self._generate_line(command)
                 self._logger.log(settings_utils.LINE_SERVICE, line)
                 with self.serial_mutex:
@@ -259,6 +257,33 @@ class GenericFirmware(ABC):
         self._timeout_last_line = self.line_number
         self._timeout.update()
 
+    def _on_readline(self, line):
+        """
+        Parse a received line from the hw device
+
+        Returns:
+            True if the readline has done correctly
+        """
+        with self._mutex:
+            if line is None:
+                return False
+            if self.ack in line:
+                self.buffer.ack_received()
+        return True
+
+    def _log_received_line(self, line, hide_line=False):
+        """
+        Log the line received from the device
+        Not called automatically in the _on_readline
+
+        Args:
+            line: the line received from the device
+            hide_line: if True will not send the line to the frontend
+        """
+        self._logger.log(settings_utils.LINE_RECEIVED, line)
+        if not hide_line:
+            self.event_handler.on_line_received(line)
+
     # From here on the methods are abstract and must be implemented in the child class
 
     @abstractmethod
@@ -268,11 +293,9 @@ class GenericFirmware(ABC):
 
         Once the initializzation is done must set True the _is_ready flag
         """
-        pass
 
     @abstractmethod
-    def _on_readline(self, line):
+    def emergency_stop(self):
         """
-        Parse a received line from the hw device
+        Stop the device immediately
         """
-        pass

@@ -62,6 +62,9 @@ class GenericEstimator:
         return self._position
 
     def reset_path_length(self):
+        """
+        Reset traveled path length
+        """
         self._path_length = 0
 
     def parse_command(self, command):

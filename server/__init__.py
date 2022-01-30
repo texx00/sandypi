@@ -99,9 +99,8 @@ try:
     import server.api.drawings
     from server.sockets_interface.socketio_emits import SocketioEmits
     import server.sockets_interface.socketio_callbacks
+    from server.hw_controller.serial_device.feeder import Feeder
     from server.hw_controller.queue_manager import QueueManager
-    from server.hw_controller.feeder import Feeder
-    from server.hw_controller.feeder_event_manager import FeederEventManager
     from server.preprocessing.file_observer import GcodeObserverManager
     from server.hw_controller.leds.leds_controller import LedsController
     from server.hw_controller.buttons.buttons_manager import ButtonsManager
@@ -114,7 +113,7 @@ except Exception as e:
 app.semits = SocketioEmits(app, socketio, db)
 
 # Device controller initialization
-app.feeder = Feeder(FeederEventManager(app))
+app.feeder = Feeder()
 app.qmanager = QueueManager(app, socketio)
 
 # Buttons controller initialization
@@ -152,7 +151,7 @@ def home():
 # Starting the feeder after the server is ready to avoid problems with the web page not showing up
 def run_post():
     sleep(2)
-    app.feeder.connect()
+    # app.feeder.connect()
     app.lmanager.start()
 
 
