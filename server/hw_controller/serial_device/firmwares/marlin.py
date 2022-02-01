@@ -9,48 +9,18 @@ from server.hw_controller.serial_device.firmwares.generic_firmware import Generi
 
 class Marlin(GenericFirmware):
     """
-    Handle devices running Marlin
+    Handle the comunication with devices running Marlin
     """
 
     def __init__(self, serial_settings, logger, event_handler: FirwmareEventHandler):
         super().__init__(serial_settings, logger, event_handler)
-        self._logger.info("Marlin device")
+        self._logger.info("Setting up coms with a Marlin device")
         # marlin specific values
         self._command_resolution = "{:.1f}"
         # command used to update the buffer status or get a free ack
         self.force_ack_command = "M114"
-        # ack string from the device
-        self.ack = "ok"
         # tolerance position (needed because the marlin rounding for the actual position is not the usual rounding)
         self.position_tolerance = 0.01
-
-    def connect(self):
-        """
-        Start the connection procedure with the serial device
-        """
-        with self._mutex:
-            self._logger.info("Connecting to the serial device")
-            with self.serial_mutex:
-                self._serial_device = DeviceSerial(
-                    self._serial_settings["serial_name"],
-                    self._serial_settings["baudrate"],
-                    self._logger.name,
-                )
-                self._serial_device.set_on_readline_callback(self._on_readline)
-                self._serial_device.open()
-                # wait device ready
-                if self._serial_device.is_fake:
-                    self._is_ready = True
-                else:
-                    # runs a delay to wait the device to be ready
-                    # TODO make this better: check messages from the device to understand when is ready
-                    def delay():
-                        time.sleep(5)
-                        self._on_device_ready()
-
-                    th = Thread(target=delay, daemon=True)
-                    th.name = "waiting_device_ready"
-                    th.start()
 
     def emergency_stop(self):
         """
@@ -135,6 +105,9 @@ class Marlin(GenericFirmware):
 
                 if not self.buffer.is_empty():
                     hide_line = True
+            # the device send a "start" line when ready
+            elif "start" in line:
+                self._on_device_ready()
 
             # TODO check feedrate response for M220 and set feedrate
             # elif "_______" in line: # must see the real output from marlin
@@ -187,6 +160,7 @@ class Marlin(GenericFirmware):
         """
         with self._mutex:
             self._reset_line_number()
+            super()._on_device_ready()
 
     def _reset_line_number(self, line_number=2):
         """

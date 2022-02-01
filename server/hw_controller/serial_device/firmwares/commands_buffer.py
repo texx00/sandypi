@@ -94,3 +94,10 @@ class CommandBuffer:
         with self._mutex:
             if self._send_mutex.locked() and len(self._buffer) < self._buffer_max_length:
                 self._send_mutex.release()
+
+    def popleft(self):
+        return self._buffer.popleft()
+
+    def __len__(self):
+        with self._mutex:
+            return len(self._buffer)

@@ -14,9 +14,9 @@ class Emulator:
         self.ack_buffer = deque()  # used for the standard "ok" acks timing
         self.message_buffer = deque()  # used to emulate marlin response to special commands
         self.last_time = time.time()
-        self.xr = re.compile("[X]([0-9.]+)($|\s)")
-        self.yr = re.compile("[Y]([0-9.]+)($|\s)")
-        self.fr = re.compile("[F]([0-9.]+)($|\s)")
+        self.xr = re.compile("[X]([0-9.]+)($|\s|)")
+        self.yr = re.compile("[Y]([0-9.]+)($|\s|)")
+        self.fr = re.compile("[F]([0-9.]+)($|\s|)")
         self.last_x = 0.0
         self.last_y = 0.0
         self.settings = load_settings()

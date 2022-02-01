@@ -17,3 +17,9 @@ class FirwmareEventHandler(ABC):
         """
         Called when a new line has been received to the serial device
         """
+
+    @abstractmethod
+    def on_device_ready(self):
+        """
+        Called when the connected device is ready
+        """

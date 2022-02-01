@@ -5,6 +5,7 @@ import re
 from abc import ABC, abstractmethod
 from threading import RLock, Lock
 from py_expression_eval import Parser
+from server.hw_controller.serial_device.device_serial import DeviceSerial
 
 from server.hw_controller.serial_device.estimation.generic_estimator import GenericEstimator
 from server.hw_controller.serial_device.firmwares.commands_buffer import CommandBuffer
@@ -52,11 +53,11 @@ class GenericFirmware(ABC):
         self.estimator = GenericEstimator()
 
         # buffer control
-        self.buffer = CommandBuffer(4)
+        self.buffer = CommandBuffer(8)
 
         # timeout setup
         self.force_ack_command = ""  # command used to force an ack
-        self.ack = ""  # the ack string sent from the device
+        self.ack = "ok"  # the ack string sent from the device
         # timeout used to clear the buffer if some acks are lost
         self._timeout_last_line = 0
         self._timeout = buffered_timeout.BufferTimeout(30, self._on_timeout)
@@ -129,6 +130,38 @@ class GenericFirmware(ABC):
         with self._mutex:
             return self.estimator.position
 
+    def send_gcode_command(self, command, hide_command=False):
+        """
+        Send the command
+        """
+        command = self._prepare_command(command)
+        # wait until the lock for the buffer length is released
+        # if the lock is released means the board sent the ack for older lines and can send new ones
+        with self.buffer.get_buffer_wait_mutex():
+            pass
+        with self._mutex:
+            self._handle_send_command(command, hide_command)
+            self.estimator.parse_command(command)
+            self._update_timeout()  # update the timeout because a new command has been sent
+
+    def connect(self):
+        """
+        Start the connection procedure with the serial device
+        """
+        with self._mutex:
+            self._logger.info("Connecting to the serial device")
+            with self.serial_mutex:
+                self._serial_device = DeviceSerial(
+                    self._serial_settings["serial_name"],
+                    self._serial_settings["baudrate"],
+                    self._logger.name,
+                )
+                self._serial_device.set_on_readline_callback(self._on_readline)
+                self._serial_device.open()
+            # wait device ready
+            if not self._serial_device.is_connected():
+                self._on_device_ready()
+
     def _parse_macro(self, command):
         """
         Parse a macro
@@ -165,29 +198,12 @@ class GenericFirmware(ABC):
         """
         with self._mutex:
             command = command.replace("\n", "").replace("\r", "").upper()
-
-            if command == " " or command == "":
-                return
-
             return self._parse_macro(command)
-
-    def send_gcode_command(self, command, hide_command=False):
-        """
-        Send the command
-        """
-        command = self._prepare_command(command)
-        self.estimator.parse_command(command)
-        self._handle_send_command(command, hide_command)
-        self._update_timeout()  # update the timeout because a new command has been sent
 
     def _handle_send_command(self, command, hide_command=False):
         """
         Send the gcode command to the device and handle the buffer
         """
-        # wait until the lock for the buffer length is released
-        # if the lock is released means the board sent the ack for older lines and can send new ones
-        with self.buffer.get_buffer_wait_mutex():
-            pass
         with self._mutex:
 
             # send the command after parsing the content
@@ -271,6 +287,15 @@ class GenericFirmware(ABC):
                 self.buffer.ack_received()
         return True
 
+    def _on_device_ready(self):
+        print("test")
+        """
+        Called when the connected device is ready to receive commands
+        """
+        with self._mutex:
+            self.event_handler.on_device_ready()
+            self._is_ready = True
+
     def _log_received_line(self, line, hide_line=False):
         """
         Log the line received from the device
@@ -285,14 +310,6 @@ class GenericFirmware(ABC):
             self.event_handler.on_line_received(line)
 
     # From here on the methods are abstract and must be implemented in the child class
-
-    @abstractmethod
-    def connect(self):
-        """
-        Initialize the communication with the serial device
-
-        Once the initializzation is done must set True the _is_ready flag
-        """
 
     @abstractmethod
     def emergency_stop(self):
