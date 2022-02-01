@@ -14,8 +14,9 @@ if __name__ == "__main__":
         device.send_gcode_command("G0 X0 Y0 F300")
         for x in range(15):
             device.send_gcode_command(f"G0 X{x*2} Y0")
-            time.sleep(0.01)
-        time.sleep(5)
+        print("Done")
+        time.sleep(6)
+        assert len(device.buffer) == 0
 
     class EventHandler(FirwmareEventHandler):
         def on_line_received(self, line):
