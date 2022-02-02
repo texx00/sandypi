@@ -15,7 +15,7 @@ if __name__ == "__main__":
         for x in range(15):
             device.send_gcode_command(f"G0 X{x*2} Y0")
         print("Done")
-        time.sleep(6)
+        # time.sleep(6)
         assert len(device.buffer) == 0
 
     class EventHandler(FirwmareEventHandler):
@@ -46,6 +46,6 @@ if __name__ == "__main__":
 
     device = Grbl(serial_settings=settings, logger=logger_name, event_handler=EventHandler())
 
-    test_device(device)
+    # test_device(device)
 
     print("Grbl done")
