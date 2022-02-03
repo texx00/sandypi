@@ -5,7 +5,7 @@ import sys
 import logging
 import glob
 
-from server.hardware.device.emulator import Emulator
+from server.hardware.device.comunication.emulator import Emulator
 
 
 class DeviceSerial:

@@ -152,8 +152,8 @@ class GenericFirmware(ABC):
             self._logger.info("Connecting to the serial device")
             with self.serial_mutex:
                 self._serial_device = DeviceSerial(
-                    self._serial_settings["serial_name"],
-                    self._serial_settings["baudrate"],
+                    self._serial_settings["port"]["value"],
+                    self._serial_settings["baud"]["value"],
                     self._logger.name,
                 )
                 self._serial_device.set_on_readline_callback(self._on_readline)
@@ -161,6 +161,14 @@ class GenericFirmware(ABC):
             # wait device ready
             if not self._serial_device.is_connected():
                 self._on_device_ready()
+
+    def emergency_stop(self):
+        """
+        Stop the device immediately
+
+        This method must be implemented in the child class
+        """
+        pass
 
     def _parse_macro(self, command):
         """
@@ -309,10 +317,5 @@ class GenericFirmware(ABC):
         if not hide_line:
             self.event_handler.on_line_received(line)
 
-    # From here on the methods are abstract and must be implemented in the child class
-
-    @abstractmethod
-    def emergency_stop(self):
-        """
-        Stop the device immediately
-        """
+    def __str__(self) -> str:
+        return f"Device:\n - firmware type: {type(self).__name__}\n - fast mode: {self.fast_mode}\n - {self.estimator}"

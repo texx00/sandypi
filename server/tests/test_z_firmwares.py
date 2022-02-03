@@ -20,7 +20,7 @@ class EventHandler(FirwmareEventHandler):
         print("Device ready")
 
 
-settings = {"serial_name": "COM3", "baudrate": 115200}
+settings = {"port": {"value": "COM3"}, "baud": {"value": 115200}}
 
 logger_name = logging.getLogger().name
 

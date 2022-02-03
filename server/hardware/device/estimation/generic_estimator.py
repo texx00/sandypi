@@ -84,3 +84,6 @@ class GenericEstimator:
                 self._position.x = float(self._x_regex.findall(command)[0][0])
             if "Y" in command:
                 self._position.y = float(self._y_regex.findall(command)[0][0])
+
+    def __str__(self):
+        return f"Estimator type: {type(self).__name__}"
