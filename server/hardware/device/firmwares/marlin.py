@@ -1,10 +1,7 @@
 from copy import deepcopy
-from threading import Thread
-import time
 
-from server.hw_controller.serial_device.device_serial import DeviceSerial
-from server.hw_controller.serial_device.firmwares.firmware_event_handler import FirwmareEventHandler
-from server.hw_controller.serial_device.firmwares.generic_firmware import GenericFirmware
+from server.hardware.device.firmwares.firmware_event_handler import FirwmareEventHandler
+from server.hardware.device.firmwares.generic_firmware import GenericFirmware
 
 
 class Marlin(GenericFirmware):

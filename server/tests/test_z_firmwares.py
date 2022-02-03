@@ -4,9 +4,9 @@ Test firmware comunication control classes
 
 import logging
 
-from server.hw_controller.serial_device.firmwares.grbl import Grbl
-from server.hw_controller.serial_device.firmwares.marlin import Marlin
-from server.hw_controller.serial_device.firmwares.firmware_event_handler import FirwmareEventHandler
+from server.hardware.device.firmwares.grbl import Grbl
+from server.hardware.device.firmwares.marlin import Marlin
+from server.hardware.device.firmwares.firmware_event_handler import FirwmareEventHandler
 
 
 class EventHandler(FirwmareEventHandler):

@@ -12,10 +12,10 @@ from py_expression_eval import Parser
 
 from server.utils import limited_size_dict, buffered_timeout, settings_utils
 from server.utils.logging_utils import formatter, MultiprocessRotatingFileHandler
-from server.hw_controller.serial_device.feeder_event_handler import FeederEventHandler
-from server.hw_controller.serial_device.device_serial import DeviceSerial
-from server.hw_controller.serial_device.gcode_rescalers import Fit
-import server.hw_controller.serial_device.firmware_defaults as firmware
+from server.hardware.device.feeder_event_handler import FeederEventHandler
+from server.hardware.device.device_serial import DeviceSerial
+from server.hardware.device.gcode_rescalers import Fit
+import server.hardware.device.firmware_defaults as firmware
 from server.database.playlist_elements import DrawingElement, TimeElement
 from server.database.generic_playlist_element import UNKNOWN_PROGRESS
 

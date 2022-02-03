@@ -1,5 +1,5 @@
 from server.database.playlist_elements import DrawingElement
-from server.hw_controller.serial_device.feeder_event_handler import FeederEventHandler
+from server.hardware.device.feeder_event_handler import FeederEventHandler
 import time
 
 

@@ -99,11 +99,11 @@ try:
     import server.api.drawings
     from server.sockets_interface.socketio_emits import SocketioEmits
     import server.sockets_interface.socketio_callbacks
-    from server.hw_controller.serial_device.feeder import Feeder
-    from server.hw_controller.queue_manager import QueueManager
+    from server.hardware.device.feeder import Feeder
+    from server.hardware.queue_manager import QueueManager
     from server.preprocessing.file_observer import GcodeObserverManager
-    from server.hw_controller.leds.leds_controller import LedsController
-    from server.hw_controller.buttons.buttons_manager import ButtonsManager
+    from server.hardware.leds.leds_controller import LedsController
+    from server.hardware.buttons.buttons_manager import ButtonsManager
     from server.utils.stats import StatsManager
 
 except Exception as e:

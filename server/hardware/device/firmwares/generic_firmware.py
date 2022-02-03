@@ -5,11 +5,11 @@ import re
 from abc import ABC, abstractmethod
 from threading import RLock, Lock
 from py_expression_eval import Parser
-from server.hw_controller.serial_device.device_serial import DeviceSerial
+from server.hardware.device.comunication.device_serial import DeviceSerial
 
-from server.hw_controller.serial_device.estimation.generic_estimator import GenericEstimator
-from server.hw_controller.serial_device.firmwares.commands_buffer import CommandBuffer
-from server.hw_controller.serial_device.firmwares.firmware_event_handler import FirwmareEventHandler
+from server.hardware.device.estimation.generic_estimator import GenericEstimator
+from server.hardware.device.firmwares.commands_buffer import CommandBuffer
+from server.hardware.device.firmwares.firmware_event_handler import FirwmareEventHandler
 from server.utils import buffered_timeout, settings_utils
 
 # Defines the character used to define macros

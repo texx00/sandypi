@@ -3,7 +3,7 @@ from random import random
 
 # in this file are defined the events that can be associated to a button
 
-from server.hw_controller.buttons.generic_button_event import GenericButtonAction
+from server.hardware.buttons.generic_button_event import GenericButtonAction
 
 
 class StartPause(GenericButtonAction):
