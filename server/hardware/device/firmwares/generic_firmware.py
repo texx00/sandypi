@@ -1,8 +1,6 @@
-from collections import deque
 import logging
 import re
 
-from abc import ABC, abstractmethod
 from threading import RLock, Lock
 from py_expression_eval import Parser
 from server.hardware.device.comunication.device_serial import DeviceSerial
@@ -19,7 +17,7 @@ MACRO_CHAR = "&"
 BUFFERED_COMMANDS = ("G0", "G00", "G1", "G01", "G2", "G02", "G3", "G03", "G28", "G92")
 
 
-class GenericFirmware(ABC):
+class GenericFirmware:
     """
     Abstract class for a firmware
 
@@ -53,7 +51,7 @@ class GenericFirmware(ABC):
         self.estimator = GenericEstimator()
 
         # buffer control
-        self.buffer = CommandBuffer(8)
+        self._buffer = CommandBuffer(8)
 
         # timeout setup
         self.force_ack_command = ""  # command used to force an ack
@@ -106,6 +104,15 @@ class GenericFirmware(ABC):
         with self._mutex:
             self._feedrate = feedrate
 
+    @property
+    def buffer(self):
+        """
+        Returns:
+            the buffer of commands sent to the device
+        """
+        with self._mutex:
+            return self._buffer
+
     def is_ready(self):
         """
         Returns:
@@ -137,7 +144,7 @@ class GenericFirmware(ABC):
         command = self._prepare_command(command)
         # wait until the lock for the buffer length is released
         # if the lock is released means the board sent the ack for older lines and can send new ones
-        with self.buffer.get_buffer_wait_mutex():
+        with self._buffer.get_buffer_wait_mutex():
             pass
         with self._mutex:
             self._handle_send_command(command, hide_command)
@@ -162,6 +169,13 @@ class GenericFirmware(ABC):
             if not self._serial_device.is_connected():
                 self._on_device_ready()
 
+    def close(self):
+        """
+        Close the comunication with the device
+        """
+        with self._mutex:
+            self._serial_device.close()
+
     def emergency_stop(self):
         """
         Stop the device immediately
@@ -169,6 +183,15 @@ class GenericFirmware(ABC):
         This method must be implemented in the child class
         """
         pass
+
+    def reset_status(self):
+        """
+        Method that should be called when a job is stopped or finished
+
+        Allow to reset the current status or variables and have a clean start for the next job
+        """
+        with self._mutex:
+            self.line_number = 0
 
     def _parse_macro(self, command):
         """
@@ -220,7 +243,7 @@ class GenericFirmware(ABC):
                 line = self._generate_line(command)
 
                 self._serial_device.send(line)  # send line
-                self.buffer.push_command(line, self.line_number)
+                self._buffer.push_command(line, self.line_number)
                 self._logger.log(settings_utils.LINE_SENT, line.replace("\n", ""))
 
                 # TODO fix the problem with small geometries may be with the serial port being to slow. For long (straight) segments the problem is not evident. Do not understand why it is happening
@@ -261,7 +284,7 @@ class GenericFirmware(ABC):
         """
         with self._mutex:
             if (
-                self.buffer.get_buffer_wait_mutex().locked
+                self._buffer.get_buffer_wait_mutex().locked
                 and self.line_number == self._timeout_last_line
             ):
                 # self.logger.warning("!Buffer timeout. Trying to clean the buffer!")
@@ -292,13 +315,13 @@ class GenericFirmware(ABC):
             if line is None:
                 return False
             if self.ack in line:
-                self.buffer.ack_received()
+                self._buffer.ack_received()
         return True
 
     def _on_device_ready(self):
         print("test")
         """
-        Called when the connected device is ready to receive commands
+        Called when the connected device is ready to receive commands 
         """
         with self._mutex:
             self.event_handler.on_device_ready()

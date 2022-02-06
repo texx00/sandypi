@@ -1,4 +1,3 @@
-from server.utils.settings_utils import get_ip4_addresses
 from flask import Flask, url_for
 from flask.helpers import send_from_directory
 from flask_socketio import SocketIO
@@ -22,14 +21,6 @@ from server.utils.logging_utils import server_stream_handler, server_file_handle
 
 # Updating setting files (will apply changes only when a new SW version is installed)
 settings_utils.update_settings_file_version()
-
-# Shows ipv4 adresses
-print(
-    "\nTo run the server use 'ip:5000' in your browser with one of the following ip adresses: {}\n".format(
-        str(get_ip4_addresses())
-    ),
-    flush=True,
-)
 
 # Logging setup
 load_dotenv()
@@ -99,6 +90,7 @@ try:
     import server.api.drawings
     from server.sockets_interface.socketio_emits import SocketioEmits
     import server.sockets_interface.socketio_callbacks
+    from server.hardware.feeder_event_manager import FeederEventManager
     from server.hardware.device.feeder import Feeder
     from server.hardware.queue_manager import QueueManager
     from server.preprocessing.file_observer import GcodeObserverManager
@@ -113,7 +105,7 @@ except Exception as e:
 app.semits = SocketioEmits(app, socketio, db)
 
 # Device controller initialization
-app.feeder = Feeder()
+app.feeder = Feeder(FeederEventManager(app))
 app.qmanager = QueueManager(app, socketio)
 
 # Buttons controller initialization

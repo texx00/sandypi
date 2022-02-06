@@ -11,7 +11,7 @@ $> source env/bin/activate
 (env) $> python3 -m pip install pyserial
 ```
 
-## "Serial not available. Will use fake device"
+## "Serial not available. Will use virtual device"
 
 The previous message may appear on the command line while running the program.
 This is a normal behaviour on the first run because it is necessary to select the serial device to connect from the UI.

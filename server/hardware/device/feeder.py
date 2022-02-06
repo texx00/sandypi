@@ -1,9 +1,11 @@
 import logging
 import os
+import time
 
+from threading import RLock, Thread
 from dotenv import load_dotenv
 from dotmap import DotMap
-from threading import RLock
+from server.database.playlist_elements import DrawingElement, TimeElement
 
 from server.hardware.device.estimation.cartesian import Cartesian
 from server.hardware.device.estimation.generic_estimator import GenericEstimator
@@ -14,6 +16,8 @@ from server.hardware.device.firmwares.firmware_event_handler import FirwmareEven
 from server.hardware.device.firmwares.generic_firmware import GenericFirmware
 from server.hardware.device.firmwares.grbl import Grbl
 from server.hardware.device.firmwares.marlin import Marlin
+
+from server.database.generic_playlist_element import UNKNOWN_PROGRESS, GenericPlaylistElement
 
 from server.utils import settings_utils
 from server.utils.logging_utils import formatter, MultiprocessRotatingFileHandler
@@ -35,7 +39,7 @@ class Feeder(FirwmareEventHandler):
     """
 
     # FIXME remove the None default from the event handler
-    def __init__(self, event_handler: FeederEventHandler = None):
+    def __init__(self, event_handler: FeederEventHandler):
         """
         Args:
             event_handler: handler for the events like drawing started, drawing ended and so on
@@ -45,7 +49,17 @@ class Feeder(FirwmareEventHandler):
 
         self.event_handler = event_handler
         self._mutex = RLock()
+        self._device = None
 
+        # feeder variables
+        self._status = DotMap({"running": False, "paused": False, "progress": UNKNOWN_PROGRESS})
+        self._current_element = None
+        # self._stopped will be true when the device is correctly stopped after calling stop()
+        self._stopped = False
+        # thread instance running the elements
+        self.__th = None
+
+        # initialize the device
         self.init_device(settings_utils.load_settings())
 
     def init_logger(self):
@@ -103,6 +117,11 @@ class Feeder(FirwmareEventHandler):
         Args:
             settings: the settings dict
         """
+        # close connection with previous settings if available
+        if not self._device is None:
+            if self._device.is_connected():
+                self._device.close()
+
         self.settings = settings
         firmware = settings["device"]["firmware"]["value"]
         # create the device based on the choosen firmware
@@ -123,18 +142,97 @@ class Feeder(FirwmareEventHandler):
         # if the device is not available will create a fake/virtual device
         self._device.connect()
 
-    def get_status(self):
-        return {"is_running": True, "is_paused": True}
+    def is_connected(self):
+        """
+        Returns:
+            True if is connected to a real device
+            False if is using a virtual device
+        """
+        with self._mutex:
+            return self._device.is_connected()
 
-    def stop(self):
-        pass
+    @property
+    def status(self):
+        """
+        Returns:
+            dict with the current status:
+                * running: True if there is a drawing going on
+                * paused: if the device is paused
+                * progress: the progress of the current element
+        """
+        with self._mutex:
+            self._status.progress = (
+                self._current_element.get_progress(1000)
+                if not self._current_element is None
+                else UNKNOWN_PROGRESS
+            )
+            # FIXME use feedrate in get_progress argument!!
+            return self._status
+
+    @property
+    def current_element(self):
+        """
+        Returns:
+            currently being used element
+        """
+        with self._mutex:
+            return self._current_element
+
+    def pause(self):
+        """
+        Pause the current drawing
+        """
+        with self._mutex:
+            self._status.paused = True
+        self.logger.info("Paused")
 
     def resume(self):
-        pass
+        """
+        Resume the current paused drawing
+        """
+        with self._mutex:
+            self._status.paused = False
+        self.logger.info("Resumed")
+
+    def stop(self):
+        """
+        Stop the current element
+
+        This is a blocking function. Will wait until the element is completely stopped before going on with the execution
+        """
+        # TODO: make it non blocking since the even is called when the drawing is stopped
+        with self._mutex:
+            # if is not running, no need to stop it
+            if not self._status.running:
+                return
+
+            tmp = (
+                self._current_element
+            )  # store the current element to raise the "on_element_ended" callback
+            self._current_element = None
+            self._status.running = False
+            if not self._stopped:
+                self.logger.info("Stopping drawing")
+            while True:
+                if self._stopped:
+                    break
+
+            # waiting comand buffer to be cleared before calling the "drawing ended" event
+            while True:
+                if len(self._device.buffer) == 0:
+                    break
+
+            # clean the device status
+            self._device.reset_status()
+
+            # call the element ended callback
+            self.event_handler.on_element_ended(tmp)
 
     def send_gcode_command(self, command):
-        with self._mutex:
-            self._device.send_gcode_command(command)
+        """
+        Send a gcode command to the device
+        """
+        self._device.send_gcode_command(command)
 
     def send_script(self, script):
         """
@@ -149,14 +247,112 @@ class Feeder(FirwmareEventHandler):
                 if s != "" and s != " ":
                     self.send_gcode_command(s)
 
+    def start_element(self, element: GenericPlaylistElement):
+        """
+        Start the given element
+
+        The element will start only if the feeder is not running.
+        If there is already something running will not run the element and return False.
+        To run an element must first stop the feeder. The "on_element_ended" callback will be raised when the device is stopped
+
+        Args:
+            element: the element to be played
+
+        Returns:
+            True if the element is being started, False otherwise
+        """
+        with self._mutex:
+            # if is already running something and the force_stop is not set will return False directly
+            if self._status.running:
+                return False
+
+            # starting the thread
+            self.__th = Thread(target=self.__thf, daemon=True)
+            self.__th.name = "feeder_send_element"
+
+            # resetting status
+            self._status.running = True
+            self._status.paused = False
+            self._stopped = False
+            self._current_element = element
+            self._device.buffer.clear()
+            # starting the thread
+            self.__th.start()
+
+            # callback for the element being started
+            self.event_handler.on_element_started(element)
+
+            return True
+
+    def update_current_time_element(self, new_interval):
+        """
+        If the current element is a TimeElement, allow to change the interval value to update the due date
+
+        Args:
+            new_interval: the new interval value for the TimeElement
+        """
+        with self._mutex:
+            if type(self._current_element) is TimeElement:
+                if self._current_element.type == "delay":
+                    self._current_element.update_delay(new_interval)
+
     # event handler methods
 
     def on_line_sent(self, line):
         self.logger.log(settings_utils.LINE_SENT, line)
+        self.event_handler.on_new_line(line)
 
     def on_line_received(self, line):
         self.logger.log(settings_utils.LINE_RECEIVED, line)
+        self.event_handler.on_message_received(line)
 
     def on_device_ready(self):
         self.logger.info(f"\nDevice ready.\n{self._device}\n")
         self.send_script(self.settings["scripts"]["connected"]["value"])
+
+    # private methods
+
+    def __thf(self):
+        """
+        This function handle the element once the start element method is called
+
+        This function must not be called directly but will run in a separate thread
+        """
+        # run the "before" script only if the given element is a drawing
+        with self._mutex:
+            if isinstance(self._current_element, DrawingElement):
+                self.send_script(self.settings["scripts"]["before"]["value"])
+
+            self.logger.info(f"Starting new drawing with code {self._current_element}")
+
+        # TODO add "scale/fit/clip" filters
+
+        # execute the command (iterate over the lines/commands or just execute what is necessary)
+        for k, line in enumerate(self._current_element.execute(self.logger)):
+            self.logger.info("Test2")
+            # if the feeder is being stopped the running flag will be False -> should exit the loop immediately
+            with self._mutex:
+                if not self._status.running:
+                    break
+
+            # if the line is None should just go to the next iteration
+            if line is None:
+                continue
+            self.send_gcode_command(line)  # send the line to the device
+
+            # if the feeder is paused should just wait until the drawing is resumed
+            while True:
+                with self._mutex:
+                    # if not paused or if a stop command is used should exit the loop
+                    if not self._status.paused or not self._status.running:
+                        break
+                    time.sleep(0.1)
+
+        # run the "after" script only if the given element is a drawing
+        with self._mutex:
+            if isinstance(self._current_element, DrawingElement):
+                self.send_script(self.settings["scripts"]["after"]["value"])
+
+            self._stopped = True
+            if self._status.running:
+                self.stop()

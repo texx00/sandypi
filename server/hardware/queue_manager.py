@@ -198,7 +198,7 @@ class QueueManager:
             True if the device is paused
         """
         with self._mutex:
-            return self.app.feeder.get_status()["is_paused"]
+            return self.app.feeder.status.paused
 
     def is_drawing(self):
         """
@@ -208,7 +208,7 @@ class QueueManager:
             True if there is a drawing running in the feeder
         """
         with self._mutex:
-            return self.app.feeder.get_status()["is_running"]
+            return self.app.feeder.status.running
 
     def pause(self):
         """
@@ -432,7 +432,7 @@ class QueueManager:
             res = {
                 "current_element": str(self._element),
                 "elements": elements,
-                "status": self.app.feeder.get_status(),
+                "status": self.app.feeder.status,
                 "repeat": self.repeat,
                 "shuffle": self.shuffle,
                 "interval": self.interval,
@@ -448,7 +448,7 @@ class QueueManager:
             element = element.before_start(self.app)
             if not element is None:
                 self.app.logger.info("Sending gcode start command")
-                self.app.feeder.start_element(element, force_stop=True)
+                self.app.feeder.start_element(element)
             else:
                 self.start_next()
 

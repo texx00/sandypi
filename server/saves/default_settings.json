@@ -3,9 +3,11 @@
         "port": {
             "name": "serial.port",
             "type": "select",
-            "value": "FAKE",
+            "value": "Virtual",
             "label": "Serial port",
-            "available_values": ["FAKE"],
+            "available_values": [
+                "Virtual"
+            ],
             "tip": "Select the serial port"
         },
         "baud": {
@@ -13,7 +15,19 @@
             "type": "select",
             "value": "115200",
             "label": "Serial baudrate",
-            "available_values": ["2400", "4800", "9600", "19200", "38400", "57600", "115200", "230400", "250000", "460800", "921600"],
+            "available_values": [
+                "2400",
+                "4800",
+                "9600",
+                "19200",
+                "38400",
+                "57600",
+                "115200",
+                "230400",
+                "250000",
+                "460800",
+                "921600"
+            ],
             "tip": "Select the correct serial baudrate"
         },
         "fast_mode": {
@@ -48,22 +62,26 @@
             "label": "Select device type",
             "tip": "Select the type of mechanism used by the device"
         },
-        "width":{
+        "width": {
             "name": "device.width",
             "type": "input",
             "value": 100,
             "label": "Device width",
             "depends_on": "device.type",
-            "depends_values": ["Cartesian"],
+            "depends_values": [
+                "Cartesian"
+            ],
             "tip": "Maximum X extension"
         },
-        "height":{
+        "height": {
             "name": "device.height",
             "type": "input",
             "value": 100,
             "label": "Device height",
             "depends_on": "device.type",
-            "depends_values": ["Cartesian"],
+            "depends_values": [
+                "Cartesian"
+            ],
             "tip": "Maximum Y extension"
         },
         "radius": {
@@ -72,7 +90,10 @@
             "value": 200,
             "label": "Device radius",
             "depends_on": "device.type",
-            "depends_values": ["Polar", "Scara"],
+            "depends_values": [
+                "Polar",
+                "Scara"
+            ],
             "tip": "Device maximum radius"
         },
         "angle_conversion_factor": {
@@ -81,7 +102,10 @@
             "value": 6,
             "label": "Angle conversion factor",
             "depends_on": "device.type",
-            "depends_values": ["Polar", "Scara"],
+            "depends_values": [
+                "Polar",
+                "Scara"
+            ],
             "tip": "The value that makes the arm to turn one full turn"
         },
         "offset_angle_1": {
@@ -90,7 +114,10 @@
             "value": -1.5,
             "label": "Insert angular position homing offset",
             "depends_on": "device.type",
-            "depends_values": ["Polar", "Scara"],
+            "depends_values": [
+                "Polar",
+                "Scara"
+            ],
             "tip": "Angle for the home position of the arm (uses the values from the conversion factor, not rad: if angle_conversion_factor is 6 and must shift the homing by half turn must put 1.5"
         },
         "offset_angle_2": {
@@ -99,7 +126,9 @@
             "value": 1.5,
             "label": "Insert second arm homing position offset",
             "depends_on": "device.type",
-            "depends_values": ["Scara"],
+            "depends_values": [
+                "Scara"
+            ],
             "tip": "Angle for the home position of the second arm (uses the values from the conversion factor, not rad: if angle_conversion_factor is 6 and must shift the homing by half turn must put 1.5"
         }
     },

@@ -25,6 +25,16 @@ class Marlin(GenericFirmware):
         """
         self.send_gcode_command("M112")
 
+    def reset_status(self):
+        """
+        To be called when a job is stopped/finished
+
+        With Marlin, will also reset the line number
+
+        """
+        super().reset_status()
+        self._reset_line_number()
+
     def _on_readline(self, line):
         """
         Parse the line received from the device

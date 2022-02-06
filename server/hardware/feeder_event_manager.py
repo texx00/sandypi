@@ -1,9 +1,12 @@
-from server.database.playlist_elements import DrawingElement
 from server.hardware.device.feeder_event_handler import FeederEventHandler
 import time
 
 
 class FeederEventManager(FeederEventHandler):
+    """
+    Handle the events from the feeder
+    """
+
     def __init__(self, app):
         super().__init__()
         self.app = app

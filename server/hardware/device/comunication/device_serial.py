@@ -26,7 +26,7 @@ class DeviceSerial:
         )
         self.serialname = serial_name
         self.baudrate = baudrate
-        self.is_fake = False
+        self.is_virtual = False
         self._buffer = bytearray()
         self.echo = ""
         self._emulator = Emulator()
@@ -57,9 +57,9 @@ class DeviceSerial:
         except Exception as e:
             # FIXME should check for different exceptions
             self.logger.exception(e)
-            self.is_fake = True
+            self.is_virtual = True
             self.logger.error(
-                "Serial not available. Are you sure the device is connected and is not in use by other softwares? (Will use the fake serial)"
+                "Serial not available. Are you sure the device is connected and is not in use by other softwares? (Will use the virtual serial)"
             )
 
         self._th.start()
@@ -95,7 +95,7 @@ class DeviceSerial:
         Args:
             line: the line to send to the device
         """
-        if self.is_fake:
+        if self.is_virtual:
             self._emulator.send(line)
         else:
             if self.serial.is_open:
@@ -115,7 +115,7 @@ class DeviceSerial:
         Returns:
             True if the serial is open on a real device
         """
-        if self.is_fake:
+        if self.is_virtual:
             return False
         return self.serial.is_open
 
@@ -136,7 +136,7 @@ class DeviceSerial:
         """
         Reads a line from the device (if available) and call the callback
         """
-        if not self.is_fake:
+        if not self.is_virtual:
             if self.serial.is_open:
                 while self.serial.in_waiting > 0:
                     line = self.serial.readline()

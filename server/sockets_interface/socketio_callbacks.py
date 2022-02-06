@@ -1,4 +1,5 @@
 # pylint: disable=E1101
+# pylint: disable=missing-function-docstring
 
 import json
 import shutil
@@ -6,10 +7,11 @@ import os
 
 from server import socketio, app, db
 
-from server.utils import settings_utils
 from server.database.elements_factory import ElementsFactory
 from server.database.models import UploadedFiles, Playlists
 from server.database.playlist_elements import DrawingElement
+from server.hardware.device.comunication.device_serial import DeviceSerial
+from server.utils import settings_utils
 
 
 @socketio.on("connect")
@@ -96,7 +98,7 @@ def playlist_refresh_single(playlist_id):
 def settings_save(data, is_connect):
     settings_utils.save_settings(data)
     settings = settings_utils.load_settings()
-    app.feeder.update_settings(settings)
+    app.feeder.init_device(settings)
     app.bmanager.update_settings(settings)
     app.lmanager.update_settings(settings)
     app.semits.show_toast_on_UI("Settings saved")
@@ -109,7 +111,7 @@ def settings_save(data, is_connect):
         if app.feeder.is_connected():
             app.semits.show_toast_on_UI("Connection to device successful")
         else:
-            app.semits.show_toast_on_UI("Device not connected. Opening a fake serial port.")
+            app.semits.show_toast_on_UI("Device not connected. Opening a virtual serial port.")
 
 
 @socketio.on("settings_request")
@@ -125,8 +127,8 @@ def settings_request():
     settings["leds"]["has_light_sensor"]["value"] = app.lmanager.has_light_sensor() or int(
         os.getenv("DEV_HWLEDS", default="0")
     )
-    settings["serial"]["port"]["available_values"] = app.feeder.serial_ports_list()
-    settings["serial"]["port"]["available_values"].append("FAKE")
+    settings["serial"]["port"]["available_values"] = DeviceSerial.get_serial_port_list()
+    settings["serial"]["port"]["available_values"].append("Virtual")
     settings["updates"]["hash"] = app.umanager.short_hash
     settings["updates"][
         "docker_compose_latest_version"
