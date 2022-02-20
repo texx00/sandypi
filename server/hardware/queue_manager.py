@@ -432,7 +432,7 @@ class QueueManager:
             res = {
                 "current_element": str(self._element),
                 "elements": elements,
-                "status": self.app.feeder.status,
+                "status": self.app.feeder.status.toDict(),
                 "repeat": self.repeat,
                 "shuffle": self.shuffle,
                 "interval": self.interval,
@@ -445,7 +445,8 @@ class QueueManager:
         """
         with self._mutex:
             # check if a new element must be generated from the given element (like for a shuffle element)
-            element = element.before_start(self.app)
+            if not element is None:
+                element = element.before_start(self.app)
             if not element is None:
                 self.app.logger.info("Sending gcode start command")
                 self.app.feeder.start_element(element)

@@ -53,6 +53,10 @@ class GenericEstimator:
             raise ValueError("The position given must have both the x and y coordinates")
         self._position = DotMap(pos)
 
+    @property
+    def feedrate(self):
+        return self._feedrate
+
     def get_last_commanded_position(self):
         """
         Returns:
@@ -79,7 +83,7 @@ class GenericEstimator:
 
         if any(code in command for code in KNOWN_COMMANDS):
             if "F" in command:
-                self.feedrate = float(self._feed_regex.findall(command)[0][0])
+                self._feedrate = float(self._feed_regex.findall(command)[0][0])
             if "X" in command:
                 self._position.x = float(self._x_regex.findall(command)[0][0])
             if "Y" in command:

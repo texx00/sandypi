@@ -117,6 +117,9 @@ class Feeder(FirwmareEventHandler):
         Args:
             settings: the settings dict
         """
+        with self._mutex:
+            if self._status.running:
+                self.stop()
         # close connection with previous settings if available
         if not self._device is None:
             if self._device.is_connected():
@@ -162,11 +165,10 @@ class Feeder(FirwmareEventHandler):
         """
         with self._mutex:
             self._status.progress = (
-                self._current_element.get_progress(1000)
+                self._current_element.get_progress(self._device.estimator.feedrate)
                 if not self._current_element is None
                 else UNKNOWN_PROGRESS
             )
-            # FIXME use feedrate in get_progress argument!!
             return self._status
 
     @property
@@ -213,10 +215,12 @@ class Feeder(FirwmareEventHandler):
             self._status.running = False
             if not self._stopped:
                 self.logger.info("Stopping drawing")
-            while True:
+        while True:
+            with self._mutex:
                 if self._stopped:
                     break
 
+        with self._mutex:
             # waiting comand buffer to be cleared before calling the "drawing ended" event
             while True:
                 if len(self._device.buffer) == 0:
@@ -329,7 +333,6 @@ class Feeder(FirwmareEventHandler):
 
         # execute the command (iterate over the lines/commands or just execute what is necessary)
         for k, line in enumerate(self._current_element.execute(self.logger)):
-            self.logger.info("Test2")
             # if the feeder is being stopped the running flag will be False -> should exit the loop immediately
             with self._mutex:
                 if not self._status.running:

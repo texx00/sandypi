@@ -156,4 +156,4 @@ th.start()
 app.observer = GcodeObserverManager("./server/autodetect", logger=app.logger)
 
 if __name__ == "__main__":
-    socketio.run(app)
+    socketio.run(app, threaded=True)

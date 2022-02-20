@@ -9,6 +9,8 @@ ACK = "ok\n\r"
 
 
 class Emulator:
+    """Emulates a device"""
+
     def __init__(self):
         self.feedrate = 5000.0
         self.ack_buffer = deque()  # used for the standard "ok" acks timing

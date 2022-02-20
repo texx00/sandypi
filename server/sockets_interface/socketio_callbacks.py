@@ -107,7 +107,7 @@ def settings_save(data, is_connect):
     if is_connect:
         app.logger.info("Connecting device")
 
-        app.feeder.connect()
+        app.feeder.init_device(settings)
         if app.feeder.is_connected():
             app.semits.show_toast_on_UI("Connection to device successful")
         else:

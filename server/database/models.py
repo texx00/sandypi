@@ -142,7 +142,7 @@ class Playlists(db.Model):
         return json.dumps(
             {
                 "name": self.name,
-                "elements": self.get_elements_json(),
+                "elements": [e.get_dict() for e in self.get_elements()],
                 "id": self.id,
                 "version": self.version,
             }
