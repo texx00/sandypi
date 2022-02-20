@@ -1,10 +1,16 @@
 from threading import Thread, Lock
 import time
 
-# this thread calls a function after a timeout but only if the "update" method is not called before that timeout expires
 
 class BufferTimeout(Thread):
-    def __init__(self, timeout_delta, function, group=None, target=None, name=None, args=(), kwargs=None):
+    """
+    this thread calls a function after a timeout but only if the "update" method is not called before that timeout expires
+
+    """
+
+    def __init__(
+        self, timeout_delta, function, group=None, target=None, name=None, args=(), kwargs=None
+    ):
         super(BufferTimeout, self).__init__(group=group, target=target, name=name)
         self.name = "buffered_timeout"
         self.timeout_delta = timeout_delta
@@ -13,7 +19,7 @@ class BufferTimeout(Thread):
         self.is_running = False
         self.setDaemon(True)
         self.update()
-    
+
     def set_timeout_period(self, val):
         self.timeout_delta = val
 

@@ -43,6 +43,7 @@ pylint-plugin-utils==0.7
 pyparsing==3.0.6
 pyserial==3.5
 pytest==6.2.5
+pytest-timeout==2.1.0
 python-dateutil==2.8.2
 python-dotenv==0.19.2
 python-editor==1.0.4
