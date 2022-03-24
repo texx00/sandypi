@@ -1,5 +1,4 @@
-
-class SocketioEmits():
+class SocketioEmits:
     def __init__(self, app, socketio, db):
         self.app = app
         self.socketio = socketio
@@ -9,11 +8,9 @@ class SocketioEmits():
     def show_toast_on_UI(self, message):
         self.emit("toast_show_message", message)
 
-
     # shows a line coming from the hw device on the manual control panel
     def hw_command_line_message(self, line):
         self.emit("command_line_show", line)
-
 
     # sends the last position to update the preview box
     def update_hw_preview(self, line):
