@@ -28,5 +28,6 @@ class TSL2591(GenericLightSensor):
         self.app.logger.info("Sensor current brightness: {}".format(tmp))  # FIXME remove this
         return tmp
 
+    @property
     def is_connected(self):
         return not self._sensor is None

@@ -1,4 +1,5 @@
 from threading import Thread, RLock
+from time import sleep
 import serial.tools.list_ports
 import serial
 import sys
@@ -27,6 +28,7 @@ class DeviceSerial:
         self.serialname = serial_name
         self.baudrate = baudrate
         self.is_virtual = False
+        self.serial = None
         self._buffer = bytearray()
         self.echo = ""
         self._emulator = Emulator()
@@ -73,6 +75,7 @@ class DeviceSerial:
         """
         self._on_readline = callback
 
+    @property
     def is_running(self):
         """
         Check if the reading thread is running
@@ -110,6 +113,7 @@ class DeviceSerial:
                     self.close()
                     self.logger.error("Error while sending a command")
 
+    @property
     def is_connected(self):
         """
         Returns:
@@ -149,12 +153,16 @@ class DeviceSerial:
         Thread function for the readline
         """
         self._running = True
-        next_line = ""
-        while self.is_running():
+        next_line = None
+
+        while self.is_running:
+            # do not understand why but with the emulator need this to make everything work correctly
+            sleep(0.001)
             with self._mutex:
                 next_line = self._readline()
             # cannot use the callback inside the mutex otherwise may run into a deadlock with the mutex if the serial.send is called in the parsing method
             self._on_readline(next_line)
+            next_line = None
 
     @classmethod
     def get_serial_port_list(cls):

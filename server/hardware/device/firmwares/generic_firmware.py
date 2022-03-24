@@ -2,6 +2,7 @@ import logging
 import re
 
 from threading import RLock, Lock
+import time
 from py_expression_eval import Parser
 from server.hardware.device.comunication.device_serial import DeviceSerial
 
@@ -113,6 +114,7 @@ class GenericFirmware:
         with self._mutex:
             return self._buffer
 
+    @property
     def is_ready(self):
         """
         Returns:
@@ -122,12 +124,13 @@ class GenericFirmware:
         with self._mutex:
             return self._is_ready
 
+    @property
     def is_connected(self):
         """
         Returns:
             True if the device is connected
         """
-        return self._serial_device.is_connected()
+        return self._serial_device.is_connected
 
     def get_current_position(self):
         """
@@ -166,7 +169,8 @@ class GenericFirmware:
                 self._serial_device.set_on_readline_callback(self._on_readline)
                 self._serial_device.open()
             # wait device ready
-            if not self._serial_device.is_connected():
+            if not self._serial_device.is_connected:
+                time.sleep(1)
                 self._on_device_ready()
 
     def close(self):
@@ -311,11 +315,11 @@ class GenericFirmware:
         Returns:
             True if the readline has done correctly
         """
-        with self._mutex:
-            if line is None:
-                return False
-            if self.ack in line:
-                self._buffer.ack_received()
+        # with self._mutex:
+        if line is None:
+            return False
+        if self.ack in line:
+            self._buffer.ack_received()
         return True
 
     def _on_device_ready(self):
@@ -336,6 +340,7 @@ class GenericFirmware:
             line: the line received from the device
             hide_line: if True will not send the line to the frontend
         """
+        line = line.rstrip("\r").rstrip("\n")
         self._logger.log(settings_utils.LINE_RECEIVED, line)
         if not hide_line:
             self.event_handler.on_line_received(line)

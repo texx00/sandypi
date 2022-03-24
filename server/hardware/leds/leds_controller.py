@@ -31,7 +31,7 @@ class LedsController:
 
     def has_light_sensor(self):
         if not self.sensor is None:
-            return self.sensor.is_connected()
+            return self.sensor.is_connected
         return False
 
     def start(self):

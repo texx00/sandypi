@@ -143,7 +143,6 @@ def home():
 # Starting the feeder after the server is ready to avoid problems with the web page not showing up
 def run_post():
     sleep(2)
-    # app.feeder.connect()
     app.lmanager.start()
 
 

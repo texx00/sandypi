@@ -122,7 +122,7 @@ class Feeder(FirwmareEventHandler):
                 self.stop()
         # close connection with previous settings if available
         if not self._device is None:
-            if self._device.is_connected():
+            if self._device.is_connected:
                 self._device.close()
 
         self.settings = settings
@@ -145,6 +145,7 @@ class Feeder(FirwmareEventHandler):
         # if the device is not available will create a fake/virtual device
         self._device.connect()
 
+    @property
     def is_connected(self):
         """
         Returns:
@@ -152,7 +153,7 @@ class Feeder(FirwmareEventHandler):
             False if is using a virtual device
         """
         with self._mutex:
-            return self._device.is_connected()
+            return self._device.is_connected
 
     @property
     def status(self):
@@ -303,11 +304,9 @@ class Feeder(FirwmareEventHandler):
     # event handler methods
 
     def on_line_sent(self, line):
-        self.logger.log(settings_utils.LINE_SENT, line)
         self.event_handler.on_new_line(line)
 
     def on_line_received(self, line):
-        self.logger.log(settings_utils.LINE_RECEIVED, line)
         self.event_handler.on_message_received(line)
 
     def on_device_ready(self):

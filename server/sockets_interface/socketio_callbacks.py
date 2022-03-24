@@ -108,7 +108,7 @@ def settings_save(data, is_connect):
         app.logger.info("Connecting device")
 
         app.feeder.init_device(settings)
-        if app.feeder.is_connected():
+        if app.feeder.is_connected:
             app.semits.show_toast_on_UI("Connection to device successful")
         else:
             app.semits.show_toast_on_UI("Device not connected. Opening a virtual serial port.")

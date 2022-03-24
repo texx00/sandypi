@@ -1,4 +1,6 @@
-import time, re, math
+import time
+import re
+import math
 from collections import deque
 
 from server.utils.settings_utils import load_settings
@@ -24,15 +26,28 @@ class Emulator:
         self.settings = load_settings()
 
     def get_x(self, line):
+        """
+        Return the x value of the command if available in the given line
+        """
         return float(self.xr.findall(line)[0][0])
 
     def get_y(self, line):
+        """
+        Return the y value of the command if available in the given line
+        """
         return float(self.yr.findall(line)[0][0])
 
     def _buffer_empty(self):
+        """Return True if the buffer is empty"""
         return len(self.ack_buffer) < 1
 
     def send(self, command):
+        """
+        Used to send a command to the emulator
+
+        Args:
+            - command: the command sent to the emulator
+        """
 
         if self._buffer_empty():
             self.last_time = time.time()
@@ -80,6 +95,9 @@ class Emulator:
             self.message_buffer.append(ACK)
 
     def readline(self):
+        """
+        Readline method for the emulated device. Used by the serial controller
+        """
         # special commands response
         if len(self.message_buffer) >= 1:
             return self.message_buffer.popleft()
@@ -87,9 +105,10 @@ class Emulator:
         # standard lines acks (G0, G1)
         if self._buffer_empty():
             return None
-        oldest = self.ack_buffer.popleft()
+        oldest = 1000000000
+        if len(self.ack_buffer):
+            oldest = self.ack_buffer.popleft()
         if oldest > time.time():
             self.ack_buffer.appendleft(oldest)
             return None
-        else:
-            return ACK
+        return ACK
