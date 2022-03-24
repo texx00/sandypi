@@ -323,9 +323,8 @@ class GenericFirmware:
         return True
 
     def _on_device_ready(self):
-        print("test")
         """
-        Called when the connected device is ready to receive commands 
+        Called when the connected device is ready to receive commands
         """
         with self._mutex:
             self.event_handler.on_device_ready()
