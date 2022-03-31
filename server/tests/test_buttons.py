@@ -6,6 +6,7 @@ import server.hardware.buttons.actions as button_actions
 
 
 def test_buttons_get_options():
+    """Check that all the actions have the correct information to be sent to the frontend"""
     options = app.bmanager.get_buttons_options()
     fields = ["description", "label", "name", "usage"]
     for o in options:
@@ -20,15 +21,14 @@ def test_buttons_get_options():
 
 
 def test_buttons_gpio_available():
-    assert (
-        not app.bmanager.gpio_is_available()
-    )  # the test must pass on a linux device not using real hw
+    """This test must pass on a linux device that is not using real hw"""
+    assert not app.bmanager.gpio_is_available()
 
 
-# checking if the button actions are created correctly and also if the execute method has been overwritten
-# def test_buttons_action_has_execute():
-#    for cl in inspect.getmembers(button_actions, inspect.isclass):
-#        if not cl[1] is GenericButtonAction:
-#            print(cl[0])
-#            a = cl[1](app)
-#            a.execute()
+def test_buttons_action_has_execute():
+    """checking if the button actions are created correctly and also if the execute method has been overwritten"""
+    for cl in inspect.getmembers(button_actions, inspect.isclass):
+        if not cl[1] is GenericButtonAction:
+            print(cl[0])
+            a = cl[1](app)
+            a.execute()
