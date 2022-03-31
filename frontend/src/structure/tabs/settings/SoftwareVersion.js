@@ -23,28 +23,28 @@ const mapDispatchToProps = (dispatch) => {
     }
 }
 
-class SoftwareVersion extends Component{
+class SoftwareVersion extends Component {
 
-    renderUpdateButton(){
+    renderUpdateButton() {
         if (this.props.updateEnabled)
             return <IconButton icon={CloudSlash} onClick={toggleAutoUpdateEnabled}>Disable automatic updates</IconButton>
         else return <IconButton icon={CloudArrowDown} onClick={toggleAutoUpdateEnabled}>Enable automatic updates</IconButton>
     }
 
-    renderDockerComposeUpdate(){
-        if (!this.props.dockerComposeLatest){
+    renderDockerComposeUpdate() {
+        if (!this.props.dockerComposeLatest) {
             return <Row className="mt-4">
-                <Col className="w-100 center alert alert-danger d-inline p-4"><p>
-                    <div className="corner-icon "><ExclamationTriangleFill width="32" height="32"/></div>
-                    <span><h4 className="pb-0 mb-0">Docker-compose.yml file update available</h4><br/> A new version of the docker-compose file is available but requires to be updated manually. Check the <a href={home_site}>Github</a> homepage to see how to update.</span>
-                </p></Col>
+                <Col className="w-100 center alert alert-danger d-inline p-4"><div>
+                    <div className="corner-icon "><ExclamationTriangleFill width="32" height="32" /></div>
+                    <span><h4 className="pb-0 mb-0">Docker-compose.yml file update available</h4><br /> A new version of the docker-compose file is available but requires to be updated manually. Check the <a href={home_site}>Github</a> homepage to see how to update.</span>
+                </div></Col>
             </Row>
         }
         return "";
     }
 
     // todo add docker files version check
-    render(){
+    render() {
         return <Container>
             <p></p>
             <Row>

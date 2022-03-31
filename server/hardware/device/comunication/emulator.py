@@ -98,6 +98,7 @@ class Emulator:
         """
         Readline method for the emulated device. Used by the serial controller
         """
+        time.sleep(0.001)
         # special commands response
         if len(self.message_buffer) >= 1:
             return self.message_buffer.popleft()

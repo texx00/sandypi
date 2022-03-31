@@ -157,7 +157,7 @@ class DeviceSerial:
 
         while self.is_running:
             # do not understand why but with the emulator need this to make everything work correctly
-            sleep(0.001)
+            sleep(0.0001)
             with self._mutex:
                 next_line = self._readline()
             # cannot use the callback inside the mutex otherwise may run into a deadlock with the mutex if the serial.send is called in the parsing method

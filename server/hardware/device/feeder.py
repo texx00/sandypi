@@ -221,17 +221,16 @@ class Feeder(FirwmareEventHandler):
                 if self._stopped:
                     break
 
-        with self._mutex:
-            # waiting comand buffer to be cleared before calling the "drawing ended" event
-            while True:
-                if len(self._device.buffer) == 0:
-                    break
+        # waiting comand buffer to be cleared before calling the "drawing ended" event
+        while True:
+            if len(self._device.buffer) == 0:
+                break
 
-            # clean the device status
-            self._device.reset_status()
+        # clean the device status
+        self._device.reset_status()
 
-            # call the element ended callback
-            self.event_handler.on_element_ended(tmp)
+        # call the element ended callback
+        self.event_handler.on_element_ended(tmp)
 
     def send_gcode_command(self, command):
         """

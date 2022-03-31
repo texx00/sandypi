@@ -1,4 +1,5 @@
 from copy import deepcopy
+from threading import Timer
 
 from server.hardware.device.firmwares.firmware_event_handler import FirwmareEventHandler
 from server.hardware.device.firmwares.generic_firmware import GenericFirmware
@@ -114,7 +115,8 @@ class Marlin(GenericFirmware):
                     hide_line = True
             # the device send a "start" line when ready
             elif "start" in line:
-                self._on_device_ready()
+                # adding delay otherwise there is a collision most of the time (n seconds)
+                Timer(2, self._on_device_ready).start()
 
             # TODO check feedrate response for M220 and set feedrate
             # elif "_______" in line: # must see the real output from marlin
@@ -177,5 +179,6 @@ class Marlin(GenericFirmware):
             line_number (optional): the line number that should start counting from
         """
         with self._mutex:
-            self._logger.info("Resetting line number")
-            self.send_gcode_command("M110 N{}".format(line_number))
+            self._logger.info("Clearing buffer and resetting line number")
+            self._buffer.clear()
+            self.send_gcode_command(f"M110 N{line_number}")
