@@ -39,4 +39,4 @@ jobs:
         flask db upgrade
     - name: Test with pytest
       run: |
-        python -m pytest server/tests
+        python -m pytest -s -v server/tests
