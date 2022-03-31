@@ -39,7 +39,7 @@ class StartNext(GenericButtonAction):
     def execute(self):
         from server.sockets_interface.socketio_callbacks import queue_next_drawing
 
-        # queue_next_drawing()
+        queue_next_drawing()
 
 
 class BrightnessUp(GenericButtonAction):
