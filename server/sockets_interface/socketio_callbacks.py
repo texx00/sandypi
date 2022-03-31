@@ -230,7 +230,7 @@ def queue_set_order(elements):
 @socketio.on("queue_next_drawing")
 def queue_next_drawing():
     app.semits.show_toast_on_UI("Stopping drawing...")
-    # app.qmanager.start_next(force_stop=True)
+    app.qmanager.start_next(force_stop=True)
     if (
         not app.qmanager.is_drawing()
     ):  # if the drawing was the last in the queue must send the updated status
