@@ -60,6 +60,7 @@ class CommandBuffer:
         """
         with self._mutex:
             self._buffer.clear()
+            self._buffer_history.clear()
 
     def ack_received(self, safe_line_number=None, append_left_extra=False):
         """

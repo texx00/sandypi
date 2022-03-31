@@ -53,9 +53,9 @@ class Marlin(GenericFirmware):
 
             hide_line = False
             # Resend
-            if "Resend: " in line:
+            if "Error:Line Number" in line:
                 line_found = False
-                line_number = int(line.replace("Resend: ", "").replace("\r\n", ""))
+                line_number = int(line.replace("\r\n", "").split(" ")[-1]) + 1
                 items = deepcopy(self.buffer._buffer_history)
                 first_available_line = None
                 for command_n, command in items.items():
@@ -171,7 +171,7 @@ class Marlin(GenericFirmware):
             self._reset_line_number()
             super()._on_device_ready()
 
-    def _reset_line_number(self, line_number=2):
+    def _reset_line_number(self, line_number=3):
         """
         Send a gcode command to reset the line numbering on the device
 

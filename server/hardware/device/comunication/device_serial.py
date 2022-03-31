@@ -153,16 +153,23 @@ class DeviceSerial:
         Thread function for the readline
         """
         self._running = True
-        next_line = None
+        next_line = ""
+        buff = ""
 
         while self.is_running:
             # do not understand why but with the emulator need this to make everything work correctly
-            sleep(0.0001)
             with self._mutex:
-                next_line = self._readline()
-            # cannot use the callback inside the mutex otherwise may run into a deadlock with the mutex if the serial.send is called in the parsing method
-            self._on_readline(next_line)
-            next_line = None
+                buff = self._readline()
+
+            # reconstruct line from the partial string received
+            if not buff is None:
+                next_line += buff
+            res = next_line.split("\n") if not next_line is None else []
+            if len(res) > 1:
+                # cannot use the callback inside the mutex otherwise may run into a deadlock with the mutex if the serial.send is called in the parsing method
+                next_line = res[-1]
+                for l in res[:-1]:
+                    self._on_readline(l)
 
     @classmethod
     def get_serial_port_list(cls):
