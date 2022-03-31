@@ -5,6 +5,8 @@ from server.utils import limited_size_dict
 
 
 class CommandBuffer:
+    """Buffer to store the commands and keep of the buffer status on the device"""
+
     def __init__(self, max_length=8):
         """
         Args:
@@ -61,6 +63,7 @@ class CommandBuffer:
         with self._mutex:
             self._buffer.clear()
             self._buffer_history.clear()
+            self.check_buffer_mutex_status()
 
     def ack_received(self, safe_line_number=None, append_left_extra=False):
         """

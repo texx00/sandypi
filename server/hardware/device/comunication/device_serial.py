@@ -1,5 +1,4 @@
 from threading import Thread, RLock
-from time import sleep
 import serial.tools.list_ports
 import serial
 import sys

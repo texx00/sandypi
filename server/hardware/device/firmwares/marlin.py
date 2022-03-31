@@ -180,5 +180,5 @@ class Marlin(GenericFirmware):
         """
         with self._mutex:
             self._logger.info("Clearing buffer and resetting line number")
-            self._buffer.clear()
+            self.buffer.clear()
             self.send_gcode_command(f"M110 N{line_number}")

@@ -470,8 +470,10 @@ class QueueManager:
 
     # TODO move this method into an "startup manager" which will need to initialize queue manager and initial status
 
-    # checks if should start drawing after the server is started and ready (can be set in the settings page)
     def check_autostart(self):
+        """
+        Checks if should start drawing after the server is started and ready (can be set in the settings page)
+        """
         with self._mutex:
             autostart = settings_utils.get_only_values(settings_utils.load_settings()["autostart"])
 
