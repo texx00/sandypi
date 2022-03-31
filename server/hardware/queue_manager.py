@@ -305,6 +305,9 @@ class QueueManager:
             self.send_queue_status()
 
     def set_element_ended(self):
+        """
+        Set the current element as ended and start the next element if the queue is not empty
+        """
         with self._mutex:
             # if the ended element was forced to stop should not set the "last_time" otherwise when a new element is started there will be a delay element first
             if self._is_force_stop:
@@ -418,7 +421,8 @@ class QueueManager:
                         str(e)
                     )
                 )
-                self.start_next()
+                if self.get_queue_len() != 0:
+                    self.start_next()
 
     def send_queue_status(self):
         """
