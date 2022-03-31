@@ -1,22 +1,24 @@
 from logging import Formatter
 import logging
-from logging.handlers import RotatingFileHandler, QueueHandler, QueueListener
-from queue import Queue
-from multiprocessing import RLock
+from logging.handlers import RotatingFileHandler
 import shutil
 
-# creating a custom multiprocessing rotating file handler
-# https://stackoverflow.com/questions/32099378/python-multiprocessing-logging-queuehandler-with-rotatingfilehandler-file-bein
 class MultiprocessRotatingFileHandler(RotatingFileHandler):
+    """
+    Multiprocessing rotating gile handler
+    https://stackoverflow.com/questions/32099378/python-multiprocessing-logging-queuehandler-with-rotatingfilehandler-file-bein
+    """
+
     def __init__(self, *kargs, **kwargs):
         super(MultiprocessRotatingFileHandler, self).__init__(*kargs, **kwargs)
 
-    # not sure why but the .log file was seen already open when it was necessary to rotate to a new file.
-    # instead of renaming the file now I'm copying the entire file to the new log.1 file and the clear the original .log file
-    # this is for sure not the best solution but it looks like it is working now
     def rotate(self, source, dest):
+        """Rotate to a new file"""
+        # not sure why but the .log file was seen already open when it was necessary to rotate to a new file.
+        # instead of renaming the file now I'm copying the entire file to the new log.1 file and the clear the original .log file
+        # this is for sure not the best solution but it looks like it is working now
         shutil.copyfile(source, dest)
-        f = open(source, "r+")
+        f = open(source, "r+", encoding="utf-8")
         f.truncate(0)
 
 

@@ -415,12 +415,12 @@ class QueueManager:
                 self.app.logger.info("Starting next element: {}".format(next_element))
 
             except Exception as e:
-                self.app.logger.exception(e)
+                """self.app.logger.exception(e)
                 self.app.logger.error(
                     "An error occured while starting a new drawing from the queue:\n{}".format(
                         str(e)
                     )
-                )
+                )"""
                 if self.get_queue_len() != 0:
                     self.start_next()
 
