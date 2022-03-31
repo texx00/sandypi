@@ -26,9 +26,9 @@ def test_buttons_gpio_available():
 
 
 # checking if the button actions are created correctly and also if the execute method has been overwritten
-def test_buttons_action_has_execute():
-    for cl in inspect.getmembers(button_actions, inspect.isclass):
-        if not cl[1] is GenericButtonAction:
-            print(cl[0])
-            a = cl[1](app)
-            a.execute()
+# def test_buttons_action_has_execute():
+#    for cl in inspect.getmembers(button_actions, inspect.isclass):
+#        if not cl[1] is GenericButtonAction:
+#            print(cl[0])
+#            a = cl[1](app)
+#            a.execute()
