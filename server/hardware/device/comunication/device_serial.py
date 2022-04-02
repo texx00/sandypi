@@ -29,8 +29,6 @@ class DeviceSerial:
         self.baudrate = baudrate
         self.is_virtual = False
         self.serial = None
-        self._buffer = bytearray()
-        self.echo = ""
         self._emulator = Emulator()
         self._readline_buffer = ReadlineBuffer()
 

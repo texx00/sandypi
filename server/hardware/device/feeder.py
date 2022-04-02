@@ -222,10 +222,9 @@ class Feeder(FirwmareEventHandler):
                     break
 
         # waiting comand buffer to be cleared before calling the "drawing ended" event
-        # while True:
-        #    if len(self._device.buffer) == 0:
-        #        break
-        # FIXME this is not working correctly, the buffer is not getting cleared correctly for some reason (with marlin at least)
+        while True:
+            if len(self._device.buffer) == 0:
+                break
 
         # clean the device status
         self._device.reset_status()

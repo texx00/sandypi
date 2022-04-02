@@ -1,5 +1,6 @@
 from copy import deepcopy
 from threading import Timer
+from time import sleep
 
 from server.hardware.device.firmwares.firmware_event_handler import FirwmareEventHandler
 from server.hardware.device.firmwares.generic_firmware import GenericFirmware
@@ -185,3 +186,4 @@ class Marlin(GenericFirmware):
             self._logger.info("Clearing buffer and resetting line number")
             self.buffer.clear()
             self.send_gcode_command(f"M110 N{line_number}")
+        sleep(1)
