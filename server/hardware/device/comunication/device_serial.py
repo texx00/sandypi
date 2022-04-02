@@ -1,11 +1,12 @@
-from threading import Thread, RLock
-import serial.tools.list_ports
-import serial
 import sys
 import logging
 import glob
+from threading import Thread, RLock
+import serial
+import serial.tools.list_ports
 
 from server.hardware.device.comunication.emulator import Emulator
+from server.hardware.device.comunication.readline_buffer import ReadlineBuffer
 
 
 class DeviceSerial:
@@ -31,6 +32,7 @@ class DeviceSerial:
         self._buffer = bytearray()
         self.echo = ""
         self._emulator = Emulator()
+        self._readline_buffer = ReadlineBuffer()
 
         # empty callback function
         def useless(arg):
@@ -60,7 +62,8 @@ class DeviceSerial:
             self.logger.exception(e)
             self.is_virtual = True
             self.logger.error(
-                "Serial not available. Are you sure the device is connected and is not in use by other softwares? (Will use the virtual serial)"
+                "Serial not available. Are you sure the device is connected and is not in use by other softwares? \
+                (Will use the virtual serial)"
             )
 
         self._th.start()
@@ -70,7 +73,8 @@ class DeviceSerial:
         Set the a callback for a new line received
 
         Args:
-            callback: the function to call when a new line is received. The function will receive the line as an argument
+            callback: the function to call when a new line is received.
+                The function will receive the line as an argument
         """
         self._on_readline = callback
 
@@ -102,12 +106,13 @@ class DeviceSerial:
         else:
             if self.serial.is_open:
                 try:
+                    while self.serial.out_waiting:
+                        pass
                     with self._mutex:
-                        while self.serial.out_waiting:
-                            pass  # TODO should add a sort of timeout
-                        self._readline()
                         self.serial.write(str(line).encode())
-                        # TODO try to send byte by byte instead of a full line? (to reduce the risk of sending commands with missing digits or wrong values that may lead to a wrong position value)
+                        # TODO try to send byte by byte instead of a full line?
+                        # (to reduce the risk of sending commands with missing digits or wrong values
+                        # that may lead to a wrong position value)
                 except:
                     self.close()
                     self.logger.error("Error while sending a command")
@@ -139,36 +144,42 @@ class DeviceSerial:
         """
         Reads a line from the device (if available) and call the callback
         """
+        line = ""
         if not self.is_virtual:
             if self.serial.is_open:
-                while self.serial.in_waiting > 0:
+                if self.serial.in_waiting > 0:
                     line = self.serial.readline()
-                    return line.decode(encoding="UTF-8")
+                    line = line.decode(encoding="UTF-8")
         else:
-            return self._emulator.readline()
+            line = self._emulator.readline()
+
+        if (line == "") or (line is None):
+            return
+
+        self._readline_buffer.update_buffer(line)
 
     def _thf(self):
         """
         Thread function for the readline
         """
         self._running = True
-        next_line = ""
-        buff = ""
 
         while self.is_running:
             # do not understand why but with the emulator need this to make everything work correctly
             with self._mutex:
-                buff = self._readline()
+                self._readline()
 
-            # reconstruct line from the partial string received
-            if not buff is None:
-                next_line += buff
-            res = next_line.split("\n") if not next_line is None else []
-            if len(res) > 1:
-                # cannot use the callback inside the mutex otherwise may run into a deadlock with the mutex if the serial.send is called in the parsing method
-                next_line = res[-1]
-                for l in res[:-1]:
-                    self._on_readline(l)
+            # check if should use the callback when there is a new full line
+            full_lines = self._readline_buffer.full_lines
+            # use the callback for every full line available
+            for full_line in full_lines:
+                try:
+                    self._on_readline(full_line)
+                except Exception as exception:
+                    self.logger.error(
+                        f"Exception while raising the readline callback on line '{full_line}'"
+                    )
+                    self.logger.exception(exception)
 
     @classmethod
     def get_serial_port_list(cls):

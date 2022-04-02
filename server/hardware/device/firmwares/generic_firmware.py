@@ -186,7 +186,7 @@ class GenericFirmware:
 
         This method must be implemented in the child class
         """
-        pass
+        ...
 
     def reset_status(self):
         """
@@ -215,10 +215,10 @@ class GenericFirmware:
                     {"X": pos.x, "Y": pos.y, "F": self.estimator.feedrate}
                 )
                 command = command.replace(MACRO_CHAR + m + MACRO_CHAR, str(res))
-            except Exception as e:
+            except Exception as exception:
                 # TODO handle this in a better way
                 self._logger.error("Error while parsing macro: " + m)
-                self._logger.error(e)
+                self._logger.error(exception)
         return command
 
     def _prepare_command(self, command):

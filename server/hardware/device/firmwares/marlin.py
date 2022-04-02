@@ -146,14 +146,17 @@ class Marlin(GenericFirmware):
                 if c[0] == "N":
                     self.line_number = int(c[1:]) - 1
                     self.buffer.clear()
+                # to set the line number just need "Nn M110"
+                # the correct N value will be added automatically during the command creation
+                line = "M110"
 
         # add checksum
         if n is None:
             n = self.line_number
         if self.fast_mode:
-            line = "N{}{}".format(n, line)
+            line = f"N{n}{line}"
         else:
-            line = "N{} {} ".format(n, line)
+            line = f"N{n} {line} "
         # calculate marlin checksum according to the wiki
         cs = 0
         for i in line:
