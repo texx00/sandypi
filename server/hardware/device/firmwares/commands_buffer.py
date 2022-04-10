@@ -100,7 +100,13 @@ class CommandBuffer:
                 self._send_mutex.release()
 
     def popleft(self):
+        """Return and remove the last entry"""
         return self._buffer.popleft()
+
+    @property
+    def last(self):
+        """Return the last entry"""
+        return self._buffer[-1]
 
     def __len__(self):
         with self._mutex:

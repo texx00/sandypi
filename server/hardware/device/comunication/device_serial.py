@@ -1,7 +1,9 @@
+from queue import Queue
 import sys
 import logging
 import glob
 from threading import Thread, RLock
+from time import sleep
 import serial
 import serial.tools.list_ports
 
@@ -37,11 +39,17 @@ class DeviceSerial:
             pass
 
         # setting up the read thread
-        self._th = Thread(target=self._thf, daemon=True)
         self._mutex = RLock()
+        self._th = Thread(target=self._thf, daemon=True)
         self._th.name = "serial_read"
         self._running = False
+
+        # setting up callbacks (they are called in a separate thread to have non blocking serial handling)
         self.set_on_readline_callback(useless)
+        self._callbacks_th = Thread(target=self._use_callbacks)
+        self._callbacks_th.name = "serial_callbacks"
+        self._callbacks_th.start()
+        self._callbacks_queue = Queue()
 
     def open(self):
         """
@@ -104,10 +112,11 @@ class DeviceSerial:
         else:
             if self.serial.is_open:
                 try:
-                    while self.serial.out_waiting:
-                        pass
+                    while self.serial.out_waiting > 0 or (self.serial.in_waiting > 0):
+                        sleep(0.01)
                     with self._mutex:
                         self.serial.write(str(line).encode())
+                        # TODO add the line to a queue and then send the queue somewhere else when possible?
                         # TODO try to send byte by byte instead of a full line?
                         # (to reduce the risk of sending commands with missing digits or wrong values
                         # that may lead to a wrong position value)
@@ -171,6 +180,13 @@ class DeviceSerial:
             full_lines = self._readline_buffer.full_lines
             # use the callback for every full line available
             for full_line in full_lines:
+                self._callbacks_queue.put(full_line)
+
+    def _use_callbacks(self):
+        """Run the callback when a line is received"""
+        while True:
+            if not self._callbacks_queue.empty():
+                full_line = self._callbacks_queue.get()
                 try:
                     self._on_readline(full_line)
                 except Exception as exception:

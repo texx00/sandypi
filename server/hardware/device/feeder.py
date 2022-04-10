@@ -212,7 +212,7 @@ class Feeder(FirwmareEventHandler):
             tmp = (
                 self._current_element
             )  # store the current element to raise the "on_element_ended" callback
-            self._current_element = None
+            # self._current_element = None
             self._status.running = False
             if not self._stopped:
                 self.logger.info("Stopping drawing")
@@ -223,13 +223,16 @@ class Feeder(FirwmareEventHandler):
 
         # waiting comand buffer to be cleared before calling the "drawing ended" event
         while True:
-            if len(self._device.buffer) == 0:
+            self.logger.info(f"Buffer length: {len(self._device.buffer)}")
+            time.sleep(0.1)
+            if len(self._device.buffer) <= 1:
                 break
 
         # clean the device status
         self._device.reset_status()
 
         # call the element ended callback
+        self.logger.info(f"Buffer length: {len(self._device.buffer)} and calling on element ended")
         self.event_handler.on_element_ended(tmp)
 
     def send_gcode_command(self, command):
@@ -348,6 +351,11 @@ class Feeder(FirwmareEventHandler):
                     if not self._status.paused or not self._status.running:
                         break
                     time.sleep(0.1)
+
+        if self._stopped:
+            self.logger.info("Element stopped")
+        else:
+            self.logger.info("Element finished")
 
         # run the "after" script only if the given element is a drawing
         with self._mutex:

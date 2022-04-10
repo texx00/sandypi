@@ -47,7 +47,9 @@ class GenericFirmware:
         self.line_number = 0
         self._command_resolution = "{:.3f}"  # by default will use 3 decimals in fast mode
         self._mutex = RLock()
-        self.serial_mutex = Lock()
+        # this mutex is used to send messages with a priority with respect to the standard commands
+        # (like for the 'resend' command in marlin for which all the commands must be sent in a row)
+        self._priority_mutex = Lock()
         self._is_ready = False  # the device will not be ready at the beginning
         self.estimator = GenericEstimator()
 
@@ -143,12 +145,23 @@ class GenericFirmware:
     def send_gcode_command(self, command, hide_command=False):
         """
         Send the command
+
+        Args:
+            command [str]: the command to send
+            hide_command [bool]: True to hide the command from the list of sent commands in the UI
         """
         command = self._prepare_command(command)
+        if command == "":
+            return
         # wait until the lock for the buffer length is released
         # if the lock is released means the board sent the ack for older lines and can send new ones
         with self._buffer.get_buffer_wait_mutex():
             pass
+        # if the priority mutex is locked should wait before sending the command until it is unlocked
+        while self._priority_mutex.locked():
+            ...
+
+        # now can send the command
         with self._mutex:
             self._handle_send_command(command, hide_command)
             self.estimator.parse_command(command)
@@ -160,14 +173,13 @@ class GenericFirmware:
         """
         with self._mutex:
             self._logger.info("Connecting to the serial device")
-            with self.serial_mutex:
-                self._serial_device = DeviceSerial(
-                    self._serial_settings["port"]["value"],
-                    self._serial_settings["baud"]["value"],
-                    self._logger.name,
-                )
-                self._serial_device.set_on_readline_callback(self._on_readline)
-                self._serial_device.open()
+            self._serial_device = DeviceSerial(
+                self._serial_settings["port"]["value"],
+                self._serial_settings["baud"]["value"],
+                self._logger.name,
+            )
+            self._serial_device.set_on_readline_callback(self._on_readline)
+            self._serial_device.open()
             # wait device ready
             if not self._serial_device.is_connected:
                 time.sleep(1)
@@ -243,14 +255,11 @@ class GenericFirmware:
 
             # send the command after parsing the content
             # need to use the mutex here because it is changing also the line number
-            with self.serial_mutex:
-                line = self._generate_line(command)
+            line = self._generate_line(command)
 
-                self._serial_device.send(line)  # send line
-                self._buffer.push_command(line, self.line_number)
-                self._logger.log(settings_utils.LINE_SENT, line.replace("\n", ""))
-
-                # TODO fix the problem with small geometries may be with the serial port being to slow. For long (straight) segments the problem is not evident. Do not understand why it is happening
+            self._serial_device.send(line)  # send line
+            self._buffer.push_command(line, self.line_number)
+            self._logger.log(settings_utils.LINE_SENT, line.replace("\n", ""))
 
             if not hide_command:
                 self.event_handler.on_line_sent(line)  # uses the handler callback for the new line
@@ -296,8 +305,7 @@ class GenericFirmware:
                 command = self.force_ack_command
                 line = self._generate_line(command)
                 self._logger.log(settings_utils.LINE_SERVICE, line)
-                with self.serial_mutex:
-                    self._serial_device.send(line)
+                self._serial_device.send(line)
             else:
                 self._update_timeout()
 
