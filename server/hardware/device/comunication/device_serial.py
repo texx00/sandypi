@@ -52,7 +52,6 @@ class DeviceSerial:
         self.set_on_readline_callback(useless)
         self._callbacks_th = Thread(target=self._use_callbacks)
         self._callbacks_th.name = "serial_callbacks"
-        self._callbacks_th.start()
 
     def open(self):
         """
@@ -177,6 +176,8 @@ class DeviceSerial:
         """
         self._running = True
 
+        self._callbacks_th.start()
+
         while self.is_running:
             # do not understand why but with the emulator need this to make everything work correctly
             with self._mutex:
@@ -194,7 +195,7 @@ class DeviceSerial:
 
         Keep the operation asynchronous to avoid deadlocks with the "send" command
         """
-        while True:
+        while self._running:
             sleep(LOOPS_SLEEP_TIME)
             if not self._callbacks_queue.empty():
                 full_line = self._callbacks_queue.get()

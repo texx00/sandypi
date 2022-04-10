@@ -71,7 +71,9 @@ class Marlin(GenericFirmware):
         # the device send a "start" line when ready
         elif "start" in line:
             # adding delay otherwise there is a collision most of the time (n seconds)
-            Timer(2, self._on_device_ready).start()
+            timer = Timer(2, self._on_device_ready)
+            timer.daemon = True
+            timer.start()
 
         # unknow command
         elif "echo:Unknown command:" in line:

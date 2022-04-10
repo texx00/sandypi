@@ -2,10 +2,9 @@ import logging
 import re
 
 from threading import RLock, Lock, Timer
-import time
 from py_expression_eval import Parser
-from server.hardware.device.comunication.device_serial import DeviceSerial
 
+from server.hardware.device.comunication.device_serial import DeviceSerial
 from server.hardware.device.estimation.generic_estimator import GenericEstimator
 from server.hardware.device.firmwares.commands_buffer import CommandBuffer
 from server.hardware.device.firmwares.firmware_event_handler import FirwmareEventHandler
@@ -183,7 +182,9 @@ class GenericFirmware:
             # wait device ready
         if not self._serial_device.is_connected:
             # calling the "device ready" callback with a delay
-            Timer(6, self._on_device_ready).start()
+            timer = Timer(2, self._on_device_ready)
+            timer.daemon = True
+            timer.start()
 
     def close(self):
         """

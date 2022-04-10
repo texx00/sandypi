@@ -3,6 +3,7 @@ Test firmware comunication control classes
 """
 
 import logging
+from time import sleep
 
 from server.hardware.device.firmwares.grbl import Grbl
 from server.hardware.device.firmwares.marlin import Marlin
@@ -28,10 +29,11 @@ logger_name = logging.getLogger().name
 def run_test(device, fast_mode=False):
     device.connect()
     device.fast_mode = fast_mode
-    # device.send_gcode_command("G28")
-    # device.send_gcode_command("G0 X0 Y0 F3000")
-    # for x in range(15):
-    #    device.send_gcode_command(f"G0 X{x} Y0")
+    device.send_gcode_command("G0 X0 Y0 F3000")
+    for x in range(15):
+        device.send_gcode_command(f"G0 X{x} Y0")
+
+    device.close()
     return True
 
 
@@ -47,6 +49,7 @@ def test_marlin():
         Marlin(serial_settings=settings, logger=logger_name, event_handler=EventHandler()),
         fast_mode=True,
     )
+    sleep(3)
 
 
 def test_grbl():
@@ -60,3 +63,4 @@ def test_grbl():
         Grbl(serial_settings=settings, logger=logger_name, event_handler=EventHandler()),
         fast_mode=True,
     )
+    sleep(3)
