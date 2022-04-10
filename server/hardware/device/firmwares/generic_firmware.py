@@ -1,7 +1,7 @@
 import logging
 import re
 
-from threading import RLock, Lock
+from threading import RLock, Lock, Timer
 import time
 from py_expression_eval import Parser
 from server.hardware.device.comunication.device_serial import DeviceSerial
@@ -181,9 +181,9 @@ class GenericFirmware:
             self._serial_device.set_on_readline_callback(self._on_readline)
             self._serial_device.open()
             # wait device ready
-            if not self._serial_device.is_connected:
-                time.sleep(1)
-                self._on_device_ready()
+        if not self._serial_device.is_connected:
+            # calling the "device ready" callback with a delay
+            Timer(6, self._on_device_ready).start()
 
     def close(self):
         """
@@ -325,7 +325,6 @@ class GenericFirmware:
         Returns:
             True if the readline has done correctly
         """
-        # with self._mutex:
         if line is None:
             return False
         if self.ack in line:

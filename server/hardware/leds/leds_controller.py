@@ -156,6 +156,7 @@ class LedsController:
                 self.app.semits.show_toast_on_UI("Led driver type not compatible with current HW")
                 self.app.logger.exception(e)
                 self.app.logger.error("Cannot initialize leds controller")
+                return
             try:
                 if settings.leds.light_sensor == "TSL2591":
                     self.sensor = TSL2591(self.app)

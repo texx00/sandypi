@@ -223,7 +223,7 @@ class Feeder(FirwmareEventHandler):
         while True:
             self.logger.debug(f"Stopping element. Buffer length: {len(self._device.buffer)}")
             time.sleep(0.1)
-            if len(self._device.buffer) == 0:
+            if len(self._device.buffer) <= 1:
                 break
 
         # clean the device status
@@ -348,7 +348,7 @@ class Feeder(FirwmareEventHandler):
                     # if not paused or if a stop command is used should exit the loop
                     if not self._status.paused or not self._status.running:
                         break
-                    time.sleep(0.5)
+                    time.sleep(0.1)
 
         if self._stopped:
             self.logger.info("Element stopped")

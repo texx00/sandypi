@@ -130,7 +130,6 @@ class Marlin(GenericFirmware):
         """
         line_found = False
         # need to resend the commands outside the mutex of the feeder -> store the commands in a list and use a different thread to send them
-        commands_to_resend = []
         if not self._priority_mutex.locked():
             self._priority_mutex.acquire()
         line_number = int(line.replace("\r\n", "").split(" ")[-1])

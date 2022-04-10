@@ -7,7 +7,7 @@ from server.utils.settings_utils import load_settings
 
 emulated_commands_with_delay = ["G0", "G00", "G1", "G01"]
 
-ACK = "ok\n\r"
+ACK = "ok\n"
 
 
 class Emulator:
@@ -98,6 +98,7 @@ class Emulator:
         """
         Readline method for the emulated device. Used by the serial controller
         """
+        # this time is needed to slow down the loop otherwise the software get stuck with the emulator
         time.sleep(0.001)
         # special commands response
         if len(self.message_buffer) >= 1:

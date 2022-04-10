@@ -28,10 +28,10 @@ logger_name = logging.getLogger().name
 def run_test(device, fast_mode=False):
     device.connect()
     device.fast_mode = fast_mode
-    device.send_gcode_command("G28")
-    device.send_gcode_command("G0 X0 Y0 F3000")
-    for x in range(15):
-        device.send_gcode_command(f"G0 X{x} Y0")
+    # device.send_gcode_command("G28")
+    # device.send_gcode_command("G0 X0 Y0 F3000")
+    # for x in range(15):
+    #    device.send_gcode_command(f"G0 X{x} Y0")
     return True
 
 

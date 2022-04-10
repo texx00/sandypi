@@ -10,6 +10,9 @@ import serial.tools.list_ports
 from server.hardware.device.comunication.emulator import Emulator
 from server.hardware.device.comunication.readline_buffer import ReadlineBuffer
 
+# loops in this class need a short sleep otherwise the entire app get stuck for some reason
+LOOPS_SLEEP_TIME = 0.001
+
 
 class DeviceSerial:
     """
@@ -45,11 +48,11 @@ class DeviceSerial:
         self._running = False
 
         # setting up callbacks (they are called in a separate thread to have non blocking serial handling)
+        self._callbacks_queue = Queue()
         self.set_on_readline_callback(useless)
         self._callbacks_th = Thread(target=self._use_callbacks)
         self._callbacks_th.name = "serial_callbacks"
         self._callbacks_th.start()
-        self._callbacks_queue = Queue()
 
     def open(self):
         """
@@ -58,18 +61,24 @@ class DeviceSerial:
         If the port is not working, work as a virtual device
         """
         try:
-            args = dict(baudrate=self.baudrate, timeout=0, write_timeout=0)
-            self.serial = serial.Serial(**args)
-            self.serial.port = self.serialname
-            self.serial.open()
-            self.logger.info("Serial device connected")
+            if self.serialname in self.get_serial_port_list():
+                args = dict(baudrate=self.baudrate, timeout=0, write_timeout=0)
+                self.serial = serial.Serial(**args)
+                self.serial.port = self.serialname
+                self.serial.open()
+                self.logger.info("Serial device connected")
+            else:
+                self.is_virtual = True
+                self.logger.error(
+                    "The selected serial port is not available. Starting a virtual device..."
+                )
         except Exception as e:
             # FIXME should check for different exceptions
             self.logger.exception(e)
             self.is_virtual = True
             self.logger.error(
-                "Serial not available. Are you sure the device is connected and is not in use by other softwares? \
-                (Will use the virtual serial)"
+                "Serial not available. Are you sure the device is connected and is not in use by other softwares? "
+                + "(Will use the virtual serial)"
             )
 
         self._th.start()
@@ -114,7 +123,7 @@ class DeviceSerial:
                 try:
                     # wait for the serial to be clear before sending to reduce the possibility of a collision
                     while self.serial.out_waiting > 0 or (self.serial.in_waiting > 0):
-                        sleep(0.01)
+                        sleep(LOOPS_SLEEP_TIME)
                     with self._mutex:
                         self.serial.write(str(line).encode())
                 except:
@@ -186,6 +195,7 @@ class DeviceSerial:
         Keep the operation asynchronous to avoid deadlocks with the "send" command
         """
         while True:
+            sleep(LOOPS_SLEEP_TIME)
             if not self._callbacks_queue.empty():
                 full_line = self._callbacks_queue.get()
                 try:
