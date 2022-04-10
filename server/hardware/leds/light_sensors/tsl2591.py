@@ -24,8 +24,6 @@ class TSL2591(GenericLightSensor):
         tmp = max(
             sqrt(min(lux, LUX_MAX) / LUX_MAX), BRIGHTNESS_MIN
         )  # calculating the brightness to use
-        self.app.logger.info("Sensor light intensity: {} lux".format(lux))  # FIXME remove this
-        self.app.logger.info("Sensor current brightness: {}".format(tmp))  # FIXME remove this
         return tmp
 
     @property

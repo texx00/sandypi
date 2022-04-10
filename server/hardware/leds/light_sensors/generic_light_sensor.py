@@ -38,7 +38,6 @@ class GenericLightSensor(ABC):
             self._history.append(brightness)
             brightness = sum(self._history) / float(len(self._history))
 
-            self.app.logger.info("Averaged brightness: {}".format(brightness))  # FIXME remove this
             self.app.lmanager.set_brightness(brightness)
         self.app.lmanager.set_brightness(1)
 

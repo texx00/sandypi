@@ -112,14 +112,11 @@ class DeviceSerial:
         else:
             if self.serial.is_open:
                 try:
+                    # wait for the serial to be clear before sending to reduce the possibility of a collision
                     while self.serial.out_waiting > 0 or (self.serial.in_waiting > 0):
                         sleep(0.01)
                     with self._mutex:
                         self.serial.write(str(line).encode())
-                        # TODO add the line to a queue and then send the queue somewhere else when possible?
-                        # TODO try to send byte by byte instead of a full line?
-                        # (to reduce the risk of sending commands with missing digits or wrong values
-                        # that may lead to a wrong position value)
                 except:
                     self.close()
                     self.logger.error("Error while sending a command")

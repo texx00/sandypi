@@ -38,7 +38,6 @@ class Feeder(FirwmareEventHandler):
     Handle single commands but also the preloaded scripts and complete drawings or elements
     """
 
-    # FIXME remove the None default from the event handler
     def __init__(self, event_handler: FeederEventHandler):
         """
         Args:
@@ -203,7 +202,6 @@ class Feeder(FirwmareEventHandler):
 
         This is a blocking function. Will wait until the element is completely stopped before going on with the execution
         """
-        # TODO: make it non blocking since the even is called when the drawing is stopped
         with self._mutex:
             # if is not running, no need to stop it
             if not self._status.running:
@@ -232,7 +230,7 @@ class Feeder(FirwmareEventHandler):
         self._device.reset_status()
 
         # call the element ended callback
-        self.logger.info(f"Calling on element ended")
+        self.logger.info("Calling on element ended")
         self.event_handler.on_element_ended(tmp)
 
     def send_gcode_command(self, command):

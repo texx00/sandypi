@@ -168,7 +168,6 @@ class Playlists(db.Model):
             raise ValueError("An id is necessary to select a playlist")
         try:
             return db.session.query(Playlists).filter(Playlists.id == id).one()
-            # TODO check if there is at least one line (if the playlist exist)
         except:
             return Playlists.create_playlist()
 
