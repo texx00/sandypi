@@ -208,6 +208,8 @@ class GenericFirmware:
         """
         with self._mutex:
             self.line_number = 0
+            if self._priority_mutex.locked():
+                self._priority_mutex.release()
 
     def _parse_macro(self, command):
         """

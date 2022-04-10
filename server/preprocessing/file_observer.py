@@ -11,6 +11,10 @@ from server.sockets_interface.socketio_callbacks import drawings_refresh
 
 
 class GcodeObserverManager:
+    """
+    This class is used to observe a folder and upload every gcode file that is found inside it
+    """
+
     def __init__(self, path=".", logger=None):
         if logger is None:
             logger_name = __name__
@@ -25,13 +29,16 @@ class GcodeObserverManager:
         self.check_current_files()
 
     def start(self):
+        """Start the observer"""
         self._observer.start()
 
     def stop(self):
+        """Stop the observer"""
         self._observer.stop()
         self._observer.join()
 
     def check_current_files(self):
+        """Check the files that are in the folder"""
         files = fnmatch.filter(os.listdir(self._path), "*.gcode")
         if len(files) > 0:
             self._logger.info("Found some files to load in the autodetect folder")
@@ -40,20 +47,26 @@ class GcodeObserverManager:
 
 
 class GcodeEventHandler(PatternMatchingEventHandler):
+    """Handle the file once is detected by the observer"""
+
     def __init__(self, logger):
         super().__init__(patterns=["*.gcode"])
         self._logger = logger
 
-    def on_created(self, evt):
-        self.handle_event(evt)
+    def on_created(self, event):
+        """Handle the creation of a new file"""
+        self.handle_event(event)
 
-    def on_moved(self, evt):
-        self.handle_event(evt)
+    def on_moved(self, event):
+        """Handle the copy of file inside the folder"""
+        self.handle_event(event)
 
-    def handle_event(self, evt):
-        self.init_drawing(evt.src_path)
+    def handle_event(self, event):
+        """Handle a generic event"""
+        self.init_drawing(event.src_path)
 
     def init_drawing(self, filename):
+        """Save the file in the database and create the preview"""
         self._logger.info("Uploading autodetected file: {}".format(filename))
         try:
             id = ""

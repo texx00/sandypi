@@ -1,6 +1,5 @@
 from copy import deepcopy
-from threading import Thread, Timer, Lock
-from time import sleep
+from threading import Timer, Lock
 
 from server.hardware.device.firmwares.firmware_event_handler import FirwmareEventHandler
 from server.hardware.device.firmwares.generic_firmware import GenericFirmware
@@ -78,7 +77,7 @@ class Marlin(GenericFirmware):
         elif "echo:Unknown command:" in line:
             self._logger.error("Error: command not found. Can also be a communication error")
             # resend the last command sent
-            self._resend_command_list([self.buffer.last])
+            self._serial_device.send(self.buffer.last)
 
         # TODO check feedrate response for M220 and set feedrate
         # elif "_______" in line: # must see the real output from marlin
@@ -146,28 +145,20 @@ class Marlin(GenericFirmware):
                 if first_available_line is None:
                     first_available_line = line_number
                 # All the lines after the required one must be resent. Cannot break the loop now
-                commands_to_resend.append(command)
+                self._serial_device.send(command)
 
-        if len(commands_to_resend) > 1 and line_found:
-            th = Thread(target=self._resend_command_list, args=(commands_to_resend,), daemon=True)
-            th.name = "marlin_resend_commands"
-            th.start()
+        if line_found:
             self.buffer.ack_received(safe_line_number=line_number - 1, append_left_extra=True)
         else:
             self._logger.error("No line was found for the number required. Restart numeration.")
-            self._reset_line_number()
+            # will reset the buffer and restart the numeration
+            self.reset_status()
 
         # if (not line_found) and not (first_available_line is None):
         #    for i in range(line_number, first_available_line):
         #        self._serial_device.send(self._generate_line(self.force_ack_command, n=i))
 
         return False
-
-    def _resend_command_list(self, commands):
-        with self._resending_commands:
-            for command in commands:
-                self._logger.info(f"Resending command: {command}")
-                self._serial_device.send(command)
 
     def _generate_line(self, command, n=None):
         """

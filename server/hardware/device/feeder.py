@@ -223,16 +223,16 @@ class Feeder(FirwmareEventHandler):
 
         # waiting comand buffer to be cleared before calling the "drawing ended" event
         while True:
-            self.logger.info(f"Buffer length: {len(self._device.buffer)}")
+            self.logger.debug(f"Stopping element. Buffer length: {len(self._device.buffer)}")
             time.sleep(0.1)
-            if len(self._device.buffer) <= 1:
+            if len(self._device.buffer) == 0:
                 break
 
         # clean the device status
         self._device.reset_status()
 
         # call the element ended callback
-        self.logger.info(f"Buffer length: {len(self._device.buffer)} and calling on element ended")
+        self.logger.info(f"Calling on element ended")
         self.event_handler.on_element_ended(tmp)
 
     def send_gcode_command(self, command):
@@ -350,7 +350,7 @@ class Feeder(FirwmareEventHandler):
                     # if not paused or if a stop command is used should exit the loop
                     if not self._status.paused or not self._status.running:
                         break
-                    time.sleep(0.1)
+                    time.sleep(0.5)
 
         if self._stopped:
             self.logger.info("Element stopped")

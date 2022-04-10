@@ -183,7 +183,11 @@ class DeviceSerial:
                 self._callbacks_queue.put(full_line)
 
     def _use_callbacks(self):
-        """Run the callback when a line is received"""
+        """
+        Run the callback when a line is received
+
+        Keep the operation asynchronous to avoid deadlocks with the "send" command
+        """
         while True:
             if not self._callbacks_queue.empty():
                 full_line = self._callbacks_queue.get()
