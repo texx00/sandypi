@@ -140,6 +140,12 @@ def home():
     return send_from_directory(app.static_folder, "index.html")
 
 
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db.session.close()
+    db.engine.dispose()
+
+
 # Starting the feeder after the server is ready to avoid problems with the web page not showing up
 def run_post():
     sleep(2)
