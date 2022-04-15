@@ -50,7 +50,7 @@ class DeviceSerial:
         # setting up callbacks (they are called in a separate thread to have non blocking serial handling)
         self._callbacks_queue = Queue()
         self.set_on_readline_callback(useless)
-        self._callbacks_th = Thread(target=self._use_callbacks)
+        self._callbacks_th = Thread(target=self._use_callbacks, daemon=True)
         self._callbacks_th.name = "serial_callbacks"
 
     def open(self):

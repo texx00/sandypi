@@ -152,7 +152,7 @@ def run_post():
     app.lmanager.start()
 
 
-th = Thread(target=run_post)
+th = Thread(target=run_post, daemon=True)
 th.name = "feeder_starter"
 th.start()
 

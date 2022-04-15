@@ -34,9 +34,8 @@ class StatsManager:
         self.stats["last_on"] = time()
         self.start_time = 0
         self._mutex = Lock()
-        self._th = Thread(target=self._thf)
+        self._th = Thread(target=self._thf, daemon=True)
         self._th.name = "stats_manager"
-        self._th.daemon = True
         self._th.start()
 
     def drawing_started(self):

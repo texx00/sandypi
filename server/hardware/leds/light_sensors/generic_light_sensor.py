@@ -19,7 +19,7 @@ class GenericLightSensor(ABC):
         When the light sensor is started, will control the brightness of the LEDs automatically. Will change it according to the last given color (can only dim)"""
 
         self._is_running = True
-        self._th = Thread(target=self._thf)
+        self._th = Thread(target=self._thf, daemon=True)
         self._th.name = "light_sensor"
         self._th.start()
 
