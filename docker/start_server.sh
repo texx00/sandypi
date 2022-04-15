@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # check if .env files needs to be replaced
 python check_prestart.py 
 
