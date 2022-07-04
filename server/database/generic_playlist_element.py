@@ -1,12 +1,3 @@
-import json
-
-from server.database.models import db
-
-UNKNOWN_PROGRESS = {
-    "eta": -1,      # default is -1 -> ETA unknown
-    "units": "s"    # ETA units
-}
-
 """
     Base class for a playlist element
     When creating a new element type, should extend this base class
@@ -30,23 +21,34 @@ UNKNOWN_PROGRESS = {
     NOTE: variable starting with "_" will not be saved in the database
     NOTE: must implement the element also in the frontend (follow the instructions at the beginning of the "Elements.js" file)
 """
-class GenericPlaylistElement():
+
+import json
+
+from server.database.models import db
+
+UNKNOWN_PROGRESS = {"eta": -1, "units": "s"}  # default is -1 -> ETA unknown  # ETA units
+
+
+class GenericPlaylistElement:
     element_type = None
-    
+
     # --- base class methods that must be implemented/overwritten in the child class ---
 
     def __init__(self, element_type, **kwargs):
         self.element_type = element_type
-        self._pop_options = []                                                                      # list of fields that are column in the database and must be removed from the standard options (string column)
-        self.add_column_field("element_type")                                                       # need to pop the element_type from the final dict because this option is a column of the table
+        # list of fields that are column in the database and must be removed from the standard options (string column)
+        self._pop_options = []
+        # need to pop the element_type from the final dict because this option is a column of the table
+        self.add_column_field("element_type")
         for v in kwargs:
             setattr(self, v, kwargs[v])
-    
+
     # if this method return None if will not run the element in the playlist
     # can override and return another element if necessary
+    # pylint: disable=unused-argument
     def before_start(self, queue_manager):
         return self
-    
+
     # this methods yields a gcode command line to be executed
     # the element is considered finished after the last line is yield
     # if a None value is yield, the feeder will skip to the next iteration
@@ -66,7 +68,7 @@ class GenericPlaylistElement():
     def get_path_length_total(self):
         """Returns the total lenght of the path of the drawing"""
         return 0
-    
+
     # Returns the current partial path done (in [mm])
     def get_path_lenght_done(self):
         """Returns the path lenght that has been done for the current drawing"""
@@ -82,7 +84,7 @@ class GenericPlaylistElement():
                 setattr(self, k, values[k])
             else:
                 raise ValueError
-    
+
     def get_dict(self):
         return GenericPlaylistElement.clean_dict(self.__dict__)
 
@@ -92,7 +94,7 @@ class GenericPlaylistElement():
     # add options that must be saved in a dedicated column insted of saving them inside the generic options of the element (like the element_type)
     def add_column_field(self, option):
         self._pop_options.append(option)
-    
+
     def save(self, element_table):
         options = self.get_dict()
         # filter other pop options
@@ -102,8 +104,12 @@ class GenericPlaylistElement():
         kwargs = zip(self._pop_options, kwargs)
         kwargs = dict(kwargs)
         options = json.dumps(options)
-        db.session.add(element_table(element_options = options, **kwargs))
+        db.session.add(element_table(element_options=options, **kwargs))
 
     @classmethod
     def clean_dict(cls, val):
-        return {key:value for key, value in val.items() if not key.startswith('_') and not callable(key)}
+        return {
+            key: value
+            for key, value in val.items()
+            if not key.startswith("_") and not callable(key)
+        }

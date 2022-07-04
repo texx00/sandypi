@@ -17,13 +17,13 @@ const playlistsSlice = createSlice({
             let elements = action.payload.elements;
             const playlistId = action.payload.playlistId;
             let pls = state.playlists.map((pl) => {
-                pl = {...pl};
-                if (pl.id === playlistId){
+                pl = { ...pl };
+                if (pl.id === playlistId) {
                     let maxId = 1;
                     if (Array.isArray(pl.elements))
-                    // looking for the highest element id to add a higher value to the elements that are being added (this avoid the creation of a new element when the element with id is sent back from the server)
-                        maxId = Math.max(pl.elements.map(el => {return el.id}), 1) + 1;
-                    for (let e in elements){
+                        // looking for the highest element id to add a higher value to the elements that are being added (this avoid the creation of a new element when the element with id is sent back from the server)
+                        maxId = Math.max(pl.elements.map(el => { return el.id }), 1) + 1;
+                    for (let e in elements) {
                         elements[e].id = maxId++;
                     }
                     pl.elements = [...pl.elements];
@@ -33,34 +33,35 @@ const playlistsSlice = createSlice({
                 }
                 return pl;
             });
-            return {...state, playlists: pls, mandatoryRefresh: true, playlistAddedNewElement: true };
+            return { ...state, playlists: pls, mandatoryRefresh: true, playlistAddedNewElement: true };
         },
         deletePlaylist: (state, action) => {
-            return { ...state, playlists: state.playlists.filter((item) => {
-                return item.id !== action.payload;
-            })}
+            return {
+                ...state, playlists: state.playlists.filter((item) => {
+                    return item.id !== action.payload;
+                })
+            }
         },
         resetPlaylistDeletedFlag: (state, action) => {
-            return {...state, playlistDeleted: false };
+            return { ...state, playlistDeleted: false };
         },
         resetMandatoryRefresh: (state, action) => {
-            return {...state, mandatoryRefresh: false};
+            return { ...state, mandatoryRefresh: false };
         },
         setPlaylists: (state, action) => {
             let playlistDeleted = true;                // to check if the playlist has been deleted from someone else
-            let pls = action.payload.map((pl)=>{
-                if (pl.id === state.playlistId){
+            let pls = action.payload.map((pl) => {
+                if (pl.id === state.playlistId) {
                     playlistDeleted = false;
                 }
-                pl.elements = JSON.parse(pl.elements);
                 return pl;
             });
-            return { 
-                ...state, 
-                playlists: pls, 
-                playlistDeleted: playlistDeleted, 
+            return {
+                ...state,
+                playlists: pls,
+                playlistDeleted: playlistDeleted,
                 mandatoryRefresh: true
-            }; 
+            };
         },
         setSinglePlaylistId: (state, action) => {
             return { ...state, playlistId: action.payload, mandatoryRefresh: true, showNewPlaylist: false };
@@ -70,11 +71,11 @@ const playlistsSlice = createSlice({
             let version = 0;
             let isNew = true;
             let res = state.playlists.map((pl) => {
-                if (pl.id === playlist.id){
+                if (pl.id === playlist.id) {
                     version = pl.version;
                     isNew = false;
                     return playlist;
-                }else{
+                } else {
                     return pl;
                 }
             });
@@ -87,9 +88,9 @@ const playlistsSlice = createSlice({
                 res.push(playlist)
             // check if it is necessary to refresh the playlist view
             let mustRefresh = (playlist.id === state.playlistId) && ((playlist.version > version) || state.playlistAddedNewElement);
-            return { ...state, playlists: res, playlistDeleted: false, mandatoryRefresh: mustRefresh, playlistAddedNewElement: false};
+            return { ...state, playlists: res, playlistDeleted: false, mandatoryRefresh: mustRefresh, playlistAddedNewElement: false };
         },
-        setShowNewPlaylist(state, action){
+        setShowNewPlaylist(state, action) {
             return { ...state, showNewPlaylist: action.payload }
         }
     }

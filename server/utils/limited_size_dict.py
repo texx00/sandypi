@@ -1,9 +1,13 @@
 from collections import OrderedDict
 
-# This dict class can have a size limit
-# Every time a new item is added to the dict, the oldest will be removed
 
 class LimitedSizeDict(OrderedDict):
+    """
+    This dict class can have a size limit
+    Every time a new item is added to the dict, the oldest will be removed
+
+    """
+
     def __init__(self, *args, **kwds):
         self.size_limit = kwds.pop("size_limit", None)
         OrderedDict.__init__(self, *args, **kwds)
