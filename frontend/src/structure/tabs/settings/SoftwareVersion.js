@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Col, Container, Row } from 'react-bootstrap';
-import { CloudArrowDown, CloudSlash, ExclamationTriangleFill } from 'react-bootstrap-icons';
+import { CloudArrowDown, CloudSlash, ExclamationTriangleFill, FileEarmarkArrowDown } from 'react-bootstrap-icons';
 
 import IconButton from '../../../components/IconButton';
 import { getCurrentHash, updateAutoEnabled, updateDockerComposeLatest } from './selector';
 import { setTab } from '../Tabs.slice';
 import { toggleAutoUpdateEnabled } from '../../../sockets/sEmits';
-import { home_site } from '../../../utils/utils';
+import { domain, home_site } from '../../../utils/utils';
 
 const mapStateToProps = (state) => {
     return {
@@ -27,8 +27,8 @@ class SoftwareVersion extends Component {
 
     renderUpdateButton() {
         if (this.props.updateEnabled)
-            return <IconButton icon={CloudSlash} onClick={toggleAutoUpdateEnabled}>Disable automatic updates</IconButton>
-        else return <IconButton icon={CloudArrowDown} onClick={toggleAutoUpdateEnabled}>Enable automatic updates</IconButton>
+            return <IconButton className="w-100" icon={CloudSlash} onClick={toggleAutoUpdateEnabled}>Disable automatic updates</IconButton>
+        else return <IconButton className="w-100" icon={CloudArrowDown} onClick={toggleAutoUpdateEnabled}>Enable automatic updates</IconButton>
     }
 
     renderDockerComposeUpdate() {
@@ -48,11 +48,18 @@ class SoftwareVersion extends Component {
         return <Container>
             <p></p>
             <Row>
-                <Col sm={6} className="center pt-2">
+                <Col sm={4} className="center pt-2">
                     Current software version shash: &nbsp;<p className={"text-light"}>{this.props.currentHash}</p>
                 </Col>
-                <Col sm={6} className="center">
+                <Col sm={4} className="center">
                     {this.renderUpdateButton()}
+                </Col>
+                <Col sm={4} className="center w-100">
+                    <IconButton icon={FileEarmarkArrowDown}
+                        className="button w-100"
+                        onClick={() => window.open(domain + '/diagnostics')}>
+                        Download diagnostic files
+                    </IconButton>
                 </Col>
             </Row>
             {this.renderDockerComposeUpdate()}

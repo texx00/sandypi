@@ -1,3 +1,10 @@
+import os
+import logging
+from threading import Thread
+from time import sleep
+
+from dotenv import load_dotenv
+
 from flask import Flask, url_for
 from flask.helpers import send_from_directory
 from flask_socketio import SocketIO
@@ -8,14 +15,8 @@ from flask_cors import CORS
 
 from werkzeug.utils import secure_filename
 
-import os
-
-from time import sleep
-from dotenv import load_dotenv
-import logging
-from threading import Thread
-
 from server.utils import settings_utils, software_updates, migrations
+from server.utils.diagnostic import generate_diagnostic_zip
 from server.utils.logging_utils import server_stream_handler, server_file_handler
 
 
@@ -64,6 +65,9 @@ CORS(app)  # setting up cors for react
 
 @app.route("/Drawings/<path:filename>")
 def base_static(filename):
+    """
+    Send back the required drawing preview
+    """
     filename = secure_filename(filename)
     return send_from_directory(
         app.root_path
@@ -71,6 +75,15 @@ def base_static(filename):
         + "/{}/".format(filename),
         "{}.jpg".format(filename),
     )
+
+
+@app.route("/diagnostics")
+def download_diagnostics():
+    """
+    Route to download the diagnostics zip file
+    """
+    zip_path = generate_diagnostic_zip()
+    return send_from_directory("static", os.path.basename(zip_path))
 
 
 # database

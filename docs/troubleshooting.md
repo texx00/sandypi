@@ -24,3 +24,4 @@ Please specify:
 * firmware (Marlin, Grbl, ...)
 * The issue
 * add a copy of the terminal result you get during the installation and when after running the software in orded to analyze better the problem
+* if the UI is working, you can download a diagnostic zip file that can be uploaded together with the issue. This can be done with the button located at the bottom of the settings page.
