@@ -184,6 +184,7 @@ class DeviceSerial:
                     with self._mutex:
                         line = self._send_buffer.pop(0)
                         self.serial.write(str(line).encode())
+                        sleep(0.01)
                 except:
                     self.close()
                     self.logger.error("Error while sending a command")

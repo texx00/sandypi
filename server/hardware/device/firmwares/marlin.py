@@ -140,6 +140,8 @@ class Marlin(GenericFirmware):
         items = deepcopy(self.buffer._buffer_history)
         first_available_line = None
 
+        self.buffer.clear()
+
         # resend the commands
         for command_n, command in items.items():
             n_line_number = int(command_n.strip("N"))
@@ -150,15 +152,14 @@ class Marlin(GenericFirmware):
                     first_available_line = line_number
                 # All the lines after the required one must be resent. Cannot break the loop now
                 self._serial_device.send(command)
+                self.buffer.push_command(command, n_line_number)
 
         # clear the serial queue from other "resend callbacks"
         self._serial_device.filter_callbacks_queue(
             lambda x: not ("Resend:" in x or "Error:Line Number" in x)
         )
 
-        if line_found:
-            self.buffer.ack_received(safe_line_number=line_number - 1)
-        else:
+        if not line_found:
             self._logger.error("No line was found for the number required. Restart numeration.")
             # will reset the buffer and restart the numeration
             self.reset_status()

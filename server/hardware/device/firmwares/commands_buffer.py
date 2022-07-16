@@ -96,7 +96,7 @@ class CommandBuffer:
         Check if the send lock must be released
         """
         with self._mutex:
-            if self._send_mutex.locked() and len(self._buffer) < self._buffer_max_length:
+            if self._send_mutex.locked() and (len(self._buffer) < self._buffer_max_length):
                 self._send_mutex.release()
 
     def popleft(self):

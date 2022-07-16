@@ -53,7 +53,7 @@ class GenericFirmware:
         self.estimator = GenericEstimator()
 
         # buffer control
-        self._buffer = CommandBuffer(8)
+        self._buffer = CommandBuffer(2)
 
         # timeout setup
         self.force_ack_command = ""  # command used to force an ack
