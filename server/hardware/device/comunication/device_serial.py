@@ -36,6 +36,7 @@ class DeviceSerial:
         self.serial = None
         self._emulator = Emulator()
         self._readline_buffer = ReadlineBuffer()
+        self._send_buffer = []
 
         # empty callback function
         def useless(arg):
@@ -102,6 +103,14 @@ class DeviceSerial:
         """
         return self._running
 
+    @property
+    def is_send_buffer_empty(self):
+        """
+        Returns:
+            True if the send_buffer is empty
+        """
+        return not bool(self._send_buffer)
+
     def stop(self):
         """
         Stop the serial read thread
@@ -115,19 +124,8 @@ class DeviceSerial:
         Args:
             line: the line to send to the device
         """
-        if self.is_virtual:
-            self._emulator.send(line)
-        else:
-            if self.serial.is_open:
-                try:
-                    # wait for the serial to be clear before sending to reduce the possibility of a collision
-                    while self.serial.out_waiting > 0 or (self.serial.in_waiting > 0):
-                        sleep(LOOPS_SLEEP_TIME)
-                    with self._mutex:
-                        self.serial.write(str(line).encode())
-                except:
-                    self.close()
-                    self.logger.error("Error while sending a command")
+        with self._mutex:
+            self._send_buffer.append(line)
 
     @property
     def is_connected(self):
@@ -158,7 +156,7 @@ class DeviceSerial:
         """
         line = ""
         if not self.is_virtual:
-            if self.serial.is_open:
+            if self.serial.is_open and not (self.serial is None):
                 if self.serial.in_waiting > 0:
                     line = self.serial.readline()
                     line = line.decode(encoding="UTF-8")
@@ -169,6 +167,26 @@ class DeviceSerial:
             return
 
         self._readline_buffer.update_buffer(line)
+
+    def _send_line(self):
+        # send a new line from the buffer
+        if len(self._send_buffer) == 0:
+            return
+        if self.is_virtual:
+            line = self._send_buffer.pop(0)
+            self._emulator.send(line)
+        else:
+            if self.serial.is_open:
+                try:
+                    # wait for the serial to be clear before sending to reduce the possibility of a collision
+                    if (self.serial.out_waiting > 0) or (self.serial.in_waiting > 0):
+                        return
+                    with self._mutex:
+                        line = self._send_buffer.pop(0)
+                        self.serial.write(str(line).encode())
+                except:
+                    self.close()
+                    self.logger.error("Error while sending a command")
 
     def _thf(self):
         """
@@ -182,12 +200,25 @@ class DeviceSerial:
             # do not understand why but with the emulator need this to make everything work correctly
             with self._mutex:
                 self._readline()
+                self._send_line()
 
             # check if should use the callback when there is a new full line
             full_lines = self._readline_buffer.full_lines
             # use the callback for every full line available
             for full_line in full_lines:
                 self._callbacks_queue.put(full_line)
+
+    def filter_callbacks_queue(self, filter_fun):
+        """
+        Remove the unprocessed strings received with the given content
+
+        Args:
+            filter_fun: funtion to filter if the content should be dropped
+        """
+        tmp = [i for i in self._callbacks_queue.queue if filter_fun(i)]
+        self._callbacks_queue = Queue()
+        for i in tmp:
+            self._callbacks_queue.put(i)
 
     def _use_callbacks(self):
         """

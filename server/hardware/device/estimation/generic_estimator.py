@@ -79,6 +79,7 @@ class GenericEstimator:
         if "G28" in command and (not "X" in command or "Y" in command):
             self._position.x = 0
             self._position.y = 0
+            return
         # G92 is handled in the buffered commands
 
         if any(code in command for code in KNOWN_COMMANDS):

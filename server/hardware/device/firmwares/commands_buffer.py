@@ -106,7 +106,9 @@ class CommandBuffer:
     @property
     def last(self):
         """Return the last entry"""
-        return self._buffer[-1]
+        if len(self._buffer) > 0:
+            return self._buffer[-1]
+        return None
 
     def __len__(self):
         with self._mutex:

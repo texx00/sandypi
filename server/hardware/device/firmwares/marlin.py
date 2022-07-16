@@ -59,8 +59,10 @@ class Marlin(GenericFirmware):
 
         # Parsing the received command
         # Resend
-        if ("Resend:" in line) or ("Error:checksum mismatch" in line):
-            hide_line = self._resend(line)
+        # This is used both when the checksum mismatch and also when the line number is wrong
+        if "Resend:" in line:
+            line_number = int(line.replace("\r", "").replace("\n", "").split(" ")[-1])
+            hide_line = self._resend(line_number)
 
         # M114 response contains the "Count" word
         # the response looks like: X:115.22 Y:116.38 Z:0.00 E:0.00 Count A:9218 B:9310 Z:0
@@ -120,7 +122,7 @@ class Marlin(GenericFirmware):
 
         return not self.buffer.is_empty()
 
-    def _resend(self, line):
+    def _resend(self, line_number):
         """
         Handle a resend command
 
@@ -134,10 +136,11 @@ class Marlin(GenericFirmware):
         # need to resend the commands outside the mutex of the feeder -> store the commands in a list and use a different thread to send them
         if not self._priority_mutex.locked():
             self._priority_mutex.acquire()
-        line_number = int(line.replace("\r\n", "").split(" ")[-1])
         self._logger.info(f"Line not received correctly. Resending from N{line_number}")
         items = deepcopy(self.buffer._buffer_history)
         first_available_line = None
+
+        # resend the commands
         for command_n, command in items.items():
             n_line_number = int(command_n.strip("N"))
             if n_line_number == line_number:
@@ -148,12 +151,19 @@ class Marlin(GenericFirmware):
                 # All the lines after the required one must be resent. Cannot break the loop now
                 self._serial_device.send(command)
 
+        # clear the serial queue from other "resend callbacks"
+        self._serial_device.filter_callbacks_queue(
+            lambda x: not ("Resend:" in x or "Error:Line Number" in x)
+        )
+
         if line_found:
-            self.buffer.ack_received(safe_line_number=line_number - 1, append_left_extra=True)
+            self.buffer.ack_received(safe_line_number=line_number - 1)
         else:
             self._logger.error("No line was found for the number required. Restart numeration.")
             # will reset the buffer and restart the numeration
             self.reset_status()
+
+        self._priority_mutex.release()
 
         # if (not line_found) and not (first_available_line is None):
         #    for i in range(line_number, first_available_line):

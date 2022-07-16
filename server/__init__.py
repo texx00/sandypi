@@ -63,6 +63,12 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 CORS(app)  # setting up cors for react
 
 
+# Home routes
+@app.route("/")
+def home():
+    return send_from_directory(app.static_folder, "index.html")
+
+
 @app.route("/Drawings/<path:filename>")
 def base_static(filename):
     """
@@ -145,12 +151,6 @@ def versioned_url_for(endpoint, **values):
         pass
         values["version"] = app.umanager.short_hash
     return url_for(endpoint, **values)
-
-
-# Home routes
-@app.route("/")
-def home():
-    return send_from_directory(app.static_folder, "index.html")
 
 
 @app.teardown_appcontext
