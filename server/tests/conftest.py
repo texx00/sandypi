@@ -18,16 +18,17 @@ from server import db
 @pytest.fixture(scope="session")
 def client():
     db_fd, db_fu = tempfile.mkstemp()
-    server.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
-    server.app.config['TESTING'] = True
+    server.app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite://"
+    server.app.config["TESTING"] = True
 
     with server.app.test_client() as client:
         with server.app.app_context():
-            db.create_all() 
+            db.create_all()
             yield client
             db.drop_all()
 
+    # stopping feeder
+    server.app.feeder._device.close()
+
     os.close(db_fd)
     os.unlink(db_fu)
-
-

@@ -27,7 +27,8 @@ If applicable, add screenshots to help explain your problem.
  - server OS: [Windows, Raspbian OS]
  - server hardware [PC, Raspberry Pi 3B+, ....]
  - serial device firmware [Marling, Grbl, ...] + version
- - Version [use `git rev-parse --short HEAD`]
+ - Version hash [can be seen from the settings page in the web interface]
+ - Branch [if different than the main stable branch]
 
 **Additional context**
 Add any other context about the problem here.

@@ -6,10 +6,10 @@ const defaultSettings = {
 		port: {
 			name: "serial.port",
 			type: "select",
-			value: "FAKE",
+			value: "Virtual",
 			label: "Serial port",
 			available_values: [
-				"FAKE"
+				"Virtual"
 			],
 			tip: "Select the serial port"
 		},

@@ -8,49 +8,49 @@ const queueSlice = createSlice({
         repeat: false,
         shuffle: false,
         interval: 0,
-        status: {eta: -1}
+        status: { eta: -1 }
     },
     reducers: {
-        setInterval(state, action){
+        setInterval(state, action) {
             return {
-                ...state, 
+                ...state,
                 interval: action.payload
             }
         },
-        setQueueElements(state, action){
+        setQueueElements(state, action) {
             return {
                 ...state,
                 elements: action.payload
             }
         },
-        setQueueStatus(state, action){
+        setQueueStatus(state, action) {
             let res = action.payload;
             res.current_element = res.current_element === "None" ? undefined : JSON.parse(res.current_element);
             return {
-                elements:       res.elements,
+                elements: res.elements,
                 currentElement: res.current_element,
-                interval:       res.interval,
-                status:         res.status,
-                repeat:         res.repeat,
-                shuffle:        res.shuffle
+                interval: res.interval,
+                status: res.status,
+                repeat: res.repeat,
+                shuffle: res.shuffle
             }
         },
-        toggleQueueShuffle(state, action){
+        toggleQueueShuffle(state, action) {
             return {
                 ...state,
                 shuffle: !state.shuffle
             }
         },
-        toggleQueueRepeat(state, action){
+        toggleQueueRepeat(state, action) {
             return {
-                ...state, 
+                ...state,
                 repeat: !state.repeat
             }
         }
     }
 });
 
-export const{
+export const {
     setInterval,
     setQueueElements,
     setQueueStatus,
