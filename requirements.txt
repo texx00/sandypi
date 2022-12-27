@@ -49,7 +49,7 @@ python-editor==1.0.4
 python-engineio==3.13.2
 python-socketio==4.6.0
 PyYAML==6.0
-setuptools==60.1.0
+setuptools==65.5.1
 six==1.16.0
 SQLAlchemy==1.4.29
 toml==0.10.2
