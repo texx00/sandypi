@@ -57,7 +57,7 @@ tomli==1.2.3
 typed-ast==1.5.1
 typing_extensions==4.0.1
 watchdog==2.1.6
-Werkzeug==2.0.2
+Werkzeug==2.2.3
 wheel==0.37.1
 wrapt==1.13.3
 zipp==3.6.0
